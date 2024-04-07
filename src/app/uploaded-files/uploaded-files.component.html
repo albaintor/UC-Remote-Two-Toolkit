@@ -1,0 +1,22 @@
+<p-toast></p-toast>
+<p-dialog header="Uploaded files" [(visible)]="visible" [style]="{width: '50vw'}">
+  <p-table [value]="uploadedFiles" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Filename</th><th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-filename>
+      <tr>
+        <td>
+          <ng-container *ngIf="filename == currentSource"><b>{{ filename }}</b> (current file)</ng-container>
+          <ng-container *ngIf="!currentSource || filename != currentSource">{{ filename }}</ng-container>
+        </td>
+        <td>
+          <p-button icon="pi pi-play" [pTooltip]="'Load this backup : '+filename"  [rounded]="true" (click)="loadFile(filename)"></p-button>&nbsp;
+          <p-button icon="pi pi-download" [pTooltip]="'Download this backup '+filename" [rounded]="true" (click)="downloadFile(filename)"></p-button>&nbsp;
+          <p-button icon="pi pi-trash" [pTooltip]="'Delete '+filename" [rounded]="true" (click)="deleteFile(filename)"></p-button></td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-dialog>

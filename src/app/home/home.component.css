@@ -1,0 +1,19 @@
+.fields
+{
+  border: 1px solid rgba(93, 100, 101, 0.38);
+  background-color: black;
+  padding: 5px;
+}
+
+h2 {
+  display: flex;
+  align-items: center;
+}
+
+.upload
+{
+  opacity: 0; /* make transparent */
+  z-index: -1; /* move under anything else */
+  position: absolute;
+  visibility: hidden;
+}

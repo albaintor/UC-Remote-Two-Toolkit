@@ -1,1 +1,15 @@
-/* You can add global styles to this file, and also import other style files */
+@import "primeicons/primeicons.css"; /* You can add global styles to this file, and also import other style files */
+:root {
+  --ngx-json-key: #9ef0ff;
+  --ngx-json-value: #00FF65;
+  --ngx-json-string : #ffa6fe;
+  --ngx-json-number : #FF1DD5;
+  --ngx-json-boolean : #FF8000;
+  --ngx-json-date : #FFEA00;
+  --ngx-json-array : #FFEA00;
+  --ngx-json-object : #059635;
+  --ngx-json-separator : #FF2238;
+}
+.p-component {
+  font-size: 0.8rem !important;
+}

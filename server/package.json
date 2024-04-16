@@ -11,6 +11,7 @@
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "got": "^14.2.1",
+    "http-errors": "^2.0.0",
     "jszip": "^3.10.1",
     "jszip-utils": "^0.1.0",
     "morgan": "~1.9.1",

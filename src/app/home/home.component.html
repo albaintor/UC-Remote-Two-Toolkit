@@ -1,6 +1,26 @@
+<div class="progress-spinner" *ngIf="progress">
+  <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+</div>
+
 <p-toast></p-toast>
 <h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Remote Two configuration toolkit</h2>
-<p-menubar [model]="items"></p-menubar>
+<p-menubar [model]="items">
+  <ng-template pTemplate="end">
+    <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
+      <ng-template pTemplate="selectedItem">
+        <ng-container *ngIf="selectedRemote">{{selectedRemote?.remote_name}} ({{selectedRemote?.address}})</ng-container>
+        <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
+      </ng-template>
+      <ng-template let-item pTemplate="item">
+        {{item.remote_name}} ({{item.address}})
+      </ng-template>
+    </p-dropdown>
+  </ng-template>
+</p-menubar>
+<ng-container *ngIf="progress">
+  {{progressDetail}}<br>
+  <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
+</ng-container>
 <ng-container *ngIf="context">
   <h4>Current source : <a (click)="downloadFile(context.source)" href="#">{{context.source}}</a> ({{context.date | date:'dd MMM yyyy \'at\' HH:mm'}})</h4>
 </ng-container>

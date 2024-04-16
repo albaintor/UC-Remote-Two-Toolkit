@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
-import {map, Observable} from "rxjs";
+import {map, Observable, Subject} from "rxjs";
 import {
-  Activities,
+  Activities, Activity,
   Config,
   Context,
   Entities,
@@ -19,6 +19,9 @@ import {
 export class ServerService {
 
   API_KEY_NAME = "RC2Tool";
+  config$ = new Subject<Config>();
+  remote$ = new Subject<Remote>();
+  config: Config | undefined;
 
   constructor(private http: HttpClient) { }
 
@@ -45,7 +48,10 @@ export class ServerService {
   getConfig(): Observable<Config>
   {
     return this.http.get<Config>('/api/config').pipe(map(results => {
-      return results;
+      if (!results.language) results.language = 'fr';
+      this.config = results;
+      this.config$.next(this.config);
+      return this.config;
     }))
   }
 
@@ -56,9 +62,53 @@ export class ServerService {
     }))
   }
 
+  getObjectName(object: any): string
+  {
+    if (typeof object.name === 'string') return object.name;
+    let name  = object.name[this.config!.language];
+    if (name) return name;
+    return object.name['en'];
+  }
+
+  getRemoteEntities(remote: Remote): Observable<Entity[]>
+  {
+    return this.http.get<Entity[]>(`/api/remote/${remote.address}/entities`).pipe(map(results => {
+      results.forEach(entity => {
+        entity.name = this.getObjectName(entity);
+      })
+      return results;
+    }))
+  }
+
+  getRemoteActivities(remote: Remote): Observable<Activity[]>
+  {
+    return this.http.get<Activity[]>(`/api/remote/${remote.address}/activities`).pipe(map(results => {
+      results.forEach(entity => {
+        if (!entity.activity_id) entity.activity_id = entity.entity_id;
+        if (!entity.entity_id) entity.entity_id = entity.activity_id;
+        entity.name = this.getObjectName(entity);
+      })
+      return results;
+    }))
+  }
+
+  getRemoteActivity(remote: Remote, activity_id: string): Observable<Activity>
+  {
+    return this.http.get<Activity>(`/api/remote/${remote.address}/activities/${activity_id}`).pipe(map(results => {
+      return results;
+    }))
+  }
+
   registerRemote(remote: Remote): Observable<Remote>
   {
     return this.http.post<any>('/api/config/remote', remote).pipe(map(results => {
+      return results;
+    }))
+  }
+
+  unregisterRemote(remote: Remote): Observable<any>
+  {
+    return this.http.delete<any>('/api/config/remote/'+remote.address).pipe(map(results => {
       return results;
     }))
   }

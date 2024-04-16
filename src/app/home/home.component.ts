@@ -1,7 +1,17 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {TableModule} from "primeng/table";
 import {ServerService} from "../server.service";
-import {Activities, Activity, Context, Entities, EntitiesUsage, Entity, EntityUsage, Profiles} from "../interfaces";
+import {
+  Activities,
+  Activity,
+  Config,
+  Context,
+  Entities,
+  EntitiesUsage,
+  Entity,
+  EntityUsage,
+  Profiles, Remote
+} from "../interfaces";
 import {CommonModule} from "@angular/common";
 import {ChipModule} from "primeng/chip";
 import {OverlayPanelModule} from "primeng/overlaypanel";
@@ -12,13 +22,15 @@ import {InputTextModule} from "primeng/inputtext";
 import {ButtonModule} from "primeng/button";
 import {TooltipModule} from "primeng/tooltip";
 import {MenubarModule} from "primeng/menubar";
-import {MenuItem, MenuItemCommandEvent, MessageService} from "primeng/api";
+import {MenuItem, MessageService} from "primeng/api";
 import {ToastModule} from "primeng/toast";
-import {catchError, map, of} from "rxjs";
+import {catchError, forkJoin, from, map, mergeMap, Observable, of} from "rxjs";
 import {HttpErrorResponse, HttpEventType} from "@angular/common/http";
 import {ProgressBarModule} from "primeng/progressbar";
 import {UploadedFilesComponent} from "../uploaded-files/uploaded-files.component";
 import {RemoteRegistrationComponent} from "../remote-registration/remote-registration.component";
+import {DropdownModule} from "primeng/dropdown";
+import {ProgressSpinnerModule} from "primeng/progressspinner";
 
 interface FileProgress
 {
@@ -45,7 +57,9 @@ interface FileProgress
     ToastModule,
     ProgressBarModule,
     UploadedFilesComponent,
-    RemoteRegistrationComponent
+    RemoteRegistrationComponent,
+    DropdownModule,
+    ProgressSpinnerModule
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
@@ -53,8 +67,6 @@ interface FileProgress
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements OnInit {
-
-  activities: Activities = {};
   entities: Entities = {};
   activity_list: Activity[] = [];
   entity_list: Entity[] = [];
@@ -71,7 +83,8 @@ export class HomeComponent implements OnInit {
     {label: 'Activities unused entities', command: () => this.checkUnassigned(), icon: 'pi pi-search'},
     {label: 'Upload backup', command: () => this.uploadFile(), icon: 'pi pi-upload'},
     {label: 'View backups', command: () => this.viewBackups(), icon: 'pi pi-folder-open'},
-    {label: 'Select Remote', command: () => this.selectRemote(), icon: 'pi pi-mobile'}
+    {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
+    {label: 'Load Remote data', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true}
   ]
   @ViewChild("fileUpload", {static: false}) fileUpload: ElementRef | undefined;
   @ViewChild(UploadedFilesComponent) uploadedFilesComponent: UploadedFilesComponent | undefined;
@@ -79,6 +92,13 @@ export class HomeComponent implements OnInit {
 
   currentFile: FileProgress | undefined;
   context: Context | undefined;
+  config: Config | undefined;
+  remotes: Remote[] = [];
+  selectedRemote: Remote | undefined;
+  progress = false;
+  remoteProgress = 0;
+  protected readonly Math = Math;
+  progressDetail = "";
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
   }
@@ -103,14 +123,13 @@ export class HomeComponent implements OnInit {
       }
       this.cdr.detectChanges();
     })
-    this.server.getActivities().subscribe(results => {
-      console.info("Activities", results);
-      this.activities = results;
+    this.server.getActivities().subscribe(activities => {
+      console.info("Activities", activities);
       this.activity_list =[];
-      for (let activity_id in this.activities)
+      for (let activity_id in activities)
       {
-        this.activities[activity_id].activity_id = activity_id;
-        this.activity_list.push(this.activities[activity_id]);
+        activities[activity_id].activity_id = activity_id;
+        this.activity_list.push(activities[activity_id]);
       }
       this.cdr.detectChanges();
     })
@@ -124,6 +143,92 @@ export class HomeComponent implements OnInit {
       this.profiles = results;
       this.cdr.detectChanges();
     })
+    this.server.getConfig().subscribe(config => {
+      this.updateRemote(config);
+      this.server.config$.subscribe(config => {
+        this.updateRemote(config);
+      })
+    })
+  }
+
+  loadRemoteData():void
+  {
+    if (!this.selectedRemote)
+    {
+      this.messageService.add({severity:'error', summary:'No remote selected'});
+      this.cdr.detectChanges();
+      return;
+    }
+    this.progress = true;
+    this.remoteProgress = 0;
+    this.items.filter(item => (item as any).block == true).forEach(item => item.disabled = true);
+    this.cdr.detectChanges();
+    const tasks: Observable<any>[] = [];
+    tasks.push(this.server.getRemoteEntities(this.selectedRemote).pipe(map((entities) => {
+      this.entity_list = entities;
+      this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
+        detail: `${this.entity_list.length} entities extracted`});
+      this.cdr.detectChanges();
+      return entities;
+    })));
+    tasks.push(this.server.getRemoteActivities(this.selectedRemote!).pipe(mergeMap((entities) => {
+      this.activity_list = entities;
+      this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
+        detail: `${this.activity_list.length} activities extracted. Extracting details now...`});
+      this.cdr.detectChanges();
+      return from(this.activity_list).pipe(mergeMap(activity => {
+        return this.server.getRemoteActivity(this.selectedRemote!, activity.entity_id!).pipe(map(activityDetails => {
+          this.progressDetail = activity.name;
+          const name = activity.name;
+          Object.assign(activity, activityDetails);
+          activity.name = name;
+          if ((activityDetails as any).options?.included_entities)
+            (activity as any).entities = (activityDetails as any).options.included_entities;
+          this.remoteProgress += 100/this.activity_list.length;
+          this.cdr.detectChanges();
+          console.log("Activity", activity);
+          return activity;
+        }))
+      }))
+    })));
+
+    forkJoin(tasks).subscribe({next: (results) => {
+        this.messageService.add({
+          severity: "success", summary: "Remote data loaded",
+          detail: `${this.entity_list.length} entities and ${this.activity_list.length} activities extracted.`
+        });
+        this.cdr.detectChanges();
+      },
+    error: (error) => {
+      this.messageService.add({
+        severity: "error", summary: "Error during remote data extraction"
+      });
+      this.cdr.detectChanges();
+    },
+    complete: () => {
+      this.items.filter(item => (item as any).block == true).forEach(item => item.disabled = false);
+      this.progress = false;
+      this.cdr.detectChanges();
+    }})
+  }
+
+
+  updateRemote(config: Config): void
+  {
+    this.config = config;
+    this.remotes = config.remotes!;
+    const selectedRemoteAddress = localStorage.getItem('remote');
+    if (selectedRemoteAddress)
+    {
+      this.selectedRemote = this.remotes.find(remote => remote.address === selectedRemoteAddress)
+    }
+    this.cdr.detectChanges();
+  }
+
+  setRemote(remote: Remote): void
+  {
+    localStorage.setItem('remote', remote.address);
+    this.server.remote$.next(remote);
   }
 
   viewBackups(): void

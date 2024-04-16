@@ -1,18 +1,34 @@
 <p-toast key="remote"></p-toast>
-<p-dialog header="Uploaded files" [(visible)]="visible" [style]="{width: '50vw'}">
-  <input [(ngModel)]="host" type="text" pInputText placeholder="Remote host" />
-  <input [(ngModel)]="port" type="text" pInputText placeholder="Remote port" />
-  <input [(ngModel)]="username" type="text" pInputText placeholder="Remote username" />
-  <input [(ngModel)]="token" type="text" pInputText placeholder="Remote token" />
+<p-dialog header="Remotes configured" [(visible)]="visible" [style]="{width: '50vw'}">
+  <div class="row">
+    <div class="col-50">
+      <input [(ngModel)]="host" type="text" pInputText placeholder="Remote host" />
+    </div>
+    <div class="col-50">
+      <input [(ngModel)]="port" type="text" pInputText placeholder="Remote port" />
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-50">
+      <input [(ngModel)]="username" type="text" pInputText placeholder="Remote username" />
+    </div>
+    <div class="col-50">
+      <input [(ngModel)]="token" type="text" pInputText placeholder="Remote token" />
+    </div>
+  </div><br>
   <p-button label="Register remote" (click)="submit()"></p-button>
   <p-table [value]="remotes" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true">
     <ng-template pTemplate="header">
       <tr>
-        <th>Name</th><th>Address</th><th>Port</th><th>Username</th><th>Token</th><th>API key</th><th>Validity</th><th>Actions</th>
+        <th>Actions</th><th>Name</th><th>Address</th><th>Port</th><th>Username</th><th>Token</th><th>API key</th><th>Validity</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-remote>
       <tr>
+        <td>
+          <p-button icon="pi pi-play" pTooltip="Select this remote" [rounded]="true" (click)="selectRemote(remote)"></p-button>&nbsp;
+          <p-button icon="pi pi-trash" pTooltip="Unregister this remote" [rounded]="true" (click)="deleteRemote(remote)" severity="danger"></p-button>&nbsp;
+        </td>
         <td><ng-container *ngIf="selectedRemote == remote"><b>{{remote.remote_name}}</b> (selected)</ng-container>
           <ng-container *ngIf="selectedRemote != remote">{{remote.remote_name}}</ng-container>
         </td>
@@ -22,9 +38,6 @@
         <td>{{remote.token}}</td>
         <td>{{remote.api_key}}</td>
         <td>{{remote.api_valid_to}}</td>
-        <td>
-          <p-button icon="pi pi-play" pTooltip="Select this remote" [rounded]="true" (click)="selectRemote(remote)"></p-button>&nbsp;
-        </td>
       </tr>
     </ng-template>
   </p-table>

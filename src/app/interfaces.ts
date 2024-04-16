@@ -1,10 +1,11 @@
 export interface Config
 {
+  language: string;
   remotes?: Remote[];
 }
 export interface Remote
 {
-  name: string;
+  remote_name?: string;
   address: string;
   port: string;
   user: string;
@@ -23,6 +24,7 @@ export interface Context
 
 export interface Entity
 {
+  // name?: string | {'en': string, 'fr': string};
   name?: string;
   entity_id?: string;
   entity_type: string;
@@ -118,6 +120,7 @@ export interface Sequence {
 }
 export interface Activity {
   activity_id?: string;
+  entity_id?: string;
   name: string;
   entities: Entity[];
   buttons: Button[];

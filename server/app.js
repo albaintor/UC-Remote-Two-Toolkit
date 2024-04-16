@@ -5,6 +5,7 @@ import multer from 'multer';
 import JSZip from 'jszip';
 import got, {HTTPError, Options} from 'got'
 import {rimraf} from 'rimraf';
+import createHttpError from 'http-errors';
 
 import path from 'path';
 // import indexRouter from './routes/index.js';
@@ -13,6 +14,7 @@ import {RC2Model} from './RC2Model.js'
 import fs from "node:fs";
 import {elementAt} from "rxjs";
 import {Remote} from "./remote.js";
+import {getConfigFile, writeConfigFile} from "./config.js";
 
 const LISTEN_PORT = "8080";
 const UPLOAD_DIR = './uploads';
@@ -39,10 +41,10 @@ app.use(express.static('public'))
 
 // module.exports = app;
 
-const CONFIG_FOLDER = '.';
+
 const WORKING_FOLDER = 'conf';
 const TEMP_FOLDER = 'temp';
-const CONFIG_FILE = 'config.json';
+
 const REMOTE_USER = 'web-configurator';
 let rc2Model = new RC2Model();
 
@@ -165,7 +167,6 @@ app.put('/server/api', (req, res, next) => {
 
 app.get('/api/config', (req, res, next) => {
   try {
-    const filepath = path.join(CONFIG_FOLDER, CONFIG_FILE);
     res.status(200).json(getConfigFile());
   } catch(error) {
     next(error);
@@ -175,7 +176,7 @@ app.get('/api/config', (req, res, next) => {
 app.post('/api/config', (req, res, next) => {
   try {
     writeConfigFile(req.body)
-    res.status(200).json(CONFIG_FILE);
+    res.status(200).end();
   } catch(error) {
     next(error);
   }
@@ -186,9 +187,11 @@ app.post('/api/config/remote', async (req, res, next) => {
   if (req.body?.user)
     user = req.body?.user;
 
-  const remote = new Remote(req.body?.address, req.body?.port, user, req.body?.user, req.body?.token);
+  const remote = new Remote(req.body?.address, req.body?.port, user,req.body?.token);
   try {
-    await remote.register(req.body?.api_key_name);
+    const api_key_name = req.body?.api_key_name ? req.body?.api_key_name : "RC2Tool";
+    await remote.unregister(api_key_name);
+    await remote.register(api_key_name);
     await remote.getRemoteName();
     const configFile = getConfigFile();
     if (!configFile.remotes)
@@ -198,6 +201,94 @@ app.post('/api/config/remote', async (req, res, next) => {
     configFile.remotes.push(remote.toJson());
     writeConfigFile(configFile);
     res.status(200).json(remote.toJson());
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
+app.delete('/api/config/remote/:address', async (req, res, next) => {
+  const address = req.params.address;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    await remote.unregister(remoteEntry.api_key_name);
+    configFile.remotes = configFile.remotes.filter(local_remote => remote.address !== local_remote.address);
+    writeConfigFile(configFile);
+    res.status(200).json(address);
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
+app.get('/api/remote/:address/entities', async (req, res, next) => {
+  const address = req.params.address;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getEntities());
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
+app.get('/api/remote/:address/activities', async (req, res, next) => {
+  const address = req.params.address;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getActivities());
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
+app.get('/api/remote/:address/activities/:activity_id', async (req, res, next) => {
+  const address = req.params.address;
+  const activity_id = req.params.activity_id;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getActivity(activity_id));
   } catch (error)
   {
     errorHandler(error, req, res, next);
@@ -392,23 +483,7 @@ app.listen(LISTEN_PORT, function () {
   console.log(`Listening on port ${LISTEN_PORT}!`);
 });
 
-function writeConfigFile(config)
-{
-  const filepath = path.join(CONFIG_FOLDER, CONFIG_FILE);
-  console.log('Write config', filepath, config);
-  fs.writeFileSync(filepath, config);
-}
 
-function getConfigFile() {
-  const filepath = path.join(CONFIG_FOLDER, CONFIG_FILE);
-  console.log('Read config', filepath);
-  if (!fs.existsSync(filepath)) {
-    return {};
-  }
-  const config_file = fs.readFileSync(filepath, 'utf-8');
-  if (!config_file) return {};
-  return JSON.parse(config_file);
-}
 
 function errorHandler(error, req, res, next) {
   if (error.response instanceof TypeError) {

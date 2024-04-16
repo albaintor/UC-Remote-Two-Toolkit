@@ -9,6 +9,7 @@ import {Remote} from "../interfaces";
 import {NgIf} from "@angular/common";
 import {TableModule} from "primeng/table";
 import {TooltipModule} from "primeng/tooltip";
+import {InputTextModule} from "primeng/inputtext";
 
 @Component({
   selector: 'app-remote-registration',
@@ -20,7 +21,8 @@ import {TooltipModule} from "primeng/tooltip";
     ButtonModule,
     NgIf,
     TableModule,
-    TooltipModule
+    TooltipModule,
+    InputTextModule
   ],
   templateUrl: './remote-registration.component.html',
   styleUrl: './remote-registration.component.css',
@@ -30,7 +32,7 @@ import {TooltipModule} from "primeng/tooltip";
 export class RemoteRegistrationComponent {
   visible = false;
   host = "";
-  port = "8080";
+  port = "80";
   username = 'web-configurator';
   token = "1234";
   remotes: Remote[] = [];
@@ -52,17 +54,20 @@ export class RemoteRegistrationComponent {
 
   submit() {
     this.server.registerRemote({
-      name: this.server.API_KEY_NAME,
+      api_key_name: this.server.API_KEY_NAME,
       address: this.host,
       port: this.port,
       user: this.username,
       token: this.token
     }).subscribe({next: ((results) => {
-
         this.messageService.add({severity: "success", summary: "Remote registered",
           detail: `Key ${results.api_key} valid to ${results.api_valid_to}`,
           key: "remote"});
         this.cdr.detectChanges();
+        this.server.getConfig().subscribe(config => {
+          this.remotes = config.remotes ? config.remotes : [];
+          this.cdr.detectChanges();
+        })
     }),
       error: ((error: any) => {
         console.error("Error registering remote", error);
@@ -76,5 +81,22 @@ export class RemoteRegistrationComponent {
     this.remoteSelected.emit(remote);
     this.visible = false;
     this.cdr.detectChanges();
+  }
+
+  deleteRemote(remote: any) {
+    this.server.unregisterRemote(remote).subscribe({next: ((results) => {
+        this.messageService.add({severity: "success", summary: "Remote unregistered",
+          key: "remote"});
+        this.server.getConfig().subscribe(config => {
+          this.remotes = config.remotes ? config.remotes : [];
+          this.cdr.detectChanges();
+        })
+        this.cdr.detectChanges();
+      }),
+      error: ((error: any) => {
+        console.error("Error unregistering remote", error);
+        this.messageService.add({severity: "error", summary: "Error while registering remote", key: "remote"});
+        this.cdr.detectChanges();
+      })})
   }
 }

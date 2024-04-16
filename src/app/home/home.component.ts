@@ -18,6 +18,7 @@ import {catchError, map, of} from "rxjs";
 import {HttpErrorResponse, HttpEventType} from "@angular/common/http";
 import {ProgressBarModule} from "primeng/progressbar";
 import {UploadedFilesComponent} from "../uploaded-files/uploaded-files.component";
+import {RemoteRegistrationComponent} from "../remote-registration/remote-registration.component";
 
 interface FileProgress
 {
@@ -43,7 +44,8 @@ interface FileProgress
     MenubarModule,
     ToastModule,
     ProgressBarModule,
-    UploadedFilesComponent
+    UploadedFilesComponent,
+    RemoteRegistrationComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
@@ -68,10 +70,12 @@ export class HomeComponent implements OnInit {
     {label: 'Unused entities', command: () => this.checkOrphans(), icon: 'pi pi-share-alt'},
     {label: 'Activities unused entities', command: () => this.checkUnassigned(), icon: 'pi pi-search'},
     {label: 'Upload backup', command: () => this.uploadFile(), icon: 'pi pi-upload'},
-    {label: 'View backups', command: () => this.viewBackups(), icon: 'pi pi-folder-open'}
+    {label: 'View backups', command: () => this.viewBackups(), icon: 'pi pi-folder-open'},
+    {label: 'Select Remote', command: () => this.selectRemote(), icon: 'pi pi-mobile'}
   ]
   @ViewChild("fileUpload", {static: false}) fileUpload: ElementRef | undefined;
   @ViewChild(UploadedFilesComponent) uploadedFilesComponent: UploadedFilesComponent | undefined;
+  @ViewChild(RemoteRegistrationComponent) remoteComponent: RemoteRegistrationComponent | undefined;
 
   currentFile: FileProgress | undefined;
   context: Context | undefined;
@@ -126,6 +130,12 @@ export class HomeComponent implements OnInit {
   {
     this.uploadedFilesComponent?.loadFiles();
     this.uploadedFilesComponent!.visible = true;
+    this.cdr.detectChanges();
+  }
+
+  selectRemote(): void
+  {
+    this.remoteComponent!.showDialog();
     this.cdr.detectChanges();
   }
 

@@ -3,7 +3,7 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import multer from 'multer';
 import JSZip from 'jszip';
-import JSZipUtils from 'jszip-utils';
+import got, {HTTPError, Options} from 'got'
 import {rimraf} from 'rimraf';
 
 import path from 'path';
@@ -11,6 +11,8 @@ import path from 'path';
 // import usersRouter from './routes/users.js';
 import {RC2Model} from './RC2Model.js'
 import fs from "node:fs";
+import {elementAt} from "rxjs";
+import {Remote} from "./remote.js";
 
 const LISTEN_PORT = "8080";
 const UPLOAD_DIR = './uploads';
@@ -37,9 +39,170 @@ app.use(express.static('public'))
 
 // module.exports = app;
 
+const CONFIG_FOLDER = '.';
 const WORKING_FOLDER = 'conf';
 const TEMP_FOLDER = 'temp';
+const CONFIG_FILE = 'config.json';
+const REMOTE_USER = 'web-configurator';
 let rc2Model = new RC2Model();
+
+app.get('/server/api', (req, res, next) => {
+  const url = req.headers.destinationurl;
+  let headers = {}
+  for (let key in req.headers) {
+    headers[key] = req.headers[key];
+  }
+  headers['host'] = (new URL(url)).host;
+  headers['User-Agent'] = '';
+  const options = {
+    headers: headers,
+    searchParams: req.query,
+  }
+
+  console.log('Proxy get', url, req.query);
+  got.get(url, options).then(proxyres => {
+    let resBody;
+    try {
+      if (proxyres?.body) resBody = JSON.parse(proxyres.body);
+    } catch (err) {
+      console.error('Error parsing response', err, proxyres?.body);
+    }
+    res.status(200).json(resBody);
+  }).catch(error => {
+
+    // let request = {headers,
+    //   searchParams: req.query
+    // };
+
+    errorHandler(error, req, res, next);
+  })
+})
+
+app.delete('/server/api', (req, res, next) => {
+  const url = req.headers.destinationurl;
+  let headers = {}
+  for (let key in req.headers) {
+    headers[key] = req.headers[key];
+  }
+  headers['host'] = (new URL(url)).host;
+  headers['User-Agent'] = '';
+  const options = {
+    headers: headers,
+    searchParams: req.query,
+  }
+  console.log('Proxy delete', url, req.query);
+  got.delete(url, options).then(proxyres => {
+    let resBody;
+    try {
+      if (proxyres?.body) resBody = JSON.parse(proxyres.body);
+    } catch (err) {
+      console.error('Error parsing response', err, proxyres?.body);
+    }
+    res.status(200).json(resBody);
+  }).catch(error => {
+    //res.status(500).send(error).end();
+    errorHandler(error, req, res, next);
+  })
+})
+
+app.post('/server/api', (req, res, next) => {
+  const url = req.headers.destinationurl;
+  let headers = {}
+  for (let key in req.headers) {
+    headers[key] = req.headers[key];
+  }
+  headers['host'] = (new URL(url)).host;
+  headers['User-Agent'] = '';
+  const options = {
+    headers: headers,
+    searchParams: req.query,
+    json: req.body
+  }
+
+  console.log('Proxy post', url, req.query, req.body, req.headers);
+  got.post(url, options).then(proxyres => {
+    let resBody;
+    try {
+      if (proxyres?.body) resBody = JSON.parse(proxyres.body);
+    } catch (err) {
+      console.error('Error parsing response', err, proxyres?.body);
+    }
+    res.status(200).json(resBody);
+  }).catch(error => {
+    errorHandler(error, req, res, next);
+  })
+})
+
+app.put('/server/api', (req, res, next) => {
+  const url = req.headers.destinationurl;
+  let headers = {}
+  for (let key in req.headers) {
+    headers[key] = req.headers[key];
+  }
+  headers['host'] = (new URL(url)).host;
+  headers['User-Agent'] = '';
+  const options = {
+    headers: headers,
+    searchParams: req.query,
+    json: req.body
+  }
+
+  console.log('Proxy put', url, req.query);
+  got.put(url, options).then(proxyres => {
+    let resBody;
+    try {
+      if (proxyres?.body) resBody = JSON.parse(proxyres.body);
+    } catch (err) {
+      console.error('Error parsing response', err, proxyres?.body);
+    }
+    res.status(200).json(resBody);
+  }).catch(error => {
+    console.log('Erreur serveur', error.response);
+    //res.status(500).send(error).end();
+    errorHandler(error, req, res, next);
+  })
+})
+
+app.get('/api/config', (req, res, next) => {
+  try {
+    const filepath = path.join(CONFIG_FOLDER, CONFIG_FILE);
+    res.status(200).json(getConfigFile());
+  } catch(error) {
+    next(error);
+  }
+})
+
+app.post('/api/config', (req, res, next) => {
+  try {
+    writeConfigFile(req.body)
+    res.status(200).json(CONFIG_FILE);
+  } catch(error) {
+    next(error);
+  }
+})
+
+app.post('/api/config/remote', async (req, res, next) => {
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+
+  const remote = new Remote(req.body?.address, req.body?.port, user, req.body?.user, req.body?.token);
+  try {
+    await remote.register(req.body?.api_key_name);
+    await remote.getRemoteName();
+    const configFile = getConfigFile();
+    if (!configFile.remotes)
+      configFile.remotes = []
+    configFile.remotes = configFile.remotes.filter(local_remote => !(remote.address === local_remote.address
+      && remote.remote_name === local_remote.remote_name));
+    configFile.remotes.push(remote.toJson());
+    writeConfigFile(configFile);
+    res.status(200).json(remote.toJson());
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
 
 app.post('/upload',upload.single('file'),(req,res)=>{
   console.log(req.file, req.body.name);
@@ -228,3 +391,63 @@ if (fs.existsSync(WORKING_FOLDER))
 app.listen(LISTEN_PORT, function () {
   console.log(`Listening on port ${LISTEN_PORT}!`);
 });
+
+function writeConfigFile(config)
+{
+  const filepath = path.join(CONFIG_FOLDER, CONFIG_FILE);
+  console.log('Write config', filepath, config);
+  fs.writeFileSync(filepath, config);
+}
+
+function getConfigFile() {
+  const filepath = path.join(CONFIG_FOLDER, CONFIG_FILE);
+  console.log('Read config', filepath);
+  if (!fs.existsSync(filepath)) {
+    return {};
+  }
+  const config_file = fs.readFileSync(filepath, 'utf-8');
+  if (!config_file) return {};
+  return JSON.parse(config_file);
+}
+
+function errorHandler(error, req, res, next) {
+  if (error.response instanceof TypeError) {
+    return res.status(400).json(error.name + ": " + error.message);
+  }
+  if (error.response)
+  {
+    let message = {};
+    message['headers'] = error.response.headers;
+    message['statusCode'] = error.response.statusCode;
+    message['code'] = error.response.code;
+    message['body'] = error.response.body;
+    message['error'] = error.response.error;
+    message['message'] = error.response.message;
+    console.log('Erreur serveur réponse', message);
+    if (error.response.body)
+    {
+      // const httpError = createHttpError(500, error, {
+      //   headers: {
+      //     "X-Custom-Header": "Value",
+      //   }
+      // });
+      // return res.status(error.response.statusCode).send(error.response.body);
+      // next(error);
+      const httpError = createHttpError(error.response.statusCode, error.response.body, {headers: error.headers});
+      return next(httpError);
+      // return res.writeHead(error.response.statusCode, error.response.message).end(error);
+      // return res.send(httpError)
+      // return res.status(error.response.statusCode).send({
+      //   error: true,
+      //   message: error
+      // })
+      // return res.send(error);
+      // return res.status(error.response.statusCode).json(error)
+    }
+    else
+      return res.status(error.response.statusCode).json(message);
+  }
+  else
+    console.log('Erreur serveur', error);
+  return res.status(500).send(error);
+}

@@ -1,3 +1,20 @@
+export interface Config
+{
+  remotes?: Remote[];
+}
+export interface Remote
+{
+  name: string;
+  address: string;
+  port: string;
+  user: string;
+  token: string;
+  api_key?: string;
+  api_key_name?: string;
+  api_valid_to?: string;
+}
+
+
 export interface Context
 {
   source: string;

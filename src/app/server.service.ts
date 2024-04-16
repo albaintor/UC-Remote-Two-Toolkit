@@ -1,14 +1,111 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
 import {map, Observable} from "rxjs";
-import {Activities, Context, Entities, EntitiesUsage, Entity, EntityUsage, Profiles} from "./interfaces";
+import {
+  Activities,
+  Config,
+  Context,
+  Entities,
+  EntitiesUsage,
+  Entity,
+  EntityUsage,
+  Profiles,
+  Remote
+} from "./interfaces";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ServerService {
 
+  API_KEY_NAME = "RC2Tool";
+
   constructor(private http: HttpClient) { }
+
+  static getHttpOptions(remote: Remote, url: string) : {headers: HttpHeaders}
+  {
+    let authKey;
+    if (remote.api_key)
+      authKey = `Bearer ${remote.api_key}`;
+    else
+      authKey = `Basic ${btoa(remote.user + ':' + remote.token)}`;
+    return {
+      headers: new HttpHeaders({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'DELETE, POST, GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With',
+        'Access-Control-Allow-Credentials': 'true',
+        'Content-Type': 'application/json',
+        'Authorization': authKey,
+        'destinationurl': remote.address + url
+      })
+    };
+  }
+
+  getConfig(): Observable<Config>
+  {
+    return this.http.get<Config>('/api/config').pipe(map(results => {
+      return results;
+    }))
+  }
+
+  setConfig(config: Config): Observable<any>
+  {
+    return this.http.post<Config>('/api/config', config).pipe(map(results => {
+      return results;
+    }))
+  }
+
+  registerRemote(remote: Remote): Observable<Remote>
+  {
+    return this.http.post<any>('/api/config/remote', remote).pipe(map(results => {
+      return results;
+    }))
+  }
+
+  remoteGet(remote: Remote, url: string,
+            params?:{[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}): Observable<any>
+  {
+    const httpOptions: {headers: HttpHeaders, params?: HttpParams} = ServerService.getHttpOptions(remote, url);
+    if (params)
+      httpOptions['params'] = new HttpParams({fromObject: params});
+    return this.http.get<any>('/server/api',httpOptions).pipe(map(results => {
+      return results;
+    }))
+  }
+
+  remotePost(remote: Remote, url: string, data: any,
+            params?:{[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}): Observable<any>
+  {
+    const httpOptions: {headers: HttpHeaders, params?: HttpParams} = ServerService.getHttpOptions(remote, url);
+    if (params)
+      httpOptions['params'] = new HttpParams({fromObject: params});
+    return this.http.post<any>('/server/api',data, httpOptions).pipe(map(results => {
+      return results;
+    }))
+  }
+
+  remotePut(remote: Remote, url: string, data: any,
+             params?:{[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}): Observable<any>
+  {
+    const httpOptions: {headers: HttpHeaders, params?: HttpParams} = ServerService.getHttpOptions(remote, url);
+    if (params)
+      httpOptions['params'] = new HttpParams({fromObject: params});
+    return this.http.put<any>('/server/api',data, httpOptions).pipe(map(results => {
+      return results;
+    }))
+  }
+
+  remoteDelete(remote: Remote, url: string,
+            params?:{[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}): Observable<any>
+  {
+    const httpOptions: {headers: HttpHeaders, params?: HttpParams} = ServerService.getHttpOptions(remote, url);
+    if (params)
+      httpOptions['params'] = new HttpParams({fromObject: params});
+    return this.http.delete<any>('/server/api',httpOptions).pipe(map(results => {
+      return results;
+    }))
+  }
 
   getContext(): Observable<Context>
   {

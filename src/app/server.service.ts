@@ -22,6 +22,8 @@ export class ServerService {
   config$ = new Subject<Config>();
   remote$ = new Subject<Remote>();
   config: Config | undefined;
+  entities: Entity[] = [];
+  activities: Activity[] = [];
 
   constructor(private http: HttpClient) { }
 
@@ -72,23 +74,25 @@ export class ServerService {
 
   getRemoteEntities(remote: Remote): Observable<Entity[]>
   {
-    return this.http.get<Entity[]>(`/api/remote/${remote.address}/entities`).pipe(map(results => {
-      results.forEach(entity => {
+    return this.http.get<Entity[]>(`/api/remote/${remote.address}/entities`).pipe(map(entities => {
+      entities.forEach(entity => {
         entity.name = this.getObjectName(entity);
       })
-      return results;
+      this.entities = entities;
+      return entities;
     }))
   }
 
   getRemoteActivities(remote: Remote): Observable<Activity[]>
   {
-    return this.http.get<Activity[]>(`/api/remote/${remote.address}/activities`).pipe(map(results => {
-      results.forEach(entity => {
+    return this.http.get<Activity[]>(`/api/remote/${remote.address}/activities`).pipe(map(activities => {
+      activities.forEach(entity => {
         if (!entity.activity_id) entity.activity_id = entity.entity_id;
         if (!entity.entity_id) entity.entity_id = entity.activity_id;
         entity.name = this.getObjectName(entity);
       })
-      return results;
+      this.activities = activities;
+      return activities;
     }))
   }
 

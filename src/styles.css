@@ -13,3 +13,32 @@
 .p-component {
   font-size: 0.8rem !important;
 }
+a:link {
+  color: white;
+  text-decoration: none;
+}
+
+/* visited link */
+a:visited {
+  /*color: green;*/
+}
+
+/* mouse over link */
+a:hover {
+  /*font-weight: bold;*/
+  color: white;
+  text-decoration: underline;
+}
+
+/* selected link */
+a:active {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.chip-command
+{
+  border-radius: 0;
+  padding: 2px;
+  height: 20px;
+}

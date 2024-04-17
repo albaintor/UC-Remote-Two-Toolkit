@@ -8,7 +8,7 @@
   <ng-template pTemplate="end">
     <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
       <ng-template pTemplate="selectedItem">
-        <ng-container *ngIf="selectedRemote">{{selectedRemote?.remote_name}} ({{selectedRemote?.address}})</ng-container>
+        <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
         <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
       </ng-template>
       <ng-template let-item pTemplate="item">
@@ -21,13 +21,17 @@
   {{progressDetail}}<br>
   <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
 </ng-container>
-<ng-container *ngIf="context">
+<ng-container *ngIf="context && !context.type">
   <h4>Current source : <a (click)="downloadFile(context.source)" href="#">{{context.source}}</a> ({{context.date | date:'dd MMM yyyy \'at\' HH:mm'}})</h4>
+</ng-container>
+<ng-container *ngIf="context && context.type">
+  <h4>Current source : {{context.source}} ({{context.date | date:'dd MMM yyyy \'at\' HH:mm'}})</h4>
 </ng-container>
 <ng-container *ngIf="currentFile && currentFile.inProgress">
   <p-progressBar [value]="currentFile.progress"></p-progressBar>
 </ng-container>
 <app-remote-registration></app-remote-registration>
+<app-activity-editor #activityeditor></app-activity-editor>
 <app-uploaded-files (configurationUpdated)="updateConfiguration()" [currentSource]="context?.source!"></app-uploaded-files>
 <input type="file" #fileUpload class="upload">
 Search entity : <p-autoComplete [(ngModel)]="entity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntity($event)"
@@ -101,8 +105,8 @@ Replace by entity : <p-autoComplete [(ngModel)]="replace_entity" [dropdown]="tru
   </ng-template>
   <ng-template pTemplate="body" let-activity>
     <tr>
-      <td>{{ activity.activity_id }}</td>
-      <td>{{ activity.name }}</td>
+      <td><a [routerLink]="[]" (click)="activityeditor.loadActivity(activity)">{{ activity.activity_id }}</a></td>
+      <td><a [routerLink]="[]" (click)="activityeditor.loadActivity(activity)">{{ activity.name }}</a></td>
       <td><ng-container *ngFor="let activity_entity of activity['entities']">
         <p-chip [label]="getEntityName(activity_entity.entity_id)" (mouseover)="showEntity(activity_entity.entity_id);oventity.show($event)"
             (mouseleave)="oventity.hide()" (click)="selectEntity(activity_entity.entity_id)"

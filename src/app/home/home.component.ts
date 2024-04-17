@@ -31,6 +31,7 @@ import {UploadedFilesComponent} from "../uploaded-files/uploaded-files.component
 import {RemoteRegistrationComponent} from "../remote-registration/remote-registration.component";
 import {DropdownModule} from "primeng/dropdown";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
+import {ActivityEditorComponent} from "../activity-editor/activity-editor.component";
 
 interface FileProgress
 {
@@ -59,7 +60,8 @@ interface FileProgress
     UploadedFilesComponent,
     RemoteRegistrationComponent,
     DropdownModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    ActivityEditorComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
@@ -67,7 +69,6 @@ interface FileProgress
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements OnInit {
-  entities: Entities = {};
   activity_list: Activity[] = [];
   entity_list: Entity[] = [];
   entity: Entity | undefined;
@@ -84,7 +85,8 @@ export class HomeComponent implements OnInit {
     {label: 'Upload backup', command: () => this.uploadFile(), icon: 'pi pi-upload'},
     {label: 'View backups', command: () => this.viewBackups(), icon: 'pi pi-folder-open'},
     {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
-    {label: 'Load Remote data', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true}
+    {label: 'Load Remote data', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true},
+    {label: 'Clear cache', command: () => this.clearCache(), icon: 'pi pi-cross', block: true},
   ]
   @ViewChild("fileUpload", {static: false}) fileUpload: ElementRef | undefined;
   @ViewChild(UploadedFilesComponent) uploadedFilesComponent: UploadedFilesComponent | undefined;
@@ -103,7 +105,32 @@ export class HomeComponent implements OnInit {
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
   }
   ngOnInit(): void {
-    this.init();
+    this.server.getConfig().subscribe(config => {
+      this.updateRemote(config);
+      this.server.config$.subscribe(config => {
+        this.updateRemote(config);
+      })
+    })
+    const entities = localStorage.getItem("entities");
+    const activities = localStorage.getItem("activities");
+    if (entities || activities)
+    {
+      if (activities) this.activity_list = JSON.parse(activities);
+      if (entities) this.entity_list = JSON.parse(entities);
+      this.server.entities = this.entity_list;
+      this.server.activities = this.activity_list;
+      this.context = {source:"Cache", type: "Remote", date: new Date()};
+      this.messageService.add({severity: "info", summary: `Remote data loaded from cache`});
+      this.cdr.detectChanges();
+    }
+    else
+      this.init();
+  }
+
+  clearCache()
+  {
+    localStorage.removeItem("entities");
+    localStorage.removeItem("activities");
   }
 
   init(): void {
@@ -112,14 +139,13 @@ export class HomeComponent implements OnInit {
       this.context = results;
       this.cdr.detectChanges();
     })
-    this.server.getEntities().subscribe(results => {
-      console.info("Entities", results);
-      this.entities = results;
+    this.server.getEntities().subscribe(entities => {
+      console.info("Entities", entities);
       this.entity_list =[];
-      for (let entity_id in this.entities)
+      for (let entity_id in entities)
       {
-        this.entities[entity_id].entity_id = entity_id;
-        this.entity_list.push(this.entities[entity_id]);
+        entities[entity_id].entity_id = entity_id;
+        this.entity_list.push(entities[entity_id]);
       }
       this.cdr.detectChanges();
     })
@@ -143,12 +169,7 @@ export class HomeComponent implements OnInit {
       this.profiles = results;
       this.cdr.detectChanges();
     })
-    this.server.getConfig().subscribe(config => {
-      this.updateRemote(config);
-      this.server.config$.subscribe(config => {
-        this.updateRemote(config);
-      })
-    })
+
   }
 
   loadRemoteData():void
@@ -166,8 +187,8 @@ export class HomeComponent implements OnInit {
     const tasks: Observable<any>[] = [];
     tasks.push(this.server.getRemoteEntities(this.selectedRemote).pipe(map((entities) => {
       this.entity_list = entities;
-      this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
-        detail: `${this.entity_list.length} entities extracted`});
+      // this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
+      //   detail: `${this.entity_list.length} entities extracted`});
       this.cdr.detectChanges();
       return entities;
     })));
@@ -197,6 +218,10 @@ export class HomeComponent implements OnInit {
           severity: "success", summary: "Remote data loaded",
           detail: `${this.entity_list.length} entities and ${this.activity_list.length} activities extracted.`
         });
+        this.context = {source: `${this.selectedRemote?.remote_name} (${this.selectedRemote?.address})`,
+          date: new Date(), type: "Remote"}
+        localStorage.setItem("entities", JSON.stringify(this.entity_list));
+        localStorage.setItem("activities", JSON.stringify(this.activity_list));
         this.cdr.detectChanges();
       },
     error: (error) => {
@@ -210,6 +235,11 @@ export class HomeComponent implements OnInit {
       this.progress = false;
       this.cdr.detectChanges();
     }})
+  }
+
+  buildEntityUsage()
+  {
+
   }
 
 
@@ -272,12 +302,12 @@ export class HomeComponent implements OnInit {
 
   showEntity(entityId: string)
   {
-    this.hoverEntity = this.entities[entityId];
+    this.hoverEntity = this.entity_list.find(entity => entity.entity_id === entityId);
   }
 
   getEntityName(entityId: string): string
   {
-    const entity = this.entities[entityId];
+    const entity = this.entity_list.find(entity => entity.entity_id === entityId);
     if (entity?.name)
       return entity.name;
     return `Unknown ${entityId}`;
@@ -286,7 +316,7 @@ export class HomeComponent implements OnInit {
   selectEntity(entity: Entity | string | undefined) {
     if (!entity) return;
     if (typeof entity === 'string')
-      this.entity = this.entities[entity as string];
+      this.entity = this.entity_list.find(entity => entity.entity_id === (entity as any));
     else
       this.entity = entity as Entity;
     if (!this.entity) return;
@@ -359,7 +389,7 @@ export class HomeComponent implements OnInit {
 
   replaceEntity(entity_id: string, new_entity_id: string): any
   {
-    const entity = this.entities[entity_id];
+    const entity = this.entity_list.find(entity => entity.entity_id === entity_id);
     const entity_usage = this.usages[entity_id];
     if (!entity || !entity_usage) return;
     const modifications: any = {};
@@ -369,7 +399,8 @@ export class HomeComponent implements OnInit {
     entity_usage.activity_buttons.forEach(button => activityList.add(button.activity_id));
 
     Array.from(activityList).forEach(activityId => {
-      const activity = this.entities[activityId];
+      const activity = this.entity_list.find(entity => entity.entity_id === activityId);
+      if (!activity) return;
       const modification : any = { "entity_id" : activityId, "options": {
         "included_entities": [], "button_mapping": [], "sequences": []
         }};

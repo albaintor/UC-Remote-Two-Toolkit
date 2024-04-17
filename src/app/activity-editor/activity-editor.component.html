@@ -1,0 +1,23 @@
+<p-toast key="activity"></p-toast>
+<p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">
+<ng-container *ngIf="currentPage">
+  <div class="grid-container" [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width)}">
+    <div class="grid-item" *ngFor="let item of getGridItems()">
+      <ng-container *ngIf="item && item.command != null">
+        <p-chip [label]="getEntityName((item.command | as : Command)?.entity_id!)"
+                [style]="getStyle(getEntityName((item.command | as : Command)?.entity_id!))"></p-chip><br><br>
+        <p-chip [label]="(item.command | as : Command)?.cmd_id" styleClass="chip-command"
+                [style]="getStyle((item.command | as : Command)?.cmd_id!)"></p-chip>
+<!--        {{(item.command | as : Command)?.entity_id}} {{(item.command | as : Command)?.cmd_id}}-->
+      </ng-container>
+      <span *ngIf="item?.media_player_id != null" style="text-align: center">
+        <p-chip [label]="getEntityName(item?.media_player_id!)"
+                [style]="getStyle(getEntityName(item?.media_player_id!))"></p-chip><br><br>
+        <img src="/assets/icons/play-button.png" alt="Media player" width="100px" height="100px"><br>
+      </span>
+    </div>
+  </div>
+  <p-paginator (onPageChange)="onPageChange($event)" [first]="0" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
+</ng-container>
+
+</p-dialog>

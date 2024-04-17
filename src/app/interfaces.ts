@@ -20,6 +20,7 @@ export interface Context
 {
   source: string;
   date: Date;
+  type?: string;
 }
 
 export interface Entity
@@ -59,7 +60,7 @@ export interface EntityUsage
   name: string;
   type: string;
   activity_entities: ActivityEntity[];
-  activity_buttons: ActivityButton[];
+  activity_buttons: BackupActivityButton[];
   activity_interface: ActivityInterface[];
   activity_sequences: Sequence[];
   pages: Page[];
@@ -86,7 +87,7 @@ export interface Page {
   name: string;
 }
 
-export interface ActivityButton
+export interface BackupActivityButton
 {
   activity_id: string;
   name: string;
@@ -101,23 +102,68 @@ export interface Button
   short_press: boolean;
 }
 
+export interface ActivityButtonMapping
+{
+  button: string;
+  "short_press"?: Command;
+  "long_press"?: Command;
+}
+
 export interface ActivityPageCommand
 {
   entity_id: string;
-  command: string;
+  type: "text"|"icon";
+  text?: string;
+  media_player_id?: string;
+  command?: string | Command;
+  location: {
+    x: number;
+    y: number;
+  }
 }
 export interface ActivityPage
 {
   page_id: string;
   name: string;
+  grid: {
+    width: number;
+    height: number;
+  }
   items: ActivityPageCommand[];
 }
+
 export interface Sequence {
   activity_id: string;
   sequence_type: string;
   cmd_id: string;
   entity_id: string;
 }
+
+
+export interface Command
+{
+  entity_id: string;
+  cmd_id: string;
+  params?: any;
+}
+
+export interface ActivitySequence
+{
+  type: string;
+  command?: Command;
+}
+
+export interface ActivityOption
+{
+  sequences?:{[type: string]: ActivitySequence};
+  included_entities?:Entity[];
+  activity_group?: any;
+  button_mapping?:ActivityButtonMapping[];
+  user_interface?: {
+    pages?: ActivityPage[];
+  }
+}
+
 export interface Activity {
   activity_id?: string;
   entity_id?: string;
@@ -126,6 +172,7 @@ export interface Activity {
   buttons: Button[];
   interface: ActivityPage[];
   sequences: Sequence[];
+  options?: ActivityOption;
 }
 
 export interface Activities {

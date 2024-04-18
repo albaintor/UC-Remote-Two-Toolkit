@@ -1,3 +1,22 @@
+<p-overlayPanel id="buttonpanel" #buttonpanel [style]="buttonPanelStyle" [showCloseIcon]="true">
+  <ng-template pTemplate="content">
+    <h3>{{selectedButton!}}</h3>
+    <ng-container *ngIf="selectedButtonMapping && selectedButtonMapping.short_press">
+      <br>Short press :
+      <p-chip [label]="getEntityName(selectedButtonMapping.short_press.entity_id)"
+              [style]="getStyle(getEntityName(selectedButtonMapping.short_press.entity_id))"></p-chip>&nbsp;
+      <p-chip [label]="selectedButtonMapping.short_press.cmd_id" styleClass="chip-command"
+              [style]="getStyle(selectedButtonMapping.short_press.cmd_id)"></p-chip>
+    </ng-container>
+    <ng-container *ngIf="selectedButtonMapping && selectedButtonMapping.long_press">
+      <br>Long press :
+      <p-chip [label]="getEntityName(selectedButtonMapping.long_press.entity_id)"
+              [style]="getStyle(getEntityName(selectedButtonMapping.long_press.entity_id))"></p-chip>&nbsp;
+      <p-chip [label]="selectedButtonMapping.long_press.cmd_id" styleClass="chip-command"
+              [style]="getStyle(selectedButtonMapping.long_press.cmd_id)"></p-chip>
+    </ng-container>
+  </ng-template>
+</p-overlayPanel>
 <p-toast key="activity"></p-toast>
 <p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">
 <ng-container *ngIf="currentPage">
@@ -19,5 +38,9 @@
   </div>
   <p-paginator (onPageChange)="onPageChange($event)" [first]="0" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
 </ng-container>
-
+  <div style="text-align: center">
+    <img src="assets/remote/remote.svg" id="remote" onload="SVGInject(this)">
+<!--    <object data="assets/remote/remote.svg" type="image/svg+xml" #remote id="remote"></object>-->
+  </div>
 </p-dialog>
+

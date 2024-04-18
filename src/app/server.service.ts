@@ -47,6 +47,13 @@ export class ServerService {
     };
   }
 
+  getRemoteMap(): Observable<{ [id: string]: string }>
+  {
+    return this.http.get<{ [id: string]: string }>('/assets/remote/button-map.json').pipe(map(results => {
+      return results;
+    }))
+  }
+
   getConfig(): Observable<Config>
   {
     return this.http.get<Config>('/api/config').pipe(map(results => {

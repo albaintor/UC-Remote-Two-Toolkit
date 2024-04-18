@@ -18,6 +18,7 @@
     "@angular/platform-browser": "^17.3.0",
     "@angular/platform-browser-dynamic": "^17.3.0",
     "@angular/router": "^17.3.0",
+    "@iconfu/svg-inject": "^1.2.3",
     "ngx-json-viewer": "^3.2.1",
     "primeicons": "^7.0.0",
     "primeng": "^17.12.0",

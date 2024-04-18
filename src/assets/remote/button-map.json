@@ -1,0 +1,23 @@
+{
+  "back": "BACK",
+  "mic": "VOICE",
+  "home": "HOME",
+  "volumeup": "VOLUME_UP",
+  "volumedown": "VOLUME_DOWN",
+  "mute": "MUTE",
+  "cursorup": "DPAD_UP",
+  "cursordown": "DPAD_DOWN",
+  "cursorleft": "DPAD_LEFT",
+  "cursorright": "DPAD_RIGHT",
+  "cursorenter": "DPAD_MIDDLE",
+  "green": "GREEN",
+  "yellow": "YELLOW",
+  "blue": "BLUE",
+  "red": "RED",
+  "channelup": "CHANNEL_UP",
+  "channeldown": "CHANNEL_DOWN",
+  "next": "NEXT",
+  "previous": "PREV",
+  "playpause": "PLAY",
+  "power": "POWER"
+}

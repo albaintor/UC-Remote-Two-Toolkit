@@ -42,3 +42,16 @@ a:active {
   padding: 2px;
   height: 20px;
 }
+
+.button:hover
+{
+  filter: invert(100%);
+  cursor: pointer;
+}
+
+svg * {
+  transition: all 1s;
+}
+
+
+

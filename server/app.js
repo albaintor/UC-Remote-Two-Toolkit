@@ -167,6 +167,7 @@ app.put('/server/api', (req, res, next) => {
 
 app.get('/api/config', (req, res, next) => {
   try {
+    console.log("Get config");
     res.status(200).json(getConfigFile());
   } catch(error) {
     next(error);

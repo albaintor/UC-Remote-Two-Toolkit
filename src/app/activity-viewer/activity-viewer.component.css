@@ -1,0 +1,18 @@
+.grid-container {
+  display: grid;
+  column-gap: 1px;
+  row-gap: 1px;
+  /*grid-template-columns: auto auto auto;*/
+  background-color: rgba(0, 0, 0, 0.74);
+  padding: 5px;
+}
+
+.grid-item {
+  background-color: rgba(28, 28, 28, 0.8);
+  border: 1px solid rgb(255, 255, 255);
+  padding: 5px;
+  /*font-size: 30px;*/
+  text-align: center;
+  min-height: 75px;
+}
+

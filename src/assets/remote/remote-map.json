@@ -1,0 +1,370 @@
+[{
+  "entity_type": "media_player",
+  "unmap_features": ["volume", "on_off", "stop", "repeat", "shuffle", "seek",
+    "media_duration", "media_position", "media_title", "media_artist", "media_album", "media_image_url", "media_type",
+    "guide", "info", "select_source", "select_sound_mode", "eject", "open_close",
+    "record", "settings"],
+  "buttons": [
+    {
+      "button": "POWER",
+      "cmd_id": "media_player.toggle",
+      "feature": "toggle",
+      "disabled": true
+    },
+    {
+      "button": "VOLUME_UP",
+      "cmd_id": "media_player.volume_up",
+      "feature": "volume_up_down"
+    },
+    {
+      "button": "VOLUME_DOWN",
+      "cmd_id": "media_player.volume_down",
+      "feature": "volume_up_down"
+    },
+    {
+      "button": "MUTE",
+      "cmd_id": "media_player.mute_toggle",
+      "feature": "mute_toggle"
+    },
+    {
+      "button": "MUTE",
+      "cmd_id": "media_player.mute",
+      "feature": "mute"
+    },
+    {
+      "button": "MUTE",
+      "cmd_id": "media_player.unmute",
+      "feature": "unmute"
+    },
+    {
+      "button": "PLAY",
+      "cmd_id": "media_player.play_pause",
+      "feature": "play_pause"
+    },
+    {
+      "button": "NEXT",
+      "cmd_id": "media_player.next",
+      "feature": "next"
+    },
+    {
+      "button": "PREV",
+      "cmd_id": "media_player.previous",
+      "feature": "previous"
+    },
+    {
+      "button": "NEXT",
+      "cmd_id": "media_player.fast_forward",
+      "feature": "fast_forward"
+    },
+    {
+      "button": "PREV",
+      "cmd_id": "media_player.rewind",
+      "feature": "rewind"
+    },
+    {
+      "button": "cursorup",
+      "cmd_id": "media_player.cursor_up",
+      "feature": "dpad"
+    },
+    {
+      "button": "cursordown",
+      "cmd_id": "media_player.cursor_down",
+      "feature": "dpad"
+    },
+    {
+      "button": "cursorleft",
+      "cmd_id": "media_player.cursor_left",
+      "feature": "dpad"
+    },
+    {
+      "button": "cursorright",
+      "cmd_id": "media_player.cursor_right",
+      "feature": "dpad"
+    },
+    {
+      "button": "cursorenter",
+      "cmd_id": "media_player.cursor_enter",
+      "feature": "dpad"
+    },
+    {
+      "button": "cursorenter",
+      "cmd_id": "media_player.context_menu",
+      "long_press": true,
+      "feature": "context_menu"
+    },
+    {
+      "button": "home",
+      "cmd_id": "media_player.home",
+      "feature": "home"
+    },
+    {
+      "button": "home",
+      "cmd_id": "media_player.menu",
+      "feature": "menu"
+    },
+    {
+      "button": "red",
+      "cmd_id": "function_red",
+      "feature": "color_buttons",
+      "disabled": true
+    },
+    {
+      "button": "green",
+      "cmd_id": "function_green",
+      "feature": "color_buttons",
+      "disabled": true
+    },
+    {
+      "button": "blue",
+      "cmd_id": "function_blue",
+      "feature": "color_buttons",
+      "disabled": true
+    },
+    {
+      "button": "yellow",
+      "cmd_id": "function_yellow",
+      "feature": "color_buttons",
+      "disabled": true
+    },
+    {
+      "button": "channelup",
+      "cmd_id": "channel_up",
+      "feature": "channel_switcher"
+    },
+    {
+      "button": "channeldown",
+      "cmd_id": "channel_down",
+      "feature": "channel_switcher"
+    }
+  ],
+  "user_interface": {
+    "pages": [
+      {
+        "grid": {
+          "height": 6,
+          "width": 4
+        },
+        "items":
+        [{
+          "command": {
+            "cmd_id": "media_player.on"
+          },
+          "size": {
+            "height": 1,
+            "width": 1
+          },
+          "icon": "uc:power-on",
+          "type": "icon"
+          },
+          {
+            "feature": "open_close",
+            "command": {
+              "cmd_id": "media_player.open_close"
+            },
+            "size": {
+              "height": 1,
+              "width": 1
+            },
+            "text": "Open/close",
+            "type": "text"
+          },
+          {
+            "feature": "audio_track",
+            "command": {
+              "cmd_id": "media_player.audio_track"
+            },
+            "size": {
+              "height": 1,
+              "width": 1
+            },
+            "icon": "uc:language",
+            "type": "icon"
+          },
+          {
+            "feature": "subtitle",
+            "command": {
+              "cmd_id": "media_player.subtitle"
+            },
+            "size": {
+              "height": 1,
+              "width": 1
+            },
+            "icon": "uc:cc",
+            "type": "icon"
+          }
+        ],
+        "name": "Commands"
+      },
+      {
+        "features": ["numpad"],
+        "grid": {
+          "height": 4,
+          "width": 3
+        },
+        "items": [{
+          "command": {
+            "cmd_id": "media_player.digit_1"
+          },
+          "location": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 1,
+            "width": 1
+          },
+          "text": "1",
+          "type": "text"
+        }, {
+          "command": {
+            "cmd_id": "media_player.digit_2"
+          },
+          "location": {
+            "x": 1,
+            "y": 0
+          },
+          "size": {
+            "height": 1,
+            "width": 1
+          },
+          "text": "2",
+          "type": "text"
+        }, {
+          "command": {
+            "cmd_id": "media_player.digit_3"
+          },
+          "location": {
+            "x": 2,
+            "y": 0
+          },
+          "size": {
+            "height": 1,
+            "width": 1
+          },
+          "text": "3",
+          "type": "text"
+        }, {
+          "command": {
+            "cmd_id": "media_player.digit_4"
+          },
+          "location": {
+            "x": 0,
+            "y": 1
+          },
+          "size": {
+            "height": 1,
+            "width": 1
+          },
+          "text": "4",
+          "type": "text"
+        }, {
+          "command": {
+            "cmd_id": "media_player.digit_5"
+          },
+          "location": {
+            "x": 1,
+            "y": 1
+          },
+          "size": {
+            "height": 1,
+            "width": 1
+          },
+          "text": "5",
+          "type": "text"
+        }, {
+          "command": {
+            "cmd_id": "media_player.digit_6"
+          },
+          "location": {
+            "x": 2,
+            "y": 1
+          },
+          "size": {
+            "height": 1,
+            "width": 1
+          },
+          "text": "6",
+          "type": "text"
+        }, {
+          "command": {
+            "cmd_id": "media_player.digit_7"
+          },
+          "location": {
+            "x": 0,
+            "y": 2
+          },
+          "size": {
+            "height": 1,
+            "width": 1
+          },
+          "text": "7",
+          "type": "text"
+        }, {
+          "command": {
+            "cmd_id": "media_player.digit_8"
+          },
+          "location": {
+            "x": 1,
+            "y": 2
+          },
+          "size": {
+            "height": 1,
+            "width": 1
+          },
+          "text": "8",
+          "type": "text"
+        }, {
+          "command": {
+            "cmd_id": "media_player.digit_9"
+          },
+          "location": {
+            "x": 2,
+            "y": 2
+          },
+          "size": {
+            "height": 1,
+            "width": 1
+          },
+          "text": "9",
+          "type": "text"
+        }, {
+          "command": {
+            "cmd_id": "media_player.digit_0"
+          },
+          "location": {
+            "x": 1,
+            "y": 3
+          },
+          "size": {
+            "height": 1,
+            "width": 1
+          },
+          "text": "0",
+          "type": "text"
+        }
+        ],
+        "name": "Numbers"
+      }, {
+        "features": ["numpad"],
+        "grid": {
+          "height": 1,
+          "width": 1
+        },
+        "items": [{
+          "location": {
+            "x": 0,
+            "y": 0
+          },
+          "media_player_id": "uc_orangetv_driver.main.media_player.D0:6E:DE:E9:88:A1",
+          "size": {
+            "height": 1,
+            "width": 1
+          },
+          "type": "media_player"
+        }
+        ],
+        "name": "Media Player"
+      }
+    ]
+  }
+}]

@@ -13,6 +13,7 @@
 .p-component {
   font-size: 0.8rem !important;
 }
+
 a:link {
   color: white;
   text-decoration: none;
@@ -20,7 +21,7 @@ a:link {
 
 /* visited link */
 a:visited {
-  /*color: green;*/
+  color: #bed8ff;
 }
 
 /* mouse over link */

@@ -10,7 +10,7 @@ import {
   Entity,
   EntityUsage,
   Profiles,
-  Remote
+  Remote, RemoteMap
 } from "./interfaces";
 
 @Injectable({
@@ -47,12 +47,20 @@ export class ServerService {
     };
   }
 
-  getRemoteMap(): Observable<{ [id: string]: string }>
+  getPictureRemoteMap(): Observable<{ [id: string]: string }>
   {
-    return this.http.get<{ [id: string]: string }>('/assets/remote/button-map.json').pipe(map(results => {
+    return this.http.get<{ [id: string]: string }>('/assets/remote/picture-button-map.json').pipe(map(results => {
       return results;
     }))
   }
+
+  getTemplateRemoteMap(): Observable<RemoteMap[]>
+  {
+    return this.http.get<RemoteMap[]>('/assets/remote/remote-map.json').pipe(map(results => {
+      return results;
+    }))
+  }
+
 
   getConfig(): Observable<Config>
   {

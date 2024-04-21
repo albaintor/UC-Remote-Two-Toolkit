@@ -1,46 +1,41 @@
-<p-overlayPanel id="buttonpanel" #buttonpanel [style]="buttonPanelStyle" [showCloseIcon]="true">
-  <ng-template pTemplate="content">
-    <h3>{{selectedButton!}}</h3>
-    <ng-container *ngIf="selectedButtonMapping && selectedButtonMapping.short_press">
-      <br>Short press :
-      <p-chip [label]="getEntityName(selectedButtonMapping.short_press.entity_id)"
-              [style]="getStyle(getEntityName(selectedButtonMapping.short_press.entity_id))"></p-chip>&nbsp;
-      <p-chip [label]="selectedButtonMapping.short_press.cmd_id" styleClass="chip-command"
-              [style]="getStyle(selectedButtonMapping.short_press.cmd_id)"></p-chip>
-    </ng-container>
-    <ng-container *ngIf="selectedButtonMapping && selectedButtonMapping.long_press">
-      <br>Long press :
-      <p-chip [label]="getEntityName(selectedButtonMapping.long_press.entity_id)"
-              [style]="getStyle(getEntityName(selectedButtonMapping.long_press.entity_id))"></p-chip>&nbsp;
-      <p-chip [label]="selectedButtonMapping.long_press.cmd_id" styleClass="chip-command"
-              [style]="getStyle(selectedButtonMapping.long_press.cmd_id)"></p-chip>
-    </ng-container>
+<div class="progress-spinner" *ngIf="progress">
+  <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+</div>
+
+<p-toast></p-toast>
+<h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Remote Two configuration toolkit</h2>
+<p-menubar [model]="items">
+  <ng-template pTemplate="end">
+    <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
+      <ng-template pTemplate="selectedItem">
+        <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
+        <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
+      </ng-template>
+      <ng-template let-item pTemplate="item">
+        {{item.remote_name}} ({{item.address}})
+      </ng-template>
+    </p-dropdown>
   </ng-template>
-</p-overlayPanel>
-<p-toast key="activity"></p-toast>
-<p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">
-<ng-container *ngIf="currentPage">
-  <div class="grid-container" [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width)}">
-    <div class="grid-item" *ngFor="let item of getGridItems()">
-      <ng-container *ngIf="item && item.command != null">
-        <p-chip [label]="getEntityName((item.command | as : Command)?.entity_id!)"
-                [style]="getStyle(getEntityName((item.command | as : Command)?.entity_id!))"></p-chip><br><br>
-        <p-chip [label]="(item.command | as : Command)?.cmd_id" styleClass="chip-command"
-                [style]="getStyle((item.command | as : Command)?.cmd_id!)"></p-chip>
-<!--        {{(item.command | as : Command)?.entity_id}} {{(item.command | as : Command)?.cmd_id}}-->
-      </ng-container>
-      <span *ngIf="item?.media_player_id != null" style="text-align: center">
-        <p-chip [label]="getEntityName(item?.media_player_id!)"
-                [style]="getStyle(getEntityName(item?.media_player_id!))"></p-chip><br><br>
-        <img src="/assets/icons/play-button.png" alt="Media player" width="100px" height="100px"><br>
-      </span>
-    </div>
-  </div>
-  <p-paginator (onPageChange)="onPageChange($event)" [first]="0" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
+</p-menubar>
+<ng-container *ngIf="progress">
+  {{progressDetail}}<br>
+  <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
 </ng-container>
-  <div style="text-align: center">
-    <img src="assets/remote/remote.svg" id="remote" onload="SVGInject(this)">
-<!--    <object data="assets/remote/remote.svg" type="image/svg+xml" #remote id="remote"></object>-->
-  </div>
-</p-dialog>
+<app-activity-viewer #activityeditor [activity]="activity"></app-activity-viewer>
+<ng-container *ngFor="let template of templates">
+  Apply mapping to a {{template.entity_type}} :
+  <p-dropdown [options]="getEntities(template.entity_type)" [(ngModel)]="selectedEntity"
+              [placeholder]="template.entity_type" (ngModelChange)="loadTemplate()">
+    <ng-template pTemplate="selectedItem">
+      {{selectedEntity?.name}} ({{selectedEntity?.entity_id}})
+    </ng-template>
+    <ng-template let-item pTemplate="item">
+      <div>{{item.name}} ({{item.entity_id}})</div>
+    </ng-template>
+  </p-dropdown>
+</ng-container>
+{{activity_id}}<br>
+<ng-container *ngIf="dump">
+  <ngx-json-viewer [json]="dump"></ngx-json-viewer>
+</ng-container>
 

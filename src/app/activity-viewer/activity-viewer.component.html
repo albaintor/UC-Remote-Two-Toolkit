@@ -1,0 +1,50 @@
+<p-overlayPanel id="buttonpanel" #buttonpanel [style]="buttonPanelStyle" [showCloseIcon]="true">
+  <ng-template pTemplate="content">
+    <h3>{{selectedButton!}}</h3>
+    <ng-container *ngIf="selectedButtonMapping && selectedButtonMapping.short_press">
+      <br>Short press :
+      <p-chip [label]="getEntityName(selectedButtonMapping.short_press.entity_id)"
+              [style]="getStyle(getEntityName(selectedButtonMapping.short_press.entity_id))"></p-chip>&nbsp;
+      <p-chip [label]="selectedButtonMapping.short_press.cmd_id" styleClass="chip-command"
+              [style]="getStyle(selectedButtonMapping.short_press.cmd_id)"></p-chip>
+      <ng-container *ngIf="selectedButtonMapping.short_press.params">{{getParams(selectedButtonMapping.short_press)}}</ng-container>
+    </ng-container>
+    <ng-container *ngIf="selectedButtonMapping && selectedButtonMapping.long_press">
+      <br>Long press :
+      <p-chip [label]="getEntityName(selectedButtonMapping.long_press.entity_id)"
+              [style]="getStyle(getEntityName(selectedButtonMapping.long_press.entity_id))"></p-chip>&nbsp;
+      <p-chip [label]="selectedButtonMapping.long_press.cmd_id" styleClass="chip-command"
+              [style]="getStyle(selectedButtonMapping.long_press.cmd_id)"></p-chip>
+      <ng-container *ngIf="selectedButtonMapping.long_press.params">{{getParams(selectedButtonMapping.long_press)}}</ng-container>
+    </ng-container>
+  </ng-template>
+</p-overlayPanel>
+<p-toast key="activity"></p-toast>
+<p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">
+  <a [routerLink]="['/activity/edit', activity?.activity_id]">Edit this activity</a>
+<ng-container *ngIf="currentPage">
+  <div class="grid-container" [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width)}">
+    <div class="grid-item" *ngFor="let item of getGridItems()">
+      <ng-container *ngIf="item && item.command != null">
+        <p-chip [label]="getEntityName((item.command | as : Command)?.entity_id!)"
+                [style]="getStyle(getEntityName((item.command | as : Command)?.entity_id!))"></p-chip><br><br>
+        <p-chip [label]="(item.command | as : Command)?.cmd_id" styleClass="chip-command"
+                [style]="getStyle((item.command | as : Command)?.cmd_id!)"></p-chip>
+<!--        {{(item.command | as : Command)?.entity_id}} {{(item.command | as : Command)?.cmd_id}}-->
+      </ng-container>
+      <span *ngIf="item?.media_player_id != null" style="text-align: center">
+        <p-chip [label]="getEntityName(item?.media_player_id!)"
+                [style]="getStyle(getEntityName(item?.media_player_id!))"></p-chip><br><br>
+        <img src="/assets/icons/play-button.png" alt="Media player" width="100px" height="100px"><br>
+      </span>
+      {{getParams(item?.command)}}
+    </div>
+  </div>
+  <p-paginator (onPageChange)="onPageChange($event)" [first]="0" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
+</ng-container>
+  <div style="text-align: center">
+    <img src="assets/remote/remote.svg" id="remote" onload="SVGInject(this)">
+<!--    <object data="assets/remote/remote.svg" type="image/svg+xml" #remote id="remote"></object>-->
+  </div>
+</p-dialog>
+

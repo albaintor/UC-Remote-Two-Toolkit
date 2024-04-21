@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { HomeComponent } from './home.component';
+import { ActivityViewerComponent } from './activity-viewer.component';
 
-describe('HomeComponent', () => {
-  let component: HomeComponent;
-  let fixture: ComponentFixture<HomeComponent>;
+describe('ActivityEditorComponent', () => {
+  let component: ActivityViewerComponent;
+  let fixture: ComponentFixture<ActivityViewerComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HomeComponent]
+      imports: [ActivityViewerComponent]
     })
     .compileComponents();
-    
-    fixture = TestBed.createComponent(HomeComponent);
+
+    fixture = TestBed.createComponent(ActivityViewerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

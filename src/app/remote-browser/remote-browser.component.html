@@ -31,11 +31,11 @@
   <p-progressBar [value]="currentFile.progress"></p-progressBar>
 </ng-container>
 <app-remote-registration></app-remote-registration>
-<app-activity-editor #activityeditor></app-activity-editor>
+<app-activity-viewer #activityeditor></app-activity-viewer>
 <app-uploaded-files (configurationUpdated)="updateConfiguration()" [currentSource]="context?.source!"></app-uploaded-files>
 <input type="file" #fileUpload class="upload">
 Search entity : <p-autoComplete [(ngModel)]="entity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntity($event)"
-  (ngModelChange)="selectEntity(entity)" field="entity_id">
+                                (ngModelChange)="selectEntity(entity)" field="entity_id">
   <ng-template let-item pTemplate="item">
     <div>{{item.name}} [{{item.type}}] ({{item.entity_id}})</div>
   </ng-template>
@@ -83,10 +83,10 @@ Replace by entity : <p-autoComplete [(ngModel)]="replace_entity" [dropdown]="tru
     <br>
     Features : {{hoverEntity.features?.join((", "))}}<br>
   </ng-container>
-<!--  <p-table [value]="entity" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true">-->
-<!--    <ng-template pTemplate="header">-->
-<!--    </ng-template>-->
-<!--  </p-table>-->
+  <!--  <p-table [value]="entity" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true">-->
+  <!--    <ng-template pTemplate="header">-->
+  <!--    </ng-template>-->
+  <!--  </p-table>-->
 </p-overlayPanel>
 <h2>Activities</h2>
 <p-table [value]="activity_list" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
@@ -109,7 +109,7 @@ Replace by entity : <p-autoComplete [(ngModel)]="replace_entity" [dropdown]="tru
       <td><a [routerLink]="[]" (click)="activityeditor.loadActivity(activity)">{{ activity.name }}</a></td>
       <td><ng-container *ngFor="let activity_entity of activity['entities']">
         <p-chip [label]="getEntityName(activity_entity.entity_id)" (mouseover)="showEntity(activity_entity.entity_id);oventity.show($event)"
-            (mouseleave)="oventity.hide()" (click)="selectEntity(activity_entity.entity_id)"
+                (mouseleave)="oventity.hide()" (click)="selectEntity(activity_entity.entity_id)"
                 [style]="getStyle(getEntityName(activity_entity.entity_id))"></p-chip> </ng-container></td>
     </tr>
   </ng-template>
@@ -148,4 +148,3 @@ Replace by entity : <p-autoComplete [(ngModel)]="replace_entity" [dropdown]="tru
     </tr>
   </ng-template>
 </p-table>
-

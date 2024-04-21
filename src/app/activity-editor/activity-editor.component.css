@@ -1,18 +1,44 @@
-.grid-container {
-  display: grid;
-  column-gap: 1px;
-  row-gap: 1px;
-  /*grid-template-columns: auto auto auto;*/
-  background-color: rgba(0, 0, 0, 0.74);
+.fields
+{
+  border: 1px solid rgba(93, 100, 101, 0.38);
+  background-color: black;
   padding: 5px;
 }
 
-.grid-item {
-  background-color: rgba(28, 28, 28, 0.8);
-  border: 1px solid rgb(255, 255, 255);
-  padding: 5px;
-  /*font-size: 30px;*/
-  text-align: center;
-  min-height: 75px;
+h2 {
+  display: flex;
+  align-items: center;
 }
 
+.upload
+{
+  opacity: 0; /* make transparent */
+  z-index: -1; /* move under anything else */
+  position: absolute;
+  visibility: hidden;
+}
+
+.progress-spinner {
+  position: fixed;
+  z-index: 999;
+  height: 2em;
+  width: 2em;
+  overflow: visible;
+  margin: auto;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+/* Transparent Overlay */
+.progress-spinner:before {
+  content: '';
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /*background-color: rgba(0,0,0,0.53);*/
+}

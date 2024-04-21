@@ -1,37 +1,27 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {TableModule} from "primeng/table";
-import {ServerService} from "../server.service";
-import {
-  Activities,
-  Activity,
-  Config,
-  Context,
-  Entities,
-  EntitiesUsage,
-  Entity,
-  EntityUsage,
-  Profiles, Remote
-} from "../interfaces";
-import {CommonModule} from "@angular/common";
-import {ChipModule} from "primeng/chip";
-import {OverlayPanelModule} from "primeng/overlaypanel";
+import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
-import {FormsModule} from "@angular/forms";
-import {NgxJsonViewerModule} from "ngx-json-viewer";
-import {InputTextModule} from "primeng/inputtext";
 import {ButtonModule} from "primeng/button";
-import {TooltipModule} from "primeng/tooltip";
-import {MenubarModule} from "primeng/menubar";
-import {MenuItem, MessageService} from "primeng/api";
-import {ToastModule} from "primeng/toast";
+import {ChipModule} from "primeng/chip";
+import {CommonModule, DatePipe, NgForOf, NgIf} from "@angular/common";
+import {NgxJsonViewerModule} from "ngx-json-viewer";
+import {OverlayPanelModule} from "primeng/overlaypanel";
+import {ProgressBarModule} from "primeng/progressbar";
+import {RemoteRegistrationComponent} from "../remote-registration/remote-registration.component";
+import {MenuItem, MessageService, SharedModule} from "primeng/api";
+import {TableModule} from "primeng/table";
+import {UploadedFilesComponent} from "../uploaded-files/uploaded-files.component";
+import {Activity, Config, Context, EntitiesUsage, Entity, EntityUsage, Profiles, Remote} from "../interfaces";
+import {ServerService} from "../server.service";
 import {catchError, forkJoin, from, map, mergeMap, Observable, of} from "rxjs";
 import {HttpErrorResponse, HttpEventType} from "@angular/common/http";
-import {ProgressBarModule} from "primeng/progressbar";
-import {UploadedFilesComponent} from "../uploaded-files/uploaded-files.component";
-import {RemoteRegistrationComponent} from "../remote-registration/remote-registration.component";
+import {FormsModule} from "@angular/forms";
+import {InputTextModule} from "primeng/inputtext";
+import {TooltipModule} from "primeng/tooltip";
+import {MenubarModule} from "primeng/menubar";
+import {ToastModule} from "primeng/toast";
 import {DropdownModule} from "primeng/dropdown";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
-import {ActivityEditorComponent} from "../activity-editor/activity-editor.component";
 
 interface FileProgress
 {
@@ -41,7 +31,7 @@ interface FileProgress
 }
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-remote-browser',
   standalone: true,
   imports: [
     TableModule,
@@ -61,14 +51,18 @@ interface FileProgress
     RemoteRegistrationComponent,
     DropdownModule,
     ProgressSpinnerModule,
-    ActivityEditorComponent
+    ActivityViewerComponent
   ],
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.css',
+  templateUrl: './remote-browser.component.html',
+  styleUrl: './remote-browser.component.css',
   providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HomeComponent implements OnInit {
+export class RemoteBrowserComponent implements OnInit {
+  @ViewChild("fileUpload", {static: false}) fileUpload: ElementRef | undefined;
+  @ViewChild(UploadedFilesComponent) uploadedFilesComponent: UploadedFilesComponent | undefined;
+  @ViewChild(RemoteRegistrationComponent) remoteComponent: RemoteRegistrationComponent | undefined;
+
   activity_list: Activity[] = [];
   entity_list: Entity[] = [];
   entity: Entity | undefined;
@@ -79,18 +73,6 @@ export class HomeComponent implements OnInit {
   outputObject: any = null;
   profiles: Profiles | undefined;
   replace_entity: Entity | undefined;
-  items: MenuItem[] = [
-    {label: 'Unused entities', command: () => this.checkOrphans(), icon: 'pi pi-share-alt'},
-    {label: 'Activities unused entities', command: () => this.checkUnassigned(), icon: 'pi pi-search'},
-    {label: 'Upload backup', command: () => this.uploadFile(), icon: 'pi pi-upload'},
-    {label: 'View backups', command: () => this.viewBackups(), icon: 'pi pi-folder-open'},
-    {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
-    {label: 'Load Remote data', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true},
-    {label: 'Clear cache', command: () => this.clearCache(), icon: 'pi pi-cross', block: true},
-  ]
-  @ViewChild("fileUpload", {static: false}) fileUpload: ElementRef | undefined;
-  @ViewChild(UploadedFilesComponent) uploadedFilesComponent: UploadedFilesComponent | undefined;
-  @ViewChild(RemoteRegistrationComponent) remoteComponent: RemoteRegistrationComponent | undefined;
 
   currentFile: FileProgress | undefined;
   context: Context | undefined;
@@ -101,9 +83,19 @@ export class HomeComponent implements OnInit {
   remoteProgress = 0;
   protected readonly Math = Math;
   progressDetail = "";
+  items: MenuItem[] = [
+    {label: 'Unused entities', command: () => this.checkOrphans(), icon: 'pi pi-share-alt'},
+    {label: 'Activities unused entities', command: () => this.checkUnassigned(), icon: 'pi pi-search'},
+    {label: 'Upload backup', command: () => this.uploadFile(), icon: 'pi pi-upload'},
+    {label: 'View backups', command: () => this.viewBackups(), icon: 'pi pi-folder-open'},
+    {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
+    {label: 'Load Remote data', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true},
+    {label: 'Clear cache', command: () => this.clearCache(), icon: 'pi pi-cross', block: true},
+  ]
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
   }
+
   ngOnInit(): void {
     this.server.getConfig().subscribe(config => {
       this.updateRemote(config);
@@ -182,7 +174,7 @@ export class HomeComponent implements OnInit {
     }
     this.progress = true;
     this.remoteProgress = 0;
-    this.items.filter(item => (item as any).block == true).forEach(item => item.disabled = true);
+    // this.items.filter(item => (item as any).block == true).forEach(item => item.disabled = true);
     this.cdr.detectChanges();
     const tasks: Observable<any>[] = [];
     tasks.push(this.server.getRemoteEntities(this.selectedRemote).pipe(map((entities) => {
@@ -224,17 +216,17 @@ export class HomeComponent implements OnInit {
         localStorage.setItem("activities", JSON.stringify(this.activity_list));
         this.cdr.detectChanges();
       },
-    error: (error) => {
-      this.messageService.add({
-        severity: "error", summary: "Error during remote data extraction"
-      });
-      this.cdr.detectChanges();
-    },
-    complete: () => {
-      this.items.filter(item => (item as any).block == true).forEach(item => item.disabled = false);
-      this.progress = false;
-      this.cdr.detectChanges();
-    }})
+      error: (error) => {
+        this.messageService.add({
+          severity: "error", summary: "Error during remote data extraction"
+        });
+        this.cdr.detectChanges();
+      },
+      complete: () => {
+        // this.items.filter(item => (item as any).block == true).forEach(item => item.disabled = false);
+        this.progress = false;
+        this.cdr.detectChanges();
+      }})
   }
 
   buildEntityUsage()
@@ -402,7 +394,7 @@ export class HomeComponent implements OnInit {
       const activity = this.entity_list.find(entity => entity.entity_id === activityId);
       if (!activity) return;
       const modification : any = { "entity_id" : activityId, "options": {
-        "included_entities": [], "button_mapping": [], "sequences": []
+          "included_entities": [], "button_mapping": [], "sequences": []
         }};
       modifications[activity.filename!] = modification;
       entity_usage.activity_entities.filter(item => item.activity_id === activityId).forEach(item => {

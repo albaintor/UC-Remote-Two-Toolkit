@@ -1,3 +1,49 @@
+
+export interface RemoteButtonMap
+{
+  button: string;
+  cmd_id: string;
+  feature: string;
+  disabled?: boolean;
+  long_press?: boolean;
+  params?: any;
+}
+
+export interface RemotePageItem
+{
+  feature?: string;
+  command: {
+    cmd_id: string;
+  }
+  location?: {
+    x?: number;
+    y?: number;
+  }
+  type: "icon" | "text";
+  icon?: string;
+  text?: string;
+}
+
+export interface RemoteButtonPage
+{
+  features?: string[];
+  grid: {
+    height: number;
+    width: number;
+  };
+  items: RemotePageItem[];
+}
+
+export interface RemoteMap
+{
+  entity_type: string;
+  unmap_features?: string[];
+  buttons?: RemoteButtonMap[];
+  user_interface?: {
+    pages: RemoteButtonPage[]
+  };
+}
+
 export interface Config
 {
   language: string;
@@ -105,8 +151,8 @@ export interface Button
 export interface ActivityButtonMapping
 {
   button: string;
-  "short_press"?: Command;
-  "long_press"?: Command;
+  short_press?: Command;
+  long_press?: Command;
 }
 
 export interface ActivityPageCommand

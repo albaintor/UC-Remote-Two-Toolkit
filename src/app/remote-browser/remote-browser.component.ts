@@ -89,7 +89,8 @@ export class RemoteBrowserComponent implements OnInit {
     {label: 'Upload backup', command: () => this.uploadFile(), icon: 'pi pi-upload'},
     {label: 'View backups', command: () => this.viewBackups(), icon: 'pi pi-folder-open'},
     {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
-    {label: 'Load Remote data', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true},
+    {label: 'Load Remote entities', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true},
+    {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
     {label: 'Clear cache', command: () => this.clearCache(), icon: 'pi pi-cross', block: true},
   ]
 
@@ -502,6 +503,30 @@ export class RemoteBrowserComponent implements OnInit {
   {
     this.server.getBackup(url).subscribe(results => {
       this.downloadFileResponse(results, url);
+    })
+  }
+
+  private loadRemoteResources() {
+    if (!this.selectedRemote)
+    {
+      this.messageService.add({severity:'error', summary:'No remote selected'});
+      this.cdr.detectChanges();
+      return;
+    }
+    this.progress = true;
+    this.cdr.detectChanges();
+    this.server.loadResources(this.selectedRemote, "Icon").subscribe({next: results => {
+        this.messageService.add({severity: "success", summary: `Remote resources ${this.selectedRemote?.address} extracted successfully`});
+        this.cdr.detectChanges();
+      }, error: err => {
+      console.error(err);
+        this.messageService.add({severity: "error", summary: `Remote resources ${this.selectedRemote?.address} extraction failed`});
+        this.cdr.detectChanges();
+      },
+      complete: () => {
+      this.progress = false;
+      this.cdr.detectChanges();
+      }
     })
   }
 }

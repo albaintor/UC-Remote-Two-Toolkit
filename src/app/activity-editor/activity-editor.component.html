@@ -35,7 +35,8 @@
 </ng-container>
 <ng-container *ngIf="selectedEntity">&nbsp;Select features to map :
   <p-multiSelect [options]="availableFeatures" [(ngModel)]="selectedFeatures" optionLabel="label"></p-multiSelect>
-  <br><div><p-checkbox [(ngModel)]="overwriteAssignedButtons" [binary]="true" label="Overwrite assigned buttons"></p-checkbox></div>
+  <br><div><p-checkbox [(ngModel)]="overwriteAssignedButtons" [binary]="true" label="Overwrite assigned physical buttons"></p-checkbox></div>
+  <div><p-checkbox [(ngModel)]="keepDefinedPositions" [binary]="true" label="Preserve defined interface buttons"></p-checkbox></div>
   <br>
 </ng-container>
 {{activity_id}}<br>
@@ -43,5 +44,5 @@
 <ng-container *ngIf="dump">
   <ngx-json-viewer [json]="dump"></ngx-json-viewer>
 </ng-container>
-<app-activity-viewer #viewer></app-activity-viewer>
+<app-activity-viewer #viewer [remote]="selectedRemote"></app-activity-viewer>
 

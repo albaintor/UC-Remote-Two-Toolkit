@@ -52,8 +52,10 @@ export class ActivityEditorComponent implements OnInit {
   progressDetail = "";
   items: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
-    {label: 'View activity', command: () => this.activityViewser?.view(this.activity!), icon: 'pi pi-folder-open'},
-    {label: 'Reset mapping', command: () => this.updateActivity(), icon: 'pi pi-times'},
+    {label: 'View original activity', command: () => this.activityViewser?.view(this.activity!), icon: 'pi pi-folder-open'},
+    {label: 'View new activity', command: () => this.activityViewser?.view(this.updatedActivity!), icon: 'pi pi-folder-open'},
+    {label: 'Reset mapping to original', command: () => this.updateActivity(), icon: 'pi pi-times'},
+    {label: 'Clear mapping', command: () => this.clearMapping(), icon: 'pi pi-times'},
   ]
   activity_list: Activity[] = [];
   entity_list: Entity[] = [];
@@ -113,18 +115,29 @@ export class ActivityEditorComponent implements OnInit {
     }
   }
 
+  clearMapping()
+  {
+    this.updatedActivity!.options!.button_mapping = [];
+    this.updatedActivity!.options!.user_interface!.pages = [];
+    this.cdr.detectChanges();
+  }
+
   updateActivity()
   {
     if (!this.activity_id || !this.activity_list) return;
     this.activity = this.activity_list.find(activity => activity.entity_id === this.activity_id);
     if (this.activity)
     {
-      this.updatedActivity = {name: this.activity.name, entities: [],
-        buttons: [], sequences: [], interface:[],
+      this.updatedActivity = {name: this.activity.name,
         options: {//activity_group: this.activity.options?.activity_group, sequences: this.activity.options?.sequences,
           //included_entities: this.activity.options?.included_entities,
           button_mapping: [],
           user_interface: {pages: []}}};
+
+      if (this.activity.options?.button_mapping)
+        this.updatedActivity!.options!.button_mapping! = JSON.parse(JSON.stringify(this.activity.options.button_mapping));
+      if (this.activity.options?.user_interface?.pages)
+        this.updatedActivity!.options!.user_interface!.pages = JSON.parse(JSON.stringify(this.activity.options.user_interface.pages));
     }
     this.cdr.detectChanges();
   }
@@ -221,8 +234,9 @@ export class ActivityEditorComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  getItemLocation(page: ActivityPage, size:{width:number, height:number},
-                  location:{x: number, y: number} | undefined): {x: number, y: number} | null
+  getItemLocation(page: ActivityPage,
+                  size:{width:number, height:number},
+                  location:({x: number, y: number} | undefined) | null)
   {
     let position = {x: 0, y: 0};
     if (location)
@@ -236,7 +250,7 @@ export class ActivityEditorComponent implements OnInit {
           {x:position.x, y: position.y, width:size.width, height: size.height},
           {x:item.location.x, y: item.location.y, width:item.size.width, height: item.size.height}))
         {
-          if (this.keepDefinedPositions)
+          if (location && this.keepDefinedPositions)
             return null;
           intersection = true;
           position.x ++;

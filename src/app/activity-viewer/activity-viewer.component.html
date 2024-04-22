@@ -25,9 +25,13 @@
 <ng-container *ngIf="currentPage">
   <div class="grid-container" [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width)}">
     <div class="grid-item" *ngFor="let item of getGridItems()">
-      <ng-container *ngIf="item?.icon">
+      <ng-container *ngIf="isStandardIcon(item?.icon)">
         <span [class]="getIconClass(item?.icon)"></span>
       </ng-container>
+      <ng-container *ngIf="isCustomIcon(item?.icon)">
+        <img [src]="getIconURL(item?.icon)" [alt]="item?.icon" width="70" height="70">
+      </ng-container>
+
       <ng-container *ngIf="item?.text">
         <span><b>{{item?.text}}</b></span><br>
       </ng-container>

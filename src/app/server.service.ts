@@ -93,12 +93,26 @@ export class ServerService {
     }))
   }
 
-  setConfig(config: Config): Observable<any>
+  // setConfig(config: Config): Observable<any>
+  // {
+  //   return this.http.post<Config>('/api/config', config).pipe(map(results => {
+  //     return results;
+  //   }))
+  // }
+
+  loadResources(remote: Remote, type: string): Observable<any>
   {
-    return this.http.post<Config>('/api/config', config).pipe(map(results => {
+    return this.http.get<any>(`/api/remote/${remote.address}/resources/${type}`).pipe(map(results => {
       return results;
     }))
   }
+
+  // getResource(remote: Remote, type: string, id: string): Observable<any>
+  // {
+  //   return this.http.get<any>(`/api/remote/${remote.address}/resources/${type}/${id}`).pipe(map(results => {
+  //     return results;
+  //   }))
+  // }
 
   getObjectName(object: any): string
   {

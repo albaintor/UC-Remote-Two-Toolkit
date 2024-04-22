@@ -223,10 +223,15 @@ export interface ActivityOption
 export interface Activity {
   entity_id?: string;
   name: string;
+  options?: ActivityOption;
+}
+
+export interface ActivityBackup {
+  entity_id?: string;
+  name: string;
   entities: Entity[];
   buttons: Button[];
   interface: ActivityPage[];
   sequences: Sequence[];
   options?: ActivityOption;
 }
-

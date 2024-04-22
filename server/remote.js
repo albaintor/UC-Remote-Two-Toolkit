@@ -1,4 +1,7 @@
 import got, {HTTPError, Options} from 'got'
+import fs from "node:fs";
+import path from "path";
+import {pipeline as streamPipeline} from 'node:stream/promises';
 
 export class Remote
 {
@@ -11,6 +14,7 @@ export class Remote
   valid_to;
   remote_name;
   protocol = 'http://';
+  resources_path = '';
 
   constructor(address, port, user, token, api_key) {
     this.address = address;
@@ -18,6 +22,49 @@ export class Remote
     this.api_key = api_key;
     this.user = user;
     this.token = token;
+  }
+
+  async loadResources(type, resources_directory)
+  {
+    this.resources_directory = path.join(resources_directory, this.address);
+    const target_path = path.join(this.resources_directory, type);
+    if (fs.existsSync(target_path)) {
+      fs.rmdirSync(target_path, { recursive: true });
+    }
+    if (!fs.existsSync(target_path)) {
+      fs.mkdirSync(target_path, { recursive: true });
+    }
+    let headers = this.getHeaders();
+    const limit = 100;
+    const options = {
+      headers: headers,
+      searchParams: {
+        limit,
+        page: 1
+      }
+    }
+    const global_list = [];
+    const url = this.getURL() + `/api/resources/${type}`;
+    let res = await got.get(url, options);
+    const count = res.headers['pagination-count'];
+    let icons = JSON.parse(res.body);
+    for (let icon of icons) {
+      global_list.push(icon['id']);
+      await streamPipeline(got.stream(`${url}/${icon['id']}`, options),
+        fs.createWriteStream(path.join(target_path, icon['id'])));
+    }
+    for (let i=2; i<=Math.ceil(count/limit); i++) {
+      options.searchParams.page = i;
+      res = await got.get(url, options);
+      icons = JSON.parse(res.body);
+      for (let icon of icons)
+        global_list.push(icon['id']);{
+        await streamPipeline(got.stream(`${url}/${icon['id']}`, options),
+          fs.createWriteStream(path.join(target_path, icon['id'])));
+      }
+    }
+    console.log('List of resources extracted', global_list);
+    return global_list;
   }
 
   toJson()

@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import {MessageService} from "primeng/api";
 import {ServerService} from "../server.service";
-import {Activity, ActivityButtonMapping, ActivityPage, ActivityPageCommand, Command} from "../interfaces";
+import {Activity, ActivityButtonMapping, ActivityPage, ActivityPageCommand, Command, Remote} from "../interfaces";
 import {DialogModule} from "primeng/dialog";
 import {ToastModule} from "primeng/toast";
 import {NgForOf, NgIf} from "@angular/common";
@@ -50,13 +50,14 @@ export class ActivityViewerComponent implements AfterViewInit {
   visible = false;
   currentPage: ActivityPage | undefined;
   @Input() activity: Activity | undefined;
+  @Input() remote: Remote | undefined;
   buttonsMap:{ [id: string]: string } = {};
   public Command!: Command;
   @ViewChild("buttonpanel", {static: false}) buttonpanel: OverlayPanel | undefined;
   selectedButton: string = "";
   selectedButtonMapping: ActivityButtonMapping | undefined;
-  buttonPanelStyle: any = { width: '450px' };
 
+  buttonPanelStyle: any = { width: '450px' };
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
     this.server.getPictureRemoteMap().subscribe(butonsMap => {
       this.buttonsMap = butonsMap;
@@ -71,6 +72,16 @@ export class ActivityViewerComponent implements AfterViewInit {
         this.remoteLoaded(img, svg);
       }
     });
+  }
+
+  isStandardIcon(icon: string | undefined): boolean {
+    if (!icon) return false;
+    return icon?.startsWith("uc:");
+  }
+
+  isCustomIcon(icon: string | undefined): boolean {
+    if (!icon) return false;
+    return !icon?.startsWith("uc:");
   }
 
   getIconClass(icon?: string): string
@@ -177,4 +188,10 @@ export class ActivityViewerComponent implements AfterViewInit {
   }
 
     protected readonly JSON = JSON;
+
+  getIconURL(icon: string | undefined) {
+    if (!icon) return "";
+    const filename = icon.replace("custom:", "");
+    return `/api/remote/${this.remote?.address}/resources/Icon/${filename}`;
+  }
 }

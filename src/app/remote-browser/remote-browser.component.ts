@@ -109,8 +109,8 @@ export class RemoteBrowserComponent implements OnInit {
     {
       if (activities) this.activity_list = JSON.parse(activities);
       if (entities) this.entity_list = JSON.parse(entities);
-      this.server.entities = this.entity_list;
-      this.server.activities = this.activity_list;
+      this.server.setEntities(this.entity_list);
+      this.server.setActivities(this.activity_list);
       this.context = {source:"Cache", type: "Remote", date: new Date()};
       this.messageService.add({severity: "info", summary: `Remote data loaded from cache`});
       this.cdr.detectChanges();
@@ -131,7 +131,7 @@ export class RemoteBrowserComponent implements OnInit {
       this.context = results;
       this.cdr.detectChanges();
     })
-    this.server.getEntities().subscribe(entities => {
+    this.server.getEntitiesFromBackup().subscribe(entities => {
       console.info("Entities", entities);
       this.entity_list =[];
       for (let entity_id in entities)
@@ -141,12 +141,12 @@ export class RemoteBrowserComponent implements OnInit {
       }
       this.cdr.detectChanges();
     })
-    this.server.getActivities().subscribe(activities => {
+    this.server.getActivitiesFromBackup().subscribe(activities => {
       console.info("Activities", activities);
-      this.activity_list =[];
+      this.activity_list = [...activities];
       for (let activity_id in activities)
       {
-        activities[activity_id].activity_id = activity_id;
+        activities[activity_id].entity_id = activity_id;
         this.activity_list.push(activities[activity_id]);
       }
       this.cdr.detectChanges();

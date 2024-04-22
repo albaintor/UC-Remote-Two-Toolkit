@@ -80,9 +80,12 @@ export class ActivityViewerComponent implements AfterViewInit {
     return ""
   }
 
-  view(): void {
+  view(activity: Activity): void {
+    if (activity)
+      this.activity = activity;
     this.visible = true;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[0];
+    console.log("View activity", this.activity);
     this.cdr.detectChanges();
   }
 
@@ -113,7 +116,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     if (!command) return "";
     if ((command as any)?.params)
       return JSON.stringify((command as any)?.params);
-    return (command as string);
+    return "";
   }
 
   getGridItems(): (ActivityPageCommand | null)[]
@@ -129,7 +132,7 @@ export class ActivityViewerComponent implements AfterViewInit {
           list.push(item);
       }
     }
-    console.log("Grid for activity", list);
+    // console.log("Grid for activity", list);
     return list;
   }
 
@@ -148,7 +151,7 @@ export class ActivityViewerComponent implements AfterViewInit {
 
   getEntityName(entityId: string): string
   {
-    const entity = this.server.entities.find(entity => entity.entity_id === entityId);
+    const entity = this.server.getEntities().find(entity => entity.entity_id === entityId);
     if (entity?.name)
       return entity.name;
     return `Unknown ${entityId}`;

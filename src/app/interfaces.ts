@@ -163,7 +163,6 @@ export interface ActivityButtonMapping
 
 export interface ActivityPageCommand
 {
-  entity_id: string;
   type: "text"|"icon"|"media_player";
   text?: string;
   icon?: string;
@@ -222,7 +221,6 @@ export interface ActivityOption
 }
 
 export interface Activity {
-  activity_id?: string;
   entity_id?: string;
   name: string;
   entities: Entity[];
@@ -232,10 +230,3 @@ export interface Activity {
   options?: ActivityOption;
 }
 
-export interface Activities {
-  [activity_id: string] : Activity;
-}
-
-export interface Entities {
-  [entity_id: string] : Entity;
-}

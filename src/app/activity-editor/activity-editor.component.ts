@@ -52,7 +52,7 @@ export class ActivityEditorComponent implements OnInit {
   progressDetail = "";
   items: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
-    {label: 'View activity', command: () => this.activityViewser?.view(), icon: 'pi pi-folder-open'},
+    {label: 'View activity', command: () => this.activityViewser?.view(this.activity!), icon: 'pi pi-folder-open'},
     {label: 'Reset mapping', command: () => this.updateActivity(), icon: 'pi pi-times'},
   ]
   activity_list: Activity[] = [];
@@ -104,8 +104,8 @@ export class ActivityEditorComponent implements OnInit {
     {
       if (activities) this.activity_list = JSON.parse(activities);
       if (entities) this.entity_list = JSON.parse(entities);
-      this.server.entities = this.entity_list;
-      this.server.activities = this.activity_list;
+      this.server.setEntities(this.entity_list);
+      this.server.setActivities(this.activity_list);
       // this.context = {source:"Cache", type: "Remote", date: new Date()};
       // this.messageService.add({severity: "info", summary: `Remote data loaded from cache`});
       this.updateActivity();
@@ -116,7 +116,7 @@ export class ActivityEditorComponent implements OnInit {
   updateActivity()
   {
     if (!this.activity_id || !this.activity_list) return;
-    this.activity = this.activity_list.find(activity => activity.activity_id === this.activity_id);
+    this.activity = this.activity_list.find(activity => activity.entity_id === this.activity_id);
     if (this.activity)
     {
       this.updatedActivity = {name: this.activity.name, entities: [],
@@ -126,6 +126,7 @@ export class ActivityEditorComponent implements OnInit {
           button_mapping: [],
           user_interface: {pages: []}}};
     }
+    this.cdr.detectChanges();
   }
 
   applyTemplate(updatedActivity: Activity)
@@ -208,8 +209,8 @@ export class ActivityEditorComponent implements OnInit {
           }
           updatedActivity!.options!.user_interface!.pages!.push(targetPage);
         }
-        const command: ActivityPageCommand = {entity_id: this.selectedEntity?.entity_id!,
-          location, size: item.size, type: item.type, command: item.command as any};
+        const command: ActivityPageCommand = {location, size: item.size, type: item.type,
+          command: {entity_id: this.selectedEntity?.entity_id!,...item.command} as any};
         if (item.text) command.text = item.text;
         if (item.icon) command.icon = item.icon;
         if (item.type === "media_player") command.media_player_id = this.selectedEntity?.entity_id!;

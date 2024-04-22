@@ -21,7 +21,7 @@
 </p-overlayPanel>
 <p-toast key="activity"></p-toast>
 <p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">
-  <a [routerLink]="['/activity/edit', activity?.activity_id]">Edit this activity</a>
+  <a [routerLink]="['/activity/edit', activity?.entity_id]">Edit this activity</a>
 <ng-container *ngIf="currentPage">
   <div class="grid-container" [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width)}">
     <div class="grid-item" *ngFor="let item of getGridItems()">

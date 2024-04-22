@@ -21,7 +21,6 @@
   {{progressDetail}}<br>
   <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
 </ng-container>
-<app-activity-viewer #activityeditor [activity]="activity"></app-activity-viewer>
 <ng-container *ngFor="let template of templates">
   Apply mapping to a {{template.entity_type}} :
   <p-dropdown [options]="getEntities(template.entity_type)" [(ngModel)]="selectedEntity"
@@ -40,9 +39,9 @@
   <br>
 </ng-container>
 {{activity_id}}<br>
-<p-button label="Apply mapping" (onClick)="applyTemplate(this.updatedActivity!);viewer.view()"></p-button>
+<p-button label="Apply mapping" (onClick)="applyTemplate(this.updatedActivity!);viewer.view(updatedActivity!)"></p-button>
 <ng-container *ngIf="dump">
   <ngx-json-viewer [json]="dump"></ngx-json-viewer>
 </ng-container>
-<app-activity-viewer #viewer [activity]="updatedActivity"></app-activity-viewer>
+<app-activity-viewer #viewer></app-activity-viewer>
 

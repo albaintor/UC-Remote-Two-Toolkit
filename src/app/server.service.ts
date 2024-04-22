@@ -2,10 +2,9 @@ import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
 import {map, Observable, Subject} from "rxjs";
 import {
-  Activities, Activity,
+  Activity,
   Config,
   Context,
-  Entities,
   EntitiesUsage,
   Entity,
   EntityUsage,
@@ -22,8 +21,10 @@ export class ServerService {
   config$ = new Subject<Config>();
   remote$ = new Subject<Remote>();
   config: Config | undefined;
-  entities: Entity[] = [];
-  activities: Activity[] = [];
+  private entities: Entity[] = [];
+  private activities: Activity[] = [];
+  entities$ = new Subject<Entity[]>();
+  activities$ = new Subject<Activity[]>();
 
   constructor(private http: HttpClient) { }
 
@@ -45,6 +46,26 @@ export class ServerService {
         'destinationurl': remote.address + url
       })
     };
+  }
+
+  getEntities(): Entity[]
+  {
+    return this.entities;
+  }
+
+  getActivities(): Activity[]
+  {
+    return this.activities;
+  }
+
+  setEntities(entities: Entity[]) : void {
+    this.entities = entities;
+    this.entities$.next(entities);
+  }
+
+  setActivities(activities: Activity[]) : void {
+    this.activities = activities;
+    this.activities$.next(activities);
   }
 
   getPictureRemoteMap(): Observable<{ [id: string]: string }>
@@ -102,8 +123,6 @@ export class ServerService {
   {
     return this.http.get<Activity[]>(`/api/remote/${remote.address}/activities`).pipe(map(activities => {
       activities.forEach(entity => {
-        if (!entity.activity_id) entity.activity_id = entity.entity_id;
-        if (!entity.entity_id) entity.entity_id = entity.activity_id;
         entity.name = this.getObjectName(entity);
       })
       this.activities = activities;
@@ -190,16 +209,16 @@ export class ServerService {
     }))
   }
 
-  getActivities(): Observable<Activities>
+  getActivitiesFromBackup(): Observable<Activity[]>
   {
-    return this.http.get<Activities>('/api/activities').pipe(map(results => {
+    return this.http.get<Activity[]>('/api/activities').pipe(map(results => {
       return results;
     }))
   }
 
-  getEntities(): Observable<Entities>
+  getEntitiesFromBackup(): Observable<Entity[]>
   {
-    return this.http.get<Entities>('/api/entities').pipe(map(results => {
+    return this.http.get<Entity[]>('/api/entities').pipe(map(results => {
       return results;
     }))
   }
@@ -217,9 +236,9 @@ export class ServerService {
       return results;
     }))
   }
-  getEntity(query: string): Observable<Entities>
+  getEntity(query: string): Observable<Entity[]>
   {
-    return this.http.get<Entities>('/api/entity/'+query).pipe(map(results => {
+    return this.http.get<Entity[]>('/api/entity/'+query).pipe(map(results => {
       return results;
     }))
   }

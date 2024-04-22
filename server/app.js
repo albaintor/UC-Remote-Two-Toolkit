@@ -410,7 +410,7 @@ app.get('/api/entities/usage', (req, res, next) => {
 
 app.get('/api/entities', (req, res, next) => {
   try {
-    res.send(rc2Model.entities_catalog).end();
+    res.send(Array.from(rc2Model.entities_catalog.values())).end();
   } catch(error) {
     next(error);
   }
@@ -434,7 +434,7 @@ app.get('/api/activities_entities', (req, res, next) => {
 
 app.get('/api/activities', (req, res, next) => {
   try {
-    res.send(rc2Model.activities).end();
+    res.send(Array.from(rc2Model.activities.values())).end();
   } catch(error) {
     next(error);
   }

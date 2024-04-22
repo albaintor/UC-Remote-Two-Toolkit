@@ -91,7 +91,6 @@ export class RemoteBrowserComponent implements OnInit {
     {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
     {label: 'Load Remote entities', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true},
     {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
-    {label: 'Clear cache', command: () => this.clearCache(), icon: 'pi pi-cross', block: true},
   ]
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {

@@ -26,7 +26,11 @@
 </ng-container>
 <ng-container *ngIf="context && context.type">
   <h4>Current source : {{context.source}} ({{context.date | date:'dd MMM yyyy \'at\' HH:mm'}})</h4>
-</ng-container>
+</ng-container>&nbsp;
+<div style="float: right">
+  <p-button label="Clear cache" (onClick)="clearCache()" severity="danger" icon="pi pi-trash" size="small"></p-button>
+</div>
+
 <ng-container *ngIf="currentFile && currentFile.inProgress">
   <p-progressBar [value]="currentFile.progress"></p-progressBar>
 </ng-container>

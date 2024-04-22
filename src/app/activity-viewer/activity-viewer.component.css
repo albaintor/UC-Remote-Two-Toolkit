@@ -16,11 +16,25 @@
   min-height: 75px;
 }
 
-
 .icon {
   order: 1;
   font-size: 3.688rem;
   color: var(--vt-c-grex-light);
   width: unset;
   height: unset
+}
+
+.button:hover
+{
+  filter: invert(100%);
+  cursor: pointer;
+}
+
+.button-assigned
+{
+  filter: url(#glowFilter);
+}
+
+svg * {
+  transition: all 1s;
 }

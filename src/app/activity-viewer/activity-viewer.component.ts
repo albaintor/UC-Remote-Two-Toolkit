@@ -6,7 +6,7 @@ import {
   ElementRef, Input,
   Pipe,
   PipeTransform,
-  ViewChild
+  ViewChild, ViewEncapsulation
 } from '@angular/core';
 import {MessageService} from "primeng/api";
 import {ServerService} from "../server.service";
@@ -44,7 +44,8 @@ export class AsPipe implements PipeTransform {
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',
   providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class ActivityViewerComponent implements AfterViewInit {
   visible = false;
@@ -52,15 +53,19 @@ export class ActivityViewerComponent implements AfterViewInit {
   @Input() activity: Activity | undefined;
   @Input() remote: Remote | undefined;
   buttonsMap:{ [id: string]: string } = {};
+  reversedButtonMap:{ [id: string]: string } = {};
   public Command!: Command;
   @ViewChild("buttonpanel", {static: false}) buttonpanel: OverlayPanel | undefined;
   selectedButton: string = "";
   selectedButtonMapping: ActivityButtonMapping | undefined;
 
   buttonPanelStyle: any = { width: '450px' };
+  svg: SVGElement | undefined;
+
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
-    this.server.getPictureRemoteMap().subscribe(butonsMap => {
-      this.buttonsMap = butonsMap;
+    this.server.getPictureRemoteMap().subscribe(buttonsMap => {
+      this.buttonsMap = buttonsMap;
+      this.reversedButtonMap = Object.fromEntries(Object.entries(buttonsMap).map(([key, value]) => [value, key]));
     })
   }
 
@@ -97,11 +102,34 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.visible = true;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[0];
     console.log("View activity", this.activity);
+    const buttons = this.svg?.getElementsByClassName("button");
+    if (buttons) {
+      for (let i = 0; i < buttons.length; i++) {
+        const svgButton = buttons.item(i);
+        svgButton?.classList.remove('button-assigned');
+      }
+      if (this.activity?.options?.button_mapping)
+      for (let button of this.activity?.options?.button_mapping)
+      {
+        const buttonId = this.reversedButtonMap[button.button];
+        if (!buttonId) continue;
+        for (let i = 0; i < buttons.length; i++) {
+          const svgButton = buttons.item(i);
+          if (svgButton?.id == buttonId)
+          {
+            if (button.long_press || button.short_press)
+              svgButton.classList.add('button-assigned');
+            break;
+          }
+        }
+      }
+    }
     this.cdr.detectChanges();
   }
 
   remoteLoaded(image: any, svg: SVGElement){
     console.log("Loaded", svg);
+    this.svg = svg;
     svg.addEventListener("mouseover", (e) => {
       if ((e.target as SVGImageElement).classList.contains('button'))
       {

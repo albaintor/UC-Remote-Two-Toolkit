@@ -1,7 +1,6 @@
 <div class="progress-spinner" *ngIf="progress">
   <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
 </div>
-
 <p-toast></p-toast>
 <h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Remote Two configuration toolkit</h2>
 <p-menubar [model]="items">
@@ -39,9 +38,10 @@
   <div><p-checkbox [(ngModel)]="keepDefinedPositions" [binary]="true" label="Preserve defined interface buttons"></p-checkbox></div>
   <br>
 </ng-container>
-{{activity_id}}<br>
+<br>
 <p-button label="Apply mapping" (onClick)="applyTemplate(this.updatedActivity!);viewer.view(updatedActivity!)"></p-button>
 <ng-container *ngIf="dump">
+  <p>Generated mapping :</p>
   <ngx-json-viewer [json]="dump"></ngx-json-viewer>
 </ng-container>
 <app-activity-viewer #viewer [remote]="selectedRemote"></app-activity-viewer>

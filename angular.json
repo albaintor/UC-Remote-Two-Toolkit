@@ -69,7 +69,7 @@
           },
           "defaultConfiguration": "development",
           "options": {
-            "browserTarget": "RC2Tool:build",
+            "buildTarget": "RC2Tool:build",
             "proxyConfig": "src/proxy.conf.json"
           }
         },

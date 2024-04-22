@@ -9,9 +9,13 @@ import {ProgressBarModule} from "primeng/progressbar";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
-import {Activity, Config, Context, Entity, Remote, RemoteMap} from "../interfaces";
+import {Activity, ActivityPage, ActivityPageCommand, Config, Context, Entity, Remote, RemoteMap} from "../interfaces";
 import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
+import {MultiSelectModule} from "primeng/multiselect";
+import {CheckboxModule} from "primeng/checkbox";
+import {ButtonModule} from "primeng/button";
+
 
 @Component({
   selector: 'app-activity-editor',
@@ -27,7 +31,10 @@ import {NgxJsonViewerModule} from "ngx-json-viewer";
     FormsModule,
     ActivityViewerComponent,
     NgForOf,
-    NgxJsonViewerModule
+    NgxJsonViewerModule,
+    MultiSelectModule,
+    CheckboxModule,
+    ButtonModule
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',
@@ -46,6 +53,7 @@ export class ActivityEditorComponent implements OnInit {
   items: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
     {label: 'View activity', command: () => this.activityViewser?.view(), icon: 'pi pi-folder-open'},
+    {label: 'Reset mapping', command: () => this.updateActivity(), icon: 'pi pi-times'},
   ]
   activity_list: Activity[] = [];
   entity_list: Entity[] = [];
@@ -53,7 +61,10 @@ export class ActivityEditorComponent implements OnInit {
   activity: Activity | undefined;
   updatedActivity: Activity | undefined;
   protected readonly Math = Math;
-  addDisabledButtons = false;
+  availableFeatures : {label: string, value: string}[] = [];
+  selectedFeatures : {label: string, value: string}[] = [];
+  overwriteAssignedButtons = false;
+  keepDefinedPositions = false;
   dump: any;
 
   @ViewChild(ActivityViewerComponent) activityViewser: ActivityViewerComponent | undefined;
@@ -115,10 +126,9 @@ export class ActivityEditorComponent implements OnInit {
           button_mapping: [],
           user_interface: {pages: []}}};
     }
-
   }
 
-  loadTemplate()
+  applyTemplate(updatedActivity: Activity)
   {
     if (!this.selectedEntity || !this.activity) return;
     const template = this.templates.find(template => template.entity_type === this.selectedEntity?.entity_type!);
@@ -131,30 +141,158 @@ export class ActivityEditorComponent implements OnInit {
     }
     console.log("Apply template to entity", entity, template)
     if (!template) return;
+    const selectedFeatures = this.selectedFeatures.map(item => item.value);
+    console.log("Selected features to map : ", selectedFeatures);
     template.buttons?.forEach(button => {
-      const existing_assignment = this.updatedActivity?.options?.button_mapping?.find(existing_button =>
+      const existing_assignment = updatedActivity?.options?.button_mapping?.find(existing_button =>
         existing_button.button === button.button
         && ((existing_button.long_press && button.long_press === true) || existing_button.short_press));
-      if (!entity.features?.includes(button.feature)) return;
-      if (button.disabled === true && !this.addDisabledButtons) return;
-      if (existing_assignment)
+      if (!selectedFeatures.includes(button.feature)) return;
+      if (!entity.features?.includes(button.feature))
       {
-       console.debug("Button already assigned", button.button, button.long_press);
-       return;
+        console.log("Feature unavailable for this entity", button.feature);
+        return;
       }
-      if (!this.updatedActivity?.options) this.updatedActivity!.options = {};
-      if (!this.updatedActivity?.options?.button_mapping) this.updatedActivity!.options!.button_mapping = [];
-      let targetButton = this.updatedActivity?.options?.button_mapping.find(existing_button => existing_button.button === button.button);
+
+      if (existing_assignment && !this.overwriteAssignedButtons)
+      {
+        console.debug("Button already assigned, override not selected : skip", button.button, button.long_press);
+        return;
+      }
+      if (!updatedActivity?.options) updatedActivity!.options = {};
+      if (!updatedActivity?.options?.button_mapping) updatedActivity!.options!.button_mapping = [];
+      let targetButton = updatedActivity?.options?.button_mapping.find(existing_button => existing_button.button === button.button);
       if (!targetButton) {
         targetButton = {button: button.button};
-        this.updatedActivity?.options?.button_mapping?.push(targetButton);
+        updatedActivity?.options?.button_mapping?.push(targetButton);
       }
       if (button.long_press)
         targetButton!.long_press = {entity_id: this.selectedEntity?.entity_id!, cmd_id: button.cmd_id, params: button.params};
       else
         targetButton!.short_press = {entity_id: this.selectedEntity?.entity_id!, cmd_id: button.cmd_id, params: button.params};
     })
-    this.dump = this.updatedActivity as any;//JSON.stringify(this.updatedActivity, null, 2);
+
+    template.user_interface?.pages?.forEach(page => {
+      if (!updatedActivity?.options) updatedActivity!.options = {};
+      if (!updatedActivity?.options?.user_interface) updatedActivity!.options.user_interface = {pages: []};
+      if (page.features)
+      {
+        let skip = false;
+        page.features.forEach(feature => {
+          if (!selectedFeatures.includes(feature))
+            skip = true;
+          return;
+        })
+        if (skip)
+        {
+          console.debug("Interface skipped as features not matched or unselected", page);
+          return;
+        }
+      }
+      let targetPage: ActivityPage = {name: `Page ${updatedActivity!.options.user_interface.pages!.length+1}`,
+        grid: {...page.grid}, items: []};
+      if (page.name) targetPage.name = page.name;
+      updatedActivity!.options.user_interface.pages!.push(targetPage);
+      page.items.forEach(item => {
+        if (item.feature && !selectedFeatures.includes(item.feature)) return;
+        let location = this.getItemLocation(targetPage, item.size, item.location);
+        if (location == null)
+        {
+          targetPage = {name: `Page ${updatedActivity!.options!.user_interface!.pages!.length+1}`,
+            grid: {...page.grid}, items: []};
+          location = this.getItemLocation(targetPage, item.size, item.location);
+          if (location == null)
+          {
+            console.error("Location not found for item", item, location);
+            return;
+          }
+          updatedActivity!.options!.user_interface!.pages!.push(targetPage);
+        }
+        const command: ActivityPageCommand = {entity_id: this.selectedEntity?.entity_id!,
+          location, size: item.size, type: item.type, command: item.command as any};
+        if (item.text) command.text = item.text;
+        if (item.icon) command.icon = item.icon;
+        if (item.type === "media_player") command.media_player_id = this.selectedEntity?.entity_id!;
+        targetPage.items.push(command);
+      })
+    })
+    this.dump = updatedActivity as any;//JSON.stringify(updatedActivity, null, 2);
+    this.cdr.detectChanges();
+  }
+
+  getItemLocation(page: ActivityPage, size:{width:number, height:number},
+                  location:{x: number, y: number} | undefined): {x: number, y: number} | null
+  {
+    let position = {x: 0, y: 0};
+    if (location)
+      position = {...location};
+    while(true)
+    {
+      let intersection = false;
+      for (let item of page.items)
+      {
+        if (ActivityEditorComponent.isIntersection(
+          {x:position.x, y: position.y, width:size.width, height: size.height},
+          {x:item.location.x, y: item.location.y, width:item.size.width, height: item.size.height}))
+        {
+          if (this.keepDefinedPositions)
+            return null;
+          intersection = true;
+          position.x ++;
+          if (position.x >= page.grid.width || position.x + size.width > page.grid.width)
+          {
+            position.x = 0; position.y ++;
+          }
+          if (position.y >= page.grid.height || position.y + size.height > page.grid.height)
+          {
+            return null;
+          }
+        }
+      }
+      if (position.x >= page.grid.width || position.x + size.width > page.grid.width)
+      {
+        if (this.keepDefinedPositions) return null;
+        position.x = 0; position.y ++;
+      }
+      if (position.y >= page.grid.height || position.y + size.height > page.grid.height)
+      {
+        return null;
+      }
+      if (!intersection) return position;
+    }
+  }
+
+  static isIntersection(rectangle1: {x: number, y: number, width: number, height:number},
+                        rectangle2: {x: number, y: number, width: number, height:number}): boolean
+  {
+    return !( rectangle1.x >= (rectangle2.x + rectangle2.width) ||
+      (rectangle1.x + rectangle1.width) <=  rectangle2.x ||
+      rectangle1.y >= (rectangle2.y + rectangle2.height) ||
+      (rectangle1.y + rectangle1.height) <=  rectangle2.y);
+  }
+
+  getTemplateFeatures(template: RemoteMap, includeDisabled = false): string[]
+  {
+    const features = new Set<string>();
+    template.buttons?.forEach(button => {
+      if (includeDisabled || button.disabled !== true)
+        features.add(button.feature)
+    });
+    template.user_interface?.pages.forEach(page => {
+      if (page.features) page.features.forEach(feature => features.add(feature));
+      page.items.forEach(item => {
+        if (item.feature) features.add(item.feature);
+      })
+    })
+    return Array.from(features).sort();
+  }
+
+  loadTemplate()
+  {
+    const template = this.templates.find(template => template.entity_type === this.selectedEntity?.entity_type!);
+    if (!template) return;
+    this.availableFeatures = this.getTemplateFeatures(template, true).map(feature => {return {label: feature, value: feature}});
+    this.selectedFeatures = this.getTemplateFeatures(template).map(feature => {return {label: feature, value: feature}});
     this.cdr.detectChanges();
   }
 

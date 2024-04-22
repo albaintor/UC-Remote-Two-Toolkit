@@ -1,4 +1,5 @@
 @import "primeicons/primeicons.css"; /* You can add global styles to this file, and also import other style files */
+@import "assets/ucicon/styles.css";
 :root {
   --ngx-json-key: #9ef0ff;
   --ngx-json-value: #00FF65;

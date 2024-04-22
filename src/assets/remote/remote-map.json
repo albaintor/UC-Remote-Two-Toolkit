@@ -1,10 +1,15 @@
 [{
   "entity_type": "media_player",
-  "unmap_features": ["volume", "on_off", "stop", "repeat", "shuffle", "seek",
+  "unmap_features": ["volume", "stop", "repeat", "shuffle", "seek",
     "media_duration", "media_position", "media_title", "media_artist", "media_album", "media_image_url", "media_type",
     "guide", "info", "select_source", "select_sound_mode", "eject", "open_close",
     "record", "settings"],
   "buttons": [
+    {
+      "button": "BACK",
+      "cmd_id": "media_player.back",
+      "feature": "back"
+    },
     {
       "button": "POWER",
       "cmd_id": "media_player.toggle",
@@ -62,78 +67,78 @@
       "feature": "rewind"
     },
     {
-      "button": "cursorup",
+      "button": "DPAD_UP",
       "cmd_id": "media_player.cursor_up",
       "feature": "dpad"
     },
     {
-      "button": "cursordown",
+      "button": "DPAD_DOWN",
       "cmd_id": "media_player.cursor_down",
       "feature": "dpad"
     },
     {
-      "button": "cursorleft",
+      "button": "DPAD_LEFT",
       "cmd_id": "media_player.cursor_left",
       "feature": "dpad"
     },
     {
-      "button": "cursorright",
+      "button": "DPAD_RIGHT",
       "cmd_id": "media_player.cursor_right",
       "feature": "dpad"
     },
     {
-      "button": "cursorenter",
+      "button": "DPAD_MIDDLE",
       "cmd_id": "media_player.cursor_enter",
       "feature": "dpad"
     },
     {
-      "button": "cursorenter",
+      "button": "DPAD_MIDDLE",
       "cmd_id": "media_player.context_menu",
       "long_press": true,
       "feature": "context_menu"
     },
     {
-      "button": "home",
+      "button": "HOME",
       "cmd_id": "media_player.home",
       "feature": "home"
     },
     {
-      "button": "home",
+      "button": "HOME",
       "cmd_id": "media_player.menu",
       "feature": "menu"
     },
     {
-      "button": "red",
-      "cmd_id": "function_red",
+      "button": "RED",
+      "cmd_id": "media_player.function_red",
       "feature": "color_buttons",
       "disabled": true
     },
     {
-      "button": "green",
-      "cmd_id": "function_green",
+      "button": "GREEN",
+      "cmd_id": "media_player.function_green",
       "feature": "color_buttons",
       "disabled": true
     },
     {
-      "button": "blue",
-      "cmd_id": "function_blue",
+      "button": "BLUE",
+      "cmd_id": "media_player.function_blue",
       "feature": "color_buttons",
       "disabled": true
     },
     {
-      "button": "yellow",
-      "cmd_id": "function_yellow",
+      "button": "YELLOW",
+      "cmd_id": "media_player.function_yellow",
       "feature": "color_buttons",
       "disabled": true
     },
     {
-      "button": "channelup",
-      "cmd_id": "channel_up",
+      "button": "CHANNEL_UP",
+      "cmd_id": "media_player.channel_up",
       "feature": "channel_switcher"
     },
     {
-      "button": "channeldown",
-      "cmd_id": "channel_down",
+      "button": "CHANNEL_DOWN",
+      "cmd_id": "media_player.channel_down",
       "feature": "channel_switcher"
     }
   ],
@@ -146,6 +151,7 @@
         },
         "items":
         [{
+          "feature": "on_off",
           "command": {
             "cmd_id": "media_player.on"
           },
@@ -345,7 +351,6 @@
         ],
         "name": "Numbers"
       }, {
-        "features": ["numpad"],
         "grid": {
           "height": 1,
           "width": 1
@@ -355,7 +360,6 @@
             "x": 0,
             "y": 0
           },
-          "media_player_id": "uc_orangetv_driver.main.media_player.D0:6E:DE:E9:88:A1",
           "size": {
             "height": 1,
             "width": 1

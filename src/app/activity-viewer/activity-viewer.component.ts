@@ -73,6 +73,13 @@ export class ActivityViewerComponent implements AfterViewInit {
     });
   }
 
+  getIconClass(icon?: string): string
+  {
+    if (icon?.startsWith("uc:"))
+      return "icon icon-" + icon.replace("uc:", "")
+    return ""
+  }
+
   view(): void {
     this.visible = true;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[0];

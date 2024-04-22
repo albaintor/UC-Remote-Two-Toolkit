@@ -14,18 +14,24 @@ export interface RemotePageItem
   feature?: string;
   command: {
     cmd_id: string;
+    params?: any;
   }
   location?: {
-    x?: number;
-    y?: number;
+    x: number;
+    y: number;
   }
-  type: "icon" | "text";
+  size: {
+    width: number;
+    height: number;
+  }
+  type: "icon" | "text" | "media_player";
   icon?: string;
   text?: string;
 }
 
 export interface RemoteButtonPage
 {
+  name?: string;
   features?: string[];
   grid: {
     height: number;
@@ -158,18 +164,23 @@ export interface ActivityButtonMapping
 export interface ActivityPageCommand
 {
   entity_id: string;
-  type: "text"|"icon";
+  type: "text"|"icon"|"media_player";
   text?: string;
+  icon?: string;
   media_player_id?: string;
   command?: string | Command;
   location: {
     x: number;
     y: number;
+  };
+  size: {
+    width: number;
+    height: number;
   }
 }
 export interface ActivityPage
 {
-  page_id: string;
+  page_id?: string;
   name: string;
   grid: {
     width: number;

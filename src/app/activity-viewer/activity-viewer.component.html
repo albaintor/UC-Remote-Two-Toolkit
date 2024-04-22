@@ -25,6 +25,12 @@
 <ng-container *ngIf="currentPage">
   <div class="grid-container" [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width)}">
     <div class="grid-item" *ngFor="let item of getGridItems()">
+      <ng-container *ngIf="item?.icon">
+        <span [class]="getIconClass(item?.icon)"></span>
+      </ng-container>
+      <ng-container *ngIf="item?.text">
+        <span><b>{{item?.text}}</b></span><br>
+      </ng-container>
       <ng-container *ngIf="item && item.command != null">
         <p-chip [label]="getEntityName((item.command | as : Command)?.entity_id!)"
                 [style]="getStyle(getEntityName((item.command | as : Command)?.entity_id!))"></p-chip><br><br>

@@ -34,8 +34,15 @@
     </ng-template>
   </p-dropdown>
 </ng-container>
+<ng-container *ngIf="selectedEntity">&nbsp;Select features to map :
+  <p-multiSelect [options]="availableFeatures" [(ngModel)]="selectedFeatures" optionLabel="label"></p-multiSelect>
+  <br><div><p-checkbox [(ngModel)]="overwriteAssignedButtons" [binary]="true" label="Overwrite assigned buttons"></p-checkbox></div>
+  <br>
+</ng-container>
 {{activity_id}}<br>
+<p-button label="Apply mapping" (onClick)="applyTemplate(this.updatedActivity!);viewer.view()"></p-button>
 <ng-container *ngIf="dump">
   <ngx-json-viewer [json]="dump"></ngx-json-viewer>
 </ng-container>
+<app-activity-viewer #viewer [activity]="updatedActivity"></app-activity-viewer>
 

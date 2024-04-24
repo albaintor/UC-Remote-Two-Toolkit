@@ -2,18 +2,8 @@
   display: grid;
   column-gap: 1px;
   row-gap: 1px;
-  /*grid-template-columns: auto auto auto;*/
   background-color: rgba(0, 0, 0, 0.74);
   padding: 5px;
-}
-
-.grid-item {
-  background-color: rgba(28, 28, 28, 0.8);
-  border: 1px solid rgb(255, 255, 255);
-  padding: 5px;
-  /*font-size: 30px;*/
-  text-align: center;
-  min-height: 75px;
 }
 
 .icon {
@@ -33,8 +23,15 @@
 .button-assigned
 {
   filter: url(#glowFilter);
+  /*filter: url('data:image/svg+xml,\
+    <svg xmlns="http://www.w3.org/2000/svg">\
+      <filter id="waves" x="-20%" y="-20%" width="140%" height="140%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" color-interpolation-filters="linearRGB">\
+        <feTurbulence type="turbulence" baseFrequency="0.01 0.01" numOctaves="1" seed="1" stitchTiles="noStitch" result="turbulence" />\
+        <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="20" xChannelSelector="G" yChannelSelector="A" result="displacementMap" />\
+      </filter>\
+    </svg>#waves');*/
 }
 
 svg * {
-  transition: all 1s;
+  transition: all 2s;
 }

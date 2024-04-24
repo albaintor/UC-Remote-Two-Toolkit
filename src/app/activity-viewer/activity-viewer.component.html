@@ -24,7 +24,9 @@
   <a [routerLink]="['/activity/edit', activity?.entity_id]">Edit this activity</a>
 <ng-container *ngIf="currentPage">
   <div class="grid-container" [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width)}">
-    <div class="grid-item" *ngFor="let item of getGridItems()">
+    <grid-button *ngFor="let item of getGridItems(); let index=index" [index]="index" [source]="gridSource" [item]="item"
+         (sourceSelected)="gridSourceSelected($event)" (destinationSelected)="gridDestinationSelected($event)"
+        (itemClicked)="gridItemClicked($event)">
       <ng-container *ngIf="isStandardIcon(item?.icon)">
         <span [class]="getIconClass(item?.icon)"></span>
       </ng-container>
@@ -48,7 +50,7 @@
         <img src="/assets/icons/play-button.png" alt="Media player" width="100px" height="100px"><br>
       </span>
       {{getParams(item?.command)}}
-    </div>
+    </grid-button>
   </div>
   <p-paginator (onPageChange)="onPageChange($event)" [first]="0" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
 </ng-container>

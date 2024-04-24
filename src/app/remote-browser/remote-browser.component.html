@@ -109,8 +109,8 @@ Replace by entity : <p-autoComplete [(ngModel)]="replace_entity" [dropdown]="tru
   </ng-template>
   <ng-template pTemplate="body" let-activity>
     <tr>
-      <td><a [routerLink]="[]" (click)="activityeditor.loadActivity(activity)">{{ activity.entity_id }}</a></td>
-      <td><a [routerLink]="[]" (click)="activityeditor.loadActivity(activity)">{{ activity.name }}</a></td>
+      <td><a [routerLink]="[]" (click)="activityeditor.view(activity)">{{ activity.entity_id }}</a></td>
+      <td><a [routerLink]="[]" (click)="activityeditor.view(activity)">{{ activity.name }}</a></td>
       <td><ng-container *ngFor="let activity_entity of activity['entities']">
         <p-chip [label]="getEntityName(activity_entity.entity_id)" (mouseover)="showEntity(activity_entity.entity_id);oventity.show($event)"
                 (mouseleave)="oventity.hide()" (click)="selectEntity(activity_entity.entity_id)"

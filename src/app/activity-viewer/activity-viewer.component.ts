@@ -20,6 +20,7 @@ import {ChipModule} from "primeng/chip";
 import SVGInject from "@iconfu/svg-inject";
 import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
 import {RouterLink} from "@angular/router";
+import {ActivityGridComponent, GridItem} from "./activity-grid/activity-grid.component";
 
 @Pipe({name: 'as', standalone: true, pure: true})
 export class AsPipe implements PipeTransform {
@@ -39,7 +40,8 @@ export class AsPipe implements PipeTransform {
     AsPipe,
     ChipModule,
     OverlayPanelModule,
-    RouterLink
+    RouterLink,
+    ActivityGridComponent
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',
@@ -61,6 +63,8 @@ export class ActivityViewerComponent implements AfterViewInit {
 
   buttonPanelStyle: any = { width: '450px' };
   svg: SVGElement | undefined;
+  protected readonly JSON = JSON;
+  gridSource: GridItem | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
     this.server.getPictureRemoteMap().subscribe(buttonsMap => {
@@ -175,14 +179,6 @@ export class ActivityViewerComponent implements AfterViewInit {
     return list;
   }
 
-  loadActivity(activity: Activity)
-  {
-    this.activity = activity;
-    this.currentPage = activity.options?.user_interface?.pages?.[0];
-    this.visible = true;
-    this.cdr.detectChanges();
-  }
-
   onPageChange($event: PaginatorState) {
     this.currentPage = this.activity?.options?.user_interface?.pages?.[$event.page!];
     this.cdr.detectChanges();
@@ -215,11 +211,24 @@ export class ActivityViewerComponent implements AfterViewInit {
     return `hsl(${stringUniqueHash % 360}, 95%, 40%)`;
   }
 
-    protected readonly JSON = JSON;
-
   getIconURL(icon: string | undefined) {
     if (!icon) return "";
     const filename = icon.replace("custom:", "");
     return `/api/remote/${this.remote?.address}/resources/Icon/${filename}`;
+  }
+
+  gridSourceSelected($event: GridItem) {
+    this.gridSource = $event;
+    this.cdr.detectChanges();
+  }
+
+  gridDestinationSelected($event: GridItem) {
+    this.messageService.add({severity:'info', summary: `${this.gridSource?.index} moved to ${$event.index}`, key: 'activity'});
+    this.cdr.detectChanges();
+  }
+
+  gridItemClicked($event: GridItem) {
+    this.messageService.add({severity:'info', summary: `${$event.index} clicked`, key: 'activity'});
+    this.cdr.detectChanges();
   }
 }

@@ -58,5 +58,9 @@
     <img src="assets/remote/remote.svg" id="remote" onload="SVGInject(this)">
 <!--    <object data="assets/remote/remote.svg" type="image/svg+xml" #remote id="remote"></object>-->
   </div>
+  <ng-container *ngIf="activity"><br><p-button label="Show data" (onClick)="showDump = true"></p-button>&nbsp;
+    <p-button *ngIf="showDump"  label="Copy data to clipboard" (onClick)="copyToClipboard(activity)"></p-button>
+    <ngx-json-viewer *ngIf="showDump" [json]="activity"></ngx-json-viewer>
+  </ng-container>
 </p-dialog>
 

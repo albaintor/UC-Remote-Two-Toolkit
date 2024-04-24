@@ -28,6 +28,7 @@
   <h4>Current source : {{context.source}} ({{context.date | date:'dd MMM yyyy \'at\' HH:mm'}})</h4>
 </ng-container>&nbsp;
 <div style="float: right">
+  <p-button label="Copy activities" (onClick)="copyToClipboard(activity_list)" icon="pi pi-copy" size="small"></p-button>&nbsp;
   <p-button label="Clear cache" (onClick)="clearCache()" severity="danger" icon="pi pi-trash" size="small"></p-button>
 </div>
 

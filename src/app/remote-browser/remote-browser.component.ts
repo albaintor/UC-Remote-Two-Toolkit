@@ -505,6 +505,13 @@ export class RemoteBrowserComponent implements OnInit {
     })
   }
 
+  copyToClipboard(data: any) {
+    navigator.clipboard.writeText(JSON.stringify(data)).then(r => {
+      this.messageService.add({severity:'info', summary: "Data copied to clipboard"});
+      this.cdr.detectChanges();
+    });
+  }
+
   private loadRemoteResources() {
     if (!this.selectedRemote)
     {

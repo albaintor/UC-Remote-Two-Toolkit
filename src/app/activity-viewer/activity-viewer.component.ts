@@ -22,6 +22,7 @@ import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
 import {RouterLink} from "@angular/router";
 import {ActivityGridComponent, GridItem} from "./activity-grid/activity-grid.component";
 import {ButtonModule} from "primeng/button";
+import {NgxJsonViewerModule} from "ngx-json-viewer";
 
 @Pipe({name: 'as', standalone: true, pure: true})
 export class AsPipe implements PipeTransform {
@@ -43,7 +44,8 @@ export class AsPipe implements PipeTransform {
     OverlayPanelModule,
     RouterLink,
     ActivityGridComponent,
-    ButtonModule
+    ButtonModule,
+    NgxJsonViewerModule
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',
@@ -69,6 +71,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   protected readonly JSON = JSON;
   gridSource: GridItem | undefined;
   grid: (ActivityPageCommand | null)[] = [];
+  showDump: boolean = false;
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
@@ -108,6 +111,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   view(activity: Activity): void {
     if (activity)
       this.activity = activity;
+    this.showDump = false;
     this.visible = true;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[0];
     this.grid = this.getGridItems();
@@ -250,5 +254,12 @@ export class ActivityViewerComponent implements AfterViewInit {
   gridItemClicked($event: GridItem) {
     this.messageService.add({severity:'info', summary: `${$event.index} clicked. TODO`, key: 'activity'});
     this.cdr.detectChanges();
+  }
+
+  copyToClipboard(data: any) {
+    navigator.clipboard.writeText(JSON.stringify(data)).then(r => {
+      this.messageService.add({severity:'info', summary: "Activity data copied to clipboard", key: 'activity'});
+      this.cdr.detectChanges();
+    });
   }
 }

@@ -84,10 +84,10 @@ export class RemoteBrowserComponent implements OnInit {
   protected readonly Math = Math;
   progressDetail = "";
   items: MenuItem[] = [
-    {label: 'Unused entities', command: () => this.checkOrphans(), icon: 'pi pi-share-alt'},
+    /*{label: 'Unused entities', command: () => this.checkOrphans(), icon: 'pi pi-share-alt'},
     {label: 'Activities unused entities', command: () => this.checkUnassigned(), icon: 'pi pi-search'},
     {label: 'Upload backup', command: () => this.uploadFile(), icon: 'pi pi-upload'},
-    {label: 'View backups', command: () => this.viewBackups(), icon: 'pi pi-folder-open'},
+    {label: 'View backups', command: () => this.viewBackups(), icon: 'pi pi-folder-open'},*/
     {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
     {label: 'Load Remote entities', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true},
     {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},

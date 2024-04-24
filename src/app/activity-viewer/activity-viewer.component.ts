@@ -21,6 +21,7 @@ import SVGInject from "@iconfu/svg-inject";
 import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
 import {RouterLink} from "@angular/router";
 import {ActivityGridComponent, GridItem} from "./activity-grid/activity-grid.component";
+import {ButtonModule} from "primeng/button";
 
 @Pipe({name: 'as', standalone: true, pure: true})
 export class AsPipe implements PipeTransform {
@@ -41,7 +42,8 @@ export class AsPipe implements PipeTransform {
     ChipModule,
     OverlayPanelModule,
     RouterLink,
-    ActivityGridComponent
+    ActivityGridComponent,
+    ButtonModule
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',
@@ -54,6 +56,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   currentPage: ActivityPage | undefined;
   @Input() activity: Activity | undefined;
   @Input() remote: Remote | undefined;
+  @Input() editMode = true;
   buttonsMap:{ [id: string]: string } = {};
   reversedButtonMap:{ [id: string]: string } = {};
   public Command!: Command;
@@ -65,6 +68,8 @@ export class ActivityViewerComponent implements AfterViewInit {
   svg: SVGElement | undefined;
   protected readonly JSON = JSON;
   gridSource: GridItem | undefined;
+  grid: (ActivityPageCommand | null)[] = [];
+
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
     this.server.getPictureRemoteMap().subscribe(buttonsMap => {
@@ -105,6 +110,7 @@ export class ActivityViewerComponent implements AfterViewInit {
       this.activity = activity;
     this.visible = true;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[0];
+    this.grid = this.getGridItems();
     console.log("View activity", this.activity);
     const buttons = this.svg?.getElementsByClassName("button");
     if (buttons) {
@@ -223,12 +229,26 @@ export class ActivityViewerComponent implements AfterViewInit {
   }
 
   gridDestinationSelected($event: GridItem) {
-    this.messageService.add({severity:'info', summary: `${this.gridSource?.index} moved to ${$event.index}`, key: 'activity'});
+    let sourceX = this.gridSource?.index! % this.currentPage?.grid.width!;
+    let sourceY = Math.floor(this.gridSource?.index! / this.currentPage?.grid.width!);
+    let destinationX = $event.index! % this.currentPage?.grid.width!;
+    let destinationY = Math.floor($event.index! / this.currentPage?.grid.width!);
+    if (this.gridSource?.item?.location)
+    {
+      console.log(`Source ${this.gridSource.item.location.x},${this.gridSource.item.location.y} => ${destinationX},${destinationY}`, this.currentPage?.items)
+      this.gridSource.item.location = {x: destinationX, y: destinationY};
+    }
+    if ($event.item?.location)
+    {
+      console.log(`Destination ${$event.item.location.x},${$event.item.location.y} => ${sourceX},${sourceY}`, this.currentPage?.items)
+      $event.item.location = {x: sourceX, y: sourceY};
+    }
+    // this.messageService.add({severity:'info', summary: `${this.gridSource?.index} (${sourceX},${sourceY}) moved to ${$event.index} (${destinationX},${destinationY})`, key: 'activity'});
     this.cdr.detectChanges();
   }
 
   gridItemClicked($event: GridItem) {
-    this.messageService.add({severity:'info', summary: `${$event.index} clicked`, key: 'activity'});
+    this.messageService.add({severity:'info', summary: `${$event.index} clicked. TODO`, key: 'activity'});
     this.cdr.detectChanges();
   }
 }

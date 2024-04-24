@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "RC2Tool": {
+    "R2Tool": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/rc2-tool",
+            "outputPath": "dist/r2-tool",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -61,22 +61,22 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "RC2Tool:build:production"
+              "buildTarget": "R2Tool:build:production"
             },
             "development": {
-              "buildTarget": "RC2Tool:build:development"
+              "buildTarget": "R2Tool:build:development"
             }
           },
           "defaultConfiguration": "development",
           "options": {
-            "buildTarget": "RC2Tool:build",
+            "buildTarget": "R2Tool:build",
             "proxyConfig": "src/proxy.conf.json"
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "RC2Tool:build"
+            "buildTarget": "R2Tool:build"
           }
         },
         "test": {

@@ -35,7 +35,7 @@
   <p-progressBar [value]="currentFile.progress"></p-progressBar>
 </ng-container>
 <app-remote-registration></app-remote-registration>
-<app-activity-viewer #activityeditor [remote]="selectedRemote"></app-activity-viewer>
+<app-activity-viewer #activityeditor [remote]="selectedRemote" [editMode]="false"></app-activity-viewer>
 <app-uploaded-files (configurationUpdated)="updateConfiguration()" [currentSource]="context?.source!"></app-uploaded-files>
 <input type="file" #fileUpload class="upload">
 Search entity : <p-autoComplete [(ngModel)]="entity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntity($event)"

@@ -21,10 +21,10 @@
 </p-overlayPanel>
 <p-toast key="activity"></p-toast>
 <p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">
-  <a [routerLink]="['/activity/edit', activity?.entity_id]">Edit this activity</a>
+  <p-button *ngIf="!editMode" label="Edit this activity" [routerLink]="['/activity/edit', activity?.entity_id]" severity="danger" icon="pi pi-pen" size="small"></p-button>
 <ng-container *ngIf="currentPage">
   <div class="grid-container" [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width)}">
-    <grid-button *ngFor="let item of getGridItems(); let index=index" [index]="index" [source]="gridSource" [item]="item"
+    <grid-button [editable]="editMode" *ngFor="let item of grid; let index=index" [index]="index" [source]="gridSource" [item]="item"
          (sourceSelected)="gridSourceSelected($event)" (destinationSelected)="gridDestinationSelected($event)"
         (itemClicked)="gridItemClicked($event)">
       <ng-container *ngIf="isStandardIcon(item?.icon)">

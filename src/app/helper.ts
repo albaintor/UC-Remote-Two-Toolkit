@@ -1,4 +1,4 @@
-import {Activity, Entity, EntityUsage, Profile, Command} from "./interfaces";
+import {Activity, Entity, EntityUsage, Profile, Command, ActivityButtonMapping} from "./interfaces";
 
 export class Helper
 {
@@ -66,5 +66,14 @@ export class Helper
       })
     })
     return entityUsage;
+  }
+
+  static compareButtons(button1: ActivityButtonMapping, button2: ActivityButtonMapping | undefined): boolean {
+    if (!button2) return false;
+    if (button1.short_press?.cmd_id != button2.short_press?.cmd_id ||
+      button1.short_press?.entity_id != button2.short_press?.entity_id) return false;
+    if (button1.long_press?.cmd_id != button2.long_press?.cmd_id ||
+      button1.long_press?.entity_id != button2.long_press?.entity_id) return false;
+    return true;
   }
 }

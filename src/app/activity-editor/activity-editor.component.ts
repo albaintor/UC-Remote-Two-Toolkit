@@ -9,13 +9,29 @@ import {ProgressBarModule} from "primeng/progressbar";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
-import {Activity, ActivityPage, ActivityPageCommand, Config, Context, Entity, Remote, RemoteMap} from "../interfaces";
+import {
+  Activity,
+  ActivityButtonMapping,
+  ActivityPage,
+  ActivityPageCommand,
+  Config,
+  Context,
+  Entity,
+  Remote,
+  RemoteMap
+} from "../interfaces";
 import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {MultiSelectModule} from "primeng/multiselect";
 import {CheckboxModule} from "primeng/checkbox";
 import {ButtonModule} from "primeng/button";
+import {Helper} from "../helper";
 
+interface Update
+{
+  api: string;
+  body: any;
+}
 
 @Component({
   selector: 'app-activity-editor',
@@ -56,6 +72,7 @@ export class ActivityEditorComponent implements OnInit {
     {label: 'View new activity', command: () => this.activityViewser?.view(this.updatedActivity!), icon: 'pi pi-folder-open'},
     {label: 'Reset mapping to original', command: () => this.updateActivity(), icon: 'pi pi-times'},
     {label: 'Clear mapping', command: () => this.clearMapping(), icon: 'pi pi-times'},
+    {label: 'Save activity to remote', command: () => this.buildUpdateData(), icon: 'pi pi-cloud-upload'},
   ]
   activity_list: Activity[] = [];
   entity_list: Entity[] = [];
@@ -68,6 +85,7 @@ export class ActivityEditorComponent implements OnInit {
   overwriteAssignedButtons = false;
   keepDefinedPositions = false;
   dump: any;
+  updateList: Update[] = [];
 
   @ViewChild(ActivityViewerComponent) activityViewser: ActivityViewerComponent | undefined;
   selectedEntity: Entity | undefined;
@@ -113,6 +131,29 @@ export class ActivityEditorComponent implements OnInit {
       this.updateActivity();
       this.cdr.detectChanges();
     }
+  }
+
+  buildUpdateData()
+  {
+    this.updateList = [];
+    this.updatedActivity?.options?.button_mapping?.forEach(button => {
+      const originalButton = this.activity?.options?.button_mapping?.
+        find(localButton=> localButton.button === button.button);
+      if (!Helper.compareButtons(button, originalButton))
+        this.updateList.push({api: `PATCH /activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
+        body: {
+          ...button
+        }})
+    });
+    this.updatedActivity?.options?.user_interface?.pages?.forEach(page => {
+      //TODO compare current / new pages
+      this.updateList.push({api: `PATCH /activities/${this.updatedActivity?.entity_id}/ui/pages/${page.page_id}`,
+        body: {
+          ...page
+        }})
+    })
+    this.dump = this.updateList;
+    this.cdr.detectChanges();
   }
 
   clearMapping()

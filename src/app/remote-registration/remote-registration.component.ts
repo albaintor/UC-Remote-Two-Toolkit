@@ -42,12 +42,17 @@ export class RemoteRegistrationComponent {
   constructor(private server: ServerService, private cdr: ChangeDetectorRef, private messageService: MessageService) {
   }
 
-  showDialog()
+  refresh()
   {
     this.server.getConfig().subscribe(config => {
       this.remotes = config.remotes ? config.remotes : [];
       this.cdr.detectChanges();
     })
+  }
+
+  showDialog()
+  {
+    this.refresh();
     this.visible = true;
     this.cdr.detectChanges();
   }
@@ -59,21 +64,22 @@ export class RemoteRegistrationComponent {
       port: this.port,
       user: this.username,
       token: this.token
-    }).subscribe({next: ((results) => {
+    }).subscribe({
+      next: ((results) => {
         this.messageService.add({severity: "success", summary: "Remote registered",
           detail: `Key ${results.api_key} valid to ${results.api_valid_to}`,
           key: "remote"});
         this.cdr.detectChanges();
-        this.server.getConfig().subscribe(config => {
-          this.remotes = config.remotes ? config.remotes : [];
-          this.cdr.detectChanges();
-        })
     }),
       error: ((error: any) => {
         console.error("Error registering remote", error);
         this.messageService.add({severity: "error", summary: "Error while registering remote", key: "remote"});
         this.cdr.detectChanges();
-    })})
+    }),
+      complete: () => {
+        this.refresh();
+        this.cdr.detectChanges();
+      }})
   }
 
   selectRemote(remote: Remote) {
@@ -84,7 +90,8 @@ export class RemoteRegistrationComponent {
   }
 
   deleteRemote(remote: any) {
-    this.server.unregisterRemote(remote).subscribe({next: ((results) => {
+    this.server.unregisterRemote(remote).subscribe({
+      next: ((results) => {
         this.messageService.add({severity: "success", summary: "Remote unregistered",
           key: "remote"});
         this.server.getConfig().subscribe(config => {
@@ -95,8 +102,12 @@ export class RemoteRegistrationComponent {
       }),
       error: ((error: any) => {
         console.error("Error unregistering remote", error);
-        this.messageService.add({severity: "error", summary: "Error while registering remote", key: "remote"});
+        this.messageService.add({severity: "error", summary: "Error while unregistering remote", key: "remote"});
         this.cdr.detectChanges();
-      })})
+      }),
+      complete: () => {
+        this.refresh();
+        this.cdr.detectChanges();
+    }})
   }
 }

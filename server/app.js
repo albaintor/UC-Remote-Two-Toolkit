@@ -224,12 +224,14 @@ app.delete('/api/config/remote/:address', async (req, res, next) => {
   const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
   try {
     await remote.unregister(remoteEntry.api_key_name);
-    configFile.remotes = configFile.remotes.filter(local_remote => remote.address !== local_remote.address);
-    writeConfigFile(configFile);
     res.status(200).json(address);
   } catch (error)
   {
     errorHandler(error, req, res, next);
+  }
+  finally {
+    configFile.remotes = configFile.remotes.filter(local_remote => remote.address !== local_remote.address);
+    writeConfigFile(configFile);
   }
 })
 

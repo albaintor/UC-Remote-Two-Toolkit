@@ -238,4 +238,37 @@ export class Remote
     return JSON.parse(res.body);
   }
 
+  async getProfiles()
+  {
+    let headers = this.getHeaders();
+    const options = {
+      headers: headers,
+    }
+    const url = this.getURL() + '/api/profiles';
+    let res = await got.get(url, options);
+    return JSON.parse(res.body);
+  }
+
+  async getProfilePages(profileId)
+  {
+    let headers = this.getHeaders();
+    const options = {
+      headers: headers,
+    }
+    const url = this.getURL() + `/api/profiles/${profileId}/pages`;
+    let res = await got.get(url, options);
+    return JSON.parse(res.body);
+  }
+
+  async getProfileGroups(profileId)
+  {
+    let headers = this.getHeaders();
+    const options = {
+      headers: headers,
+    }
+    const url = this.getURL() + `/api/profiles/${profileId}/groups`;
+    let res = await got.get(url, options);
+    return JSON.parse(res.body);
+  }
+
 }

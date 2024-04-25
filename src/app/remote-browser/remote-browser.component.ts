@@ -11,7 +11,7 @@ import {RemoteRegistrationComponent} from "../remote-registration/remote-registr
 import {MenuItem, MessageService, SharedModule} from "primeng/api";
 import {TableModule} from "primeng/table";
 import {UploadedFilesComponent} from "../uploaded-files/uploaded-files.component";
-import {Activity, Config, Context, EntitiesUsage, Entity, EntityUsage, Profiles, Remote} from "../interfaces";
+import {Activity, Config, Context, EntitiesUsage, Entity, EntityUsage, Profile, Profiles, Remote} from "../interfaces";
 import {ServerService} from "../server.service";
 import {catchError, forkJoin, from, map, mergeMap, Observable, of} from "rxjs";
 import {HttpErrorResponse, HttpEventType} from "@angular/common/http";
@@ -22,6 +22,7 @@ import {MenubarModule} from "primeng/menubar";
 import {ToastModule} from "primeng/toast";
 import {DropdownModule} from "primeng/dropdown";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
+import {Helper} from "../helper";
 
 interface FileProgress
 {
@@ -63,15 +64,13 @@ export class RemoteBrowserComponent implements OnInit {
   @ViewChild(UploadedFilesComponent) uploadedFilesComponent: UploadedFilesComponent | undefined;
   @ViewChild(RemoteRegistrationComponent) remoteComponent: RemoteRegistrationComponent | undefined;
 
-  activity_list: Activity[] = [];
-  entity_list: Entity[] = [];
+  activities: Activity[] = [];
+  entities: Entity[] = [];
   entity: Entity | undefined;
   suggestions: Entity[] = [];
-  usages: EntitiesUsage = {};
-  entityUsages: EntityUsage | undefined;
   hoverEntity: Entity | undefined;
   outputObject: any = null;
-  profiles: Profiles | undefined;
+  profiles: Profile[] = [];
   replace_entity: Entity | undefined;
 
   currentFile: FileProgress | undefined;
@@ -92,6 +91,7 @@ export class RemoteBrowserComponent implements OnInit {
     {label: 'Load Remote entities', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true},
     {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
   ]
+  entityUsages: EntityUsage | null | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
   }
@@ -105,12 +105,15 @@ export class RemoteBrowserComponent implements OnInit {
     })
     const entities = localStorage.getItem("entities");
     const activities = localStorage.getItem("activities");
+    const profiles = localStorage.getItem("profiles");
     if (entities || activities)
     {
-      if (activities) this.activity_list = JSON.parse(activities);
-      if (entities) this.entity_list = JSON.parse(entities);
-      this.server.setEntities(this.entity_list);
-      this.server.setActivities(this.activity_list);
+      if (activities) this.activities = JSON.parse(activities);
+      if (entities) this.entities = JSON.parse(entities);
+      if (profiles) this.profiles = JSON.parse(profiles);
+      this.server.setEntities(this.entities);
+      this.server.setActivities(this.activities);
+      this.server.setProfiles(this.profiles);
       this.context = {source:"Cache", type: "Remote", date: new Date()};
       this.messageService.add({severity: "info", summary: `Remote data loaded from cache`});
       this.cdr.detectChanges();
@@ -133,32 +136,17 @@ export class RemoteBrowserComponent implements OnInit {
     })
     this.server.getEntitiesFromBackup().subscribe(entities => {
       console.info("Entities", entities);
-      this.entity_list =[];
-      for (let entity_id in entities)
-      {
-        entities[entity_id].entity_id = entity_id;
-        this.entity_list.push(entities[entity_id]);
-      }
+      this.entities = entities;
       this.cdr.detectChanges();
     })
     this.server.getActivitiesFromBackup().subscribe(activities => {
       console.info("Activities", activities);
-      this.activity_list = [...activities];
-      for (let activity_id in activities)
-      {
-        activities[activity_id].entity_id = activity_id;
-        this.activity_list.push(activities[activity_id]);
-      }
+      this.activities = activities;
       this.cdr.detectChanges();
     })
-    this.server.getUsages().subscribe(results => {
-      console.info("Entities usages", results);
-      this.usages = results;
-      this.cdr.detectChanges();
-    })
-    this.server.getProfiles().subscribe(results => {
+    this.server.getProfilesFromBackup().subscribe(results => {
       console.info("Profiles", results);
-      this.profiles = results;
+      this.profiles = Object.values(results);
       this.cdr.detectChanges();
     })
 
@@ -178,18 +166,18 @@ export class RemoteBrowserComponent implements OnInit {
     this.cdr.detectChanges();
     const tasks: Observable<any>[] = [];
     tasks.push(this.server.getRemoteEntities(this.selectedRemote).pipe(map((entities) => {
-      this.entity_list = entities;
+      this.entities = entities;
       // this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
       //   detail: `${this.entity_list.length} entities extracted`});
       this.cdr.detectChanges();
       return entities;
     })));
     tasks.push(this.server.getRemoteActivities(this.selectedRemote!).pipe(mergeMap((entities) => {
-      this.activity_list = entities;
+      this.activities = entities;
       this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
-        detail: `${this.activity_list.length} activities extracted. Extracting details now...`});
+        detail: `${this.activities.length} activities extracted. Extracting details now...`});
       this.cdr.detectChanges();
-      return from(this.activity_list).pipe(mergeMap(activity => {
+      return from(this.activities).pipe(mergeMap(activity => {
         return this.server.getRemoteActivity(this.selectedRemote!, activity.entity_id!).pipe(map(activityDetails => {
           this.progressDetail = activity.name;
           const name = activity.name;
@@ -197,23 +185,29 @@ export class RemoteBrowserComponent implements OnInit {
           activity.name = name;
           if ((activityDetails as any).options?.included_entities)
             (activity as any).entities = (activityDetails as any).options.included_entities;
-          this.remoteProgress += 100/this.activity_list.length;
+          this.remoteProgress += 100/this.activities.length;
           this.cdr.detectChanges();
           console.log("Activity", activity);
           return activity;
         }))
       }))
     })));
+    tasks.push(this.server.getRemoteProfiles(this.selectedRemote).pipe(map(profiles => {
+      this.profiles = profiles;
+      console.log("Profiles", profiles);
+      return profiles;
+    })))
 
     forkJoin(tasks).subscribe({next: (results) => {
         this.messageService.add({
           severity: "success", summary: "Remote data loaded",
-          detail: `${this.entity_list.length} entities and ${this.activity_list.length} activities extracted.`
+          detail: `${this.entities.length} entities and ${this.activities.length} activities extracted.`
         });
         this.context = {source: `${this.selectedRemote?.remote_name} (${this.selectedRemote?.address})`,
           date: new Date(), type: "Remote"}
-        localStorage.setItem("entities", JSON.stringify(this.entity_list));
-        localStorage.setItem("activities", JSON.stringify(this.activity_list));
+        localStorage.setItem("entities", JSON.stringify(this.entities));
+        localStorage.setItem("activities", JSON.stringify(this.activities));
+        localStorage.setItem("profiles", JSON.stringify(this.profiles));
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -228,12 +222,6 @@ export class RemoteBrowserComponent implements OnInit {
         this.cdr.detectChanges();
       }})
   }
-
-  buildEntityUsage()
-  {
-
-  }
-
 
   updateRemote(config: Config): void
   {
@@ -266,40 +254,14 @@ export class RemoteBrowserComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  checkUnassigned(): void
-  {
-    const results: any = {};
-    for (let entity_id in this.usages)
-    {
-      const entity = this.usages[entity_id];
-      if (entity.activity_entities.length > 0 &&
-        entity.activity_buttons.length == 0 && entity.activity_interface.length == 0
-      )
-      {
-        results[entity_id] = entity;
-      }
-    }
-    this.outputObject = results;
-    this.messageService.add({ severity: 'success', summary: 'Unassigned extracted'});
-    this.cdr.detectChanges();
-  }
-  checkOrphans(): void
-  {
-    this.server.getOrphans().subscribe(results => {
-      this.outputObject = results;
-      this.messageService.add({ severity: 'success', summary: 'Orphans extracted'});
-      this.cdr.detectChanges();
-    })
-  }
-
   showEntity(entityId: string)
   {
-    this.hoverEntity = this.entity_list.find(entity => entity.entity_id === entityId);
+    this.hoverEntity = this.entities.find(entity => entity.entity_id === entityId);
   }
 
   getEntityName(entityId: string): string
   {
-    const entity = this.entity_list.find(entity => entity.entity_id === entityId);
+    const entity = this.entities.find(entity => entity.entity_id === entityId);
     if (entity?.name)
       return entity.name;
     return `Unknown ${entityId}`;
@@ -307,12 +269,16 @@ export class RemoteBrowserComponent implements OnInit {
 
   selectEntity(entity: Entity | string | undefined) {
     if (!entity) return;
-    if (typeof entity === 'string')
-      this.entity = this.entity_list.find(entity => entity.entity_id === (entity as any));
+    if (typeof entity === 'string') {
+      const entityId = (entity as any) as string;
+      this.entity = this.entities.find(entity => entity.entity_id === entityId);
+    }
     else
       this.entity = entity as Entity;
     if (!this.entity) return;
-    this.entityUsages = this.usages[this.entity.entity_id!];
+    this.entityUsages = Helper.fingEntityUsage(this.entity.entity_id!, this.entities, this.activities, this.profiles);
+    console.log("Usage of entity", this.entity, this.entityUsages);
+    // this.entityUsages = this.usages[this.entity.entity_id!]; // TODO
     this.cdr.detectChanges();
   }
 
@@ -320,7 +286,7 @@ export class RemoteBrowserComponent implements OnInit {
     if (!$event.query || $event.query.length == 0)
     {
       console.log("Search entity : whole list");
-      this.suggestions = [...this.entity_list.sort((a, b) => {
+      this.suggestions = [...this.entities.sort((a, b) => {
         return (a.name ? a.name : "").localeCompare(b.name ? b.name : "");
       })];
       this.cdr.detectChanges();
@@ -381,7 +347,7 @@ export class RemoteBrowserComponent implements OnInit {
 
   replaceEntity(entity_id: string, new_entity_id: string): any
   {
-    const entity = this.entity_list.find(entity => entity.entity_id === entity_id);
+    /*const entity = this.entity_list.find(entity => entity.entity_id === entity_id);
     const entity_usage = this.usages[entity_id];
     if (!entity || !entity_usage) return;
     const modifications: any = {};
@@ -436,7 +402,7 @@ export class RemoteBrowserComponent implements OnInit {
 
     this.outputObject = modifications;
     this.cdr.detectChanges();
-    return modifications;
+    return modifications;*/
   }
 
   uploadSelectedFile(file: FileProgress)

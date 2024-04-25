@@ -92,13 +92,13 @@ export interface EntitiesUsage
   [entity_id: string] : EntityUsage;
 }
 
-export interface ActivityEntity
+export interface ActivityEntityUsage
 {
   activity_id: string;
   name: string;
 }
 
-export interface ActivityInterface
+export interface ActivityInterfaceUsage
 {
   activity_id: string;
   name: string;
@@ -109,12 +109,11 @@ export interface ActivityInterface
 
 export interface EntityUsage
 {
-  name: string;
-  type: string;
-  activity_entities: ActivityEntity[];
-  activity_buttons: BackupActivityButton[];
-  activity_interface: ActivityInterface[];
-  activity_sequences: Sequence[];
+  entity: Entity;
+  activity_entities: ActivityEntityUsage[];
+  activity_buttons: ActivityButtonUsage[];
+  activity_interface: ActivityInterfaceUsage[];
+  activity_sequences: ActivitySequenceUsage[];
   pages: Page[];
 }
 
@@ -123,23 +122,39 @@ export interface Profiles
   [profile_id: string] : Profile
 }
 
+export interface ProfileGroup
+{
+  group_id: string;
+  profile_id: string;
+  name: string;
+  icon?: string;
+  entities: string[];
+}
+
 export interface Profile
 {
+  profile_id: string;
   name: string;
-  filename : string;
-  foldername: string;
   pages: Page[];
+  filename?: string;
+  foldername?: string;
+  groups?: ProfileGroup[];
 }
 
 export interface Page {
-  profile_id: string;
-  filename: string;
-  foldername: string;
   page_id: string;
   name: string;
+  image?: string;
+  position: number;
+  items?:[
+    {
+      entity_id: string;
+      position: number;
+    }
+  ]
 }
 
-export interface BackupActivityButton
+export interface ActivityButtonUsage
 {
   activity_id: string;
   name: string;
@@ -188,11 +203,10 @@ export interface ActivityPage
   items: ActivityPageCommand[];
 }
 
-export interface Sequence {
+export interface ActivitySequenceUsage {
   activity_id: string;
   sequence_type: string;
   cmd_id: string;
-  entity_id: string;
 }
 
 
@@ -211,7 +225,7 @@ export interface ActivitySequence
 
 export interface ActivityOption
 {
-  sequences?:{[type: string]: ActivitySequence};
+  sequences?:{[type: string]: ActivitySequence[]};
   included_entities?:Entity[];
   activity_group?: any;
   button_mapping?:ActivityButtonMapping[];
@@ -232,6 +246,6 @@ export interface ActivityBackup {
   entities: Entity[];
   buttons: Button[];
   interface: ActivityPage[];
-  sequences: Sequence[];
+  sequences: ActivitySequenceUsage[];
   options?: ActivityOption;
 }

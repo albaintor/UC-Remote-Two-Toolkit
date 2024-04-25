@@ -28,7 +28,7 @@
   <h4>Current source : {{context.source}} ({{context.date | date:'dd MMM yyyy \'at\' HH:mm'}})</h4>
 </ng-container>&nbsp;
 <div style="float: right">
-  <p-button label="Copy activities" (onClick)="copyToClipboard(activity_list)" icon="pi pi-copy" size="small"></p-button>&nbsp;
+  <p-button label="Copy activities" (onClick)="copyToClipboard(activities)" icon="pi pi-copy" size="small"></p-button>&nbsp;
   <p-button label="Clear cache" (onClick)="clearCache()" severity="danger" icon="pi pi-trash" size="small"></p-button>
 </div>
 
@@ -94,7 +94,7 @@ Replace by entity : <p-autoComplete [(ngModel)]="replace_entity" [dropdown]="tru
   <!--  </p-table>-->
 </p-overlayPanel>
 <h2>Activities</h2>
-<p-table [value]="activity_list" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+<p-table [value]="activities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
          dataKey="entity_id">
   <ng-template pTemplate="header">
     <tr>
@@ -120,7 +120,7 @@ Replace by entity : <p-autoComplete [(ngModel)]="replace_entity" [dropdown]="tru
   </ng-template>
 </p-table>
 <h2>Entities</h2>
-<p-table [value]="entity_list" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+<p-table [value]="entities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
          dataKey="entity_id" columnResizeMode="expand">
   <ng-template pTemplate="header">
     <tr>

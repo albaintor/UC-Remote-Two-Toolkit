@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
-import {map, Observable, Subject} from "rxjs";
+import {forkJoin, from, map, mergeMap, Observable, Subject} from "rxjs";
 import {
   Activity,
   Config,
   Context,
   EntitiesUsage,
   Entity,
-  EntityUsage,
+  EntityUsage, Page, Profile, ProfileGroup,
   Profiles,
   Remote, RemoteMap
 } from "./interfaces";
+import {compileResults} from "@angular/compiler-cli/src/ngtsc/annotations/common";
 
 @Injectable({
   providedIn: 'root'
@@ -23,8 +24,10 @@ export class ServerService {
   config: Config | undefined;
   private entities: Entity[] = [];
   private activities: Activity[] = [];
+  private profiles: Profile[] = [];
   entities$ = new Subject<Entity[]>();
   activities$ = new Subject<Activity[]>();
+  profiles$: Subject<Profile[]> = new Subject<Profile[]>();
 
   constructor(private http: HttpClient) { }
 
@@ -58,6 +61,11 @@ export class ServerService {
     return this.activities;
   }
 
+  getProfiles(): Profile[]
+  {
+    return this.profiles;
+  }
+
   setEntities(entities: Entity[]) : void {
     this.entities = entities;
     this.entities$.next(entities);
@@ -66,6 +74,11 @@ export class ServerService {
   setActivities(activities: Activity[]) : void {
     this.activities = activities;
     this.activities$.next(activities);
+  }
+
+  setProfiles(profiles: Profile[]) : void {
+    this.profiles = profiles;
+    this.profiles$.next(profiles);
   }
 
   getPictureRemoteMap(): Observable<{ [id: string]: string }>
@@ -151,6 +164,37 @@ export class ServerService {
     }))
   }
 
+
+  getRemoteProfiles(remote: Remote): Observable<Profile[]>
+  {
+    const profiles: Profile[] = [];
+    let obs = this.http.get<Profile[]>(`/api/remote/${remote.address}/profiles`).pipe(
+      mergeMap(profiles => {
+      return from(profiles);
+    }),
+      mergeMap(profile => {
+        return forkJoin([
+          this.http.get<Page[]>(`/api/remote/${remote.address}/profiles/${profile.profile_id}/pages`).pipe(map(pages => {
+            profile.pages = pages;
+          })),
+          this.http.get<ProfileGroup[]>(`/api/remote/${remote.address}/profiles/${profile.profile_id}/groups`).pipe(map(groups => {
+            profile.groups = groups;
+          })),
+        ]).pipe(map(groups => {
+          return profile;
+        }))
+      }),
+      map(profileData => {
+        profiles.push(profileData);
+        return profileData;
+      }))
+    return forkJoin([obs]).pipe(map(results => {
+      this.profiles = profiles;
+      this.profiles$.next(profiles);
+      return results;
+    }))
+  }
+
   registerRemote(remote: Remote): Observable<Remote>
   {
     return this.http.post<any>('/api/config/remote', remote).pipe(map(results => {
@@ -165,7 +209,7 @@ export class ServerService {
     }))
   }
 
-  remoteGet(remote: Remote, url: string,
+  /*remoteGet(remote: Remote, url: string,
             params?:{[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}): Observable<any>
   {
     const httpOptions: {headers: HttpHeaders, params?: HttpParams} = ServerService.getHttpOptions(remote, url);
@@ -207,7 +251,7 @@ export class ServerService {
     return this.http.delete<any>('/server/api',httpOptions).pipe(map(results => {
       return results;
     }))
-  }
+  }*/
 
   getContext(): Observable<Context>
   {
@@ -237,29 +281,16 @@ export class ServerService {
     }))
   }
 
-  getProfiles(): Observable<Profiles>
+  getProfilesFromBackup(): Observable<Profiles>
   {
     return this.http.get<Profiles>('/api/profiles').pipe(map(results => {
       return results;
     }))
   }
 
-  getOrphans(): Observable<any>
-  {
-    return this.http.get<any>('/api/orphans').pipe(map(results => {
-      return results;
-    }))
-  }
   getEntity(query: string): Observable<Entity[]>
   {
     return this.http.get<Entity[]>('/api/entity/'+query).pipe(map(results => {
-      return results;
-    }))
-  }
-
-  getUsages(): Observable<EntitiesUsage>
-  {
-    return this.http.get<EntitiesUsage>('/api/entities/usage').pipe(map(results => {
       return results;
     }))
   }
@@ -291,6 +322,4 @@ export class ServerService {
       observe: 'events'
     });
   }
-
-
 }

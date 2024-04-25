@@ -333,6 +333,62 @@ app.get('/api/remote/:address/resources/:type/:id', async (req, res, next) => {
   }
 })
 
+app.get('/api/remote/:address/profiles', async (req, res, next) => {
+  const address = req.params.address;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getProfiles());
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
+app.get('/api/remote/:address/profiles/:profileid/pages', async (req, res, next) => {
+  const address = req.params.address;
+  const profileId = req.params.profileid;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getProfilePages(profileId));
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
+app.get('/api/remote/:address/profiles/:profileid/groups', async (req, res, next) => {
+  const address = req.params.address;
+  const profileId = req.params.profileid;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getProfileGroups(profileId));
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
 app.post('/upload',upload.single('file'),(req,res)=>{
   console.log(req.file, req.body.name);
   res.status(200).json(req.file.filename)
@@ -429,22 +485,6 @@ app.get('/api/context', (req, res, next) => {
   }
 })
 
-app.get('/api/orphans', (req, res, next) => {
-  try {
-    res.send(rc2Model.getOrphans()).end();
-  } catch(error) {
-    next(error);
-  }
-})
-
-app.get('/api/entities/usage', (req, res, next) => {
-  try {
-    res.send(rc2Model.entities_usage).end();
-  } catch(error) {
-    next(error);
-  }
-})
-
 app.get('/api/entities', (req, res, next) => {
   try {
     res.send(Array.from(rc2Model.entities_catalog.values())).end();
@@ -456,14 +496,6 @@ app.get('/api/entities', (req, res, next) => {
 app.get('/api/entity/:entity', (req, res, next) => {
   try {
     res.send(rc2Model.getEntity(req.params.entity)).end();
-  } catch(error) {
-    next(error);
-  }
-})
-
-app.get('/api/activities_entities', (req, res, next) => {
-  try {
-    res.send(rc2Model.activities_entities).end();
   } catch(error) {
     next(error);
   }

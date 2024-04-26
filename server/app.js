@@ -35,7 +35,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
-app.use(express.static('public'))
+app.use(express.static('public/browser'))
 
 // app.use('/', indexRouter);
 // app.use('/users', usersRouter);
@@ -588,7 +588,6 @@ app.listen(LISTEN_PORT, function () {
 });
 
 
-
 function errorHandler(error, req, res, next) {
   if (error.response instanceof TypeError) {
     return res.status(400).json(error.name + ": " + error.message);
@@ -605,23 +604,8 @@ function errorHandler(error, req, res, next) {
     console.log('Erreur serveur réponse', message);
     if (error.response.body)
     {
-      // const httpError = createHttpError(500, error, {
-      //   headers: {
-      //     "X-Custom-Header": "Value",
-      //   }
-      // });
-      // return res.status(error.response.statusCode).send(error.response.body);
-      // next(error);
       const httpError = createHttpError(error.response.statusCode, error.response.body, {headers: error.headers});
       return next(httpError);
-      // return res.writeHead(error.response.statusCode, error.response.message).end(error);
-      // return res.send(httpError)
-      // return res.status(error.response.statusCode).send({
-      //   error: true,
-      //   message: error
-      // })
-      // return res.send(error);
-      // return res.status(error.response.statusCode).json(error)
     }
     else
       return res.status(error.response.statusCode).json(message);

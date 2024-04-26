@@ -371,4 +371,125 @@
       }
     ]
   }
-}]
+},
+  {
+    "entity_type": "remote",
+    "buttons":[
+      {
+        "button": "BACK",
+        "cmd_id": "BACK",
+        "simple_command": true
+      },
+      {
+        "button": "POWER",
+        "cmd_id": "POWER_OFF",
+        "simple_command": true,
+        "disabled": true
+      },
+      {
+        "button": "VOLUME_UP",
+        "cmd_id": "VOLUME_UP",
+        "simple_command": true
+      },
+      {
+        "button": "VOLUME_DOWN",
+        "cmd_id": "VOLUME_DOWN",
+        "simple_command": true
+      },
+      {
+        "button": "MUTE",
+        "cmd_id": "MUTE",
+        "simple_command": true
+      },
+      {
+        "button": "PLAY",
+        "cmd_id": "PLAY",
+        "simple_command": true
+      },
+      {
+        "button": "PLAY",
+        "cmd_id": "PLAY_PAUSE",
+        "simple_command": true
+      },
+      {
+        "button": "NEXT",
+        "cmd_id": "NEXT",
+        "simple_command": true
+      },
+      {
+        "button": "PREV",
+        "cmd_id": "PREV",
+        "simple_command": true
+      },
+      {
+        "button": "DPAD_UP",
+        "cmd_id": "CURSOR_UP",
+        "simple_command": true
+      },
+      {
+        "button": "DPAD_DOWN",
+        "cmd_id": "CURSOR_DOWN",
+        "simple_command": true
+      },
+      {
+        "button": "DPAD_LEFT",
+        "cmd_id": "CURSOR_LEFT",
+        "simple_command": true
+      },
+      {
+        "button": "DPAD_RIGHT",
+        "cmd_id": "CURSOR_RIGHT",
+        "simple_command": true
+      },
+      {
+        "button": "DPAD_MIDDLE",
+        "cmd_id": "CURSOR_CENTER",
+        "simple_command": true
+      },
+      {
+        "button": "HOME",
+        "cmd_id": "HOME",
+        "simple_command": true
+      },
+      {
+        "button": "HOME",
+        "cmd_id": "MENU",
+        "simple_command": true
+      },
+      {
+        "button": "RED",
+        "cmd_id": "RED",
+        "simple_command": true,
+        "disabled": true
+      },
+      {
+        "button": "GREEN",
+        "cmd_id": "GREEN",
+        "simple_command": true,
+        "disabled": true
+      },
+      {
+        "button": "BLUE",
+        "cmd_id": "BLUE",
+        "simple_command": true,
+        "disabled": true
+      },
+      {
+        "button": "YELLOW",
+        "cmd_id": "YELLOW",
+        "simple_command": true,
+        "disabled": true
+      },
+      {
+        "button": "CHANNEL_UP",
+        "cmd_id": "CHANNEL_UP",
+        "simple_command": true
+      },
+      {
+        "button": "CHANNEL_DOWN",
+        "cmd_id": "CHANNEL_DOWN",
+        "simple_command": true
+      }
+    ]
+  }
+]

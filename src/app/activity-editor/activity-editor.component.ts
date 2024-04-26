@@ -11,14 +11,15 @@ import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
 import {
   Activity,
-  ActivityButtonMapping,
-  ActivityPage,
   ActivityPageCommand,
+  Command,
   Config,
-  Context,
   Entity,
+  OperationStatus,
   Remote,
-  RemoteMap
+  RemoteMap,
+  RemoteOperation,
+  UIPage
 } from "../interfaces";
 import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
@@ -26,12 +27,8 @@ import {MultiSelectModule} from "primeng/multiselect";
 import {CheckboxModule} from "primeng/checkbox";
 import {ButtonModule} from "primeng/button";
 import {Helper} from "../helper";
-
-interface Update
-{
-  api: string;
-  body: any;
-}
+import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
+import {RemoteOperationsComponent} from "./remote-operations/remote-operations.component";
 
 @Component({
   selector: 'app-activity-editor',
@@ -50,7 +47,9 @@ interface Update
     NgxJsonViewerModule,
     MultiSelectModule,
     CheckboxModule,
-    ButtonModule
+    ButtonModule,
+    AutoCompleteModule,
+    RemoteOperationsComponent
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',
@@ -75,7 +74,7 @@ export class ActivityEditorComponent implements OnInit {
     {label: 'Save activity to remote', command: () => this.buildUpdateData(), icon: 'pi pi-cloud-upload'},
   ]
   activity_list: Activity[] = [];
-  entity_list: Entity[] = [];
+  entities: Entity[] = [];
   templates: RemoteMap[] = [];
   activity: Activity | undefined;
   updatedActivity: Activity | undefined;
@@ -85,10 +84,15 @@ export class ActivityEditorComponent implements OnInit {
   overwriteAssignedButtons = false;
   keepDefinedPositions = false;
   dump: any;
-  updateList: Update[] = [];
+  remoteOperations: RemoteOperation[] = [];
+  entity: Entity | undefined;
+  newEntity: Entity | undefined;
 
   @ViewChild(ActivityViewerComponent) activityViewser: ActivityViewerComponent | undefined;
+  @ViewChild(RemoteOperationsComponent) operations: RemoteOperationsComponent | undefined;
+
   selectedEntity: Entity | undefined;
+  suggestions: Entity[] = [];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private activatedRoute: ActivatedRoute) {
@@ -123,8 +127,8 @@ export class ActivityEditorComponent implements OnInit {
     if (entities || activities)
     {
       if (activities) this.activity_list = JSON.parse(activities);
-      if (entities) this.entity_list = JSON.parse(entities);
-      this.server.setEntities(this.entity_list);
+      if (entities) this.entities = JSON.parse(entities);
+      this.server.setEntities(this.entities);
       this.server.setActivities(this.activity_list);
       // this.context = {source:"Cache", type: "Remote", date: new Date()};
       // this.messageService.add({severity: "info", summary: `Remote data loaded from cache`});
@@ -135,24 +139,31 @@ export class ActivityEditorComponent implements OnInit {
 
   buildUpdateData()
   {
-    this.updateList = [];
+    this.remoteOperations = [];
     this.updatedActivity?.options?.button_mapping?.forEach(button => {
       const originalButton = this.activity?.options?.button_mapping?.
         find(localButton=> localButton.button === button.button);
       if (!Helper.compareButtons(button, originalButton))
-        this.updateList.push({api: `PATCH /activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
+        this.remoteOperations.push({method: "PATCH", api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
         body: {
           ...button
-        }})
+        }, status: OperationStatus.Todo})
     });
     this.updatedActivity?.options?.user_interface?.pages?.forEach(page => {
       //TODO compare current / new pages
-      this.updateList.push({api: `PATCH /activities/${this.updatedActivity?.entity_id}/ui/pages/${page.page_id}`,
+      let api = `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`;
+      let method: "PUT" | "POST" | "DELETE" | "PATCH" = "POST";
+      if (page.page_id) {
+        api = `/api/activities/${this.updatedActivity?.entity_id}/ui/pages/${page.page_id}`;
+        method = "PATCH";
+      }
+
+      this.remoteOperations.push({method , api,
         body: {
           ...page
-        }})
+        }, status: OperationStatus.Todo})
     })
-    this.dump = this.updateList;
+    this.dump = this.remoteOperations;
     this.cdr.detectChanges();
   }
 
@@ -169,12 +180,23 @@ export class ActivityEditorComponent implements OnInit {
     this.activity = this.activity_list.find(activity => activity.entity_id === this.activity_id);
     if (this.activity)
     {
-      this.updatedActivity = {name: this.activity.name,
+      this.updatedActivity = {
+        entity_id: this.activity.entity_id,
+        name: this.activity.name,
         options: {//activity_group: this.activity.options?.activity_group, sequences: this.activity.options?.sequences,
-          //included_entities: this.activity.options?.included_entities,
+          included_entities: [],
           button_mapping: [],
           user_interface: {pages: []}}};
-
+      if (this.activity.options?.included_entities)
+        this.updatedActivity.options!.included_entities = [...this.activity.options?.included_entities!];
+      ['on', 'off'].forEach(type => {
+        if (!this.updatedActivity!.options!.sequences)
+          this.updatedActivity!.options!.sequences = {};
+        if (this.activity!.options?.sequences?.[type])
+        {
+          this.updatedActivity!.options!.sequences![type] = [...this.activity!.options!.sequences[type]!]
+        }
+      });
       if (this.activity.options?.button_mapping)
         this.updatedActivity!.options!.button_mapping! = JSON.parse(JSON.stringify(this.activity.options.button_mapping));
       if (this.activity.options?.user_interface?.pages)
@@ -187,7 +209,7 @@ export class ActivityEditorComponent implements OnInit {
   {
     if (!this.selectedEntity || !this.activity) return;
     const template = this.templates.find(template => template.entity_type === this.selectedEntity?.entity_type!);
-    const entity = this.entity_list.find(entity => entity.entity_id === this.selectedEntity?.entity_id);
+    const entity = this.entities.find(entity => entity.entity_id === this.selectedEntity?.entity_id);
     if (!entity)
     {
       this.messageService.add({severity: "error", summary: `This entity ${this.selectedEntity.name} (${this.selectedEntity.entity_id}) is not referenced`})
@@ -202,13 +224,14 @@ export class ActivityEditorComponent implements OnInit {
       const existing_assignment = updatedActivity?.options?.button_mapping?.find(existing_button =>
         existing_button.button === button.button
         && ((existing_button.long_press && button.long_press === true) || existing_button.short_press));
-      if (!selectedFeatures.includes(button.feature)) return;
-      if (!entity.features?.includes(button.feature))
+      if (button.feature && !selectedFeatures.includes(button.feature)) return;
+      if (button.simple_command === true && !this.selectedEntity?.options?.simple_commands?.includes(button.cmd_id)) return;
+
+      if (button.feature && !entity.features?.includes(button.feature))
       {
         console.log("Feature unavailable for this entity", button.feature);
         return;
       }
-
       if (existing_assignment && !this.overwriteAssignedButtons)
       {
         console.debug("Button already assigned, override not selected : skip", button.button, button.long_press);
@@ -244,7 +267,7 @@ export class ActivityEditorComponent implements OnInit {
           return;
         }
       }
-      let targetPage: ActivityPage = {name: `Page ${updatedActivity!.options.user_interface.pages!.length+1}`,
+      let targetPage: UIPage = {name: `Page ${updatedActivity!.options.user_interface.pages!.length+1}`,
         grid: {...page.grid}, items: []};
       if (page.name) targetPage.name = page.name;
       updatedActivity!.options.user_interface.pages!.push(targetPage);
@@ -271,11 +294,12 @@ export class ActivityEditorComponent implements OnInit {
         targetPage.items.push(command);
       })
     })
+    this.operations!.visible = true;
     this.dump = updatedActivity as any;//JSON.stringify(updatedActivity, null, 2);
     this.cdr.detectChanges();
   }
 
-  getItemLocation(page: ActivityPage,
+  getItemLocation(page: UIPage,
                   size:{width:number, height:number},
                   location:({x: number, y: number} | undefined) | null)
   {
@@ -331,7 +355,7 @@ export class ActivityEditorComponent implements OnInit {
   {
     const features = new Set<string>();
     template.buttons?.forEach(button => {
-      if (includeDisabled || button.disabled !== true)
+      if (button.feature && (includeDisabled || button.disabled !== true))
         features.add(button.feature)
     });
     template.user_interface?.pages.forEach(page => {
@@ -371,7 +395,73 @@ export class ActivityEditorComponent implements OnInit {
   }
 
   getEntities(entity_type: string) {
-    return this.entity_list.filter(entity => entity.entity_type === entity_type)
+    return this.entities.filter(entity => entity.entity_type === entity_type)
       .sort((a,b) => a.name!?.localeCompare(b.name!));
+  }
+
+  replaceEntity(entity_id: string, new_entity_id: string): any
+  {
+    const entity = this.entities.find(entity => entity.entity_id === new_entity_id);
+    if (!this.updatedActivity || !entity) return;
+    if (!this.updatedActivity.options?.included_entities?.find(entity => entity.entity_id === new_entity_id))
+      this.updatedActivity?.options!.included_entities!.push(entity);
+    this.updatedActivity?.options?.button_mapping?.forEach(button => {
+      if (button.long_press?.entity_id === entity_id)
+        button.long_press.entity_id = new_entity_id;
+      if (button.short_press?.entity_id === entity_id)
+        button.short_press.entity_id = new_entity_id;
+    })
+    this.updatedActivity?.options?.user_interface?.pages?.forEach(page => {
+      page?.items?.forEach(item => {
+        if (item.command && typeof item.command === "string" && (item.command as string) === entity_id)
+          item.command = new_entity_id;
+        else if (item.command && (item.command as Command)?.entity_id === entity_id)
+          (item.command as Command).entity_id = new_entity_id;
+        if (item.media_player_id === entity_id)
+          item.media_player_id = new_entity_id;
+      })
+    });
+    ['on', 'off'].forEach(type => {
+      this.updatedActivity?.options?.sequences?.[type]?.forEach(sequence => {
+        if (sequence.command?.entity_id === entity_id)
+          sequence.command!.entity_id = new_entity_id;
+      })
+    })
+    this.messageService.add({severity: "success", summary: "Entity replaced"});
+    this.dump = this.updatedActivity as any;//JSON.stringify(updatedActivity, null, 2);
+    this.cdr.detectChanges();
+  }
+
+  protected readonly Helper = Helper;
+
+  searchEntity($event: AutoCompleteCompleteEvent) {
+    if (!$event.query || $event.query.length == 0)
+    {
+      console.log("Search entity : whole list");
+      this.suggestions = [...this.entities.sort((a, b) => {
+        return (a.name ? a.name : "").localeCompare(b.name ? b.name : "");
+      })];
+      this.cdr.detectChanges();
+      return;
+    }
+    this.suggestions = Helper.queryEntity($event.query, this.entities);
+    this.cdr.detectChanges();
+  }
+
+  searchActivityEntity($event: AutoCompleteCompleteEvent) {
+    if (!this.updatedActivity?.options?.included_entities) return;
+    if (!$event.query || $event.query.length == 0)
+    {
+      console.log("Search entity : whole list");
+      const activityEntities = this.entities.filter(entity =>
+        this.updatedActivity?.options?.included_entities?.find(activityEntity => activityEntity.entity_id === entity.entity_id));
+      this.suggestions = activityEntities.sort((a, b) => {
+        return (a.name ? a.name : "").localeCompare(b.name ? b.name : "");
+      });
+      this.cdr.detectChanges();
+      return;
+    }
+    this.suggestions = Helper.queryEntity($event.query, [...this.updatedActivity!.options!.included_entities!]);
+    this.cdr.detectChanges();
   }
 }

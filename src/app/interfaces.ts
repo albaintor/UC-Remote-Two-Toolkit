@@ -1,9 +1,25 @@
+export enum OperationStatus
+{
+  Todo ,
+  Done ,
+  Error,
+  Cancelled
+}
+
+export interface RemoteOperation
+{
+  method: "PUT" | "POST" | "DELETE" | "PATCH";
+  api: string;
+  body: any;
+  status?: OperationStatus;
+}
 
 export interface RemoteButtonMap
 {
   button: string;
   cmd_id: string;
   feature: string;
+  simple_command?: boolean;
   disabled?: boolean;
   long_press?: boolean;
   params?: any;
@@ -83,6 +99,13 @@ export interface Entity
   entity_type: string;
   integration?: string;
   features?:string[];
+  options?: {
+    button_mapping?:ButtonMapping[];
+    user_interface?: {
+      pages?: UIPage[];
+    }
+    simple_commands?: string[];
+  }
   foldername?: string;
   filename?: string;
 }
@@ -169,7 +192,7 @@ export interface Button
   short_press: boolean;
 }
 
-export interface ActivityButtonMapping
+export interface ButtonMapping
 {
   button: string;
   short_press?: Command;
@@ -192,7 +215,7 @@ export interface ActivityPageCommand
     height: number;
   }
 }
-export interface ActivityPage
+export interface UIPage
 {
   page_id?: string;
   name: string;
@@ -228,9 +251,9 @@ export interface ActivityOption
   sequences?:{[type: string]: ActivitySequence[]};
   included_entities?:Entity[];
   activity_group?: any;
-  button_mapping?:ActivityButtonMapping[];
+  button_mapping?:ButtonMapping[];
   user_interface?: {
-    pages?: ActivityPage[];
+    pages?: UIPage[];
   }
 }
 
@@ -245,7 +268,7 @@ export interface ActivityBackup {
   name: string;
   entities: Entity[];
   buttons: Button[];
-  interface: ActivityPage[];
+  interface: UIPage[];
   sequences: ActivitySequenceUsage[];
   options?: ActivityOption;
 }

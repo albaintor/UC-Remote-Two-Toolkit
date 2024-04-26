@@ -27,10 +27,6 @@
 <ng-container *ngIf="context && context.type">
   <h4>Current source : {{context.source}} ({{context.date | date:'dd MMM yyyy \'at\' HH:mm'}})</h4>
 </ng-container>&nbsp;
-<div style="float: right">
-  <p-button label="Copy activities" (onClick)="copyToClipboard(activities)" icon="pi pi-copy" size="small"></p-button>&nbsp;
-  <p-button label="Clear cache" (onClick)="clearCache()" severity="danger" icon="pi pi-trash" size="small"></p-button>
-</div>
 
 <ng-container *ngIf="currentFile && currentFile.inProgress">
   <p-progressBar [value]="currentFile.progress"></p-progressBar>
@@ -39,19 +35,26 @@
 <app-activity-viewer #activityeditor [remote]="selectedRemote" [editMode]="false"></app-activity-viewer>
 <app-uploaded-files (configurationUpdated)="updateConfiguration()" [currentSource]="context?.source!"></app-uploaded-files>
 <input type="file" #fileUpload class="upload">
-Search entity : <p-autoComplete [(ngModel)]="entity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntity($event)"
-                                (ngModelChange)="selectEntity(entity)" field="entity_id">
+<div class="flex overflow-hidden">
+  <div class="flex-none flex align-items-center justify-content-left px-1 py-1">
+    Search entity :</div>
+  <div class="flex-grow-1 flex align-items-center justify-content-left px-1 py-1">
+    <div style="width: 100%;">
+<p-autoComplete [(ngModel)]="entity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntity($event)" appendTo="body"
+                                (ngModelChange)="selectEntity(entity)" field="entity_id" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
   <ng-template let-item pTemplate="item">
-    <div>{{item.name}} [{{item.type}}] ({{item.entity_id}})</div>
+    <div><b>{{item.name}}</b> [<span [style]="{'color': getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
   </ng-template>
-</p-autoComplete>&nbsp;&nbsp;
-Replace by entity : <p-autoComplete [(ngModel)]="replace_entity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntity($event)"  field="entity_id">
-  <ng-template let-item pTemplate="item">
-    <div>{{item.name}} [{{item.type}}] ({{item.entity_id}})</div>
-  </ng-template>
-</p-autoComplete>&nbsp;&nbsp;&nbsp;&nbsp;
-<p-button label="Replace entity" (onClick)="replaceEntity(entity?.entity_id!, replace_entity?.entity_id!)"></p-button>
-<ng-container *ngIf="entity && entity.entity_id">
+</p-autoComplete></div>
+</div>
+  <div class="flex-none flex align-items-center justify-content-right px-1 py-1">
+    <p-button label="Copy entities" (onClick)="copyToClipboard(entities)" icon="pi pi-copy" size="small"></p-button>&nbsp;
+    <p-button label="Copy activities" (onClick)="copyToClipboard(activities)" icon="pi pi-copy" size="small"></p-button>&nbsp;
+    <p-button label="Clear cache" (onClick)="clearCache()" severity="danger" icon="pi pi-trash" size="small"></p-button>
+  </div>
+</div>
+
+  <ng-container *ngIf="entity && entity.entity_id">
   <div class="fields">
     <p><b>Entity id : </b>{{entity.entity_id}}</p>
     <p><b>Name : </b><p-chip [label]="entity.name" [style]="getStyle(entity.name!)"></p-chip></p>
@@ -64,7 +67,7 @@ Replace by entity : <p-autoComplete [(ngModel)]="replace_entity" [dropdown]="tru
       <ng-container *ngFor="let sequence of entityUsages?.activity_sequences">
         <p-chip [label]="sequence.cmd_id+' ('+sequence.sequence_type+')'" [style]="getStyle(sequence.cmd_id)"></p-chip>&nbsp;
       </ng-container></p>
-    <p *ngIf="entityUsages?.activity_buttons!.length > 0"><b>Usages in activity buttons : </b>
+      <p *ngIf="entityUsages?.activity_buttons!.length > 0"><b>Usages in activity buttons : </b>
       <ng-container *ngFor="let button of entityUsages?.activity_buttons">
         <p-chip [label]="button.button" [style]="getStyle(button.button)" [pTooltip]="button.name+' '+button.activity_id"></p-chip>&nbsp;
       </ng-container></p>

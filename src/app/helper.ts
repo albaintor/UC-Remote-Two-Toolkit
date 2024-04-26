@@ -1,4 +1,4 @@
-import {Activity, Entity, EntityUsage, Profile, Command, ActivityButtonMapping} from "./interfaces";
+import {Activity, Entity, EntityUsage, Profile, Command, ButtonMapping} from "./interfaces";
 
 export class Helper
 {
@@ -68,12 +68,27 @@ export class Helper
     return entityUsage;
   }
 
-  static compareButtons(button1: ActivityButtonMapping, button2: ActivityButtonMapping | undefined): boolean {
+  static compareButtons(button1: ButtonMapping, button2: ButtonMapping | undefined): boolean {
     if (!button2) return false;
     if (button1.short_press?.cmd_id != button2.short_press?.cmd_id ||
       button1.short_press?.entity_id != button2.short_press?.entity_id) return false;
     if (button1.long_press?.cmd_id != button2.long_press?.cmd_id ||
       button1.long_press?.entity_id != button2.long_press?.entity_id) return false;
     return true;
+  }
+
+  static queryEntity(query: string, entities: Entity[]): Entity[]
+  {
+    query = query.toLowerCase();
+    const suggestions = entities.filter(entity => entity.entity_id?.toLowerCase().includes(query) ||
+      entity.name?.toLowerCase().includes(query));
+    suggestions.sort((a, b) => {
+      return (a.name ? a.name : "").localeCompare(b.name ? b.name : "");
+    })
+    if (suggestions.length == 0)
+    {
+      return [{entity_id: query, name: query, entity_type: ""}];
+    }
+    return suggestions;
   }
 }

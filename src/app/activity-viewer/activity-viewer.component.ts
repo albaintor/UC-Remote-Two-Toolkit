@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import {MessageService} from "primeng/api";
 import {ServerService} from "../server.service";
-import {Activity, ActivityButtonMapping, ActivityPage, ActivityPageCommand, Command, Remote} from "../interfaces";
+import {Activity, ButtonMapping, UIPage, ActivityPageCommand, Command, Remote} from "../interfaces";
 import {DialogModule} from "primeng/dialog";
 import {ToastModule} from "primeng/toast";
 import {NgForOf, NgIf} from "@angular/common";
@@ -19,7 +19,7 @@ import {ChipModule} from "primeng/chip";
 // @ts-ignore
 import SVGInject from "@iconfu/svg-inject";
 import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
-import {RouterLink} from "@angular/router";
+import {RouterLink, withComponentInputBinding} from "@angular/router";
 import {ActivityGridComponent, GridItem} from "./activity-grid/activity-grid.component";
 import {ButtonModule} from "primeng/button";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
@@ -55,7 +55,7 @@ export class AsPipe implements PipeTransform {
 })
 export class ActivityViewerComponent implements AfterViewInit {
   visible = false;
-  currentPage: ActivityPage | undefined;
+  currentPage: UIPage | undefined;
   @Input() activity: Activity | undefined;
   @Input() remote: Remote | undefined;
   @Input() editMode = true;
@@ -64,7 +64,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   public Command!: Command;
   @ViewChild("buttonpanel", {static: false}) buttonpanel: OverlayPanel | undefined;
   selectedButton: string = "";
-  selectedButtonMapping: ActivityButtonMapping | undefined;
+  selectedButtonMapping: ButtonMapping | undefined;
 
   buttonPanelStyle: any = { width: '450px' };
   svg: SVGElement | undefined;
@@ -72,6 +72,9 @@ export class ActivityViewerComponent implements AfterViewInit {
   gridSource: GridItem | undefined;
   grid: (ActivityPageCommand | null)[] = [];
   showDump: boolean = false;
+  firstRow = 0;
+  gridWidth = 4*185;
+  gridHeight = 6*185;
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
@@ -114,8 +117,15 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.showDump = false;
     this.visible = true;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[0];
-    this.grid = this.getGridItems();
+    this.firstRow = 0;
     console.log("View activity", this.activity);
+    this.updateButtonsGrid();
+  }
+
+  updateButtonsGrid()
+  {
+    this.grid = this.getGridItems();
+
     const buttons = this.svg?.getElementsByClassName("button");
     if (buttons) {
       for (let i = 0; i < buttons.length; i++) {
@@ -123,20 +133,18 @@ export class ActivityViewerComponent implements AfterViewInit {
         svgButton?.classList.remove('button-assigned');
       }
       if (this.activity?.options?.button_mapping)
-      for (let button of this.activity?.options?.button_mapping)
-      {
-        const buttonId = this.reversedButtonMap[button.button];
-        if (!buttonId) continue;
-        for (let i = 0; i < buttons.length; i++) {
-          const svgButton = buttons.item(i);
-          if (svgButton?.id == buttonId)
-          {
-            if (button.long_press || button.short_press)
-              svgButton.classList.add('button-assigned');
-            break;
+        for (let button of this.activity?.options?.button_mapping) {
+          const buttonId = this.reversedButtonMap[button.button];
+          if (!buttonId) continue;
+          for (let i = 0; i < buttons.length; i++) {
+            const svgButton = buttons.item(i);
+            if (svgButton?.id == buttonId) {
+              if (button.long_press || button.short_press)
+                svgButton.classList.add('button-assigned');
+              break;
+            }
           }
         }
-      }
     }
     this.cdr.detectChanges();
   }
@@ -191,6 +199,7 @@ export class ActivityViewerComponent implements AfterViewInit {
 
   onPageChange($event: PaginatorState) {
     this.currentPage = this.activity?.options?.user_interface?.pages?.[$event.page!];
+    this.updateButtonsGrid();
     this.cdr.detectChanges();
   }
 
@@ -261,5 +270,12 @@ export class ActivityViewerComponent implements AfterViewInit {
       this.messageService.add({severity:'info', summary: "Activity data copied to clipboard", key: 'activity'});
       this.cdr.detectChanges();
     });
+  }
+
+  getGridSize(item: ActivityPageCommand | null): any {
+    const width = this.currentPage?.grid.width;
+    const height = this.currentPage?.grid.height;
+    if (!width || !height) return {};
+    return {width: (this.gridWidth/width)+'px', height: (this.gridHeight/height)+'px'};
   }
 }

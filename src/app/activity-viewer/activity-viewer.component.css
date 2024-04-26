@@ -1,9 +1,12 @@
 .grid-container {
   display: grid;
-  column-gap: 1px;
-  row-gap: 1px;
-  background-color: rgba(0, 0, 0, 0.74);
-  padding: 5px;
+  grid-gap: 0;
+  column-gap: 0;
+  row-gap: 0;
+  background-color: rgba(0, 0, 0, 1);
+  padding: 0;
+  margin: auto;
+  width: 50%;
 }
 
 .icon {

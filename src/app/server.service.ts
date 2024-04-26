@@ -46,7 +46,7 @@ export class ServerService {
         'Access-Control-Allow-Credentials': 'true',
         'Content-Type': 'application/json',
         'Authorization': authKey,
-        'destinationurl': remote.address + url
+        'destinationurl': `${remote.address}:${remote.port}${url}`
       })
     };
   }
@@ -209,7 +209,7 @@ export class ServerService {
     }))
   }
 
-  /*remoteGet(remote: Remote, url: string,
+  remoteGet(remote: Remote, url: string,
             params?:{[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}): Observable<any>
   {
     const httpOptions: {headers: HttpHeaders, params?: HttpParams} = ServerService.getHttpOptions(remote, url);
@@ -251,7 +251,18 @@ export class ServerService {
     return this.http.delete<any>('/server/api',httpOptions).pipe(map(results => {
       return results;
     }))
-  }*/
+  }
+
+  remotePatch(remote: Remote, url: string, data: any,
+               params?:{[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}): Observable<any>
+  {
+    const httpOptions: {headers: HttpHeaders, params?: HttpParams} = ServerService.getHttpOptions(remote, url);
+    if (params)
+      httpOptions['params'] = new HttpParams({fromObject: params});
+    return this.http.patch<any>('/server/api', data, httpOptions).pipe(map(results => {
+      return results;
+    }))
+  }
 
   getContext(): Observable<Context>
   {

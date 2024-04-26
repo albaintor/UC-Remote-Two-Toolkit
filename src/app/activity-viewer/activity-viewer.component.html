@@ -23,8 +23,9 @@
 <p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">
   <p-button *ngIf="!editMode" label="Edit this activity" [routerLink]="['/activity/edit', activity?.entity_id]" severity="danger" icon="pi pi-pen" size="small"></p-button>
 <ng-container *ngIf="currentPage">
-  <div class="grid-container" [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width)}">
-    <grid-button [editable]="editMode" *ngFor="let item of grid; let index=index" [index]="index" [source]="gridSource" [item]="item"
+  <div class="grid-container"
+       [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width), 'width': gridWidth+'px', 'height': gridHeight+'px'}">
+    <grid-button [editable]="editMode" *ngFor="let item of grid; let index=index" [index]="index" [source]="gridSource" [item]="item" [style]="getGridSize(item)"
          (sourceSelected)="gridSourceSelected($event)" (destinationSelected)="gridDestinationSelected($event)"
         (itemClicked)="gridItemClicked($event)">
       <ng-container *ngIf="isStandardIcon(item?.icon)">
@@ -52,7 +53,7 @@
       {{getParams(item?.command)}}
     </grid-button>
   </div>
-  <p-paginator (onPageChange)="onPageChange($event)" [first]="0" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
+  <p-paginator (onPageChange)="onPageChange($event)" [first]="firstRow" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
 </ng-container>
   <div style="text-align: center">
     <img src="assets/remote/remote.svg" id="remote" onload="SVGInject(this)">

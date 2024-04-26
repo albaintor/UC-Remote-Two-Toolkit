@@ -20,6 +20,7 @@
     "@angular/router": "^17.3.0",
     "@iconfu/svg-inject": "^1.2.3",
     "ngx-json-viewer": "^3.2.1",
+    "primeflex": "^3.3.1",
     "primeicons": "^7.0.0",
     "primeng": "^17.12.0",
     "rxjs": "~7.8.0",

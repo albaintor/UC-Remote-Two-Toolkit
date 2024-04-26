@@ -1,0 +1,22 @@
+<p-toast key="operation"></p-toast>
+<p-dialog header="Remotes operations" [(visible)]="visible" [style]="{width: '80vw'}">
+  <ng-container *ngIf="operations.length > 0">
+    <p-button label="Update remote" severity="danger" (onClick)="updateRemote()"></p-button>
+  </ng-container>
+  <p-table [value]="operations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Method</th><th>API</th><th [style]="{width: '60%'}">Data</th><th>Status</th><th>Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-operation>
+      <tr>
+        <td>{{operation.method}}</td>
+        <td>{{operation.api}}</td>
+        <td  [style]="{width: '60%'}"><ngx-json-viewer [json]="operation.body" [depth]="1"></ngx-json-viewer></td>
+        <td>{{operation.status}}</td>
+        <td>&nbsp;</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-dialog>

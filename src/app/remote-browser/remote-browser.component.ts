@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
 import {ButtonModule} from "primeng/button";
@@ -13,7 +21,7 @@ import {TableModule} from "primeng/table";
 import {UploadedFilesComponent} from "../uploaded-files/uploaded-files.component";
 import {Activity, Config, Context, EntitiesUsage, Entity, EntityUsage, Profile, Profiles, Remote} from "../interfaces";
 import {ServerService} from "../server.service";
-import {catchError, forkJoin, from, map, mergeMap, Observable, of} from "rxjs";
+import {catchError, config, forkJoin, from, map, mergeMap, Observable, of, window} from "rxjs";
 import {HttpErrorResponse, HttpEventType} from "@angular/common/http";
 import {FormsModule} from "@angular/forms";
 import {InputTextModule} from "primeng/inputtext";
@@ -59,7 +67,7 @@ interface FileProgress
   providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RemoteBrowserComponent implements OnInit {
+export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   @ViewChild("fileUpload", {static: false}) fileUpload: ElementRef | undefined;
   @ViewChild(UploadedFilesComponent) uploadedFilesComponent: UploadedFilesComponent | undefined;
   @ViewChild(RemoteRegistrationComponent) remoteComponent: RemoteRegistrationComponent | undefined;
@@ -71,8 +79,6 @@ export class RemoteBrowserComponent implements OnInit {
   hoverEntity: Entity | undefined;
   outputObject: any = null;
   profiles: Profile[] = [];
-  replace_entity: Entity | undefined;
-
   currentFile: FileProgress | undefined;
   context: Context | undefined;
   config: Config | undefined;
@@ -92,6 +98,7 @@ export class RemoteBrowserComponent implements OnInit {
     {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
   ]
   entityUsages: EntityUsage | null | undefined;
+  localMode = true;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
   }
@@ -103,6 +110,9 @@ export class RemoteBrowserComponent implements OnInit {
         this.updateRemote(config);
       })
     })
+  }
+
+  ngAfterViewInit(): void {
     const entities = localStorage.getItem("entities");
     const activities = localStorage.getItem("activities");
     const profiles = localStorage.getItem("profiles");
@@ -116,6 +126,7 @@ export class RemoteBrowserComponent implements OnInit {
       this.server.setProfiles(this.profiles);
       this.context = {source:"Cache", type: "Remote", date: new Date()};
       this.messageService.add({severity: "info", summary: `Remote data loaded from cache`});
+      this.localMode = true;
       this.cdr.detectChanges();
     }
     else
@@ -129,6 +140,7 @@ export class RemoteBrowserComponent implements OnInit {
   }
 
   init(): void {
+    this.localMode = false;
     this.server.getContext().subscribe(results => {
       console.info("Context", results);
       this.context = results;
@@ -208,6 +220,7 @@ export class RemoteBrowserComponent implements OnInit {
         localStorage.setItem("entities", JSON.stringify(this.entities));
         localStorage.setItem("activities", JSON.stringify(this.activities));
         localStorage.setItem("profiles", JSON.stringify(this.profiles));
+        this.localMode = true;
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -278,7 +291,6 @@ export class RemoteBrowserComponent implements OnInit {
     if (!this.entity) return;
     this.entityUsages = Helper.fingEntityUsage(this.entity.entity_id!, this.entities, this.activities, this.profiles);
     console.log("Usage of entity", this.entity, this.entityUsages);
-    // this.entityUsages = this.usages[this.entity.entity_id!]; // TODO
     this.cdr.detectChanges();
   }
 
@@ -292,22 +304,14 @@ export class RemoteBrowserComponent implements OnInit {
       this.cdr.detectChanges();
       return;
     }
+    if (this.localMode)
+    {
+      this.suggestions = Helper.queryEntity($event.query, this.entities);
+      this.cdr.detectChanges();
+      return;
+    }
     this.server.getEntity($event.query).subscribe(results => {
-      this.suggestions = [];
-      for (let entity_id in results)
-      {
-        const entity = results[entity_id];
-        entity.entity_id = entity_id;
-        this.suggestions.push(entity);
-      }
-      this.suggestions.sort((a, b) => {
-        return (a.name ? a.name : "").localeCompare(b.name ? b.name : "");
-      })
-      if (this.suggestions.length == 0)
-      {
-        this.replace_entity = {entity_id: $event.query, name: $event.query, entity_type: ""};
-        // this.suggestions = [ {entity_id: $event.query, name: $event.query, entity_type: ""}];
-      }
+      this.suggestions = Helper.queryEntity($event.query, results);
       this.cdr.detectChanges();
     })
   }
@@ -343,66 +347,6 @@ export class RemoteBrowserComponent implements OnInit {
       colour += value.toString(16).padStart(2, '0')
     }
     return colour
-  }
-
-  replaceEntity(entity_id: string, new_entity_id: string): any
-  {
-    /*const entity = this.entity_list.find(entity => entity.entity_id === entity_id);
-    const entity_usage = this.usages[entity_id];
-    if (!entity || !entity_usage) return;
-    const modifications: any = {};
-
-    const activityList = new Set(entity_usage
-      .activity_entities.map(activity_entity => activity_entity.activity_id));
-    entity_usage.activity_buttons.forEach(button => activityList.add(button.activity_id));
-
-    Array.from(activityList).forEach(activityId => {
-      const activity = this.entity_list.find(entity => entity.entity_id === activityId);
-      if (!activity) return;
-      const modification : any = { "entity_id" : activityId, "options": {
-          "included_entities": [], "button_mapping": [], "sequences": []
-        }};
-      modifications[activity.filename!] = modification;
-      entity_usage.activity_entities.filter(item => item.activity_id === activityId).forEach(item => {
-        modification["options"]["included_entities"].push({"old_entity_id" : entity_id, "entity_id": new_entity_id});
-      });
-      entity_usage.activity_sequences.filter(item => item.activity_id === activityId).forEach(item => {
-        modification["options"]["sequences"].push({"sequence_type": item.sequence_type, "cmd_id": item.cmd_id,
-          "old_entity_id" : entity_id, "entity_id": new_entity_id});
-      });
-      entity_usage.activity_buttons.filter(item => item.activity_id === activityId).forEach(item => {
-        let existing_button = modification["options"]["button_mapping"].find((button: any) => button.button === item.button);
-        if (!existing_button)
-        {
-          existing_button = {"button": item.button};
-          modification["options"]["button_mapping"].push(existing_button);
-        }
-        if (item.short_press)
-          existing_button['short_press'] = {"old_entity_id" : entity_id, "entity_id": new_entity_id};
-        else
-          existing_button['long_press'] = {"old_entity_id" : entity_id, "entity_id": new_entity_id};
-      })
-    })
-
-    const profiles = Array.from(new Set(entity_usage.pages.map(page => page.profile_id)));
-    profiles.forEach(profileId => {
-      const profile = this.profiles![profileId]!;
-      modifications[profile.filename] = {"profile_id": profileId, "pages": []};
-      const pages = entity_usage.pages.filter(page => page.profile_id === profileId);
-      const pageIds = Array.from(new Set(pages.map(page => page.page_id)));
-      pageIds.forEach(pageId => {
-        const newPage: any = {"page_id": pageId, "items": []};
-        const items = pages.filter(page => page.page_id === pageId);
-        items.forEach(item => {
-          newPage["items"].push({"old_entity_id" : entity_id, "entity_id": new_entity_id})
-        })
-        modifications[profile.filename]["pages"] = newPage;
-      })
-    })
-
-    this.outputObject = modifications;
-    this.cdr.detectChanges();
-    return modifications;*/
   }
 
   uploadSelectedFile(file: FileProgress)
@@ -457,7 +401,7 @@ export class RemoteBrowserComponent implements OnInit {
     let binaryData = [];
     binaryData.push(response);
     let downloadLink = document.createElement('a');
-    downloadLink.href = window.URL.createObjectURL(new Blob(binaryData as any, {type: dataType}));
+    downloadLink.href = URL.createObjectURL(new Blob(binaryData as any, {type: dataType}));
     if (filename)
       downloadLink.setAttribute('download', filename);
     document.body.appendChild(downloadLink);

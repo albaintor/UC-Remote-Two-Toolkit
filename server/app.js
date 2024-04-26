@@ -16,7 +16,7 @@ import {elementAt} from "rxjs";
 import {Remote} from "./remote.js";
 import {getConfigFile, writeConfigFile} from "./config.js";
 
-const LISTEN_PORT = "8080";
+const LISTEN_PORT = "8000";
 const UPLOAD_DIR = './uploads';
 const RESOURCES_DIR = './resources';
 var app = express();
@@ -50,7 +50,7 @@ const REMOTE_USER = 'web-configurator';
 let rc2Model = new RC2Model();
 
 app.get('/server/api', (req, res, next) => {
-  const url = req.headers.destinationurl;
+  let url = req.headers.destinationurl;
   let headers = {}
   for (let key in req.headers) {
     headers[key] = req.headers[key];
@@ -61,7 +61,7 @@ app.get('/server/api', (req, res, next) => {
     headers: headers,
     searchParams: req.query,
   }
-
+  if (!url.startsWith('http://')) url = 'http://'+url;
   console.log('Proxy get', url, req.query);
   got.get(url, options).then(proxyres => {
     let resBody;
@@ -82,7 +82,7 @@ app.get('/server/api', (req, res, next) => {
 })
 
 app.delete('/server/api', (req, res, next) => {
-  const url = req.headers.destinationurl;
+  let url = req.headers.destinationurl;
   let headers = {}
   for (let key in req.headers) {
     headers[key] = req.headers[key];
@@ -93,6 +93,7 @@ app.delete('/server/api', (req, res, next) => {
     headers: headers,
     searchParams: req.query,
   }
+  if (!url.startsWith('http://')) url = 'http://'+url;
   console.log('Proxy delete', url, req.query);
   got.delete(url, options).then(proxyres => {
     let resBody;
@@ -109,7 +110,7 @@ app.delete('/server/api', (req, res, next) => {
 })
 
 app.post('/server/api', (req, res, next) => {
-  const url = req.headers.destinationurl;
+  let url = req.headers.destinationurl;
   let headers = {}
   for (let key in req.headers) {
     headers[key] = req.headers[key];
@@ -121,9 +122,40 @@ app.post('/server/api', (req, res, next) => {
     searchParams: req.query,
     json: req.body
   }
-
+  if (!url.startsWith('http://')) url = 'http://'+url;
   console.log('Proxy post', url, req.query, req.body, req.headers);
   got.post(url, options).then(proxyres => {
+    let resBody;
+    try {
+      if (proxyres?.body) resBody = JSON.parse(proxyres.body);
+    } catch (err) {
+      console.error('Error parsing response', err, proxyres?.body);
+    }
+    res.status(200).json(resBody);
+  }).catch(error => {
+    errorHandler(error, req, res, next);
+  })
+})
+
+app.patch('/server/api', (req, res, next) => {
+  let url = req.headers.destinationurl;
+  let headers = {}
+  for (let key in req.headers) {
+    headers[key] = req.headers[key];
+    console.log(key, req.headers[key]);
+  }
+  if (!url.startsWith('http://')) url = 'http://'+url;
+  console.log("Destination url", url);
+  headers['host'] = (new URL(url)).host;
+  headers['User-Agent'] = '';
+  const options = {
+    headers: headers,
+    searchParams: req.query,
+    json: req.body
+  }
+
+  console.log('Proxy post', url, req.query, req.body, req.headers);
+  got.patch(url, options).then(proxyres => {
     let resBody;
     try {
       if (proxyres?.body) resBody = JSON.parse(proxyres.body);

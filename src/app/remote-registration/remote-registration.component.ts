@@ -5,7 +5,7 @@ import {ServerService} from "../server.service";
 import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
 import {ButtonModule} from "primeng/button";
-import {Remote} from "../interfaces";
+import {Remote, RemoteRegistration} from "../interfaces";
 import {NgIf} from "@angular/common";
 import {TableModule} from "primeng/table";
 import {TooltipModule} from "primeng/tooltip";
@@ -38,6 +38,7 @@ export class RemoteRegistrationComponent {
   remotes: Remote[] = [];
   @Output() remoteSelected = new EventEmitter<Remote>();
   selectedRemote: Remote | undefined;
+  registrations: RemoteRegistration[] | undefined;
 
   constructor(private server: ServerService, private cdr: ChangeDetectorRef, private messageService: MessageService) {
   }
@@ -109,5 +110,23 @@ export class RemoteRegistrationComponent {
         this.refresh();
         this.cdr.detectChanges();
     }})
+  }
+
+  getRemote(remote: Remote) {
+    this.server.getRemoteRegistrations(remote).subscribe({
+      next: ((results) => {
+        this.messageService.add({severity: "success", summary: "Registrations retrieved",
+          key: "remote"});
+        this.registrations = results;
+        this.cdr.detectChanges();
+      }),
+      error: ((error: any) => {
+        console.error("Error extracting remote info", error);
+        this.messageService.add({severity: "error", summary: "Error while extracting remote registrations", key: "remote"});
+        this.cdr.detectChanges();
+      }),
+      complete: () => {
+        this.cdr.detectChanges();
+      }})
   }
 }

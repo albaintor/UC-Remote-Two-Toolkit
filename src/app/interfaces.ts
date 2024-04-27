@@ -1,3 +1,15 @@
+export interface RemoteRegistration
+{
+  key_id: string;
+  name: string;
+  prefix: string;
+  active: boolean;
+  valid_to: string;
+  description: string;
+  creation_date: string;
+  scopes: string[];
+}
+
 export enum OperationStatus
 {
   Todo ,

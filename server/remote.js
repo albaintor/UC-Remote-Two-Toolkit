@@ -118,6 +118,25 @@ export class Remote
     }
   }
 
+  async getRegisteredKeys()
+  {
+    let headers = this.getHeaders();
+    const options = {
+      headers: headers
+    }
+    const url = this.getURL() + '/api/auth/api_keys';
+    console.log('Register remote', url, options);
+    const res = await got.get(url, options);
+    let resBody;
+    try {
+      if (res?.body) resBody = JSON.parse(res.body);
+      return resBody;
+    } catch (err) {
+      console.error('Error retrieving remote keys', err, res?.body);
+      throw(err);
+    }
+  }
+
   async register(api_key_name)
   {
     let headers = this.getHeaders();

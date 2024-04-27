@@ -28,6 +28,7 @@
         <td>
           <p-button icon="pi pi-play" pTooltip="Select this remote" [rounded]="true" (click)="selectRemote(remote)"></p-button>&nbsp;
           <p-button icon="pi pi-trash" pTooltip="Unregister this remote" [rounded]="true" (click)="deleteRemote(remote)" severity="danger"></p-button>&nbsp;
+          <p-button icon="pi pi-barcode" pTooltip="Get registrations" [rounded]="true" (click)="getRemote(remote)"></p-button>&nbsp;
         </td>
         <td><ng-container *ngIf="selectedRemote == remote"><b>{{remote.remote_name}}</b> (selected)</ng-container>
           <ng-container *ngIf="selectedRemote != remote">{{remote.remote_name}}</ng-container>
@@ -38,6 +39,22 @@
         <td>{{remote.token}}</td>
         <td>{{remote.api_key}}</td>
         <td>{{remote.api_valid_to}}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+  <br>
+  <p-table *ngIf="registrations" [value]="registrations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Key id</th><th>Name</th><th>Prefix</th><th>Active</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-remote>
+      <tr>
+        <td>{{remote.key_id}}</td>
+        <td>{{remote.name}}</td>
+        <td>{{remote.prefix}}</td>
+        <td>{{remote.active}}</td>
       </tr>
     </ng-template>
   </p-table>

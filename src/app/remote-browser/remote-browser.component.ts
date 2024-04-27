@@ -31,6 +31,7 @@ import {ToastModule} from "primeng/toast";
 import {DropdownModule} from "primeng/dropdown";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {Helper} from "../helper";
+import {EntityViewerComponent} from "../entity-viewer/entity-viewer.component";
 
 interface FileProgress
 {
@@ -60,7 +61,8 @@ interface FileProgress
     RemoteRegistrationComponent,
     DropdownModule,
     ProgressSpinnerModule,
-    ActivityViewerComponent
+    ActivityViewerComponent,
+    EntityViewerComponent
   ],
   templateUrl: './remote-browser.component.html',
   styleUrl: './remote-browser.component.css',

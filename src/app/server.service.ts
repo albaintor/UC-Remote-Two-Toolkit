@@ -9,7 +9,7 @@ import {
   Entity,
   EntityUsage, Page, Profile, ProfileGroup,
   Profiles,
-  Remote, RemoteMap
+  Remote, RemoteMap, RemoteRegistration
 } from "./interfaces";
 import {compileResults} from "@angular/compiler-cli/src/ngtsc/annotations/common";
 
@@ -205,6 +205,13 @@ export class ServerService {
   unregisterRemote(remote: Remote): Observable<any>
   {
     return this.http.delete<any>('/api/config/remote/'+remote.address).pipe(map(results => {
+      return results;
+    }))
+  }
+
+  getRemoteRegistrations(remote: Remote): Observable<RemoteRegistration[]>
+  {
+    return this.http.get<RemoteRegistration[]>('/api/config/remote/'+remote.address).pipe(map(results => {
       return results;
     }))
   }

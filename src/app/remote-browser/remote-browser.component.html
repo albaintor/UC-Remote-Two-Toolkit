@@ -32,6 +32,7 @@
   <p-progressBar [value]="currentFile.progress"></p-progressBar>
 </ng-container>
 <app-remote-registration></app-remote-registration>
+<app-entity-viewer #entityviewer></app-entity-viewer>
 <app-activity-viewer #activityeditor [remote]="selectedRemote" [editMode]="false"></app-activity-viewer>
 <app-uploaded-files (configurationUpdated)="updateConfiguration()" [currentSource]="context?.source!"></app-uploaded-files>
 <input type="file" #fileUpload class="upload">
@@ -146,8 +147,8 @@
   </ng-template>
   <ng-template pTemplate="body" let-entity>
     <tr>
-      <td>{{ entity.entity_id }}</td>
-      <td><p-chip [label]="entity.name" [style]="getStyle(entity.name)"></p-chip></td>
+      <td><a [routerLink]="[]" (click)="entityviewer.view(entity)">{{entity.entity_id}}</a></td>
+      <td><p-chip [label]="entity.name" [style]="getStyle(entity.name)" (click)="entityviewer.view(entity)"></p-chip></td>
       <td><p-chip [label]="entity.type" [style]="getStyle(entity.type)"></p-chip></td>
       <td><p-chip [label]="entity.entity_type" [style]="getStyle(entity.entity_type)"></p-chip></td>
       <td><ng-container *ngFor="let feature of entity['features']">

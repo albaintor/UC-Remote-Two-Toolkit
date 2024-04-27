@@ -1,0 +1,28 @@
+<p-dialog [header]="'Entity '+entity?.name" [(visible)]="visible" [style]="panelStyle">
+  <h3>{{entity?.entity_id}}</h3>
+  <h3>Type : <span [style]="Helper.getFrontStyle(entity?.entity_type!)">{{entity?.entity_type}}</span></h3>
+  <div class="flex flex-wrap" *ngIf="entity?.features">
+    <div class="flex align-items-center justify-content-center ml-1">
+      <h3>Features</h3>
+    </div>
+    <div class="flex align-items-center justify-content-center ml-1" *ngFor="let feature of entity?.features">
+      <p-chip [label]="feature" [style]="Helper.getStyle(feature)"></p-chip>
+    </div>
+  </div>
+  <div class="flex flex-wrap" *ngIf="entity?.options?.simple_commands">
+    <div class="flex align-items-center justify-content-center ml-1">
+      <h3>Simple commands</h3>
+    </div>
+    <div class="flex align-items-center justify-content-center ml-1" *ngFor="let command of entity?.options?.simple_commands">
+      <p-chip [label]="command" [style]="Helper.getStyle(command)"></p-chip>
+    </div>
+  </div>
+  <div class="flex flex-wrap" *ngIf="entity?.options?.button_mapping">
+    <div class="flex align-items-center justify-content-center ml-1">
+      <h3>Buttons mapping</h3>
+    </div>
+    <div class="flex align-items-center justify-content-center ml-1" *ngFor="let button of entity?.options?.button_mapping">
+      <p-chip [label]="button.button" [style]="Helper.getStyle(button.button)"></p-chip>
+    </div>
+  </div>
+</p-dialog>

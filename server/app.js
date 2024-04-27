@@ -241,6 +241,29 @@ app.post('/api/config/remote', async (req, res, next) => {
   }
 })
 
+app.get('/api/config/remote/:address', async (req, res, next) => {
+  const address = req.params.address;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    const results = await remote.getRegisteredKeys();
+    res.status(200).json(results);
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
 app.delete('/api/config/remote/:address', async (req, res, next) => {
   const address = req.params.address;
   let user = REMOTE_USER

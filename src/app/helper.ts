@@ -13,6 +13,25 @@ export class Helper
     }
   }
 
+  static getFrontStyle(value: string): any
+  {
+    try {
+      const color = Helper.getFrontColor(value);
+      return {"color" : color};
+    } catch (exception)
+    {
+      return ""
+    }
+  }
+
+  static getFrontColor(stringInput: string) {
+    if (stringInput.toLowerCase().startsWith('unknown')) return 'red';
+    let stringUniqueHash = [...stringInput].reduce((acc, char) => {
+      return char.charCodeAt(0) + ((acc << 5) - acc);
+    }, 0);
+    return `hsl(${stringUniqueHash % 360}, 95%, 70%)`;
+  }
+
   static getBackgroundColor(stringInput: string) {
     if (stringInput.toLowerCase().startsWith('unknown')) return 'red';
     let stringUniqueHash = [...stringInput].reduce((acc, char) => {
@@ -70,11 +89,14 @@ export class Helper
 
   static compareButtons(button1: ButtonMapping, button2: ButtonMapping | undefined): boolean {
     if (!button2) return false;
+    if (button1.short_press && !button2.short_press) return false;
+    if (button1.long_press && !button2.long_press) return false;
+    if (button2.short_press && !button1.short_press) return false;
+    if (button2.long_press && !button1.long_press) return false;
     if (button1.short_press?.cmd_id != button2.short_press?.cmd_id ||
       button1.short_press?.entity_id != button2.short_press?.entity_id) return false;
-    if (button1.long_press?.cmd_id != button2.long_press?.cmd_id ||
-      button1.long_press?.entity_id != button2.long_press?.entity_id) return false;
-    return true;
+    return !(button1.long_press?.cmd_id != button2.long_press?.cmd_id ||
+      button1.long_press?.entity_id != button2.long_press?.entity_id);
   }
 
   static comparePages(page1: UIPage, page2: UIPage): boolean

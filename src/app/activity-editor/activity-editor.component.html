@@ -51,9 +51,8 @@
     <p-checkbox [(ngModel)]="keepDefinedPositions" [binary]="true" label="Preserve defined interface buttons"></p-checkbox>
   </div>
 <br>
-  <p-button label="Apply mapping" (onClick)="applyTemplate(this.updatedActivity!);viewer.view(updatedActivity!, true)"></p-button><br><br>
 </ng-container>
-
+<p-button *ngIf="selectedEntity" label="Apply mapping" (onClick)="applyTemplate(this.updatedActivity!);viewer.view(updatedActivity!, true)"></p-button><br>
 <h3>Replace an entity by another</h3>
 <div class="flex overflow-hidden">
   <div class="flex-none flex align-items-center justify-content-left px-1 py-1">

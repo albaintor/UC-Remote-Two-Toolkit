@@ -286,10 +286,13 @@ export class ActivityEditorComponent implements OnInit {
     console.log("Selected features to map : ", selectedFeatures);
     template.buttons?.forEach(button => {
       const existing_assignment = updatedActivity?.options?.button_mapping?.find(existing_button =>
-        existing_button.button === button.button
+        existing_button.button === button.button && (existing_button.long_press || existing_button.short_press)
         && ((existing_button.long_press && button.long_press === true) || existing_button.short_press));
       if (button.feature && !selectedFeatures.includes(button.feature)) return;
-      if (button.simple_command === true && !this.selectedEntity?.options?.simple_commands?.includes(button.cmd_id)) return;
+      if (button.simple_command === true && !this.selectedEntity?.options?.simple_commands?.includes(button.cmd_id)) {
+        console.log("TOTO", button.cmd_id, this.selectedEntity?.options?.simple_commands);
+        return
+      }
 
       if (button.feature && !entity.features?.includes(button.feature))
       {
@@ -313,6 +316,7 @@ export class ActivityEditorComponent implements OnInit {
       else
         targetButton!.short_press = {entity_id: this.selectedEntity?.entity_id!, cmd_id: button.cmd_id, params: button.params};
     })
+    console.log("BUTTONS", this.updatedActivity?.options?.button_mapping)
 
     template.user_interface?.pages?.forEach(page => {
       if (!updatedActivity?.options) updatedActivity!.options = {};

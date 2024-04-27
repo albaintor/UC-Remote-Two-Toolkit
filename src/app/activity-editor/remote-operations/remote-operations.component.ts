@@ -9,7 +9,8 @@ import {TableModule} from "primeng/table";
 import {TooltipModule} from "primeng/tooltip";
 import {OperationStatus, Remote, RemoteOperation} from "../../interfaces";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
-import {catchError, forkJoin, from, map, mergeMap, Observable, of, toArray} from "rxjs";
+import {catchError, forkJoin, from, map, mergeMap, of} from "rxjs";
+import {ChipModule} from "primeng/chip";
 
 @Component({
   selector: 'app-remote-operations',
@@ -21,7 +22,8 @@ import {catchError, forkJoin, from, map, mergeMap, Observable, of, toArray} from
     NgIf,
     TableModule,
     TooltipModule,
-    NgxJsonViewerModule
+    NgxJsonViewerModule,
+    ChipModule
   ],
   templateUrl: './remote-operations.component.html',
   styleUrl: './remote-operations.component.css',
@@ -38,6 +40,24 @@ export class RemoteOperationsComponent {
 
   }
 
+  getStatusLabel(status: OperationStatus): string
+  {
+    if (status === OperationStatus.Todo) return "To do";
+    if (status === OperationStatus.Done) return "Done";
+    if (status === OperationStatus.Error) return "Error";
+    if (status === OperationStatus.Cancelled) return "Cancelled";
+    return "Unknown";
+  }
+
+  getStatusLabelStyle(status: OperationStatus) {
+    let color = 'gray';
+    if (status === OperationStatus.Todo) color = 'blue';
+    if (status === OperationStatus.Done) color = 'green';
+    if (status === OperationStatus.Error) color = 'red';
+    if (status === OperationStatus.Cancelled) color = 'black';
+    return {"background-color" : color};
+  }
+
   updateRemote() {
     if (!this.remote) return;
     const operations = from(this.operations).pipe(
@@ -52,8 +72,7 @@ export class RemoteOperationsComponent {
             catchError(error => {
               operation.status = OperationStatus.Error;
               console.error("Error during update", operation, error);
-              throw error;
-              // return of(operation);
+              return of(operation);
           }));
         if (operation.method === "PATCH")
           return this.server.remotePatch(this.remote!, operation.api, operation.body).pipe(
@@ -65,8 +84,7 @@ export class RemoteOperationsComponent {
             catchError(error => {
               operation.status = OperationStatus.Error;
               console.error("Error during update", operation, error);
-              throw error;
-              // return of(operation);
+              return of(operation);
             }));
         if (operation.method === "DELETE")
           return this.server.remoteDelete(this.remote!, operation.api).pipe(
@@ -78,8 +96,7 @@ export class RemoteOperationsComponent {
             catchError(error => {
               operation.status = OperationStatus.Error;
               console.error("Error during update", operation, error);
-              throw error;
-              // return of(operation);
+              return of(operation);
             }));
         if (operation.method === "PUT")
           return this.server.remotePut(this.remote!, operation.api, operation.body).pipe(
@@ -92,16 +109,18 @@ export class RemoteOperationsComponent {
               operation.status = OperationStatus.Error;
               console.error("Error during update", operation, error);
               return of(operation);
-              // return of(operation);
             }));
         // Should not happen
         return of(of(operation));
-    }, 1)).subscribe(
+    }, 1));
+
+    forkJoin([operations]).subscribe(
       {
         next: results => {
           const success = this.operations.filter(operation => operation.status === OperationStatus.Done).length;
           const errors = this.operations.filter(operation => operation.status === OperationStatus.Error).length;
-          this.messageService.add({severity: "success", summary: "Operations executed to remote",
+          const severity = errors > 0 ? "info": "success";
+          this.messageService.add({severity, summary: "Operations executed to remote",
             detail: `${success} success, ${errors} errors`,
             key: "operation"});
           this.cdr.detectChanges();

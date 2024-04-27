@@ -111,9 +111,10 @@ export class ActivityViewerComponent implements AfterViewInit {
     return ""
   }
 
-  view(activity: Activity): void {
+  view(activity: Activity, editable: boolean): void {
     if (activity)
       this.activity = activity;
+    this.editMode = editable;
     this.showDump = false;
     this.visible = true;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[0];

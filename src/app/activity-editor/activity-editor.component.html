@@ -20,25 +20,41 @@
   {{progressDetail}}<br>
   <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
 </ng-container>
-<ng-container *ngFor="let template of templates">
-  Apply mapping to a {{template.entity_type}} :
-  <p-dropdown [options]="getEntities(template.entity_type)" [(ngModel)]="selectedEntity"
-              [placeholder]="template.entity_type" (ngModelChange)="loadTemplate()">
-    <ng-template pTemplate="selectedItem">
-      {{selectedEntity?.name}} ({{selectedEntity?.entity_id}})
-    </ng-template>
-    <ng-template let-item pTemplate="item">
-      <div>{{item.name}} ({{item.entity_id}})</div>
-    </ng-template>
-  </p-dropdown>
+<h3>Apply a mapping from a given entity (choose only one)</h3>
+<div class="formgroup-inline">
+  <ng-container *ngFor="let template of templates">
+    <div class="field">
+      <label [for]="template.entity_type" class="p-sr-only">Apply mapping to a {{template.entity_type}} :</label>
+      <p-dropdown [id]="template.entity_type"  [options]="getEntities(template.entity_type)" [(ngModel)]="selectedEntity"
+                  [placeholder]="'Select a '+template.entity_type" (ngModelChange)="loadTemplate()">
+        <ng-template pTemplate="selectedItem">
+          {{selectedEntity?.name}} ({{selectedEntity?.entity_id}})
+        </ng-template>
+        <ng-template let-item pTemplate="item">
+          <div>{{item.name}} ({{item.entity_id}})</div>
+        </ng-template>
+      </p-dropdown>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="selectedEntity && availableFeatures && availableFeatures!.length > 0">
+    <div class="field">
+      <label for="features">Select features to map</label>
+      <p-multiSelect id="features" [options]="availableFeatures" [(ngModel)]="selectedFeatures" optionLabel="label"></p-multiSelect>
+    </div>
+  </ng-container>&nbsp;
+</div>
+<ng-container *ngIf="selectedEntity && availableFeatures && availableFeatures!.length > 0">
+  <div class="field-checkbox">
+    <p-checkbox [(ngModel)]="overwriteAssignedButtons" [binary]="true" label="Overwrite assigned physical buttons"></p-checkbox>
+  </div>
+  <div class="field-checkbox">
+    <p-checkbox [(ngModel)]="keepDefinedPositions" [binary]="true" label="Preserve defined interface buttons"></p-checkbox>
+  </div>
+<br>
+  <p-button label="Apply mapping" (onClick)="applyTemplate(this.updatedActivity!);viewer.view(updatedActivity!, true)"></p-button><br><br>
 </ng-container>
-<ng-container *ngIf="selectedEntity && availableFeatures && availableFeatures!.length > 0">&nbsp;Select features to map :
-  <p-multiSelect [options]="availableFeatures" [(ngModel)]="selectedFeatures" optionLabel="label"></p-multiSelect>
-  <br><div><p-checkbox [(ngModel)]="overwriteAssignedButtons" [binary]="true" label="Overwrite assigned physical buttons"></p-checkbox></div>
-  <div><p-checkbox [(ngModel)]="keepDefinedPositions" [binary]="true" label="Preserve defined interface buttons"></p-checkbox></div>
-  <br>
-</ng-container>&nbsp;
-<p-button label="Apply mapping" (onClick)="applyTemplate(this.updatedActivity!);viewer.view(updatedActivity!)"></p-button><br><br>
+
+<h3>Replace an entity by another</h3>
 <div class="flex overflow-hidden">
   <div class="flex-none flex align-items-center justify-content-left px-1 py-1">
     Replace entity :</div>

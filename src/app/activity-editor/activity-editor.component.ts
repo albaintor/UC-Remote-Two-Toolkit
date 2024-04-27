@@ -65,14 +65,15 @@ export class ActivityEditorComponent implements OnInit {
   progress = false;
   remoteProgress = 0;
   progressDetail = "";
-  items: MenuItem[] = [
+  availableItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
-    {label: 'View original activity', command: () => this.activityViewser?.view(this.activity!), icon: 'pi pi-folder-open'},
-    {label: 'View new activity', command: () => this.activityViewser?.view(this.updatedActivity!), icon: 'pi pi-folder-open'},
+    {label: 'View original activity', command: () => this.activityViewser?.view(this.activity!, false), icon: 'pi pi-folder-open'},
+    {label: 'View new activity', command: () => this.activityViewser?.view(this.updatedActivity!, true), icon: 'pi pi-folder-open'},
     {label: 'Reset mapping to original', command: () => this.updateActivity(), icon: 'pi pi-times'},
     {label: 'Clear mapping', command: () => this.clearMapping(), icon: 'pi pi-times'},
     {label: 'Save activity to remote', command: () => this.buildUpdateData(), icon: 'pi pi-cloud-upload'},
   ]
+  items: MenuItem[] = [];
   activity_list: Activity[] = [];
   entities: Entity[] = [];
   templates: RemoteMap[] = [];
@@ -100,6 +101,7 @@ export class ActivityEditorComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.initMenu();
     this.activatedRoute.params.subscribe(params => {
       this.activity_id = params['id'];
       this.updateActivity();
@@ -137,20 +139,74 @@ export class ActivityEditorComponent implements OnInit {
     }
   }
 
+  initMenu()
+  {
+    if (this.updatedActivity)
+      this.items = [...this.availableItems];
+    else
+      this.items = [...this.availableItems.filter(item => item.label !== 'Save activity to remote')];
+  }
+
   buildUpdateData()
   {
+    if (!this.updatedActivity) return;
     this.remoteOperations = [];
+    const newIncludedEntities = Helper.getActivityEntities(this.updatedActivity!, this.entities);
+    let updateIncludedEntities = false;
+    let createActivity = false;
+    if (!this.updatedActivity.entity_id ||
+      !this.entities.find(entity => entity.entity_id === this.updatedActivity!.entity_id)) {
+      this.updatedActivity!.entity_id = undefined;
+      createActivity = true;
+    }
+
+    if (this.activity)
+    {
+      const currentIncludedEntities = Helper.getActivityEntities(this.activity!, this.entities);
+      newIncludedEntities.forEach(entity => {
+        if (!currentIncludedEntities.find(currentEntity => currentEntity.entity_id === entity.entity_id))
+          updateIncludedEntities = true;
+      });
+    }
+    else
+      updateIncludedEntities = true;
+
+    if (createActivity)
+    {
+      this.remoteOperations.push({method: "POST", api: `/api/activities`,
+        body: {
+          name: this.updatedActivity.name,
+          options: {
+            entity_ids: newIncludedEntities.map((entity) => entity.entity_id),
+          }
+        }, status: OperationStatus.Todo});
+      this.messageService.add({severity: "info", summary: "The activity has to be created first : execute this one-task first and reload"});
+      this.cdr.detectChanges();
+      return;
+    } else if (updateIncludedEntities)
+    {
+      this.remoteOperations.push({method: "PATCH", api: `/api/activities/${this.updatedActivity?.entity_id}`,
+        body: {
+          options: {
+            entity_ids: newIncludedEntities.map((entity) => entity.entity_id),
+          }
+        }, status: OperationStatus.Todo})
+    }
+
+
     this.updatedActivity?.options?.button_mapping?.forEach(button => {
       const originalButton = this.activity?.options?.button_mapping?.
         find(localButton=> localButton.button === button.button);
-      if (!Helper.compareButtons(button, originalButton))
+      if (!originalButton || !Helper.compareButtons(button, originalButton))
         this.remoteOperations.push({method: "PATCH", api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
         body: {
           ...button
         }, status: OperationStatus.Todo})
     });
     this.updatedActivity?.options?.user_interface?.pages?.forEach(page => {
-      //TODO compare current / new pages
+      const currentPage = this.activity?.options?.user_interface?.pages?.find(currentPage =>
+        currentPage.page_id === page.page_id);
+      if (currentPage && Helper.comparePages(page, currentPage)) return;
       let api = `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`;
       let method: "PUT" | "POST" | "DELETE" | "PATCH" = "POST";
       if (page.page_id) {
@@ -163,6 +219,13 @@ export class ActivityEditorComponent implements OnInit {
           ...page
         }, status: OperationStatus.Todo})
     })
+    if (this.remoteOperations.length == 0)
+    {
+      this.messageService.add({severity:"info", summary: "No modifications applied"});
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.dump = this.remoteOperations;
     this.cdr.detectChanges();
   }
@@ -202,6 +265,7 @@ export class ActivityEditorComponent implements OnInit {
       if (this.activity.options?.user_interface?.pages)
         this.updatedActivity!.options!.user_interface!.pages = JSON.parse(JSON.stringify(this.activity.options.user_interface.pages));
     }
+    this.initMenu();
     this.cdr.detectChanges();
   }
 
@@ -267,13 +331,24 @@ export class ActivityEditorComponent implements OnInit {
           return;
         }
       }
-      let targetPage: UIPage = {name: `Page ${updatedActivity!.options.user_interface.pages!.length+1}`,
-        grid: {...page.grid}, items: []};
+
+      // Reuse existing page if empty and same size
+      let targetPage = Helper.findExistingMatchPage(this.updatedActivity!,
+        page.grid.width, page.grid.height);
+      if (!targetPage) {
+        targetPage = {
+          name: `Page ${updatedActivity!.options.user_interface.pages!.length + 1}`,
+          grid: {...page.grid}, items: []
+        };
+        updatedActivity!.options.user_interface.pages!.push(targetPage);
+      }
+
       if (page.name) targetPage.name = page.name;
-      updatedActivity!.options.user_interface.pages!.push(targetPage);
+
+
       page.items.forEach(item => {
         if (item.feature && !selectedFeatures.includes(item.feature)) return;
-        let location = this.getItemLocation(targetPage, item.size, item.location);
+        let location = this.getItemLocation(targetPage!, item.size, item.location);
         if (location == null)
         {
           targetPage = {name: `Page ${updatedActivity!.options!.user_interface!.pages!.length+1}`,
@@ -291,7 +366,7 @@ export class ActivityEditorComponent implements OnInit {
         if (item.text) command.text = item.text;
         if (item.icon) command.icon = item.icon;
         if (item.type === "media_player") command.media_player_id = this.selectedEntity?.entity_id!;
-        targetPage.items.push(command);
+        targetPage!.items.push(command);
       })
     })
     this.operations!.visible = true;

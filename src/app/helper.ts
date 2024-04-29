@@ -1,4 +1,4 @@
-import {Activity, Entity, EntityUsage, Profile, Command, ButtonMapping, UIPage} from "./interfaces";
+import {Activity, Entity, EntityUsage, Profile, Command, ButtonMapping, UIPage, Remote} from "./interfaces";
 
 export class Helper
 {
@@ -173,5 +173,28 @@ export class Helper
         return existingPage;
     }
     return null;
+  }
+
+  static isStandardIcon(icon: string | undefined): boolean {
+    if (!icon) return false;
+    return icon?.startsWith("uc:");
+  }
+
+  static isCustomIcon(icon: string | undefined): boolean {
+    if (!icon) return false;
+    return !icon?.startsWith("uc:");
+  }
+
+  static getIconClass(icon?: string): string
+  {
+    if (icon?.startsWith("uc:"))
+      return "icon icon-" + icon.replace("uc:", "")
+    return ""
+  }
+
+  static getIconURL(remote: Remote, icon: string | undefined) {
+    if (!icon) return "";
+    const filename = icon.replace("custom:", "");
+    return `/api/remote/${remote?.address}/resources/Icon/${filename}`;
   }
 }

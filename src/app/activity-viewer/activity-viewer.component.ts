@@ -23,6 +23,8 @@ import {RouterLink, withComponentInputBinding} from "@angular/router";
 import {ActivityGridComponent, GridItem} from "./activity-grid/activity-grid.component";
 import {ButtonModule} from "primeng/button";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
+import {Helper} from "../helper";
+import {CommandEditorComponent} from "../activity-editor/command-editor/command-editor.component";
 
 @Pipe({name: 'as', standalone: true, pure: true})
 export class AsPipe implements PipeTransform {
@@ -45,7 +47,8 @@ export class AsPipe implements PipeTransform {
     RouterLink,
     ActivityGridComponent,
     ButtonModule,
-    NgxJsonViewerModule
+    NgxJsonViewerModule,
+    CommandEditorComponent
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',
@@ -63,6 +66,8 @@ export class ActivityViewerComponent implements AfterViewInit {
   reversedButtonMap:{ [id: string]: string } = {};
   public Command!: Command;
   @ViewChild("buttonpanel", {static: false}) buttonpanel: OverlayPanel | undefined;
+  @ViewChild("commandeditor", {static: false}) commandeditor: CommandEditorComponent | undefined;
+
   selectedButton: string = "";
   selectedButtonMapping: ButtonMapping | undefined;
 
@@ -92,23 +97,6 @@ export class ActivityViewerComponent implements AfterViewInit {
         this.remoteLoaded(img, svg);
       }
     });
-  }
-
-  isStandardIcon(icon: string | undefined): boolean {
-    if (!icon) return false;
-    return icon?.startsWith("uc:");
-  }
-
-  isCustomIcon(icon: string | undefined): boolean {
-    if (!icon) return false;
-    return !icon?.startsWith("uc:");
-  }
-
-  getIconClass(icon?: string): string
-  {
-    if (icon?.startsWith("uc:"))
-      return "icon icon-" + icon.replace("uc:", "")
-    return ""
   }
 
   view(activity: Activity, editable: boolean): void {
@@ -231,12 +219,6 @@ export class ActivityViewerComponent implements AfterViewInit {
     return `hsl(${stringUniqueHash % 360}, 95%, 40%)`;
   }
 
-  getIconURL(icon: string | undefined) {
-    if (!icon) return "";
-    const filename = icon.replace("custom:", "");
-    return `/api/remote/${this.remote?.address}/resources/Icon/${filename}`;
-  }
-
   gridSourceSelected($event: GridItem) {
     this.gridSource = $event;
     this.cdr.detectChanges();
@@ -263,6 +245,7 @@ export class ActivityViewerComponent implements AfterViewInit {
 
   gridItemClicked($event: GridItem) {
     this.messageService.add({severity:'info', summary: `${$event.index} clicked. TODO`, key: 'activity'});
+    this.commandeditor?.show(this.remote!, $event.item);
     this.cdr.detectChanges();
   }
 
@@ -279,4 +262,6 @@ export class ActivityViewerComponent implements AfterViewInit {
     if (!width || !height) return {};
     return {width: (this.gridWidth/width)+'px', height: (this.gridHeight/height)+'px'};
   }
+
+  protected readonly Helper = Helper;
 }

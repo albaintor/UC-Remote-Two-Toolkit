@@ -120,6 +120,13 @@ export class ServerService {
     }))
   }
 
+  getResources(remote: Remote, type: string): Observable<string[]>
+  {
+    return this.http.get<string[]>(`/api/remote/${remote.address}/local/resources/${type}`).pipe(map(results => {
+      return results;
+    }))
+  }
+
   // getResource(remote: Remote, type: string, id: string): Observable<any>
   // {
   //   return this.http.get<any>(`/api/remote/${remote.address}/resources/${type}/${id}`).pipe(map(results => {

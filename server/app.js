@@ -35,7 +35,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
-app.use(express.static('public/browser'))
+app.use('/', express.static('public/browser'))
 
 // app.use('/', indexRouter);
 // app.use('/users', usersRouter);
@@ -384,6 +384,28 @@ app.get('/api/remote/:address/resources/:type/:id', async (req, res, next) => {
     res.set({'Content-Type': 'image/'+path.extname(resource_id).replace('.', '')});
     console.log('Get file', path.join(RESOURCES_DIR, address, type, resource_id))
     await res.sendFile(path.join(RESOURCES_DIR, address, type, resource_id), { root: '.' });
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
+app.get('/api/remote/:address/local/resources/:type', async (req, res, next) => {
+  const address = req.params.address;
+  const type = req.params.type;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getResources(type, RESOURCES_DIR));
   } catch (error)
   {
     errorHandler(error, req, res, next);

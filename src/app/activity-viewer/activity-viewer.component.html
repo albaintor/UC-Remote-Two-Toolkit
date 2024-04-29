@@ -20,6 +20,7 @@
   </ng-template>
 </p-overlayPanel>
 <p-toast key="activity"></p-toast>
+<app-command-editor #commandeditor></app-command-editor>
 <p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">
   <p-button *ngIf="!editMode" label="Edit this activity" [routerLink]="['/activity/edit', activity?.entity_id]" severity="danger" icon="pi pi-pen" size="small"></p-button>
 <ng-container *ngIf="currentPage">
@@ -28,11 +29,11 @@
     <grid-button [editable]="editMode" *ngFor="let item of grid; let index=index" [index]="index" [source]="gridSource" [item]="item" [style]="getGridSize(item)"
          (sourceSelected)="gridSourceSelected($event)" (destinationSelected)="gridDestinationSelected($event)"
         (itemClicked)="gridItemClicked($event)">
-      <ng-container *ngIf="isStandardIcon(item?.icon)">
-        <span [class]="getIconClass(item?.icon)"></span>
+      <ng-container *ngIf="Helper.isStandardIcon(item?.icon)">
+        <span [class]="Helper.getIconClass(item?.icon)"></span>
       </ng-container>
-      <ng-container *ngIf="isCustomIcon(item?.icon)">
-        <img [src]="getIconURL(item?.icon)" [alt]="item?.icon" width="70" height="70">
+      <ng-container *ngIf="Helper.isCustomIcon(item?.icon)">
+        <img [src]="Helper.getIconURL(remote!, item?.icon)" [alt]="item?.icon" width="70" height="70">
       </ng-container>
 
       <ng-container *ngIf="item?.text">

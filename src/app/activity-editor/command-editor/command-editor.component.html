@@ -1,1 +1,45 @@
-<p>command-editor works!</p>
+<p-toast id="remoteCommand"></p-toast>
+<app-icon-selector (iconSelected)="iconSelected($event)"></app-icon-selector>
+<p-dialog header="Edit command" [(visible)]="visible" [style]="{width: '80vw'}">
+  <div class="formgrid grid" *ngIf="command">
+    <div class="field col">
+      <label for="mode">Toggle text / icon</label>
+      <p-selectButton id="mode" [options]="stateOptions" [(ngModel)]="command.type" optionLabel="label" optionValue="value"></p-selectButton>
+    </div>
+    <div class="field col" *ngIf="command.type === 'text'">
+      <label for="text">Display text</label>
+      <input pInputText id="text" type="text" placeholder="Normal" [(ngModel)]="command.text" />
+    </div>
+    <div class="field col" *ngIf="command.type === 'icon'">
+      <span id="icon" (click)="selectIcon(command)" class="icon-select">
+        <ng-container *ngIf="command.icon && Helper.isStandardIcon(command.icon)">
+          <span [class]="Helper.getIconClass(command.icon)"></span>
+        </ng-container>
+        <ng-container *ngIf="command.icon && Helper.isCustomIcon(command.icon)">
+          <img [src]="Helper.getIconURL(remote!, command.icon)" [alt]="command.icon" width="70" height="70">
+        </ng-container>
+      </span>
+    </div>
+    <div class="field col" *ngIf="command.type === 'media_player'">
+      <label>Media player</label>
+      {{command.media_player_id}}
+    </div>
+
+    <div class="field col">
+      <label>Command</label>
+      {{command.command?.toString()}}
+    </div>
+    <div class="field col">
+      <label for="width">Width</label>
+      <p-inputNumber id="width" [(ngModel)]="command.size!.width" [showButtons]="true" buttonLayout="horizontal" inputId="width" spinnerMode="horizontal" [step]="1"
+          decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus"
+          decrementButtonIcon="pi pi-minus" [min]="1" [max]="4"></p-inputNumber>
+    </div>
+    <div class="field col">
+      <label for="height">Height</label>
+      <p-inputNumber id="height" [(ngModel)]="command.size!.height" [showButtons]="true" buttonLayout="horizontal" inputId="width" spinnerMode="horizontal" [step]="1"
+                     decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus"
+                     decrementButtonIcon="pi pi-minus" [min]="1" [max]="6"></p-inputNumber>
+    </div>
+  </div>
+</p-dialog>

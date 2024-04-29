@@ -1,5 +1,6 @@
 import got, {HTTPError, Options} from 'got'
 import fs from "node:fs";
+import { readdir } from 'node:fs/promises';
 import path from "path";
 import {pipeline as streamPipeline} from 'node:stream/promises';
 
@@ -22,6 +23,14 @@ export class Remote
     this.api_key = api_key;
     this.user = user;
     this.token = token;
+  }
+
+  async getResources(type, resources_directory) {
+    this.resources_directory = path.join(resources_directory, this.address);
+    const target_path = path.join(this.resources_directory, type);
+    if (!fs.existsSync(target_path))
+      return [];
+    return await readdir(target_path);
   }
 
   async loadResources(type, resources_directory)

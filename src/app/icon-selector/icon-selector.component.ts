@@ -23,9 +23,14 @@ export class IconSelectorComponent {
   visible = false;
   remote: Remote | undefined;
   customIcons: string[] = [];
+  ucIcons: {name: string, icon: string}[] = [];
   @Output() iconSelected = new EventEmitter<string>();
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef) {
+    this.server.getUCIconsMap().subscribe(icons => {
+      this.ucIcons = icons;
+      this.cdr.detectChanges();
+    })
   }
 
   show(remote: Remote): void {

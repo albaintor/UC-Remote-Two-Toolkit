@@ -1,4 +1,14 @@
-import {Activity, Entity, EntityUsage, Profile, Command, ButtonMapping, UIPage, Remote} from "./interfaces";
+import {
+  Activity,
+  Entity,
+  EntityUsage,
+  Profile,
+  Command,
+  ButtonMapping,
+  UIPage,
+  Remote,
+  ActivityPageCommand
+} from "./interfaces";
 
 export class Helper
 {
@@ -123,9 +133,9 @@ export class Helper
   {
     query = query.toLowerCase();
     const suggestions = entities.filter(entity => entity.entity_id?.toLowerCase().includes(query) ||
-      entity.name?.toLowerCase().includes(query));
+      Helper.getEntityName(entity)!.toLowerCase().includes(query));
     suggestions.sort((a, b) => {
-      return (a.name ? a.name : "").localeCompare(b.name ? b.name : "");
+      return (a.name ? Helper.getEntityName(a): "")!.localeCompare(b.name ? Helper.getEntityName(b)! : "");
     })
     if (suggestions.length == 0)
     {
@@ -196,5 +206,85 @@ export class Helper
     if (!icon) return "";
     const filename = icon.replace("custom:", "");
     return `/api/remote/${remote?.address}/resources/Icon/${filename}`;
+  }
+
+  static getEntityName(entity: any): string | undefined
+  {
+    if (typeof entity.name === "string") return entity.name;
+    if (entity.name?.['en']) return entity.name['en'];
+    if (entity.name?.['fr']) return entity.name['fr'];
+    return undefined;
+  }
+
+  static isIntersection(rectangle1: {x: number, y: number, width: number, height:number},
+                        rectangle2: {x: number, y: number, width: number, height:number}): boolean
+  {
+    return !( rectangle1.x >= (rectangle2.x + rectangle2.width) ||
+      (rectangle1.x + rectangle1.width) <=  rectangle2.x ||
+      rectangle1.y >= (rectangle2.y + rectangle2.height) ||
+      (rectangle1.y + rectangle1.height) <=  rectangle2.y);
+  }
+
+  static fillSquare(matrix: boolean[][], x: number, y: number, width: number, height: number)
+  {
+    for (let row=y; row<y+height; row++) {
+      for (let col=x; col<x+width; col++) {
+        matrix[row][col] = true;
+      }
+    }
+  }
+
+  static findItem(list: (ActivityPageCommand | null)[], x: number, y: number): boolean
+  {
+    for (let item of list)
+    {
+      if (!item) continue;
+      if (Helper.isIntersection({x: item.location.x, y: item.location.y, width: item.size.width, height: item.size.height},
+        {x, y, width: 1, height: 1}))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static getItemPosition(grid: (ActivityPageCommand | null)[], index: number, gridWidth: number, gridHeight: number): {x: number, y: number, width: number, height: number} | null
+  {
+    const matrix: boolean[][] = new Array(gridHeight)
+      .fill(false)
+      .map(() =>
+        new Array(gridWidth).fill(false)
+      );
+    let x= 0, y = 0;
+    for (let i=0; i < grid.length; i++)
+    {
+      let width = 1, height = 1;
+      if (grid[i] && grid[i]?.size)
+      {
+        width = grid[i]!.size.width!;
+        height = grid[i]!.size.height!;
+      }
+      for (let row =0; row < matrix.length; row++)
+      {
+        for (let col = 0; col < matrix[row].length; col++)
+        {
+          if (matrix[row][col]) continue;
+          if (col+width > gridWidth) break;
+          let rowFilled = false;
+          for (let col2 = col; col2 < width; col2++)
+          {
+            if (matrix[row][col2])
+            {
+              rowFilled = true;
+              break;
+            }
+          }
+          if (rowFilled) break;
+          if (index == i) return {x: col, y: row, width: width, height: height};
+          Helper.fillSquare(matrix, col, row, width, height);
+        }
+      }
+    }
+    return null;
   }
 }

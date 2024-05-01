@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import {OverlayPanel} from "primeng/overlaypanel";
 import {ActivityPageCommand} from "../../interfaces";
+import {Helper} from "../../helper";
 
 export interface GridItem
 {
@@ -35,6 +36,7 @@ export class ActivityGridComponent  implements AfterViewInit{
   @Output() destinationSelected = new EventEmitter<GridItem>();
   @Output() itemClicked = new EventEmitter<GridItem>();
   @ViewChild("griditem", {static: false}) gridItem: ElementRef | undefined;
+  @Input() grid!: { width: number; height: number };
 
   ngAfterViewInit(): void {
     if (!this.editable) return;
@@ -62,6 +64,15 @@ export class ActivityGridComponent  implements AfterViewInit{
   @HostListener('dragover', ['$event']) handleDragOver(event: any){
     if (event.preventDefault) {
       event.preventDefault();
+    }
+    if (this.source?.item != this.item && this.source?.item?.size)
+    {
+      //TODO calculate x,y position of griditem
+      /*let sourceX = this.gridSource?.index! % this.currentPage?.grid.width!;
+      let sourceY = Math.floor(this.gridSource?.index! / this.currentPage?.grid.width!);
+      let destinationX = $event.index! % this.currentPage?.grid.width!;
+      let destinationY = Math.floor($event.index! / this.currentPage?.grid.width!);*/
+      //pointer-events: none;
     }
     event.dataTransfer.dropEffect = 'move';
     return false;

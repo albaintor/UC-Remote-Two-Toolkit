@@ -390,7 +390,7 @@ export class ActivityEditorComponent implements OnInit {
       let intersection = false;
       for (let item of page.items)
       {
-        if (ActivityEditorComponent.isIntersection(
+        if (Helper.isIntersection(
           {x:position.x, y: position.y, width:size.width, height: size.height},
           {x:item.location.x, y: item.location.y, width:item.size.width, height: item.size.height}))
         {
@@ -419,15 +419,6 @@ export class ActivityEditorComponent implements OnInit {
       }
       if (!intersection) return position;
     }
-  }
-
-  static isIntersection(rectangle1: {x: number, y: number, width: number, height:number},
-                        rectangle2: {x: number, y: number, width: number, height:number}): boolean
-  {
-    return !( rectangle1.x >= (rectangle2.x + rectangle2.width) ||
-      (rectangle1.x + rectangle1.width) <=  rectangle2.x ||
-      rectangle1.y >= (rectangle2.y + rectangle2.height) ||
-      (rectangle1.y + rectangle1.height) <=  rectangle2.y);
   }
 
   getTemplateFeatures(template: RemoteMap, includeDisabled = false): string[]
@@ -475,7 +466,7 @@ export class ActivityEditorComponent implements OnInit {
 
   getEntities(entity_type: string) {
     return this.entities.filter(entity => entity.entity_type === entity_type)
-      .sort((a,b) => a.name!?.localeCompare(b.name!));
+      .sort((a,b) => Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!));
   }
 
   replaceEntity(entity_id: string, new_entity_id: string): any
@@ -518,7 +509,7 @@ export class ActivityEditorComponent implements OnInit {
     {
       console.log("Search entity : whole list");
       this.suggestions = [...this.entities.sort((a, b) => {
-        return (a.name ? a.name : "").localeCompare(b.name ? b.name : "");
+        return (a.name ? Helper.getEntityName(a)! : "").localeCompare(b.name ? Helper.getEntityName(b)! : "");
       })];
       this.cdr.detectChanges();
       return;
@@ -535,7 +526,7 @@ export class ActivityEditorComponent implements OnInit {
       const activityEntities = this.entities.filter(entity =>
         this.updatedActivity?.options?.included_entities?.find(activityEntity => activityEntity.entity_id === entity.entity_id));
       this.suggestions = activityEntities.sort((a, b) => {
-        return (a.name ? a.name : "").localeCompare(b.name ? b.name : "");
+        return (a.name ? Helper.getEntityName(a)! : "").localeCompare(b.name ? Helper.getEntityName(b)! : "");
       });
       this.cdr.detectChanges();
       return;

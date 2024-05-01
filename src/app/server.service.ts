@@ -6,7 +6,7 @@ import {
   Config,
   Context,
   EntitiesUsage,
-  Entity,
+  Entity, EntityCommand,
   EntityUsage, Page, Profile, ProfileGroup,
   Profiles,
   Remote, RemoteMap, RemoteRegistration
@@ -28,6 +28,7 @@ export class ServerService {
   entities$ = new Subject<Entity[]>();
   activities$ = new Subject<Activity[]>();
   profiles$: Subject<Profile[]> = new Subject<Profile[]>();
+  configCommands$ = new Subject<EntityCommand[]>();
 
   constructor(private http: HttpClient) { }
 
@@ -123,6 +124,14 @@ export class ServerService {
   getResources(remote: Remote, type: string): Observable<string[]>
   {
     return this.http.get<string[]>(`/api/remote/${remote.address}/local/resources/${type}`).pipe(map(results => {
+      return results;
+    }))
+  }
+
+  getConfigEntityCommands(remote: Remote): Observable<EntityCommand[]>
+  {
+    return this.http.get<EntityCommand[]>(`/api/remote/${remote.address}/cfg/entity/commands`).pipe(map(results => {
+      this.configCommands$.next(results);
       return results;
     }))
   }
@@ -346,5 +355,12 @@ export class ServerService {
       reportProgress: true,
       observe: 'events'
     });
+  }
+
+  getUCIconsMap(): Observable<{name: string, icon: string}[]>
+  {
+    return this.http.get<{name: string, icon: string}[]>('/assets/icons/uc-icons.json').pipe(map(results => {
+      return results;
+    }))
   }
 }

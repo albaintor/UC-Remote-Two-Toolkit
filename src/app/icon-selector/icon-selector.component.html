@@ -1,13 +1,15 @@
-<p-dialog header="Remotes operations" [(visible)]="visible" [style]="{width: '80vw'}">
+<p-dialog header="Select icon" [(visible)]="visible" [style]="{width: '80vw'}">
+  <div class="flex flex-row flex-wrap">
+    <div class="flex align-items-center justify-content-center w-4rem h-4rem p-6" *ngFor="let icon of ucIcons">
+      <span (click)="selectIcon(icon.icon)" class="icon-select" [pTooltip]="icon.name">
+        <span [class]="Helper.getIconClass(icon.icon)"></span>
+      </span>
+    </div>
+  </div>
   <div class="flex flex-row flex-wrap">
     <div class="flex align-items-center justify-content-center w-4rem h-4rem p-6" *ngFor="let icon of customIcons">
       <span id="icon" (click)="selectIcon(icon)" class="icon-select" [pTooltip]="icon">
-        <ng-container *ngIf="Helper.isStandardIcon(icon)">
-          <span [class]="Helper.getIconClass(icon)"></span>
-        </ng-container>
-        <ng-container *ngIf="Helper.isCustomIcon(icon)">
-          <img [src]="Helper.getIconURL(remote!, icon)" [alt]="icon" width="70" height="70">
-        </ng-container>
+        <img [src]="Helper.getIconURL(remote!, icon)" [alt]="icon" width="70" height="70">
       </span>
     </div>
   </div>

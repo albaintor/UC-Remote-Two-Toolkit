@@ -299,4 +299,20 @@ export class Remote
     return JSON.parse(res.body);
   }
 
+  async getConfigEntityCommands()
+  {
+    let headers = this.getHeaders();
+    const limit = 100;
+    const options = {
+      headers: headers,
+      searchParams: {
+        limit,
+        page: 1
+      }
+    }
+    const url = this.getURL() + '/api/cfg/entity/commands';
+    let res = await got.get(url, options);
+    return JSON.parse(res.body);
+  }
+
 }

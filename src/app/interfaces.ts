@@ -1,3 +1,36 @@
+export interface EntityCommand
+{
+  id: string;
+  cmd_id: string;
+  name: {
+    en: string;
+    fr?: string;
+    de?: string
+  }
+  params: [
+    {
+      items?:{
+        field: string;
+        source: string;
+      }
+      name: {
+        en: string;
+        fr?: string;
+        de?: string
+      }
+      param?: string;
+      type: "enum"|"number"|"regex"|"bool"|"selection";
+      values?: string[];
+      default?: number;
+      min?: number;
+      max?: number;
+      step?: number;
+      unit?: string;
+    }
+  ]
+}
+
+
 export interface RemoteRegistration
 {
   key_id: string;
@@ -105,8 +138,7 @@ export interface Context
 
 export interface Entity
 {
-  // name?: string | {'en': string, 'fr': string};
-  name?: string;
+  name?: string | {'en': string, 'fr': string};
   entity_id?: string;
   entity_type: string;
   integration?: string;

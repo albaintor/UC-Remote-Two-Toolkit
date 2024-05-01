@@ -58,7 +58,7 @@
   <ng-container *ngIf="entity && entity.entity_id">
   <div class="fields">
     <p><b>Entity id : </b>{{entity.entity_id}}</p>
-    <p><b>Name : </b><p-chip [label]="entity.name" [style]="getStyle(entity.name!)"></p-chip></p>
+    <p><b>Name : </b><p-chip [label]="Helper.getEntityName(entity)!" [style]="getStyle(Helper.getEntityName(entity)!)"></p-chip></p>
     <p><b>Type : </b><p-chip [label]="entity.entity_type" [style]="getStyle(entity.entity_type)"></p-chip></p>
     <p *ngIf="entityUsages?.activity_entities!.length > 0"><b>Usages in activities : </b>
       <ng-container *ngFor="let activity_entity of entityUsages?.activity_entities">

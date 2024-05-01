@@ -171,15 +171,24 @@ export class ActivityViewerComponent implements AfterViewInit {
 
   getGridItems(): (ActivityPageCommand | null)[]
   {
+    const matrix: boolean[][] = new Array(this.gridHeight)
+      .fill(false)
+      .map(() =>
+        new Array(this.gridWidth).fill(false)
+      );
     const list: (ActivityPageCommand | null)[] = [];
-    for (let y=0; y<this.currentPage?.grid.height!; y++)
+    for (let y=0; y<this.currentPage?.grid.height!;y++)
     {
-      for (let x=0; x<this.currentPage?.grid.width!; x++)
+      for (let x=0; x<this.currentPage?.grid.width!;x++)
       {
         const item = this.currentPage?.items.find(item => item.location.x == x && item.location.y == y);
-        if (item == null) list.push(null);
-        else
+        if (item == null)
+        {
+          if (!Helper.findItem(list, x, y)) list.push(null);
+        }
+        else {
           list.push(item);
+        }
       }
     }
     // console.log("Grid for activity", list);
@@ -196,7 +205,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   {
     const entity = this.server.getEntities().find(entity => entity.entity_id === entityId);
     if (entity?.name)
-      return entity.name;
+      return Helper.getEntityName(entity)!;
     return `Unknown ${entityId}`;
   }
 
@@ -225,27 +234,38 @@ export class ActivityViewerComponent implements AfterViewInit {
   }
 
   gridDestinationSelected($event: GridItem) {
-    let sourceX = this.gridSource?.index! % this.currentPage?.grid.width!;
+    let sourceLocation = Helper.getItemPosition(this.grid, this.gridSource?.index!, this.gridWidth, this.gridHeight);
+    let destinationLocation = Helper.getItemPosition(this.grid, $event.index, this.gridWidth, this.gridHeight);
+    /*let sourceX = this.gridSource?.index! % this.currentPage?.grid.width!;
     let sourceY = Math.floor(this.gridSource?.index! / this.currentPage?.grid.width!);
     let destinationX = $event.index! % this.currentPage?.grid.width!;
-    let destinationY = Math.floor($event.index! / this.currentPage?.grid.width!);
+    let destinationY = Math.floor($event.index! / this.currentPage?.grid.width!);*/
+    if (!destinationLocation)
+    {
+      console.error("Cannot move item", this.gridSource, $event);
+      return;
+    }
     if (this.gridSource?.item?.location)
     {
-      console.log(`Source ${this.gridSource.item.location.x},${this.gridSource.item.location.y} => ${destinationX},${destinationY}`, this.currentPage?.items)
-      this.gridSource.item.location = {x: destinationX, y: destinationY};
+      console.log(`Source ${this.gridSource.item.location.x},${this.gridSource.item.location.y} => ${destinationLocation?.x},${destinationLocation?.y}`, this.currentPage?.items)
+      this.gridSource.item.location = {x: destinationLocation?.x, y: destinationLocation?.y};
     }
     if ($event.item?.location)
     {
-      console.log(`Destination ${$event.item.location.x},${$event.item.location.y} => ${sourceX},${sourceY}`, this.currentPage?.items)
-      $event.item.location = {x: sourceX, y: sourceY};
+      console.log(`Destination ${$event.item.location.x},${$event.item.location.y} => ${sourceLocation?.x},${sourceLocation?.y}`, this.currentPage?.items)
+      $event.item.location = {x: sourceLocation?.x!, y: sourceLocation?.y!};
     }
     // this.messageService.add({severity:'info', summary: `${this.gridSource?.index} (${sourceX},${sourceY}) moved to ${$event.index} (${destinationX},${destinationY})`, key: 'activity'});
     this.cdr.detectChanges();
   }
 
+
   gridItemClicked($event: GridItem) {
-    this.messageService.add({severity:'info', summary: `${$event.index} clicked. TODO`, key: 'activity'});
-    this.commandeditor?.show(this.remote!, $event.item);
+    if ($event.item == undefined)
+    {
+      //$event.item = {size: {width: 1, height: 1}, text: "", location: $event.};
+    }
+    this.commandeditor?.show(this.remote!, this.activity!, $event.item);
     this.cdr.detectChanges();
   }
 
@@ -256,11 +276,22 @@ export class ActivityViewerComponent implements AfterViewInit {
     });
   }
 
-  getGridSize(item: ActivityPageCommand | null): any {
+  getGridItemSize(item: ActivityPageCommand | null): any {
     const width = this.currentPage?.grid.width;
     const height = this.currentPage?.grid.height;
+    const itemWidth = item?.size?.width ? item!.size.width : 1;
+    const itemHeight = item?.size?.height ? item!.size.height : 1;
     if (!width || !height) return {};
-    return {width: (this.gridWidth/width)+'px', height: (this.gridHeight/height)+'px'};
+    const style: any = {width: (itemWidth*this.gridWidth/width)+'px', height: (itemHeight!*this.gridHeight/height)+'px'};
+    if (item?.size?.width! > 1)
+    {
+      style['grid-column-end'] = `span ${item!.size.width}`;
+    }
+    if (item?.size?.height! > 1)
+    {
+      style['grid-row-end'] = `span ${item!.size.height}`;
+    }
+    return style;
   }
 
   protected readonly Helper = Helper;

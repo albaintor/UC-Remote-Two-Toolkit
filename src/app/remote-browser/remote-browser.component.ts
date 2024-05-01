@@ -19,7 +19,18 @@ import {RemoteRegistrationComponent} from "../remote-registration/remote-registr
 import {MenuItem, MessageService, SharedModule} from "primeng/api";
 import {TableModule} from "primeng/table";
 import {UploadedFilesComponent} from "../uploaded-files/uploaded-files.component";
-import {Activity, Config, Context, EntitiesUsage, Entity, EntityUsage, Profile, Profiles, Remote} from "../interfaces";
+import {
+  Activity,
+  Config,
+  Context,
+  EntitiesUsage,
+  Entity,
+  EntityCommand,
+  EntityUsage,
+  Profile,
+  Profiles,
+  Remote
+} from "../interfaces";
 import {ServerService} from "../server.service";
 import {catchError, config, forkJoin, from, map, mergeMap, Observable, of, window} from "rxjs";
 import {HttpErrorResponse, HttpEventType} from "@angular/common/http";
@@ -101,6 +112,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   ]
   entityUsages: EntityUsage | null | undefined;
   localMode = true;
+  configCommands: EntityCommand[] = [];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
   }
@@ -118,11 +130,13 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     const entities = localStorage.getItem("entities");
     const activities = localStorage.getItem("activities");
     const profiles = localStorage.getItem("profiles");
+    const configCommands = localStorage.getItem("configCommands");
     if (entities || activities)
     {
       if (activities) this.activities = JSON.parse(activities);
       if (entities) this.entities = JSON.parse(entities);
       if (profiles) this.profiles = JSON.parse(profiles);
+      if (configCommands) this.configCommands = JSON.parse(configCommands);
       this.server.setEntities(this.entities);
       this.server.setActivities(this.activities);
       this.server.setProfiles(this.profiles);
@@ -211,6 +225,9 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       console.log("Profiles", profiles);
       return profiles;
     })))
+    tasks.push(this.server.getConfigEntityCommands(this.selectedRemote).pipe(map(commands => {
+      this.configCommands = commands;
+    })))
 
     forkJoin(tasks).subscribe({next: (results) => {
         this.messageService.add({
@@ -222,6 +239,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
         localStorage.setItem("entities", JSON.stringify(this.entities));
         localStorage.setItem("activities", JSON.stringify(this.activities));
         localStorage.setItem("profiles", JSON.stringify(this.profiles));
+        localStorage.setItem("configCommands", JSON.stringify(this.configCommands));
         this.localMode = true;
         this.cdr.detectChanges();
       },
@@ -278,7 +296,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   {
     const entity = this.entities.find(entity => entity.entity_id === entityId);
     if (entity?.name)
-      return entity.name;
+      return Helper.getEntityName(entity)!;
     return `Unknown ${entityId}`;
   }
 
@@ -301,7 +319,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     {
       console.log("Search entity : whole list");
       this.suggestions = [...this.entities.sort((a, b) => {
-        return (a.name ? a.name : "").localeCompare(b.name ? b.name : "");
+        return (a.name ? Helper.getEntityName(a)! : "").localeCompare(b.name ? Helper.getEntityName(b)! : "");
       })];
       this.cdr.detectChanges();
       return;
@@ -447,4 +465,6 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       }
     })
   }
+
+  protected readonly Helper = Helper;
 }

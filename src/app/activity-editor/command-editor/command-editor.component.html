@@ -39,7 +39,7 @@
         {{Helper.getEntityName(item)}} ({{item.entity_id}})
       </ng-template>
     </p-dropdown>
-    <p-dropdown [(ngModel)]="selectedCommand" [options]="entityCommands">
+    <p-dropdown [(ngModel)]="selectedCommand" [options]="entityCommands" (ngModelChange)="commandSelected($event)">
       <ng-template pTemplate="selectedItem">
         {{Helper.getEntityName(selectedCommand)}}
       </ng-template>

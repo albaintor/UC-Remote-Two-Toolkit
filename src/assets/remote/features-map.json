@@ -1,0 +1,305 @@
+[
+  {
+    "entity_type": "media_player",
+    "features_map": [
+      {
+        "commands":  ["media_player.back"],
+        "feature": "back"
+      },
+      {
+        "commands":  ["media_player.toggle"],
+        "feature": "toggle"
+      },
+      {
+        "commands":  ["media_player.volume_down", "media_player.volume_up"],
+        "feature": "volume_up_down"
+      },
+      {
+        "commands":  ["media_player.mute_toggle"],
+        "feature": "mute_toggle"
+      },
+      {
+        "commands":  ["media_player.mute"],
+        "feature": "mute"
+      },
+      {
+        "commands":  ["media_player.unmute"],
+        "feature": "unmute"
+      },
+      {
+        "commands":  ["media_player.play_pause"],
+        "feature": "play_pause"
+      },
+      {
+        "commands":  ["media_player.next"],
+        "feature": "next"
+      },
+      {
+        "commands":  ["media_player.previous"],
+        "feature": "previous"
+      },
+      {
+        "commands":  ["media_player.fast_forward"],
+        "feature": "fast_forward"
+      },
+      {
+        "commands":  ["media_player.rewind"],
+        "feature": "rewind"
+      },
+      {
+        "commands":  ["media_player.cursor_up", "media_player.cursor_down", "media_player.cursor_left", "media_player.cursor_right", "media_player.cursor_enter"],
+        "feature": "dpad"
+      },
+      {
+        "commands":  ["media_player.context_menu"],
+        "feature": "context_menu"
+      },
+      {
+        "commands":  ["media_player.home"],
+        "feature": "home"
+      },
+      {
+        "commands":  ["media_player.menu"],
+        "feature": "menu"
+      },
+      {
+        "commands":  ["media_player.function_red", "media_player.function_green", "media_player.function_blue", "media_player.function_yellow"],
+        "feature": "color_buttons"
+      },
+      {
+        "commands":  ["media_player.digit_0", "media_player.digit_1", "media_player.digit_2", "media_player.digit_3","media_player.digit_4",
+          "media_player.digit_5","media_player.digit_6","media_player.digit_7","media_player.digit_8","media_player.digit_9"],
+        "feature": "numpad"
+      },
+      {
+        "commands":  ["media_player.channel_up", "media_player.channel_down"],
+        "feature": "channel_switcher"
+      },
+      {
+        "commands": ["media_player.volume"],
+        "feature": "volume"
+      },
+      {
+        "commands": ["media_player.stop"],
+        "feature": "stop"
+      },
+      {
+        "commands": ["media_player.repeat"],
+        "feature": "repeat"
+      },
+      {
+        "commands": ["media_player.shuffle"],
+        "feature": "shuffle"
+      },
+      {
+        "commands": ["media_player.seek"],
+        "feature": "seek"
+      },
+      {
+        "commands": ["media_player.media_duration"],
+        "feature": "media_duration"
+      },
+      {
+        "commands": ["media_player.media_position"],
+        "feature": "media_position"
+      },
+      {
+        "commands": ["media_player.media_title"],
+        "feature": "media_title"
+      },
+      {
+        "commands": ["media_player.media_artist"],
+        "feature": "media_artist"
+      },
+      {
+        "commands": ["media_player.media_album"],
+        "feature": "media_album"
+      },
+      {
+        "commands": ["media_player.media_image_url"],
+        "feature": "media_image_url"
+      },
+      {
+        "commands": ["media_player.guide"],
+        "feature": "guide"
+      },
+      {
+        "commands": ["media_player.info"],
+        "feature": "info"
+      },
+      {
+        "commands": ["media_player.select_source"],
+        "feature": "select_source"
+      },
+      {
+        "commands": ["media_player.select_sound_mode"],
+        "feature": "select_sound_mode"
+      },
+      {
+        "commands": ["media_player.eject"],
+        "feature": "eject"
+      },
+      {
+        "commands": ["media_player.open_close"],
+        "feature": "open_close"
+      },
+      {
+        "commands": ["media_player.record"],
+        "feature": "record"
+      },
+      {
+        "commands": ["media_player.settings"],
+        "feature": "settings"
+      },
+      {
+        "commands": ["media_player.live"],
+        "feature": "live"
+      },
+      {
+        "commands": ["media_player.audio_track"],
+        "feature": "audio_track"
+      },
+      {
+        "commands": ["media_player.subtitle"],
+        "feature": "subtitle"
+      },
+      {
+        "commands": ["media_player.search"],
+        "feature": "search"
+      },
+      {
+        "commands": ["media_player.my_recordings"],
+        "feature": "my_recordings"
+      }
+    ]
+  },
+  {
+    "entity_type": "light",
+    "features_map": [
+      {
+        "commands": ["light.on", "light.off"],
+        "feature": "on_off"
+      },
+      {
+        "commands": ["light.toggle"],
+        "feature": "toggle"
+      }
+    ]
+  },
+  {
+    "entity_type": "remote",
+    "features_map": [
+      {
+        "commands": ["remote.on", "remote.off"],
+        "feature": "on_off"
+      },
+      {
+        "commands": ["remote.toggle"],
+        "feature": "toggle"
+      },
+      {
+        "commands": ["remote.send_cmd", "remote.send_cmd_sequence"],
+        "feature": "send_cmd"
+      }
+    ]
+  },
+  {
+    "entity_type": "button",
+    "features_map": [
+      {
+        "commands": ["button.push"]
+      }
+    ]
+  },
+  {
+    "entity_type": "switch",
+    "features_map": [
+      {
+        "commands": ["switch.on", "switch.off"],
+        "feature": "on_off"
+      },
+      {
+        "commands": ["switch.toggle"],
+        "feature": "toggle"
+      }
+    ]
+  },
+  {
+    "entity_type": "climate",
+    "features_map": [
+      {
+        "commands": ["climate.on", "climate.off"],
+        "feature": "on_off"
+      },
+      {
+        "commands": ["climate.hvac_mode"],
+        "feature": "heat"
+      },
+      {
+        "commands": ["climate.hvac_mode"],
+        "feature": "cool"
+      },
+      {
+        "commands": ["climate.hvac_mode"],
+        "feature": "fan"
+      },
+      {
+        "commands": ["climate.fan_mode"],
+        "feature": "fan"
+      },
+      {
+        "commands": ["climate.target_temperature"],
+        "feature": "heat"
+      },
+      {
+        "commands": ["climate.target_temperature"],
+        "feature": "cool"
+      },
+      {
+        "commands": ["climate.target_temperature_range"],
+        "feature": "heat"
+      },
+      {
+        "commands": ["climate.target_temperature_range"],
+        "feature": "cool"
+      }
+    ]
+  },
+  {
+    "entity_type": "cover",
+    "features_map": [
+      {
+        "commands": ["cover.open"],
+        "feature": "open"
+      },
+      {
+        "commands": ["cover.close"],
+        "feature": "close"
+      },
+      {
+        "commands": ["cover.stop"],
+        "feature": "stop"
+      },
+      {
+        "commands": ["cover.position"],
+        "feature": "position"
+      },
+      {
+        "commands": ["cover.tilt"],
+        "feature": "tilt"
+      },
+      {
+        "commands": ["cover.tilt_stop"],
+        "feature": "tilt_stop"
+      },
+      {
+        "commands": ["cover.tilt_down"],
+        "feature": "tilt_position"
+      },
+      {
+        "commands": ["cover.tilt_up"],
+        "feature": "tilt_position"
+      }
+    ]
+  }
+]

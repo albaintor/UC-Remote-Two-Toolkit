@@ -6,7 +6,7 @@ import {
   Config,
   Context,
   EntitiesUsage,
-  Entity, EntityCommand,
+  Entity, EntityCommand, EntityFeature,
   EntityUsage, Page, Profile, ProfileGroup,
   Profiles,
   Remote, RemoteMap, RemoteRegistration
@@ -96,6 +96,12 @@ export class ServerService {
     }))
   }
 
+  getFeaturesMap(): Observable<EntityFeature[]>
+  {
+    return this.http.get<EntityFeature[]>('/assets/remote/features-map.json').pipe(map(results => {
+      return results;
+    }))
+  }
 
   getConfig(): Observable<Config>
   {

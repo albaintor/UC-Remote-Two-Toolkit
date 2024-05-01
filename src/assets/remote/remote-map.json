@@ -209,7 +209,7 @@
         },
         "items": [{
           "command": {
-            "cmd_id": "media_player.digit_1"
+              "cmd_id": "media_player.digit_1"
           },
           "location": {
             "x": 0,

@@ -1,7 +1,16 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, ViewChild} from '@angular/core';
 import {ServerService} from "../../server.service";
 import {MessageService} from "primeng/api";
-import {Activity, ActivityPageCommand, Command, Entity, EntityCommand, Remote, RemoteMap} from "../../interfaces";
+import {
+  Activity,
+  ActivityPageCommand,
+  Command,
+  Entity,
+  EntityCommand,
+  EntityFeature,
+  Remote,
+  RemoteMap
+} from "../../interfaces";
 import {FormsModule} from "@angular/forms";
 import {InputTextModule} from "primeng/inputtext";
 import {InputNumberModule} from "primeng/inputnumber";
@@ -53,10 +62,15 @@ export class CommandEditorComponent {
   configEntityCommands: EntityCommand[] = [];
   entityCommands: EntityCommand[] = [];
   selectedCommand: EntityCommand | undefined;
+  featuresMap: EntityFeature[] = [];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
     this.server.getTemplateRemoteMap().subscribe(templates => {
       this.templates = templates;
+      this.cdr.detectChanges();
+    });
+    this.server.getFeaturesMap().subscribe(featuresMap => {
+      this.featuresMap = featuresMap;
       this.cdr.detectChanges();
     })
     const configCommands = localStorage.getItem("configCommands");
@@ -128,6 +142,21 @@ export class CommandEditorComponent {
       this.entityCommands = this.configEntityCommands.filter(command =>
         command.id.startsWith(this.selectedEntity?.entity_type!)).sort((a, b) =>
          Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!));
+      const entity = this.entities.find(entity => entity.entity_id === this.selectedEntity?.entity_id);
+      if (this.featuresMap.length > 0 && entity)
+      {
+        const features = this.featuresMap.find(featuresMap => featuresMap.entity_type === entity.entity_type);
+        if (features)
+        {
+          const commands: string[] = [];
+          features.features_map.forEach(command => {
+            if (!command.feature || entity.features?.includes(command.feature))
+              commands.push(...command.commands);
+          });
+          // console.log("Features", features, commands, this.selectedEntity, entity);
+          this.entityCommands = this.entityCommands.filter(command => commands.includes(command.id));
+        }
+      }
       if (!this.selectedCommand || !this.entityCommands.find(command =>
         this.selectedCommand?.id === command.id))
       {
@@ -157,5 +186,13 @@ export class CommandEditorComponent {
       //TODO
       //this.command = {};
     }
+  }
+
+  commandSelected($event: any) {
+    if (!this.selectedCommand) return;
+    this.command!.command = {entity_id: this.selectedEntity?.entity_id!, cmd_id: this.selectedCommand.cmd_id};
+    this.messageService.add({severity: "info", summary: `Entity ${Helper.getEntityName(this.selectedEntity)}`,
+      detail: `Entity id : ${this.selectedEntity?.entity_id}, command ${this.selectedCommand.cmd_id} assigned`});
+    this.cdr.detectChanges();
   }
 }

@@ -1,3 +1,14 @@
+export interface EntityFeature
+{
+  entity_type: string;
+  features_map: [
+    {
+      commands: string[];
+      feature?: string;
+    }
+  ]
+}
+
 export interface EntityCommand
 {
   id: string;

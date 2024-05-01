@@ -181,11 +181,6 @@ export class CommandEditorComponent {
 
   entitySelected($event: any) {
     this.updateSelection();
-    if (!this.command)
-    {
-      //TODO
-      //this.command = {};
-    }
   }
 
   commandSelected($event: any) {

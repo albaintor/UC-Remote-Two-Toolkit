@@ -1,6 +1,7 @@
 <p-toast id="remoteCommand"></p-toast>
 <app-icon-selector (iconSelected)="iconSelected($event)"></app-icon-selector>
-<p-dialog header="Edit command" [(visible)]="visible" [style]="{width: '80vw', height: '70vw'}" appendTo="body">
+<p-dialog header="Edit command" [(visible)]="visible" [style]="{width: '80vw', height: '70vw'}" appendTo="body"
+  [dismissableMask]="true">
   <div class="flex flex-wrap gap-3" *ngIf="command">
     <div class="flex align-items-center">
       <label for="mode">Toggle text / icon</label>

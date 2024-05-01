@@ -3,6 +3,10 @@
     "entity_type": "media_player",
     "features_map": [
       {
+        "commands": ["media_player.on", "media_player.off"],
+        "feature": "on_off"
+      },
+      {
         "commands":  ["media_player.back"],
         "feature": "back"
       },

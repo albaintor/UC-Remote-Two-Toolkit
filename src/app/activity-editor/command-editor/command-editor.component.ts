@@ -1,4 +1,11 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  ViewChild,
+  ViewEncapsulation
+} from '@angular/core';
 import {ServerService} from "../../server.service";
 import {MessageService} from "primeng/api";
 import {
@@ -23,6 +30,7 @@ import {DialogModule} from "primeng/dialog";
 import {IconSelectorComponent} from "../../icon-selector/icon-selector.component";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
 import {DropdownModule} from "primeng/dropdown";
+import {ButtonModule} from "primeng/button";
 
 @Component({
   selector: 'app-command-editor',
@@ -36,12 +44,14 @@ import {DropdownModule} from "primeng/dropdown";
     ToastModule,
     DialogModule,
     IconSelectorComponent,
-    DropdownModule
+    DropdownModule,
+    ButtonModule
   ],
   templateUrl: './command-editor.component.html',
   styleUrl: './command-editor.component.css',
   providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class CommandEditorComponent {
   @Input() remote: Remote | undefined;
@@ -63,6 +73,7 @@ export class CommandEditorComponent {
   entityCommands: EntityCommand[] = [];
   selectedCommand: EntityCommand | undefined;
   featuresMap: EntityFeature[] = [];
+  backupCommand : ActivityPageCommand | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
     this.server.getTemplateRemoteMap().subscribe(templates => {
@@ -96,6 +107,7 @@ export class CommandEditorComponent {
     this.activityEntities = this.activity?.options?.included_entities?.sort((a, b) =>
       Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!))!;
     this.command = command;
+    this.backupCommand = JSON.parse(JSON.stringify(command));
     this.visible = true;
     this.cdr.detectChanges();
     if (this.configEntityCommands.length == 0)
@@ -189,5 +201,12 @@ export class CommandEditorComponent {
     this.messageService.add({severity: "info", summary: `Entity ${Helper.getEntityName(this.selectedEntity)}`,
       detail: `Entity id : ${this.selectedEntity?.entity_id}, command ${this.selectedCommand.cmd_id} assigned`});
     this.cdr.detectChanges();
+  }
+
+  undoChanges($event: MouseEvent) {
+    this.command = this.backupCommand;
+    this.backupCommand = JSON.parse(JSON.stringify(this.command));
+    this.initSelection();
+    this.updateSelection();
   }
 }

@@ -28,7 +28,7 @@ import {CheckboxModule} from "primeng/checkbox";
 import {ButtonModule} from "primeng/button";
 import {Helper} from "../helper";
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
-import {RemoteOperationsComponent} from "./remote-operations/remote-operations.component";
+import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
 
 @Component({
   selector: 'app-activity-editor',
@@ -224,6 +224,9 @@ export class ActivityEditorComponent implements OnInit {
       this.messageService.add({severity:"info", summary: "No modifications applied"});
       this.cdr.detectChanges();
       return;
+    }
+    else {
+      this.operations!.visible = true;
     }
 
     this.dump = this.remoteOperations;

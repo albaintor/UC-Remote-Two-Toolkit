@@ -28,7 +28,7 @@ import {ToastModule} from "primeng/toast";
 import {jsonHelpUsage} from "@angular/cli/src/command-builder/utilities/json-help";
 import {DialogModule} from "primeng/dialog";
 import {IconSelectorComponent} from "../../icon-selector/icon-selector.component";
-import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
+import {RemoteOperationsComponent} from "../../remote-operations/remote-operations.component";
 import {DropdownModule} from "primeng/dropdown";
 import {ButtonModule} from "primeng/button";
 

@@ -1,0 +1,66 @@
+<div class="progress-spinner" *ngIf="progress">
+  <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+</div>
+<p-toast></p-toast>
+<h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Remote Two configuration toolkit</h2>
+<p-menubar [model]="items">
+  <ng-template pTemplate="end">
+    <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
+      <ng-template pTemplate="selectedItem">
+        <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
+        <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
+      </ng-template>
+      <ng-template let-item pTemplate="item">
+        {{item.remote_name}} ({{item.address}})
+      </ng-template>
+    </p-dropdown>
+  </ng-template>
+</p-menubar>
+<ng-container *ngIf="progress">
+  {{progressDetail}}<br>
+  <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
+</ng-container>
+<app-entity-viewer #entityviewer></app-entity-viewer>
+<br>
+<ng-container *ngIf="!oldEntity">Entity to be replaced</ng-container>
+<p-chip *ngIf="oldEntity" [label]="''+oldEntity.name+' ('+oldEntity.entity_id+')'" />&nbsp;=>&nbsp;
+<ng-container *ngIf="!newEntity">Entity to replace</ng-container>
+<p-chip *ngIf="newEntity" [label]="''+newEntity.name+' ('+newEntity.entity_id+')'" />&nbsp;
+<p-button label="Reset" (onClick)="reset()" severity="danger" icon="pi pi-times" size="small" [rounded]="true"></p-button>&nbsp;&nbsp;
+<p-button [disabled]="oldEntity == undefined || newEntity == undefined" label="Submit" icon="pi pi-check"
+          (click)="replaceEntity(oldEntity!, newEntity!)"/>
+<h2>Select entity to replace</h2>
+<p-table [value]="entities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+         dataKey="entity_id" columnResizeMode="expand">
+  <ng-template pTemplate="header">
+    <tr>
+      <th pSortableColumn="entity_id" pResizableColumn>Entity ID<p-sortIcon field="entity_id"></p-sortIcon></th>
+      <th pSortableColumn="name" pResizableColumn>Name<p-sortIcon field="name"></p-sortIcon></th>
+      <th pSortableColumn="integration_id" pResizableColumn>Driver<p-sortIcon field="integration_id"></p-sortIcon></th>
+      <th pSortableColumn="entity_type" pResizableColumn>Entity type<p-sortIcon field="entity_type"></p-sortIcon></th>
+      <th pResizableColumn>Features</th>
+      <th pSortableColumn="filename" pResizableColumn>Path<p-sortIcon field="filename"/></th>
+    </tr>
+    <tr>
+      <th><p-columnFilter type="text" field="entity_id"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="name"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="type"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="integration_id"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="entity_type"></p-columnFilter></th>
+      <th>&nbsp;</th>
+      <th><p-columnFilter type="text" field="filename"></p-columnFilter></th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-entity>
+    <tr>
+      <td><a [routerLink]="[]" (click)="selectEntity(entity)">{{entity.entity_id}}</a></td>
+      <td><p-chip [label]="entity.name" [style]="getStyle(entity.name)" (click)="entityviewer.view(entity)"></p-chip></td>
+      <td><p-chip [label]="entity.integration_id" [style]="getStyle(entity.integration_id)"></p-chip></td>
+      <td><p-chip [label]="entity.entity_type" [style]="getStyle(entity.entity_type)"></p-chip></td>
+      <td><ng-container *ngFor="let feature of entity['features']">
+        <p-chip [label]="feature" [style]="getStyle(feature)"></p-chip> </ng-container></td>
+      <td><span>{{entity.filename}}</span></td>
+    </tr>
+  </ng-template>
+</p-table>
+<app-remote-operations #operations [operations]="remoteOperations" [remote]="selectedRemote"></app-remote-operations>

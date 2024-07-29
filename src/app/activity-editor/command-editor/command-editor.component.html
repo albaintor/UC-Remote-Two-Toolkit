@@ -65,7 +65,7 @@
       <label for="width">Width</label>
     </div>
     <div class="flex-shrink-0 align-items-center">
-      <p-inputNumber inputStyle="width:30px" id="width" [(ngModel)]="command.size!.width" [showButtons]="true" buttonLayout="horizontal" inputId="width" spinnerMode="horizontal" [step]="1"
+      <p-inputNumber id="width" [(ngModel)]="command.size!.width" [showButtons]="true" buttonLayout="horizontal" inputId="width" spinnerMode="horizontal" [step]="1"
           decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus"
           decrementButtonIcon="pi pi-minus" [min]="1" [max]="4" styleClass="input-number"></p-inputNumber>
     </div>
@@ -73,7 +73,7 @@
       <label for="height">Height</label>
     </div>
     <div class="flex-shrink-0 align-items-center">
-      <p-inputNumber inputStyle="width:30px" id="height" [(ngModel)]="command.size!.height" [showButtons]="true" buttonLayout="horizontal" inputId="width" spinnerMode="horizontal" [step]="1"
+      <p-inputNumber id="height" [(ngModel)]="command.size!.height" [showButtons]="true" buttonLayout="horizontal" inputId="width" spinnerMode="horizontal" [step]="1"
                      decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus"
                      decrementButtonIcon="pi pi-minus" [min]="1" [max]="6" styleClass="input-number"></p-inputNumber>
     </div>

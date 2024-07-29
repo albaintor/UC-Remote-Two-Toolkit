@@ -109,6 +109,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
     {label: 'Load Remote entities', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true},
     {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
+    {label: 'Rename entity', routerLink:'/entity/rename', icon: 'pi pi-file-edit'},
   ]
   entityUsages: EntityUsage | null | undefined;
   localMode = true;

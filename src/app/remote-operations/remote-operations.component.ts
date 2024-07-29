@@ -2,12 +2,12 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input} from '@ang
 import {DialogModule} from "primeng/dialog";
 import {ToastModule} from "primeng/toast";
 import {MessageService} from "primeng/api";
-import {ServerService} from "../../server.service";
+import {ServerService} from "../server.service";
 import {ButtonModule} from "primeng/button";
 import {NgIf} from "@angular/common";
 import {TableModule} from "primeng/table";
 import {TooltipModule} from "primeng/tooltip";
-import {OperationStatus, Remote, RemoteOperation} from "../../interfaces";
+import {OperationStatus, Remote, RemoteOperation} from "../interfaces";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {catchError, forkJoin, from, map, mergeMap, of} from "rxjs";
 import {ChipModule} from "primeng/chip";

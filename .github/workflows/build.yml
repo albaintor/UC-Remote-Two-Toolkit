@@ -35,7 +35,7 @@ jobs:
           echo "VERSION=$(git describe --match "v[0-9]*" --tags HEAD --always)" >> $env:GITHUB_ENV
 
       - name: Cache node modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-node-modules
         with:
@@ -83,7 +83,7 @@ jobs:
 
       - name: Create upload artifact
         run: |
-          Compress-Archive -Path ${{ env.GITHUB_WORKSPACE }}/artifacts/* -Destination ${{ env.ARTIFACT_NAME }}.zip
+          Compress-Archive -Path ${{ github.workspace }}/artifacts/* -Destination ${{ env.ARTIFACT_NAME }}.zip
 
       - uses: actions/upload-artifact@v4
         id: upload_artifact
@@ -112,7 +112,7 @@ jobs:
           echo "VERSION=$(git describe --match "v[0-9]*" --tags HEAD --always)" >> $GITHUB_ENV
 
       - name: Cache node modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-node-modules
         with:

@@ -84,8 +84,9 @@ jobs:
       - name: Create upload artifact
         shell: bash
         run: |
-          tar czvf ${{ env.ARTIFACT_NAME }}.tar.gz -C ${GITHUB_WORKSPACE}/artifacts .
+          zip -r ${{ env.ARTIFACT_NAME }}.zip ${GITHUB_WORKSPACE}/artifacts
           ls -lah
+        # tar czvf ${{ env.ARTIFACT_NAME }}.tar.gz -C ${GITHUB_WORKSPACE}/artifacts .
 
       - uses: actions/upload-artifact@v4
         id: upload_artifact

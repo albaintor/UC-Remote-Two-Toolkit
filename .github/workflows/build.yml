@@ -82,13 +82,8 @@ jobs:
           echo "ARTIFACT_NAME=r2toolkit-${{ env.VERSION }}-windows" >> $GITHUB_ENV
 
       - name: Create upload artifact
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r ${{ env.ARTIFACT_NAME }}.zip ${GITHUB_WORKSPACE}/artifacts
-        # run: |
-        #  zip -r ${{ env.ARTIFACT_NAME }}.zip ${GITHUB_WORKSPACE}/artifacts
-        #  ls -lah
-        # tar czvf ${{ env.ARTIFACT_NAME }}.tar.gz -C ${GITHUB_WORKSPACE}/artifacts .
+        run: |
+          Compress-Archive -Path ${GITHUB_WORKSPACE}/artifacts/* -Destination ${{ env.ARTIFACT_NAME }}.zip
 
       - uses: actions/upload-artifact@v4
         id: upload_artifact

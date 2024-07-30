@@ -79,7 +79,7 @@ jobs:
           mkdir -p artifacts
           cp server/r2tool-server.exe artifacts/
           cp -r server/public artifacts/
-          echo ("ARTIFACT_NAME=r2toolkit-"+$env.VERSION+"-windows") >> $env:GITHUB_ENV
+          echo "ARTIFACT_NAME=r2toolkit-${{ env.VERSION }}-windows" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Create upload artifact
         shell: bash

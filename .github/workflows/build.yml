@@ -34,7 +34,7 @@ jobs:
           echo "VERSION=$(git describe --match "v[0-9]*" --tags HEAD --always)" >> $GITHUB_ENV
 
       - name: Cache node modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-node-modules
         with:
@@ -64,6 +64,8 @@ jobs:
           npm ci
           node --experimental-sea-config sea-config.json
           cp $(command -v node) server
+        # On Windows :
+        # node -e "require('fs').copyFileSync(process.execPath, 'rc2tool-server.exe')"
 
       - name: Prepare artifacts
         shell: bash
@@ -71,6 +73,10 @@ jobs:
           mkdir -p artifacts
           cp -r server/* artifacts/
           echo "ARTIFACT_NAME=r2toolkit-${{ env.VERSION }}-aarch64" >> $GITHUB_ENV
+
+      - name: Create upload artifact
+        shell: bash
+        run: |
           tar czvf ${{ env.ARTIFACT_NAME }}.tar.gz -C ${GITHUB_WORKSPACE}/artifacts .
           ls -lah
 

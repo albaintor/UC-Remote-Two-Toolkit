@@ -68,6 +68,7 @@ jobs:
       - name: Prepare artifacts
         shell: bash
         run: |
+          mkdir -p artifacts
           cp -r server/* artifacts/
           echo "ARTIFACT_NAME=r2toolkit-${{ env.VERSION }}-aarch64" >> $GITHUB_ENV
           tar czvf ${{ env.ARTIFACT_NAME }}.tar.gz -C ${GITHUB_WORKSPACE}/artifacts .

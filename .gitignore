@@ -8,6 +8,7 @@
 
 # Node
 /node_modules
+/server/node_modules
 npm-debug.log
 yarn-error.log
 
@@ -42,3 +43,6 @@ testem.log
 Thumbs.db
 
 /server/config.json
+/server/conf
+/server/public
+/server/resources

@@ -68,6 +68,7 @@ export interface RemoteOperation
   api: string;
   body: any;
   status?: OperationStatus;
+  message?: any;
 }
 
 export interface RemoteButtonMap

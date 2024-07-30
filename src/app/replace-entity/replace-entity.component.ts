@@ -16,6 +16,7 @@ import {EntityViewerComponent} from "../entity-viewer/entity-viewer.component";
 import {ButtonModule} from "primeng/button";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
 import {forkJoin, from, map, mergeMap, Observable} from "rxjs";
+import {MessagesModule} from "primeng/messages";
 
 @Component({
   selector: 'app-replace-entity',
@@ -35,6 +36,7 @@ import {forkJoin, from, map, mergeMap, Observable} from "rxjs";
     EntityViewerComponent,
     ButtonModule,
     RemoteOperationsComponent,
+    MessagesModule,
   ],
   templateUrl: './replace-entity.component.html',
   styleUrl: './replace-entity.component.css',
@@ -91,6 +93,14 @@ export class ReplaceEntityComponent implements OnInit{
   initMenu()
   {
     this.items = [...this.availableItems];
+  }
+
+  getUsedActivities(entity: Entity): Activity[]
+  {
+    if (!entity.entity_id) return [];
+    return this.activities.filter(activity => activity.options?.included_entities?.find(includedEntity =>
+      includedEntity.entity_id == entity.entity_id
+    ));
   }
 
   loadRemoteData():void
@@ -303,4 +313,10 @@ export class ReplaceEntityComponent implements OnInit{
 
   }
 
+  invertEntities() {
+    let entity = this.oldEntity;
+    this.oldEntity = this.newEntity;
+    this.newEntity = entity;
+    this.cdr.detectChanges();
+  }
 }

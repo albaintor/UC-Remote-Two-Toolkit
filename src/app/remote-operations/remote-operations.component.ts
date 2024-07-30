@@ -58,6 +58,23 @@ export class RemoteOperationsComponent {
     return {"background-color" : color};
   }
 
+  getErrorMessage(error: any): string
+  {
+    if (error.error?.body)
+    {
+      try {
+        const body = JSON.parse(error.error?.body);
+        if (body.message) return body.message;
+        return JSON.stringify(body);
+      } catch(err) {
+      }
+    }
+    try {
+      return JSON.stringify(error.error);
+    } catch (e) {}
+    return error.toString();
+  }
+
   updateRemote() {
     if (!this.remote) return;
     const operations = from(this.operations).pipe(
@@ -71,6 +88,7 @@ export class RemoteOperationsComponent {
           }),
             catchError(error => {
               operation.status = OperationStatus.Error;
+              operation.message = this.getErrorMessage(error);
               console.error("Error during update", operation, error);
               return of(operation);
           }));
@@ -83,6 +101,7 @@ export class RemoteOperationsComponent {
             }),
             catchError(error => {
               operation.status = OperationStatus.Error;
+              operation.message = this.getErrorMessage(error);
               console.error("Error during update", operation, error);
               return of(operation);
             }));
@@ -95,6 +114,7 @@ export class RemoteOperationsComponent {
             }),
             catchError(error => {
               operation.status = OperationStatus.Error;
+              operation.message = this.getErrorMessage(error);
               console.error("Error during update", operation, error);
               return of(operation);
             }));
@@ -107,6 +127,7 @@ export class RemoteOperationsComponent {
             }),
             catchError(error => {
               operation.status = OperationStatus.Error;
+              operation.message = this.getErrorMessage(error);
               console.error("Error during update", operation, error);
               return of(operation);
             }));

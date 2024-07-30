@@ -293,7 +293,7 @@ export class ActivityEditorComponent implements OnInit {
         && ((existing_button.long_press && button.long_press === true) || existing_button.short_press));
       if (button.feature && !selectedFeatures.includes(button.feature)) return;
       if (button.simple_command === true && !this.selectedEntity?.options?.simple_commands?.includes(button.cmd_id)) {
-        console.log("TOTO", button.cmd_id, this.selectedEntity?.options?.simple_commands);
+        //console.log("TOTO", button.cmd_id, this.selectedEntity?.options?.simple_commands);
         return
       }
 
@@ -368,11 +368,12 @@ export class ActivityEditorComponent implements OnInit {
           }
           updatedActivity!.options!.user_interface!.pages!.push(targetPage);
         }
-        const command: ActivityPageCommand = {location, size: item.size, type: item.type,
+        let command: ActivityPageCommand = {location, size: item.size, type: item.type,
           command: {entity_id: this.selectedEntity?.entity_id!,...item.command} as any};
+        if (item.type === "media_player")
+          command = {location, size: item.size, type: item.type, media_player_id: this.selectedEntity?.entity_id!};
         if (item.text) command.text = item.text;
         if (item.icon) command.icon = item.icon;
-        if (item.type === "media_player") command.media_player_id = this.selectedEntity?.entity_id!;
         targetPage!.items.push(command);
       })
     })

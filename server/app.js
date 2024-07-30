@@ -55,13 +55,13 @@ app.get('/server/api', (req, res, next) => {
   for (let key in req.headers) {
     headers[key] = req.headers[key];
   }
+  if (!url.startsWith('http://')) url = 'http://'+url;
   headers['host'] = (new URL(url)).host;
   headers['User-Agent'] = '';
   const options = {
     headers: headers,
     searchParams: req.query,
   }
-  if (!url.startsWith('http://')) url = 'http://'+url;
   console.log('Proxy get', url, req.query);
   got.get(url, options).then(proxyres => {
     let resBody;
@@ -87,13 +87,13 @@ app.delete('/server/api', (req, res, next) => {
   for (let key in req.headers) {
     headers[key] = req.headers[key];
   }
+  if (!url.startsWith('http://')) url = 'http://'+url;
   headers['host'] = (new URL(url)).host;
   headers['User-Agent'] = '';
   const options = {
     headers: headers,
     searchParams: req.query,
   }
-  if (!url.startsWith('http://')) url = 'http://'+url;
   console.log('Proxy delete', url, req.query);
   got.delete(url, options).then(proxyres => {
     let resBody;
@@ -115,6 +115,7 @@ app.post('/server/api', (req, res, next) => {
   for (let key in req.headers) {
     headers[key] = req.headers[key];
   }
+  if (!url.startsWith('http://')) url = 'http://'+url;
   headers['host'] = (new URL(url)).host;
   headers['User-Agent'] = '';
   const options = {
@@ -169,11 +170,12 @@ app.patch('/server/api', (req, res, next) => {
 })
 
 app.put('/server/api', (req, res, next) => {
-  const url = req.headers.destinationurl;
+  let url = req.headers.destinationurl;
   let headers = {}
   for (let key in req.headers) {
     headers[key] = req.headers[key];
   }
+  if (!url.startsWith('http://')) url = 'http://'+url;
   headers['host'] = (new URL(url)).host;
   headers['User-Agent'] = '';
   const options = {
@@ -668,8 +670,9 @@ function errorHandler(error, req, res, next) {
     console.log('Erreur serveur réponse', message);
     if (error.response.body)
     {
-      const httpError = createHttpError(error.response.statusCode, error.response.body, {headers: error.headers});
-      return next(httpError);
+      return res.status(error.response.statusCode).json(message);
+      // const httpError = createHttpError(error.response.statusCode, error.response.body, {headers: error.headers});
+      // return next(httpError);
     }
     else
       return res.status(error.response.statusCode).json(message);

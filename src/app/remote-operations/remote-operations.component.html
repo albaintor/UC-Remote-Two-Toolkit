@@ -13,9 +13,10 @@
       <tr>
         <td>{{operation.method}}</td>
         <td>{{operation.api}}</td>
-        <td><p-chip [label]="getStatusLabel(operation.status)" [style]="getStatusLabelStyle(operation.status)"></p-chip></td>
+        <td><p-chip [label]="getStatusLabel(operation.status)" [style]="getStatusLabelStyle(operation.status)"></p-chip>
+        <ng-container *ngIf="operation.message">{{operation.message}}</ng-container></td>
         <td>&nbsp;</td>
-        <td  [style]="{width: '60%'}"><ngx-json-viewer [json]="operation.body" [depth]="1"></ngx-json-viewer></td>
+        <td [style]="{width: '60%'}"><ngx-json-viewer [json]="operation.body" [depth]="1"></ngx-json-viewer></td>
       </tr>
     </ng-template>
   </p-table>

@@ -91,6 +91,7 @@ export class RemoteRegistrationComponent {
   }
 
   deleteRemote(remote: any) {
+    console.info("Unregistering remote", remote);
     this.server.unregisterRemote(remote).subscribe({
       next: ((results) => {
         this.messageService.add({severity: "success", summary: "Remote unregistered",

@@ -1,4 +1,4 @@
 {
-  "main": "app.js",
-  "output": "app-prep.blob"
+  "main": "bundle.js",
+  "output": "sea-prep.blob"
 }

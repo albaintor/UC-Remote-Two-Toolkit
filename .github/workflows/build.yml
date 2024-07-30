@@ -63,19 +63,24 @@ jobs:
         run: |
           cd server
           npm ci
+          echo "Building NodeJS app to bundle compatible with CommonJS format for executable injection"
+          npx esbuild --format=cjs --target=node21 --platform=node --bundle --outfile=bundle.js app.js
+          echo "Creating blob for injection"
           node --experimental-sea-config sea-config.json
           node -e "require('fs').copyFileSync(process.execPath, 'r2tool-server.exe')"
+          echo "Injecting blob in NodeJS executable"
           npx postject r2tool-server.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
         # signtool remove /s r2tool-server.exe
-        # signtool sign /fd SHA256 r2tool-server.exe 
+        # signtool sign /fd SHA256 r2tool-server.exe
         # npx postject r2tool-server.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
 
       - name: Prepare artifacts
         shell: bash
         run: |
           mkdir -p artifacts
-          cp -r server/* artifacts/
-          echo "ARTIFACT_NAME=r2toolkit-${{ env.VERSION }}-aarch64" >> $env:GITHUB_ENV
+          cp server/r2tool-server.exe artifacts/
+          cp -r server/public artifacts/
+          echo "ARTIFACT_NAME=r2toolkit-${{ env.VERSION }}-windows" >> $env:GITHUB_ENV
 
       - name: Create upload artifact
         shell: bash
@@ -138,8 +143,14 @@ jobs:
         run: |
           cd server
           npm ci
+          echo "Building NodeJS app to bundle compatible with CommonJS format for executable injection"
+          npx esbuild --format=cjs --target=node21 --platform=node --bundle --outfile=bundle.js app.js
+          echo "Creating blob for injection"
           node --experimental-sea-config sea-config.json
-          cp $(command -v node) server
+          cp $(command -v node) r2tool-server
+          echo "Injecting blob in NodeJS executable"
+          npx postject r2tool-server NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+          node --experimental-sea-config sea-config.json
         # On Windows :
         # node -e "require('fs').copyFileSync(process.execPath, 'r2tool-server.exe')"
 
@@ -147,7 +158,8 @@ jobs:
         shell: bash
         run: |
           mkdir -p artifacts
-          cp -r server/* artifacts/
+          cp server/r2tool-server.exe artifacts/
+          cp -r server/public artifacts/
           echo "ARTIFACT_NAME=r2toolkit-${{ env.VERSION }}-aarch64" >> $GITHUB_ENV
 
       - name: Create upload artifact

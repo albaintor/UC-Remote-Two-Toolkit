@@ -72,7 +72,6 @@ jobs:
           npx postject r2tool-server.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
         # signtool remove /s r2tool-server.exe
         # signtool sign /fd SHA256 r2tool-server.exe
-        # npx postject r2tool-server.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
 
       - name: Prepare artifacts
         shell: bash
@@ -80,7 +79,7 @@ jobs:
           mkdir -p artifacts
           cp server/r2tool-server.exe artifacts/
           cp -r server/public artifacts/
-          echo "ARTIFACT_NAME=r2toolkit-${{ env.VERSION }}-windows" >> $env:GITHUB_ENV
+          echo ("ARTIFACT_NAME=r2toolkit-"+$env.VERSION+"-windows") >> $env:GITHUB_ENV
 
       - name: Create upload artifact
         shell: bash
@@ -151,14 +150,12 @@ jobs:
           echo "Injecting blob in NodeJS executable"
           npx postject r2tool-server NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
           node --experimental-sea-config sea-config.json
-        # On Windows :
-        # node -e "require('fs').copyFileSync(process.execPath, 'r2tool-server.exe')"
 
       - name: Prepare artifacts
         shell: bash
         run: |
           mkdir -p artifacts
-          cp server/r2tool-server.exe artifacts/
+          cp server/r2tool-server artifacts/
           cp -r server/public artifacts/
           echo "ARTIFACT_NAME=r2toolkit-${{ env.VERSION }}-aarch64" >> $GITHUB_ENV
 

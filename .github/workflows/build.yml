@@ -12,7 +12,8 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  HASH_FILENAME: r2-tool.hash
+  HASH_FILENAME_WINDOWS: r2-tool-windows.hash
+  HASH_FILENAME: r2-tool-ubuntu.hash
 
 jobs:
   build-windows:
@@ -205,6 +206,8 @@ jobs:
         if: "!contains(github.ref, 'tags/v')"
         run: |
           # append timestamp
+          for filename in *.zip; do mv $filename "$(basename $filename .zip)-${{ env.TIMESTAMP }}.zip"; done;
+          for filename in *.zip; do echo "sha256  `sha256sum $filename`" >> ${{ env.HASH_FILENAME_WINDOWS }}; done;
           for filename in *.tar.gz; do mv $filename "$(basename $filename .tar.gz)-${{ env.TIMESTAMP }}.tar.gz"; done;
           for filename in *.tar.gz; do echo "sha256  `sha256sum $filename`" >> ${{ env.HASH_FILENAME }}; done;
 
@@ -217,12 +220,15 @@ jobs:
           prerelease: true
           title: "Development Build"
           files: |
+            *.zip
             *.tar.gz
+            ${{ env.HASH_FILENAME_WINDOWS }}
             ${{ env.HASH_FILENAME }}
 
       - name: Create GitHub release archives
         if: "contains(github.ref, 'tags/v')"
         run: |
+          for filename in *.zip; do echo "sha256  `sha256sum $filename`" >> ${{ env.HASH_FILENAME_WINDOWS }}; done;
           for filename in *.tar.gz; do echo "sha256  `sha256sum $filename`" >> ${{ env.HASH_FILENAME }}; done;
 
       - name: Create Release
@@ -233,4 +239,6 @@ jobs:
           prerelease: false
           files: |
             *.tar.gz
+            *.zip
+            ${{ env.HASH_FILENAME_WINDOWS }}
             ${{ env.HASH_FILENAME }}

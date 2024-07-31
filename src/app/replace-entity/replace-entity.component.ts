@@ -1,5 +1,15 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
-import {Activity, Command, Config, Entity, OperationStatus, Profile, Remote, RemoteOperation} from "../interfaces";
+import {
+  Activity,
+  ActivitySequence,
+  Command,
+  Config,
+  Entity,
+  OperationStatus,
+  Profile,
+  Remote,
+  RemoteOperation
+} from "../interfaces";
 import {MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
 import {ActivatedRoute} from "@angular/router";
@@ -17,6 +27,11 @@ import {ButtonModule} from "primeng/button";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
 import {forkJoin, from, map, mergeMap, Observable} from "rxjs";
 import {MessagesModule} from "primeng/messages";
+
+class Message {
+  title: string = "";
+  message: string = "";
+}
 
 @Component({
   selector: 'app-replace-entity',
@@ -63,6 +78,8 @@ export class ReplaceEntityComponent implements OnInit{
   newEntity: Entity | undefined;
   profiles: Profile[] | undefined;
   localMode: boolean = false;
+  orphanEntities: Entity[] = [];
+  messages: Message[] = [];
 
   @ViewChild(RemoteOperationsComponent) operations: RemoteOperationsComponent | undefined;
 
@@ -81,11 +98,14 @@ export class ReplaceEntityComponent implements OnInit{
     })
     const entities = localStorage.getItem("entities");
     const activities = localStorage.getItem("activities");
-    if (entities || activities)
+    const orphans = localStorage.getItem("orphans");
+    if (entities || activities || orphans)
     {
       if (activities) this.activities = JSON.parse(activities);
       if (entities) this.entities = JSON.parse(entities);
+      if (orphans) this.orphanEntities = JSON.parse(orphans);
       this.server.setEntities(this.entities);
+      this.getOrphans();
       this.cdr.detectChanges();
     }
   }
@@ -103,6 +123,29 @@ export class ReplaceEntityComponent implements OnInit{
     ));
   }
 
+  getEntityName(entity:Entity): string
+  {
+    if (!entity || !entity.name) return "";
+    if (typeof entity.name === 'string')
+      return entity.name;
+    if (entity.name?.en)
+      return entity.name.en;
+    return "";
+  }
+
+  getOrphans()
+  {
+    // Add orphan entities
+    this.activities.forEach(activity => {
+      activity.options?.included_entities?.forEach(include_entity => {
+        if (!this.entities.find(entity => entity.entity_id == include_entity.entity_id)) {
+          this.entities.push(include_entity);
+          this.orphanEntities.push(include_entity);
+        }
+      })
+    })
+  }
+
   loadRemoteData():void
   {
     if (!this.selectedRemote)
@@ -114,6 +157,10 @@ export class ReplaceEntityComponent implements OnInit{
     this.progress = true;
     this.remoteProgress = 0;
     // this.items.filter(item => (item as any).block == true).forEach(item => item.disabled = true);
+    this.entities = [];
+    this.activities = [];
+    this.profiles = [];
+    this.orphanEntities = [];
     this.cdr.detectChanges();
     const tasks: Observable<any>[] = [];
     tasks.push(this.server.getRemoteEntities(this.selectedRemote).pipe(map((entities) => {
@@ -150,6 +197,8 @@ export class ReplaceEntityComponent implements OnInit{
     })))
 
     forkJoin(tasks).subscribe({next: (results) => {
+      // Add orphan entities
+        this.getOrphans();
         this.messageService.add({
           severity: "success", summary: "Remote data loaded",
           detail: `${this.entities.length} entities and ${this.activities.length} activities extracted.`
@@ -157,6 +206,7 @@ export class ReplaceEntityComponent implements OnInit{
         localStorage.setItem("entities", JSON.stringify(this.entities));
         localStorage.setItem("activities", JSON.stringify(this.activities));
         localStorage.setItem("profiles", JSON.stringify(this.profiles));
+        localStorage.setItem("orphans", JSON.stringify(this.orphanEntities));
         this.localMode = true;
         this.cdr.detectChanges();
       },
@@ -229,6 +279,7 @@ export class ReplaceEntityComponent implements OnInit{
   {
     if (!oldEntity || !newEntity || !oldEntity.entity_id || !newEntity.entity_id) return;
     this.remoteOperations = [];
+    this.messages = [];
     this.activities.forEach(activity => {
       if (activity.options?.included_entities?.find(entity => entity.entity_id === oldEntity?.entity_id!))
       {
@@ -238,16 +289,29 @@ export class ReplaceEntityComponent implements OnInit{
           .map(entity=> entity.entity_id!);
         if (!entity_ids.includes(newEntity.entity_id!))
           entity_ids.push(newEntity.entity_id!);
-        let sequences_list = new Map<string, any>();
+        let sequences_list: {[p: string]: ActivitySequence[]}  = {};
         ['on', 'off'].forEach(type => {
           if (activity?.options?.sequences?.[type])
           {
             let sequences = [...activity.options.sequences[type]];
-            sequences_list.set(type, sequences);
+            let finalsequences: ActivitySequence[] = [];
             sequences.forEach(sequence => {
-              if (sequence.command?.entity_id === oldEntity.entity_id)
+              if (sequence.command?.entity_id === oldEntity.entity_id) {
                 sequence.command!.entity_id = newEntity.entity_id!;
-            })
+                finalsequences.push(sequence);
+              }
+              else if (sequence.command?.entity_id && this.orphanEntities.find(entity =>
+                entity.entity_id === sequence.command!.entity_id!))
+              {
+                console.warn("This entity is orphan in the sequence", sequence);
+                this.messages.push({title: "This entity is orphan in the sequence",
+                  message: `${sequence.command!.entity_id!}  will be removed from sequence in activity ${activity.name} (${activity.entity_id})`});
+                this.cdr.detectChanges();
+              }
+              else
+                finalsequences.push(sequence);
+            });
+            sequences_list[type] =  finalsequences;
           }
         })
 
@@ -295,6 +359,26 @@ export class ReplaceEntityComponent implements OnInit{
           })
           if (found)
           {
+            // Check after orphans otherwise update will fail
+            page?.items?.forEach(item => {
+              if ((item.command as Command)?.entity_id && this.orphanEntities.find(entity =>
+                entity.entity_id === (item.command as Command)!.entity_id!))
+              {
+                console.warn("This entity is orphan in the UI", item);
+                this.messages.push({title: "This entity is orphan in the UI",
+                  message: `${(item.command as Command)!.entity_id!}  will be removed from UI page ${page.name} in activity ${activity.name} (${activity.entity_id})`})
+                delete item['command'];
+                this.cdr.detectChanges();
+              } else if (item.media_player_id && this.orphanEntities.find(entity =>
+                entity.entity_id === item.media_player_id))
+              {
+                console.warn("This entity is orphan in the UI", item);
+                this.messages.push({title: "This entity is orphan in the UI",
+                  message: `${item.media_player_id}  will be removed from UI page ${page.name} in activity ${activity.name} (${activity.entity_id})`})
+                delete item['media_player_id'];
+                this.cdr.detectChanges();
+              }
+            })
             let method: "PUT" | "POST" | "DELETE" | "PATCH" = "PATCH";
             let api = `/api/activities/${activity.entity_id}/ui/pages/${page.page_id}`;
 

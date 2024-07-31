@@ -25,14 +25,14 @@
 <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px">
   <div class="flex align-items-center justify-content-center">
     <ng-container *ngIf="!oldEntity">Entity to be replaced</ng-container>
-    <p-chip *ngIf="oldEntity" [label]="''+oldEntity.name+' ('+oldEntity.entity_id+')'" />&nbsp;
+    <p-chip *ngIf="oldEntity" [label]="''+getEntityName(oldEntity)+' ('+oldEntity.entity_id+')'" />&nbsp;
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" (click)="invertEntities()"/>
   </div>
   <div class="flex align-items-center justify-content-center">
     <ng-container *ngIf="!newEntity">Entity to replace</ng-container>
-    <p-chip *ngIf="newEntity" [label]="''+newEntity.name+' ('+newEntity.entity_id+')'" />
+    <p-chip *ngIf="newEntity" [label]="''+getEntityName(newEntity)+' ('+newEntity.entity_id+')'" />
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-button label="Reset" (onClick)="reset()" severity="danger" icon="pi pi-times" size="small" [rounded]="true"></p-button>
@@ -42,6 +42,46 @@
               (click)="replaceEntity(oldEntity!, newEntity!)"/>
   </div>
 </div>
+<ng-container *ngIf="messages.length > 0">
+  <h3>Warnings during the analysis</h3>
+  <p-table [value]="messages" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+           dataKey="message" columnResizeMode="expand">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="title" pResizableColumn>Title<p-sortIcon field="title"></p-sortIcon></th>
+        <th pSortableColumn="message" pResizableColumn>Detail<p-sortIcon field="message"></p-sortIcon></th>
+      </tr>
+      <tr>
+        <th><p-columnFilter type="text" field="entity_id"></p-columnFilter></th>
+        <th><p-columnFilter type="text" field="message"></p-columnFilter></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-message>
+      <tr>
+        <td>{{message.title}}</td>
+        <td>{{message.message}}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</ng-container>
+<ng-container *ngIf="orphanEntities.length > 0">
+  <h3>Orphan entities</h3>
+  <p-table [value]="orphanEntities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+           dataKey="entity_id" columnResizeMode="expand">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="title" pResizableColumn>Name<p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="entity_id" pResizableColumn>Entity id<p-sortIcon field="entity_id"></p-sortIcon></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-entity>
+      <tr>
+        <td>{{getEntityName(entity)}}</td>
+        <td>{{entity.entity_id}}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</ng-container>
 <h2>Select entity to replace</h2>
 <p-messages severity="warn">
   <ng-template pTemplate>
@@ -71,7 +111,7 @@
   <ng-template pTemplate="body" let-entity>
     <tr>
       <td><a [routerLink]="[]" (click)="selectEntity(entity)">{{entity.entity_id}}</a></td>
-      <td><p-chip [label]="entity.name" [style]="getStyle(entity.name)" (click)="entityviewer.view(entity)"></p-chip></td>
+      <td><p-chip [label]="getEntityName(entity)" [style]="getStyle(getEntityName(entity))" (click)="entityviewer.view(entity)"></p-chip></td>
       <td><p-chip [label]="entity.integration_id" [style]="getStyle(entity.integration_id)"></p-chip></td>
       <td><p-chip [label]="entity.entity_type" [style]="getStyle(entity.entity_type)"></p-chip></td>
       <td><ng-container *ngFor="let activity of getUsedActivities(entity)">

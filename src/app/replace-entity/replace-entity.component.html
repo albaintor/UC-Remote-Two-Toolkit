@@ -22,24 +22,33 @@
 </ng-container>
 <app-entity-viewer #entityviewer></app-entity-viewer>
 <br>
+<div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px" *ngFor="let item of replaceEntities">
+  <div class="flex align-items-center justify-content-center">
+    <ng-container *ngIf="!item.oldEntity">Entity to be replaced</ng-container>
+    <p-chip *ngIf="item.oldEntity" [label]="''+getEntityName(item.oldEntity)+' ('+item.oldEntity.entity_id+')'" />&nbsp;
+  </div>
+  <div class="flex align-items-center justify-content-center">
+    <p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" (click)="invertEntities(item)"/>
+  </div>
+  <div class="flex align-items-center justify-content-center">
+    <ng-container *ngIf="!item.newEntity">Entity to replace</ng-container>
+    <p-chip *ngIf="item.newEntity" [label]="''+getEntityName(item.newEntity)+' ('+item.newEntity.entity_id+')'" />
+  </div>
+
+</div>
 <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px">
   <div class="flex align-items-center justify-content-center">
-    <ng-container *ngIf="!oldEntity">Entity to be replaced</ng-container>
-    <p-chip *ngIf="oldEntity" [label]="''+getEntityName(oldEntity)+' ('+oldEntity.entity_id+')'" />&nbsp;
+    <p-button label="Reset" (onClick)="reset(replaceEntities.at(-1)!)" severity="danger" icon="pi pi-times" size="small" [rounded]="true"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" (click)="invertEntities()"/>
+    <p-button label="Add" (onClick)="add()" severity="success" icon="pi pi-plus" size="small" [rounded]="true"></p-button>
+  </div>
+  <div class="flex align-items-center justify-content-center" *ngIf="replaceEntities.length > 1">
+    <p-button label="Remove" (onClick)="remove()" severity="danger" icon="pi pi-minus" size="small" [rounded]="true"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <ng-container *ngIf="!newEntity">Entity to replace</ng-container>
-    <p-chip *ngIf="newEntity" [label]="''+getEntityName(newEntity)+' ('+newEntity.entity_id+')'" />
-  </div>
-  <div class="flex align-items-center justify-content-center">
-    <p-button label="Reset" (onClick)="reset()" severity="danger" icon="pi pi-times" size="small" [rounded]="true"></p-button>
-  </div>
-  <div class="flex align-items-center justify-content-center">
-    <p-button [disabled]="oldEntity == undefined || newEntity == undefined" label="Submit" icon="pi pi-check"
-              (click)="replaceEntity(oldEntity!, newEntity!)"/>
+    <p-button [disabled]="checkSelection()" label="Submit" icon="pi pi-check"
+              (click)="replaceEntity()"/>
   </div>
 </div>
 <ng-container *ngIf="messages.length > 0">

@@ -74,8 +74,7 @@ export class ReplaceEntityComponent implements OnInit{
   readonly Math = Math;
   remoteProgress = 0;
   progressDetail = "";
-  oldEntity: Entity | undefined;
-  newEntity: Entity | undefined;
+  replaceEntities: {oldEntity: Entity | undefined, newEntity: Entity | undefined}[] = [{oldEntity: undefined, newEntity: undefined}];
   profiles: Profile[] | undefined;
   localMode: boolean = false;
   orphanEntities: Entity[] = [];
@@ -261,34 +260,44 @@ export class ReplaceEntityComponent implements OnInit{
   }
 
   selectEntity(entity: Entity) {
-    if (!this.oldEntity)
-      this.oldEntity = entity;
+
+    if (!this.replaceEntities.at(-1)!.oldEntity)
+      this.replaceEntities.at(-1)!.oldEntity = entity;
     else
-      this.newEntity = entity;
+      this.replaceEntities.at(-1)!.newEntity = entity;
     this.cdr.detectChanges();
   }
 
-  reset() {
-    this.oldEntity = undefined;
-    this.newEntity = undefined;
+  reset(item: {oldEntity: Entity | undefined, newEntity: Entity | undefined}) {
+    item.oldEntity = undefined;
+    item.newEntity = undefined;
     this.cdr.detectChanges();
   }
 
 
-  replaceEntity(oldEntity: Entity, newEntity: Entity): any
+  replaceEntity(): any
   {
-    if (!oldEntity || !newEntity || !oldEntity.entity_id || !newEntity.entity_id) return;
+    const replaceEntities = this.replaceEntities;
+    for (let item of replaceEntities) {
+      if (!item.oldEntity || !item.newEntity) return;
+    }
+    const oldEntities = replaceEntities.map(item => item.oldEntity);
+    const oldEntityIds: string[] = oldEntities.filter(entity=> entity!.entity_id != undefined).map(entity => entity!.entity_id!);
     this.remoteOperations = [];
     this.messages = [];
     this.activities.forEach(activity => {
-      if (activity.options?.included_entities?.find(entity => entity.entity_id === oldEntity?.entity_id!))
+      if (activity.options?.included_entities?.find(entity => oldEntityIds.includes(entity.entity_id!)))
       {
         console.debug("Found activity to update", activity);
         let entity_ids: string[] = activity.options.included_entities
-          .filter(entity => entity.entity_id && entity.entity_id !== oldEntity.entity_id)
+          .filter(entity => entity.entity_id && !oldEntityIds.includes(entity.entity_id!))
           .map(entity=> entity.entity_id!);
-        if (!entity_ids.includes(newEntity.entity_id!))
-          entity_ids.push(newEntity.entity_id!);
+
+        replaceEntities.forEach(replaceEntity => {
+          if (activity.options?.included_entities?.includes(replaceEntity.oldEntity!))
+            entity_ids.push(replaceEntity.newEntity!.entity_id!);
+        })
+
         let sequences_list: {[p: string]: ActivitySequence[]}  = {};
         ['on', 'off'].forEach(type => {
           if (activity?.options?.sequences?.[type])
@@ -296,8 +305,9 @@ export class ReplaceEntityComponent implements OnInit{
             let sequences = [...activity.options.sequences[type]];
             let finalsequences: ActivitySequence[] = [];
             sequences.forEach(sequence => {
-              if (sequence.command?.entity_id === oldEntity.entity_id) {
-                sequence.command!.entity_id = newEntity.entity_id!;
+              const item = replaceEntities.find(entity => entity.oldEntity!.entity_id === sequence.command?.entity_id);
+              if (item) {
+                sequence.command!.entity_id = item.newEntity!.entity_id!;
                 finalsequences.push(sequence);
               }
               else if (sequence.command?.entity_id && this.orphanEntities.find(entity =>
@@ -324,15 +334,17 @@ export class ReplaceEntityComponent implements OnInit{
           }, status: OperationStatus.Todo})
 
         activity.options?.button_mapping?.forEach(button => {
-          if (button.short_press?.entity_id === oldEntity.entity_id) {
-            button.short_press!.entity_id = newEntity.entity_id!;
+          let item = replaceEntities.find(entity => entity.oldEntity!.entity_id === button.short_press?.entity_id);
+          if (item) {
+            button.short_press!.entity_id = item.newEntity!.entity_id!;
             this.remoteOperations.push({method: "PATCH", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
               body: {
                 short_press: {...button.short_press}
               }, status: OperationStatus.Todo})
           }
-          if (button.long_press?.entity_id === oldEntity.entity_id) {
-            button.long_press!.entity_id = newEntity.entity_id!;
+          item = replaceEntities.find(entity => entity.oldEntity!.entity_id === button.long_press?.entity_id);
+          if (item) {
+            button.long_press!.entity_id = item.newEntity!.entity_id!;
             this.remoteOperations.push({method: "PATCH", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
               body: {
                 long_press: {...button.long_press}
@@ -343,18 +355,25 @@ export class ReplaceEntityComponent implements OnInit{
         activity.options?.user_interface?.pages?.forEach(page => {
           let found = false;
           page?.items?.forEach(item => {
+            let entityItem = replaceEntities.find(entity => entity.oldEntity!.entity_id === item.command);
             // TODO should not happen
-            if (item.command && typeof item.command === "string" && (item.command as string) === oldEntity.entity_id) {
-              item.command = newEntity.entity_id;
+            if (entityItem) {
+              item.command = entityItem.newEntity!.entity_id;
               found = true;
             }
-            else if (item.command && (item.command as Command)?.entity_id === oldEntity.entity_id) {
-              (item.command as Command).entity_id = newEntity.entity_id!;
-              found = true;
+            else if (item.command && (item.command as Command)?.entity_id) {
+              entityItem = replaceEntities.find(entity => entity.oldEntity!.entity_id === (item.command as Command)?.entity_id);
+              if (entityItem) {
+                (item.command as Command).entity_id = entityItem.newEntity!.entity_id!;
+                found = true;
+              }
             }
-            if (item.media_player_id === oldEntity.entity_id) {
-              item.media_player_id = newEntity.entity_id;
-              found = true;
+            else if (item.media_player_id) {
+              entityItem = replaceEntities.find(entity => entity.oldEntity!.entity_id === item.media_player_id);
+              if (entityItem) {
+                item.media_player_id = entityItem.newEntity!.entity_id!;
+                found = true;
+              }
             }
           })
           if (found)
@@ -397,10 +416,29 @@ export class ReplaceEntityComponent implements OnInit{
 
   }
 
-  invertEntities() {
-    let entity = this.oldEntity;
-    this.oldEntity = this.newEntity;
-    this.newEntity = entity;
+  invertEntities(item: {oldEntity: Entity | undefined, newEntity: Entity | undefined}) {
+    let entity = item.oldEntity;
+    item.oldEntity = item.newEntity;
+    item.newEntity = entity;
     this.cdr.detectChanges();
+  }
+
+  add() {
+    this.replaceEntities.push({oldEntity: undefined, newEntity: undefined});
+    this.cdr.detectChanges();
+  }
+
+  remove()
+  {
+    this.replaceEntities.pop();
+    this.cdr.detectChanges();
+  }
+
+  checkSelection(): boolean {
+    for (let item of this.replaceEntities)
+    {
+      if (item.oldEntity == undefined || item.newEntity == undefined) return true;
+    }
+    return false;
   }
 }

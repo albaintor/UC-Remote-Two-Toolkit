@@ -89,7 +89,7 @@ jobs:
         id: upload_artifact
         with:
           name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.ARTIFACT_NAME }}.tar.gz
+          path: ${{ env.ARTIFACT_NAME }}.zip
           if-no-files-found: error
           retention-days: 3
 

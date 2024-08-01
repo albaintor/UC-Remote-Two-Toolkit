@@ -109,10 +109,10 @@
       <th pResizableColumn>Features</th>
     </tr>
     <tr>
-      <th><p-columnFilter type="text" field="entity_id"></p-columnFilter></th>
-      <th><p-columnFilter type="text" field="name"></p-columnFilter></th>
-      <th><p-columnFilter type="text" field="integration_id"></p-columnFilter></th>
-      <th><p-columnFilter type="text" field="entity_type"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="entity_id" [matchMode]="'contains'"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="name" [matchMode]="'contains'"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="integration_id" [matchMode]="'contains'"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="entity_type" [matchMode]="'contains'"></p-columnFilter></th>
       <th></th>
       <th></th>
     </tr>

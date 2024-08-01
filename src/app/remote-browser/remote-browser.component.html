@@ -130,30 +130,26 @@
     <tr>
       <th pSortableColumn="entity_id" pResizableColumn>Entity ID<p-sortIcon field="entity_id"></p-sortIcon></th>
       <th pSortableColumn="name" pResizableColumn>Name<p-sortIcon field="name"></p-sortIcon></th>
-      <th pSortableColumn="type" pResizableColumn>Type<p-sortIcon field="type"></p-sortIcon></th>
       <th pSortableColumn="entity_type" pResizableColumn>Entity type<p-sortIcon field="entity_type"></p-sortIcon></th>
+      <th pSortableColumn="integration_id" pResizableColumn>Integration<p-sortIcon field="integration_id"></p-sortIcon></th>
       <th pResizableColumn>Features</th>
-      <th pSortableColumn="filename" pResizableColumn>Path<p-sortIcon field="filename"/></th>
     </tr>
     <tr>
-      <th><p-columnFilter type="text" field="entity_id"></p-columnFilter></th>
-      <th><p-columnFilter type="text" field="name"></p-columnFilter></th>
-      <th><p-columnFilter type="text" field="type"></p-columnFilter></th>
-      <th><p-columnFilter type="text" field="type"></p-columnFilter></th>
-      <th><p-columnFilter type="text" field="entity_type"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="entity_id" [matchMode]="'contains'"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="name" [matchMode]="'contains'"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="entity_type" [matchMode]="'contains'"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="integration_id" [matchMode]="'contains'"></p-columnFilter></th>
       <th>&nbsp;</th>
-      <th><p-columnFilter type="text" field="filename"></p-columnFilter></th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-entity>
     <tr>
       <td><a [routerLink]="[]" (click)="entityviewer.view(entity)">{{entity.entity_id}}</a></td>
       <td><p-chip [label]="entity.name" [style]="getStyle(entity.name)" (click)="entityviewer.view(entity)"></p-chip></td>
-      <td><p-chip [label]="entity.type" [style]="getStyle(entity.type)"></p-chip></td>
       <td><p-chip [label]="entity.entity_type" [style]="getStyle(entity.entity_type)"></p-chip></td>
+      <td><p-chip [label]="entity.integration_id" [style]="getStyle(entity.integration_id)"></p-chip></td>
       <td><ng-container *ngFor="let feature of entity['features']">
         <p-chip [label]="feature" [style]="getStyle(feature)"></p-chip> </ng-container></td>
-      <td><span>{{entity.filename}}</span></td>
     </tr>
   </ng-template>
 </p-table>

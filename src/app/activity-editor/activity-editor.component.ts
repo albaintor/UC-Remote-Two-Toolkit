@@ -29,28 +29,30 @@ import {ButtonModule} from "primeng/button";
 import {Helper} from "../helper";
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
+import {MessagesModule} from "primeng/messages";
 
 @Component({
   selector: 'app-activity-editor',
   standalone: true,
-  imports: [
-    DropdownModule,
-    MenubarModule,
-    NgIf,
-    ProgressBarModule,
-    ProgressSpinnerModule,
-    SharedModule,
-    ToastModule,
-    FormsModule,
-    ActivityViewerComponent,
-    NgForOf,
-    NgxJsonViewerModule,
-    MultiSelectModule,
-    CheckboxModule,
-    ButtonModule,
-    AutoCompleteModule,
-    RemoteOperationsComponent
-  ],
+    imports: [
+        DropdownModule,
+        MenubarModule,
+        NgIf,
+        ProgressBarModule,
+        ProgressSpinnerModule,
+        SharedModule,
+        ToastModule,
+        FormsModule,
+        ActivityViewerComponent,
+        NgForOf,
+        NgxJsonViewerModule,
+        MultiSelectModule,
+        CheckboxModule,
+        ButtonModule,
+        AutoCompleteModule,
+        RemoteOperationsComponent,
+        MessagesModule
+    ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',
   providers: [MessageService],

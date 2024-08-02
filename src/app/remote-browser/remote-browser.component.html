@@ -17,6 +17,12 @@
     </p-dropdown>
   </ng-template>
 </p-menubar>
+<p-messages severity="info">
+  <ng-template pTemplate>
+    <div class="ml-2">Here you can review your activities and entities. When you click on an activity you can edit it (buttons and UI mapping, replace an entity by another...).<br>
+    If you want to replace entities in all activities, please select <b>Rename entities</b> option above</div>
+  </ng-template>
+</p-messages>
 <ng-container *ngIf="progress">
   {{progressDetail}}<br>
   <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
@@ -25,13 +31,13 @@
   <h4>Current source : <a (click)="downloadFile(context.source)" href="#">{{context.source}}</a> ({{context.date | date:'dd MMM yyyy \'at\' HH:mm'}})</h4>
 </ng-container>
 <ng-container *ngIf="context && context.type">
-  <h4>Current source : {{context.source}} ({{context.date | date:'dd MMM yyyy \'at\' HH:mm'}})</h4>
+  <h4>Current source (cached) : {{context.source}} ({{context.date | date:'dd MMM yyyy \'at\' HH:mm'}})</h4>
 </ng-container>&nbsp;
 
 <ng-container *ngIf="currentFile && currentFile.inProgress">
   <p-progressBar [value]="currentFile.progress"></p-progressBar>
 </ng-container>
-<app-remote-registration></app-remote-registration>
+<app-remote-registration (remoteSelected)="selectedRemote=$event"></app-remote-registration>
 <app-entity-viewer #entityviewer></app-entity-viewer>
 <app-activity-viewer #activityeditor [remote]="selectedRemote" [editMode]="false"></app-activity-viewer>
 <app-uploaded-files (configurationUpdated)="updateConfiguration()" [currentSource]="context?.source!"></app-uploaded-files>
@@ -98,8 +104,16 @@
   <!--  </p-table>-->
 </p-overlayPanel>
 <h2>Activities</h2>
-<p-table [value]="activities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
-         dataKey="entity_id">
+<p-table #dt [value]="activities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+         dataKey="entity_id" [globalFilterFields]="['activity_id','name','entities.name']">
+  <ng-template pTemplate="caption">
+    <div class="flex">
+      <span class="p-input-icon-left ml-auto">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="setFilter(dt, $event)" placeholder="Search keyword" />
+      </span>
+    </div>
+  </ng-template>
   <ng-template pTemplate="header">
     <tr>
       <th pSortableColumn="entity_id" pResizableColumn>Activity ID<p-sortIcon field="activity_id"></p-sortIcon></th>
@@ -107,8 +121,8 @@
       <th pResizableColumn>Entities</th>
     </tr>
     <tr>
-      <th><p-columnFilter type="text" field="entity_id"></p-columnFilter></th>
-      <th><p-columnFilter type="text" field="name"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="entity_id" [matchMode]="'contains'"></p-columnFilter></th>
+      <th><p-columnFilter type="text" field="name" [matchMode]="'contains'"></p-columnFilter></th>
       <th>&nbsp;</th>
     </tr>
   </ng-template>
@@ -124,8 +138,17 @@
   </ng-template>
 </p-table>
 <h2>Entities</h2>
-<p-table [value]="entities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
-         dataKey="entity_id" columnResizeMode="expand">
+<p-table #dt2 [value]="entities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+         dataKey="entity_id" columnResizeMode="expand"
+         [globalFilterFields]="['entity_id','name','entity_type','integration_id']">
+  <ng-template pTemplate="caption">
+    <div class="flex">
+      <span class="p-input-icon-left ml-auto">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="setFilter(dt2, $event)" placeholder="Search keyword" />
+      </span>
+    </div>
+  </ng-template>
   <ng-template pTemplate="header">
     <tr>
       <th pSortableColumn="entity_id" pResizableColumn>Entity ID<p-sortIcon field="entity_id"></p-sortIcon></th>

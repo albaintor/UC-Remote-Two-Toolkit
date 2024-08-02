@@ -145,6 +145,8 @@ export interface Context
 {
   source: string;
   date: Date;
+  remote_name?: string;
+  remote_ip?: string;
   type?: string;
 }
 

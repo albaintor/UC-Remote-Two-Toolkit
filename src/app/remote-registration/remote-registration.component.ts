@@ -46,6 +46,7 @@ export class RemoteRegistrationComponent {
   refresh()
   {
     this.server.getConfig().subscribe(config => {
+      console.debug("Remotes extracted", config);
       this.remotes = config.remotes ? config.remotes : [];
       this.cdr.detectChanges();
     })
@@ -84,6 +85,7 @@ export class RemoteRegistrationComponent {
   }
 
   selectRemote(remote: Remote) {
+    if (remote == undefined) { return; }
     this.selectedRemote = remote;
     this.remoteSelected.emit(remote);
     this.visible = false;
@@ -96,10 +98,7 @@ export class RemoteRegistrationComponent {
       next: ((results) => {
         this.messageService.add({severity: "success", summary: "Remote unregistered",
           key: "remote"});
-        this.server.getConfig().subscribe(config => {
-          this.remotes = config.remotes ? config.remotes : [];
-          this.cdr.detectChanges();
-        })
+        this.refresh();
         this.cdr.detectChanges();
       }),
       error: ((error: any) => {

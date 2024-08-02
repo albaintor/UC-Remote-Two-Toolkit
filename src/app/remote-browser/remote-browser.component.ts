@@ -43,6 +43,7 @@ import {DropdownModule} from "primeng/dropdown";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {Helper} from "../helper";
 import {EntityViewerComponent} from "../entity-viewer/entity-viewer.component";
+import {MessagesModule} from "primeng/messages";
 
 interface FileProgress
 {
@@ -73,7 +74,8 @@ interface FileProgress
     DropdownModule,
     ProgressSpinnerModule,
     ActivityViewerComponent,
-    EntityViewerComponent
+    EntityViewerComponent,
+    MessagesModule
   ],
   templateUrl: './remote-browser.component.html',
   styleUrl: './remote-browser.component.css',
@@ -107,9 +109,9 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     {label: 'Upload backup', command: () => this.uploadFile(), icon: 'pi pi-upload'},
     {label: 'View backups', command: () => this.viewBackups(), icon: 'pi pi-folder-open'},*/
     {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
-    {label: 'Load Remote entities', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true},
+    {label: 'Load Remote data', command: () => this.loadRemoteData(), icon: 'pi pi-cloud-download', block: true},
     {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
-    {label: 'Rename entity', routerLink:'/entity/rename', icon: 'pi pi-file-edit'},
+    {label: 'Rename entities', routerLink:'/entity/rename', icon: 'pi pi-file-edit'},
   ]
   entityUsages: EntityUsage | null | undefined;
   localMode = true;
@@ -131,17 +133,19 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     const entities = localStorage.getItem("entities");
     const activities = localStorage.getItem("activities");
     const profiles = localStorage.getItem("profiles");
+    const context = localStorage.getItem("context");
     const configCommands = localStorage.getItem("configCommands");
     if (entities || activities)
     {
       if (activities) this.activities = JSON.parse(activities);
       if (entities) this.entities = JSON.parse(entities);
       if (profiles) this.profiles = JSON.parse(profiles);
+      if (context) this.context = JSON.parse(context);
       if (configCommands) this.configCommands = JSON.parse(configCommands);
       this.server.setEntities(this.entities);
       this.server.setActivities(this.activities);
       this.server.setProfiles(this.profiles);
-      this.context = {source:"Cache", type: "Remote", date: new Date()};
+      // this.server.setContext(this.context);
       this.messageService.add({severity: "info", summary: `Remote data loaded from cache`});
       this.localMode = true;
       this.cdr.detectChanges();
@@ -158,12 +162,12 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
 
   init(): void {
     this.localMode = false;
-    this.server.getContext().subscribe(results => {
+    /*this.server.getContext().subscribe(results => {
       console.info("Context", results);
       this.context = results;
       this.cdr.detectChanges();
-    })
-    this.server.getEntitiesFromBackup().subscribe(entities => {
+    })*/
+    /*this.server.getEntitiesFromBackup().subscribe(entities => {
       console.info("Entities", entities);
       this.entities = entities;
       this.cdr.detectChanges();
@@ -177,7 +181,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       console.info("Profiles", results);
       this.profiles = Object.values(results);
       this.cdr.detectChanges();
-    })
+    })*/
 
   }
 
@@ -236,11 +240,12 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
           detail: `${this.entities.length} entities and ${this.activities.length} activities extracted.`
         });
         this.context = {source: `${this.selectedRemote?.remote_name} (${this.selectedRemote?.address})`,
-          date: new Date(), type: "Remote"}
+          date: new Date(), type: "Remote", remote_ip: this.selectedRemote?.address, remote_name: this.selectedRemote?.remote_name};
         localStorage.setItem("entities", JSON.stringify(this.entities));
         localStorage.setItem("activities", JSON.stringify(this.activities));
         localStorage.setItem("profiles", JSON.stringify(this.profiles));
         localStorage.setItem("configCommands", JSON.stringify(this.configCommands));
+        localStorage.setItem("context", JSON.stringify(this.context));
         this.localMode = true;
         this.cdr.detectChanges();
       },
@@ -468,4 +473,8 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   }
 
   protected readonly Helper = Helper;
+
+  setFilter(dt: any, $event: Event) {
+    dt.filterGlobal(($event as any).target.value, 'contains')
+  }
 }

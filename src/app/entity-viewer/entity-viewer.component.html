@@ -25,4 +25,13 @@
       <p-chip [label]="button.button" [style]="Helper.getStyle(button.button)"></p-chip>
     </div>
   </div>
+  <div class="flex flex-wrap" *ngIf="included_activities">
+    <div class="flex align-items-center justify-content-center ml-1">
+      <h3>Used in activities</h3>
+    </div>
+    <div class="flex align-items-center justify-content-center ml-1" *ngFor="let activity of included_activities">
+      <p-chip [label]="activity.name" [style]="Helper.getStyle(activity.name)" [pTooltip]="activity.entity_id"></p-chip>
+    </div>
+  </div>
+
 </p-dialog>

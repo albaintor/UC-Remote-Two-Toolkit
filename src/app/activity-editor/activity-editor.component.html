@@ -20,6 +20,14 @@
   {{progressDetail}}<br>
   <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
 </ng-container>
+<p-messages severity="info">
+  <ng-template pTemplate>
+    <div class="ml-2">Here you can edit an activity : you can see the original mapping and the new mapping with the 2 options above. In the new mapping you can only move UI icons.<br>
+    You cannot edit buttons and UI mapping at this state, but you can apply automatic mapping from a given media player or remote entity to the buttons and UI.<br>
+    You can also replace an entity by another within the activity.<br>
+    Once done, click on <b>Save activity to remote</b> to update the remote with the pending operations.</div>
+  </ng-template>
+</p-messages>
 <h3>Apply a mapping from a given entity (choose only one)</h3>
 <div class="formgroup-inline">
   <ng-container *ngFor="let template of templates">

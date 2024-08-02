@@ -3,7 +3,7 @@ import {
   Activity,
   ActivitySequence,
   Command,
-  Config,
+  Config, Context,
   Entity,
   OperationStatus,
   Profile,
@@ -15,7 +15,7 @@ import {ServerService} from "../server.service";
 import {ActivatedRoute} from "@angular/router";
 import {DropdownModule} from "primeng/dropdown";
 import {MenubarModule} from "primeng/menubar";
-import {NgForOf, NgIf} from "@angular/common";
+import {DatePipe, NgForOf, NgIf} from "@angular/common";
 import {ProgressBarModule} from "primeng/progressbar";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {ToastModule} from "primeng/toast";
@@ -52,6 +52,7 @@ class Message {
     ButtonModule,
     RemoteOperationsComponent,
     MessagesModule,
+    DatePipe,
   ],
   templateUrl: './replace-entity.component.html',
   styleUrl: './replace-entity.component.css',
@@ -81,6 +82,7 @@ export class ReplaceEntityComponent implements OnInit{
   messages: Message[] = [];
 
   @ViewChild(RemoteOperationsComponent) operations: RemoteOperationsComponent | undefined;
+  context: Context | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private activatedRoute: ActivatedRoute) {
@@ -98,11 +100,13 @@ export class ReplaceEntityComponent implements OnInit{
     const entities = localStorage.getItem("entities");
     const activities = localStorage.getItem("activities");
     const orphans = localStorage.getItem("orphans");
+    const context = localStorage.getItem("context");
     if (entities || activities || orphans)
     {
       if (activities) this.activities = JSON.parse(activities);
       if (entities) this.entities = JSON.parse(entities);
       if (orphans) this.orphanEntities = JSON.parse(orphans);
+      if (context) this.context = JSON.parse(context);
       this.server.setEntities(this.entities);
       this.getOrphans();
       this.cdr.detectChanges();
@@ -202,10 +206,13 @@ export class ReplaceEntityComponent implements OnInit{
           severity: "success", summary: "Remote data loaded",
           detail: `${this.entities.length} entities and ${this.activities.length} activities extracted.`
         });
+        this.context = {source: `${this.selectedRemote?.remote_name} (${this.selectedRemote?.address})`,
+          date: new Date(), type: "Remote", remote_ip: this.selectedRemote?.address, remote_name: this.selectedRemote?.remote_name};
         localStorage.setItem("entities", JSON.stringify(this.entities));
         localStorage.setItem("activities", JSON.stringify(this.activities));
         localStorage.setItem("profiles", JSON.stringify(this.profiles));
         localStorage.setItem("orphans", JSON.stringify(this.orphanEntities));
+        localStorage.setItem("context", JSON.stringify(this.context));
         this.localMode = true;
         this.cdr.detectChanges();
       },

@@ -65,6 +65,7 @@ export enum OperationStatus
 export interface RemoteOperation
 {
   method: "PUT" | "POST" | "DELETE" | "PATCH";
+  name?: string;
   api: string;
   body: any;
   status?: OperationStatus;

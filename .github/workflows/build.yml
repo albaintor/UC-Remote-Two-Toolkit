@@ -33,7 +33,8 @@ jobs:
         run: |
           chcp 65001 #set code page to utf-8
           git fetch origin +refs/tags/*:refs/tags/*
-          echo "VERSION=$(git describe --match "v[0-9]*" --tags HEAD --always)" >> $env:GITHUB_ENV
+          echo VERSION="v$(jq .version -r package.json)" >> $GITHUB_ENV
+      #echo "VERSION=$(git describe --match "v[0-9]*" --tags HEAD --always)" >> $env:GITHUB_ENV
 
       - name: Cache node modules
         uses: actions/cache@v4
@@ -110,7 +111,8 @@ jobs:
       - name: Fetch all tags to determine version
         run: |
           git fetch origin +refs/tags/*:refs/tags/*
-          echo "VERSION=$(git describe --match "v[0-9]*" --tags HEAD --always)" >> $GITHUB_ENV
+          echo VERSION="v$(jq .version -r package.json)" >> $GITHUB_ENV
+        # echo "VERSION=$(git describe --match "v[0-9]*" --tags HEAD --always)" >> $GITHUB_ENV
 
       - name: Cache node modules
         uses: actions/cache@v4

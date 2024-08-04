@@ -1,9 +1,17 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ViewChild,
+  ViewEncapsulation
+} from '@angular/core';
 import {
   Activity,
   ActivitySequence,
   Command,
-  Config, Context,
+  Config,
+  Context,
   Entity,
   OperationStatus,
   Profile,
@@ -27,6 +35,7 @@ import {ButtonModule} from "primeng/button";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
 import {forkJoin, from, map, mergeMap, Observable} from "rxjs";
 import {MessagesModule} from "primeng/messages";
+import {MultiSelectModule} from "primeng/multiselect";
 
 class Message {
   title: string = "";
@@ -53,11 +62,13 @@ class Message {
     RemoteOperationsComponent,
     MessagesModule,
     DatePipe,
+    MultiSelectModule,
   ],
   templateUrl: './replace-entity.component.html',
   styleUrl: './replace-entity.component.css',
   providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class ReplaceEntityComponent implements OnInit{
   remoteOperations: RemoteOperation[] = [];
@@ -83,6 +94,7 @@ export class ReplaceEntityComponent implements OnInit{
 
   @ViewChild(RemoteOperationsComponent) operations: RemoteOperationsComponent | undefined;
   context: Context | undefined;
+  availableEntities: Entity[] = [];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private activatedRoute: ActivatedRoute) {
@@ -104,7 +116,10 @@ export class ReplaceEntityComponent implements OnInit{
     if (entities || activities || orphans)
     {
       if (activities) this.activities = JSON.parse(activities);
-      if (entities) this.entities = JSON.parse(entities);
+      if (entities) {
+        this.entities = JSON.parse(entities);
+        this.availableEntities = [...this.entities];
+      }
       if (orphans) this.orphanEntities = JSON.parse(orphans);
       if (context) this.context = JSON.parse(context);
       this.server.setEntities(this.entities);
@@ -168,6 +183,7 @@ export class ReplaceEntityComponent implements OnInit{
     const tasks: Observable<any>[] = [];
     tasks.push(this.server.getRemoteEntities(this.selectedRemote).pipe(map((entities) => {
       this.entities = entities;
+      this.availableEntities = [...this.entities];
       // this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
       //   detail: `${this.entity_list.length} entities extracted`});
       this.cdr.detectChanges();
@@ -266,18 +282,21 @@ export class ReplaceEntityComponent implements OnInit{
     return `hsl(${stringUniqueHash % 360}, 95%, 40%)`;
   }
 
-  selectEntity(entity: Entity) {
+  selectEntity(selectedEntity: Entity) {
 
-    if (!this.replaceEntities.at(-1)!.oldEntity)
-      this.replaceEntities.at(-1)!.oldEntity = entity;
+    if (!this.replaceEntities.at(-1)!.oldEntity) {
+      this.replaceEntities.at(-1)!.oldEntity = selectedEntity;
+      this.availableEntities = this.entities.filter(entity => entity.entity_type == selectedEntity.entity_type);
+    }
     else
-      this.replaceEntities.at(-1)!.newEntity = entity;
+      this.replaceEntities.at(-1)!.newEntity = selectedEntity;
     this.cdr.detectChanges();
   }
 
   reset(item: {oldEntity: Entity | undefined, newEntity: Entity | undefined}) {
     item.oldEntity = undefined;
     item.newEntity = undefined;
+    this.availableEntities = [...this.entities];
     this.cdr.detectChanges();
   }
 
@@ -301,7 +320,7 @@ export class ReplaceEntityComponent implements OnInit{
           .map(entity=> entity.entity_id!);
 
         replaceEntities.forEach(replaceEntity => {
-          if (activity.options?.included_entities?.includes(replaceEntity.oldEntity!))
+          if (activity.options?.included_entities?.find(entity => entity.entity_id! === replaceEntity.oldEntity?.entity_id!))
             entity_ids.push(replaceEntity.newEntity!.entity_id!);
         })
 
@@ -332,7 +351,7 @@ export class ReplaceEntityComponent implements OnInit{
           }
         })
 
-        this.remoteOperations.push({method: "PATCH", api: `/api/activities/${activity.entity_id}`,
+        this.remoteOperations.push({name: `${activity.name}`,method: "PATCH", api: `/api/activities/${activity.entity_id}`,
           body: {
             options: {
               entity_ids,
@@ -344,7 +363,7 @@ export class ReplaceEntityComponent implements OnInit{
           let item = replaceEntities.find(entity => entity.oldEntity!.entity_id === button.short_press?.entity_id);
           if (item) {
             button.short_press!.entity_id = item.newEntity!.entity_id!;
-            this.remoteOperations.push({method: "PATCH", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
+            this.remoteOperations.push({name: `${activity.name} (buttons)`,method: "PATCH", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
               body: {
                 short_press: {...button.short_press}
               }, status: OperationStatus.Todo})
@@ -352,7 +371,7 @@ export class ReplaceEntityComponent implements OnInit{
           item = replaceEntities.find(entity => entity.oldEntity!.entity_id === button.long_press?.entity_id);
           if (item) {
             button.long_press!.entity_id = item.newEntity!.entity_id!;
-            this.remoteOperations.push({method: "PATCH", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
+            this.remoteOperations.push({name: `${activity.name} (buttons)`, method: "PATCH", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
               body: {
                 long_press: {...button.long_press}
               }, status: OperationStatus.Todo})
@@ -408,7 +427,7 @@ export class ReplaceEntityComponent implements OnInit{
             let method: "PUT" | "POST" | "DELETE" | "PATCH" = "PATCH";
             let api = `/api/activities/${activity.entity_id}/ui/pages/${page.page_id}`;
 
-            this.remoteOperations.push({method , api,
+            this.remoteOperations.push({name: `${activity.name} (page ${page.name})`,method , api,
               body: {
                 ...page
               }, status: OperationStatus.Todo})
@@ -432,12 +451,20 @@ export class ReplaceEntityComponent implements OnInit{
 
   add() {
     this.replaceEntities.push({oldEntity: undefined, newEntity: undefined});
+    this.availableEntities = [...this.entities];
     this.cdr.detectChanges();
   }
 
   remove()
   {
     this.replaceEntities.pop();
+    if (this.replaceEntities.length > 0 && this.replaceEntities[-1].oldEntity)
+    {
+      this.availableEntities = this.entities.filter(entity =>
+        entity.entity_type == this.replaceEntities[-1].oldEntity?.entity_type);
+    }
+    else
+      this.availableEntities = [...this.entities];
     this.cdr.detectChanges();
   }
 
@@ -447,5 +474,21 @@ export class ReplaceEntityComponent implements OnInit{
       if (item.oldEntity == undefined || item.newEntity == undefined) return true;
     }
     return false;
+  }
+
+  getValues(table: any[], field_name: string) {
+    const values = new Set<any>();
+    table.forEach(item => {
+      if (item?.[field_name]) {
+        values.add(item?.[field_name])
+      }
+    });
+    return Array.from(values).sort();
+  }
+
+  getItems(table: any[], field_name: string) {
+    return this.getValues(table, field_name).map(value => {
+      return {name: value.toString(), value}
+    });
   }
 }

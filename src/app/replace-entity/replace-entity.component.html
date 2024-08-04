@@ -101,13 +101,8 @@
   </p-table>
 </ng-container>
 <h2>Select entity to replace</h2>
-<p-messages severity="warn">
-  <ng-template pTemplate>
-    <div class="ml-2">You should select only entities of the same type and features</div>
-  </ng-template>
-</p-messages>
-<p-table [value]="entities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
-         dataKey="entity_id" columnResizeMode="expand">
+<p-table [value]="availableEntities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+         dataKey="entity_id" columnResizeMode="expand" [scrollable]="true" [scrollHeight]="'calc(100vh - 50px)'">
   <ng-template pTemplate="header">
     <tr>
       <th pSortableColumn="entity_id" pResizableColumn>Entity ID<p-sortIcon field="entity_id"></p-sortIcon></th>
@@ -119,9 +114,39 @@
     </tr>
     <tr>
       <th><p-columnFilter type="text" field="entity_id" [matchMode]="'contains'"></p-columnFilter></th>
-      <th><p-columnFilter type="text" field="name" [matchMode]="'contains'"></p-columnFilter></th>
-      <th><p-columnFilter type="text" field="integration_id" [matchMode]="'contains'"></p-columnFilter></th>
-      <th><p-columnFilter type="text" field="entity_type" [matchMode]="'contains'"></p-columnFilter></th>
+      <th><p-columnFilter field="name" matchMode="in" [showMenu]="false">
+        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+          <p-multiSelect
+            [ngModel]="value"
+            [options]="getItems(availableEntities, 'name')"
+            placeholder="Name"
+            (onChange)="filter($event.value)"
+            optionLabel="name" optionValue="value" appendTo="body">
+          </p-multiSelect>
+        </ng-template>
+      </p-columnFilter></th>
+      <th><p-columnFilter field="integration_id" matchMode="in" [showMenu]="false">
+        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+          <p-multiSelect
+            [ngModel]="value"
+            [options]="getItems(availableEntities, 'integration_id')"
+            placeholder="Integration ID"
+            (onChange)="filter($event.value)"
+            optionLabel="name" optionValue="value" appendTo="body">
+          </p-multiSelect>
+        </ng-template>
+      </p-columnFilter></th>
+      <th><p-columnFilter field="entity_type" matchMode="in" [showMenu]="false">
+        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+          <p-multiSelect
+            [ngModel]="value"
+            [options]="getItems(availableEntities, 'entity_type')"
+            placeholder="Entity type"
+            (onChange)="filter($event.value)"
+            optionLabel="name" optionValue="value" appendTo="body">
+          </p-multiSelect>
+        </ng-template>
+      </p-columnFilter>
       <th></th>
       <th></th>
     </tr>

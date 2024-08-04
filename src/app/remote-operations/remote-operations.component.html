@@ -1,21 +1,34 @@
 <p-toast key="operation"></p-toast>
-<p-dialog header="Remotes operations" [(visible)]="visible" [style]="{width: '80vw'}">
-  <ng-container *ngIf="operations.length > 0">
-    <p-button label="Submit to remote" severity="danger" (onClick)="updateRemote()"></p-button>
-  </ng-container>
-  <p-table [value]="operations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true">
+<p-dialog header="Remotes operations" [(visible)]="visible" [style]="{width: '100vw'}" [draggable]="true"
+          [resizable]="true">
+
+  <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px">
+    <div class="flex align-items-center justify-content-center">
+      <ng-container *ngIf="operations.length > 0">
+        <p-button label="Submit to remote" severity="danger" (onClick)="updateRemote()"></p-button>
+      </ng-container>
+    </div>
+    <div class="flex align-items-center justify-content-center" *ngIf="hasDone()">
+      <p-button label="Reset statuses" (onClick)="resetAll()" severity="secondary" icon="pi pi-times" size="small" [rounded]="true"></p-button>
+    </div>
+    <div class="flex align-items-center justify-content-center" *ngIf="hasErrors()">
+      <p-button label="Reset errors only" (onClick)="resetErrors()" severity="secondary" icon="pi pi-minus" size="small" [rounded]="true"></p-button>
+    </div>
+  </div>
+  <p-table [value]="operations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+           [scrollable]="true" [scrollHeight]="'calc(70vh - 50px)'">
     <ng-template pTemplate="header">
       <tr>
-        <th>Method</th><th>API</th><th>Status</th><th>Action</th><th [style]="{width: '60%'}">Data</th><th>Actions</th>
+        <th pResizableColumn>Name</th><th pResizableColumn>Method</th><th pResizableColumn>API</th><th pResizableColumn>Status</th><th pResizableColumn [style]="{width: '60%'}">Data</th><th>Actions</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-operation>
       <tr>
+        <td>{{operation.name}}</td>
         <td>{{operation.method}}</td>
         <td>{{operation.api}}</td>
         <td><p-chip [label]="getStatusLabel(operation.status)" [style]="getStatusLabelStyle(operation.status)"></p-chip>
         <ng-container *ngIf="operation.message">{{operation.message}}</ng-container></td>
-        <td>&nbsp;</td>
         <td [style]="{width: '60%'}"><ngx-json-viewer [json]="operation.body" [depth]="1"></ngx-json-viewer></td>
         <td>
           <ng-container *ngIf="operation.status !== OperationStatus.Todo">

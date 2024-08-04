@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, ViewEncapsulation} from '@angular/core';
 import {DialogModule} from "primeng/dialog";
 import {ToastModule} from "primeng/toast";
 import {MessageService} from "primeng/api";
@@ -28,7 +28,8 @@ import {ChipModule} from "primeng/chip";
   templateUrl: './remote-operations.component.html',
   styleUrl: './remote-operations.component.css',
   providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class RemoteOperationsComponent {
   visible = false;
@@ -170,5 +171,27 @@ export class RemoteOperationsComponent {
   setStatus(operation: RemoteOperation, status: OperationStatus) {
     operation.status = status;
     this.cdr.detectChanges();
+  }
+
+  resetAll() {
+    this.operations.forEach(operation => operation.status = OperationStatus.Todo);
+    this.cdr.detectChanges();
+  }
+
+  resetErrors() {
+    this.operations.forEach(operation => {
+      if (operation.status === OperationStatus.Error) {
+        operation.status = OperationStatus.Todo;
+      }
+    });
+    this.cdr.detectChanges();
+  }
+
+  hasErrors() {
+    return this.operations.find(operation => operation.status == OperationStatus.Error);
+  }
+
+  hasDone() {
+    return this.operations.find(operation => operation.status !== OperationStatus.Todo);
   }
 }

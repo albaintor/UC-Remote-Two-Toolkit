@@ -52,17 +52,17 @@ export class ServerService {
     };
   }
 
-  getEntities(): Entity[]
+  getCachedEntities(): Entity[]
   {
     return this.entities;
   }
 
-  getActivities(): Activity[]
+  getCachedActivities(): Activity[]
   {
     return this.activities;
   }
 
-  getProfiles(): Profile[]
+  getCachedProfiles(): Profile[]
   {
     return this.profiles;
   }

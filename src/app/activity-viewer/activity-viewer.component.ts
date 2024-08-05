@@ -211,7 +211,7 @@ export class ActivityViewerComponent implements AfterViewInit {
 
   getEntityName(entityId: string): string
   {
-    const entity = this.server.getEntities().find(entity => entity.entity_id === entityId);
+    const entity = this.server.getCachedEntities().find(entity => entity.entity_id === entityId);
     if (entity?.name)
       return Helper.getEntityName(entity)!;
     return `Unknown ${entityId}`;

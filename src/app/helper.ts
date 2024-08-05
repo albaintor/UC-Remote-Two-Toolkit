@@ -7,7 +7,7 @@ import {
   ButtonMapping,
   UIPage,
   Remote,
-  ActivityPageCommand, OrphanEntity
+  ActivityPageCommand, OrphanEntity, Profiles
 } from "./interfaces";
 
 export class Helper
@@ -309,15 +309,27 @@ export class Helper
     return orphanEntities;
   }
 
-  static getUnusedEntities(activities: Activity[], entities: Entity[]): Entity[]
+  static getUnusedEntities(activities: Activity[], profiles:Profile[], entities: Entity[]): Entity[]
   {
     // Add orphan entities
     const unusedEntities: Entity[] = [];
     entities.forEach(entity => {
-      if (entity.entity_type == "activity") return;
+      // if (entity.entity_type == "activity") return;
       if (activities.find(activity => activity.options?.included_entities?.
         find(included_entity => included_entity.entity_id == entity.entity_id))) {
         return;
+      }
+      for (let profile of profiles)
+      {
+        for (let page of profile.pages)
+        {
+          if (!page.items) continue;
+          for (let item of page.items)
+          {
+            if (item.entity_id == entity.entity_id)
+              return;
+          }
+        }
       }
       unusedEntities.push(entity);
     })

@@ -5,34 +5,35 @@ import {
   Component,
   ElementRef,
   OnInit,
-  ViewChild
+  ViewChild,
+  ViewEncapsulation
 } from '@angular/core';
 import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
 import {ButtonModule} from "primeng/button";
 import {ChipModule} from "primeng/chip";
-import {CommonModule, DatePipe, NgForOf, NgIf} from "@angular/common";
+import {CommonModule} from "@angular/common";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {OverlayPanelModule} from "primeng/overlaypanel";
 import {ProgressBarModule} from "primeng/progressbar";
 import {RemoteRegistrationComponent} from "../remote-registration/remote-registration.component";
-import {MenuItem, MessageService, SharedModule} from "primeng/api";
+import {MenuItem, MessageService} from "primeng/api";
 import {TableModule} from "primeng/table";
 import {UploadedFilesComponent} from "../uploaded-files/uploaded-files.component";
 import {
   Activity,
   Config,
   Context,
-  EntitiesUsage,
   Entity,
   EntityCommand,
-  EntityUsage, OrphanEntity,
+  EntityUsage,
+  OrphanEntity,
   Profile,
   Profiles,
   Remote
 } from "../interfaces";
 import {ServerService} from "../server.service";
-import {catchError, config, forkJoin, from, map, mergeMap, Observable, of, window} from "rxjs";
+import {catchError, forkJoin, from, map, mergeMap, Observable, of} from "rxjs";
 import {HttpErrorResponse, HttpEventType} from "@angular/common/http";
 import {FormsModule} from "@angular/forms";
 import {InputTextModule} from "primeng/inputtext";
@@ -46,6 +47,7 @@ import {EntityViewerComponent} from "../entity-viewer/entity-viewer.component";
 import {MessagesModule} from "primeng/messages";
 import {DialogModule} from "primeng/dialog";
 import {MultiSelectModule} from "primeng/multiselect";
+import {AccordionModule} from "primeng/accordion";
 
 interface FileProgress
 {
@@ -79,12 +81,14 @@ interface FileProgress
     EntityViewerComponent,
     MessagesModule,
     DialogModule,
-    MultiSelectModule
+    MultiSelectModule,
+    AccordionModule
   ],
   templateUrl: './remote-browser.component.html',
   styleUrl: './remote-browser.component.css',
   providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   @ViewChild("fileUpload", {static: false}) fileUpload: ElementRef | undefined;
@@ -148,7 +152,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       this.server.setEntities(this.entities);
       this.server.setActivities(this.activities);
       this.server.setProfiles(this.profiles);
-      this.unusedEntities = Helper.getUnusedEntities(this.activities, this.entities);
+      this.unusedEntities = Helper.getUnusedEntities(this.activities, this.profiles, this.entities);
       this.orphanEntities = Helper.getOrphans(this.activities, this.entities);
       // this.server.setContext(this.context);
       this.messageService.add({severity: "info", summary: `Remote data loaded from cache`});
@@ -221,7 +225,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     })))
 
     forkJoin(tasks).subscribe({next: (results) => {
-        this.unusedEntities = Helper.getUnusedEntities(this.activities, this.entities);
+        this.unusedEntities = Helper.getUnusedEntities(this.activities, this.profiles, this.entities);
         this.orphanEntities = Helper.getOrphans(this.activities, this.entities);
         this.messageService.add({
           severity: "success", summary: "Remote data loaded",

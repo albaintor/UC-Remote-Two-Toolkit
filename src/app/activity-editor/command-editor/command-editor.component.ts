@@ -91,7 +91,7 @@ export class CommandEditorComponent {
     this.server.configCommands$.subscribe(entityCommands => {
       this.configEntityCommands = entityCommands;
     })
-    this.entities = this.server.getEntities();
+    this.entities = this.server.getCachedEntities();
     this.server.entities$.subscribe(entities => this.entities = entities);
   }
 

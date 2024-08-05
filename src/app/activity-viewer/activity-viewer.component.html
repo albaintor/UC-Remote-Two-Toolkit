@@ -21,7 +21,7 @@
 </p-overlayPanel>
 <p-toast key="activity"></p-toast>
 <app-command-editor #commandeditor></app-command-editor>
-<p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">
+<!--<p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">-->
   <p-button *ngIf="!editMode" label="Edit this activity" [routerLink]="['/activity/edit', activity?.entity_id]" severity="danger" icon="pi pi-pen" size="small"></p-button>
 <ng-container *ngIf="currentPage">
   <div class="grid-container"
@@ -64,5 +64,5 @@
     <p-button *ngIf="showDump"  label="Copy data to clipboard" (onClick)="copyToClipboard(activity)"></p-button>
     <ngx-json-viewer *ngIf="showDump" [json]="activity"></ngx-json-viewer>
   </ng-container>
-</p-dialog>
+<!--</p-dialog>-->
 

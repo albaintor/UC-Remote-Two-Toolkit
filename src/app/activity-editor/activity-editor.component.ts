@@ -30,29 +30,31 @@ import {Helper} from "../helper";
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
 import {MessagesModule} from "primeng/messages";
+import {DialogModule} from "primeng/dialog";
 
 @Component({
   selector: 'app-activity-editor',
   standalone: true,
-    imports: [
-        DropdownModule,
-        MenubarModule,
-        NgIf,
-        ProgressBarModule,
-        ProgressSpinnerModule,
-        SharedModule,
-        ToastModule,
-        FormsModule,
-        ActivityViewerComponent,
-        NgForOf,
-        NgxJsonViewerModule,
-        MultiSelectModule,
-        CheckboxModule,
-        ButtonModule,
-        AutoCompleteModule,
-        RemoteOperationsComponent,
-        MessagesModule
-    ],
+  imports: [
+    DropdownModule,
+    MenubarModule,
+    NgIf,
+    ProgressBarModule,
+    ProgressSpinnerModule,
+    SharedModule,
+    ToastModule,
+    FormsModule,
+    ActivityViewerComponent,
+    NgForOf,
+    NgxJsonViewerModule,
+    MultiSelectModule,
+    CheckboxModule,
+    ButtonModule,
+    AutoCompleteModule,
+    RemoteOperationsComponent,
+    MessagesModule,
+    DialogModule
+  ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',
   providers: [MessageService],
@@ -69,8 +71,7 @@ export class ActivityEditorComponent implements OnInit {
   progressDetail = "";
   availableItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
-    {label: 'View original activity', command: () => this.activityViewser?.view(this.activity!, false), icon: 'pi pi-folder-open'},
-    {label: 'View new activity', command: () => this.activityViewser?.view(this.updatedActivity!, true), icon: 'pi pi-folder-open'},
+    {label: 'View original activity', command: () => this.viewerVisible = true, icon: 'pi pi-folder-open'},
     {label: 'Reset mapping to original', command: () => this.updateActivity(), icon: 'pi pi-times'},
     {label: 'Clear mapping', command: () => this.clearMapping(), icon: 'pi pi-times'},
     {label: 'Save activity to remote', command: () => this.buildUpdateData(), icon: 'pi pi-cloud-upload'},
@@ -90,8 +91,10 @@ export class ActivityEditorComponent implements OnInit {
   remoteOperations: RemoteOperation[] = [];
   entity: Entity | undefined;
   newEntity: Entity | undefined;
+  protected readonly Helper = Helper;
+  viewerVisible = false;
 
-  @ViewChild(ActivityViewerComponent) activityViewser: ActivityViewerComponent | undefined;
+  @ViewChild("editor") activityEditor: ActivityViewerComponent | undefined;
   @ViewChild(RemoteOperationsComponent) operations: RemoteOperationsComponent | undefined;
 
   selectedEntity: Entity | undefined;
@@ -271,6 +274,7 @@ export class ActivityEditorComponent implements OnInit {
         this.updatedActivity!.options!.user_interface!.pages = JSON.parse(JSON.stringify(this.activity.options.user_interface.pages));
     }
     this.initMenu();
+    this.activityEditor?.updateButtonsGrid();
     this.cdr.detectChanges();
   }
 
@@ -382,6 +386,7 @@ export class ActivityEditorComponent implements OnInit {
     })
     this.operations!.visible = true;
     this.dump = updatedActivity as any;//JSON.stringify(updatedActivity, null, 2);
+    this.activityEditor?.updateButtonsGrid();
     this.cdr.detectChanges();
   }
 
@@ -506,10 +511,10 @@ export class ActivityEditorComponent implements OnInit {
     })
     this.messageService.add({severity: "success", summary: "Entity replaced"});
     this.dump = this.updatedActivity as any;//JSON.stringify(updatedActivity, null, 2);
+    this.activityEditor?.updateButtonsGrid();
     this.cdr.detectChanges();
   }
 
-  protected readonly Helper = Helper;
 
   searchEntity($event: AutoCompleteCompleteEvent) {
     if (!$event.query || $event.query.length == 0)

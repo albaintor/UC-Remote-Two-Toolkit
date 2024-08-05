@@ -44,6 +44,7 @@ import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {Helper} from "../helper";
 import {EntityViewerComponent} from "../entity-viewer/entity-viewer.component";
 import {MessagesModule} from "primeng/messages";
+import {DialogModule} from "primeng/dialog";
 
 interface FileProgress
 {
@@ -75,7 +76,8 @@ interface FileProgress
     ProgressSpinnerModule,
     ActivityViewerComponent,
     EntityViewerComponent,
-    MessagesModule
+    MessagesModule,
+    DialogModule
   ],
   templateUrl: './remote-browser.component.html',
   styleUrl: './remote-browser.component.css',
@@ -104,10 +106,6 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   protected readonly Math = Math;
   progressDetail = "";
   items: MenuItem[] = [
-    /*{label: 'Unused entities', command: () => this.checkOrphans(), icon: 'pi pi-share-alt'},
-    {label: 'Activities unused entities', command: () => this.checkUnassigned(), icon: 'pi pi-search'},
-    {label: 'Upload backup', command: () => this.uploadFile(), icon: 'pi pi-upload'},
-    {label: 'View backups', command: () => this.viewBackups(), icon: 'pi pi-folder-open'},*/
     {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
     {label: 'Load Remote data', command: () => this.loadRemoteData(), icon: 'pi pi-cloud-download', block: true},
     {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
@@ -116,6 +114,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   entityUsages: EntityUsage | null | undefined;
   localMode = true;
   configCommands: EntityCommand[] = [];
+  viewerVisible = false;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
   }
@@ -470,6 +469,13 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       this.cdr.detectChanges();
       }
     })
+  }
+
+  viewActivity(activityeditor: ActivityViewerComponent, activity: Activity)
+  {
+    activityeditor.view(activity, false);
+    this.viewerVisible = true;
+    this.cdr.detectChanges();
   }
 
   protected readonly Helper = Helper;

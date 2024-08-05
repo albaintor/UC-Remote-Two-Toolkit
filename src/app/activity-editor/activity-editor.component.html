@@ -28,16 +28,17 @@
     Once done, click on <b>Save activity to remote</b> to update the remote with the pending operations.</div>
   </ng-template>
 </p-messages>
-<h3>Apply a mapping from a given entity (choose only one)</h3>
+<h3>Apply a predefined mapping from a given entity</h3>
+<div *ngIf="selectedEntity"><b>{{selectedEntity.name}}</b> ({{selectedEntity.entity_id}})</div>
 <div class="formgroup-inline">
   <ng-container *ngFor="let template of templates">
-    <div class="field">
+    <div class="field" *ngIf="!selectedEntity">
       <label [for]="template.entity_type" class="p-sr-only">Apply mapping to a {{template.entity_type}} :</label>
       <p-dropdown [id]="template.entity_type"  [options]="getEntities(template.entity_type)" [(ngModel)]="selectedEntity"
                   [placeholder]="'Select a '+template.entity_type" (ngModelChange)="loadTemplate()">
-        <ng-template pTemplate="selectedItem">
-          {{selectedEntity?.name}} ({{selectedEntity?.entity_id}})
-        </ng-template>
+<!--        <ng-template pTemplate="selectedItem">-->
+<!--          {{selectedEntity?.name}} ({{selectedEntity?.entity_id}})-->
+<!--        </ng-template>-->
         <ng-template let-item pTemplate="item">
           <div>{{item.name}} ({{item.entity_id}})</div>
         </ng-template>
@@ -51,16 +52,17 @@
     </div>
   </ng-container>&nbsp;
 </div>
-<ng-container *ngIf="selectedEntity && availableFeatures && availableFeatures!.length > 0">
-  <div class="field-checkbox">
+<div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px" *ngIf="selectedEntity && availableFeatures && availableFeatures!.length > 0">
+  <div class="flex align-items-center justify-content-center">
     <p-checkbox [(ngModel)]="overwriteAssignedButtons" [binary]="true" label="Overwrite assigned physical buttons"></p-checkbox>
   </div>
-  <div class="field-checkbox">
+  <div class="flex align-items-center justify-content-center">
     <p-checkbox [(ngModel)]="keepDefinedPositions" [binary]="true" label="Preserve defined interface buttons"></p-checkbox>
   </div>
-<br>
-</ng-container>
-<p-button *ngIf="selectedEntity" label="Apply mapping" (onClick)="applyTemplate(this.updatedActivity!);viewer.view(updatedActivity!, true)"></p-button><br>
+  <div class="flex align-items-center justify-content-center">
+    <p-button label="Apply mapping" (onClick)="applyTemplate(this.updatedActivity!);viewer.view(updatedActivity!, true)"></p-button><br>
+  </div>
+</div>
 <h3>Replace an entity by another</h3>
 <div class="flex overflow-hidden">
   <div class="flex-none flex align-items-center justify-content-left px-1 py-1">
@@ -86,10 +88,13 @@
   </div>
 </div>
 <br>
+<p-dialog [header]="'Activity '+activity?.name" [(visible)]="viewerVisible" [style]="{width: '50vw'}">
+  <app-activity-viewer #viewer [remote]="selectedRemote" [editMode]="false" [activity]="activity"></app-activity-viewer>
+</p-dialog>
+<app-activity-viewer #editor [remote]="selectedRemote" [editMode]="true" [activity]="updatedActivity"></app-activity-viewer>
 <ng-container *ngIf="dump">
   <p>Generated mapping :</p>
   <ngx-json-viewer [json]="dump"></ngx-json-viewer>
 </ng-container>
-<app-activity-viewer #viewer [remote]="selectedRemote" [editMode]="true"></app-activity-viewer>
 <app-remote-operations #operations [operations]="remoteOperations" [remote]="selectedRemote"></app-remote-operations>
 

@@ -39,7 +39,9 @@
 </ng-container>
 <app-remote-registration (remoteSelected)="selectedRemote=$event"></app-remote-registration>
 <app-entity-viewer #entityviewer></app-entity-viewer>
-<app-activity-viewer #activityeditor [remote]="selectedRemote" [editMode]="false"></app-activity-viewer>
+<p-dialog [header]="'Activity viewer'" [(visible)]="viewerVisible" [style]="{width: '50vw'}">
+  <app-activity-viewer #activityeditor [remote]="selectedRemote" [editMode]="false"></app-activity-viewer>
+</p-dialog>
 <app-uploaded-files (configurationUpdated)="updateConfiguration()" [currentSource]="context?.source!"></app-uploaded-files>
 <input type="file" #fileUpload class="upload">
 <div class="flex overflow-hidden">
@@ -128,8 +130,8 @@
   </ng-template>
   <ng-template pTemplate="body" let-activity>
     <tr>
-      <td><a [routerLink]="[]" (click)="activityeditor.view(activity, false)">{{ activity.entity_id }}</a></td>
-      <td><a [routerLink]="[]" (click)="activityeditor.view(activity, false)">{{ activity.name }}</a></td>
+      <td><a [routerLink]="[]" (click)="viewActivity(activityeditor, activity)">{{ activity.entity_id }}</a></td>
+      <td><a [routerLink]="[]" (click)="viewActivity(activityeditor, activity)">{{ activity.name }}</a></td>
       <td><ng-container *ngFor="let activity_entity of activity['entities']">
         <p-chip [label]="getEntityName(activity_entity.entity_id)" (mouseover)="showEntity(activity_entity.entity_id);oventity.show($event)"
                 (mouseleave)="oventity.hide()" (click)="selectEntity(activity_entity.entity_id)"

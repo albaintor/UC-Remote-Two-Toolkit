@@ -57,9 +57,13 @@ export class AsPipe implements PipeTransform {
   encapsulation: ViewEncapsulation.None
 })
 export class ActivityViewerComponent implements AfterViewInit {
-  visible = false;
   currentPage: UIPage | undefined;
-  @Input() activity: Activity | undefined;
+  @Input('activity') set _activity(value: Activity | undefined) {
+    this.activity = value;
+    if (value)
+      this.initView();
+  }
+  activity: Activity | undefined;
   @Input() remote: Remote | undefined;
   @Input() editMode = true;
   buttonsMap:{ [id: string]: string } = {};
@@ -103,8 +107,12 @@ export class ActivityViewerComponent implements AfterViewInit {
     if (activity)
       this.activity = activity;
     this.editMode = editable;
+    this.initView();
+  }
+
+  initView()
+  {
     this.showDump = false;
-    this.visible = true;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[0];
     this.firstRow = 0;
     console.log("View activity", this.activity);

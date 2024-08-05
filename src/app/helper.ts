@@ -7,7 +7,7 @@ import {
   ButtonMapping,
   UIPage,
   Remote,
-  ActivityPageCommand
+  ActivityPageCommand, OrphanEntity
 } from "./interfaces";
 
 export class Helper
@@ -208,12 +208,12 @@ export class Helper
     return `/api/remote/${remote?.address}/resources/Icon/${filename}`;
   }
 
-  static getEntityName(entity: any): string | undefined
+  static getEntityName(entity: any): string
   {
     if (typeof entity.name === "string") return entity.name;
     if (entity.name?.['en']) return entity.name['en'];
     if (entity.name?.['fr']) return entity.name['fr'];
-    return undefined;
+    return "";
   }
 
   static isIntersection(rectangle1: {x: number, y: number, width: number, height:number},
@@ -286,5 +286,57 @@ export class Helper
       }
     }
     return null;
+  }
+
+  static getOrphans(activities: Activity[], entities: Entity[]): OrphanEntity[]
+  {
+    // Add orphan entities
+    const orphanEntities: OrphanEntity[] = [];
+    activities.forEach(activity => {
+      activity.options?.included_entities?.forEach(include_entity => {
+        if (!entities.find(entity => entity.entity_id == include_entity.entity_id)) {
+          let orphanEntity = orphanEntities.find(
+            orphanEntity => orphanEntity.entity_id == include_entity.entity_id);
+          if (!orphanEntity) {
+            orphanEntity = {...include_entity, activities: [activity]};
+            orphanEntities.push(orphanEntity);
+          }
+          else
+            orphanEntity.activities?.push(activity)
+        }
+      })
+    })
+    return orphanEntities;
+  }
+
+  static getUnusedEntities(activities: Activity[], entities: Entity[]): Entity[]
+  {
+    // Add orphan entities
+    const unusedEntities: Entity[] = [];
+    entities.forEach(entity => {
+      if (entity.entity_type == "activity") return;
+      if (activities.find(activity => activity.options?.included_entities?.
+        find(included_entity => included_entity.entity_id == entity.entity_id))) {
+        return;
+      }
+      unusedEntities.push(entity);
+    })
+    return unusedEntities;
+  }
+
+  static getValues(table: any[], field_name: string) {
+    const values = new Set<any>();
+    table.forEach(item => {
+      if (item?.[field_name]) {
+        values.add(item?.[field_name])
+      }
+    });
+    return Array.from(values).sort();
+  }
+
+  static getItems(table: any[], field_name: string) {
+    return Helper.getValues(table, field_name).map(value => {
+      return {name: value.toString(), value}
+    });
   }
 }

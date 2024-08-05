@@ -13,7 +13,7 @@ import {
   Config,
   Context,
   Entity,
-  OperationStatus,
+  OperationStatus, OrphanEntity,
   Profile,
   Remote,
   RemoteOperation
@@ -36,15 +36,11 @@ import {RemoteOperationsComponent} from "../remote-operations/remote-operations.
 import {forkJoin, from, map, mergeMap, Observable} from "rxjs";
 import {MessagesModule} from "primeng/messages";
 import {MultiSelectModule} from "primeng/multiselect";
+import {Helper} from "../helper";
 
 class Message {
   title: string = "";
   message: string = "";
-}
-
-interface OrphanEntity extends Entity
-{
-  activities?: Activity[];
 }
 
 @Component({
@@ -116,19 +112,18 @@ export class ReplaceEntityComponent implements OnInit{
     })
     const entities = localStorage.getItem("entities");
     const activities = localStorage.getItem("activities");
-    const orphans = localStorage.getItem("orphans");
     const context = localStorage.getItem("context");
-    if (entities || activities || orphans)
+    if (entities || activities)
     {
       if (activities) this.activities = JSON.parse(activities);
       if (entities) {
         this.entities = JSON.parse(entities);
         this.availableEntities = [...this.entities];
       }
-      if (orphans) this.orphanEntities = JSON.parse(orphans);
       if (context) this.context = JSON.parse(context);
       this.server.setEntities(this.entities);
-      this.getOrphans();
+      this.orphanEntities = Helper.getOrphans(this.activities, this.entities)
+      this.entities.push(...this.orphanEntities);
       this.cdr.detectChanges();
     }
   }
@@ -144,37 +139,6 @@ export class ReplaceEntityComponent implements OnInit{
     return this.activities.filter(activity => activity.options?.included_entities?.find(includedEntity =>
       includedEntity.entity_id == entity.entity_id
     ));
-  }
-
-  getEntityName(entity:Entity): string
-  {
-    if (!entity || !entity.name) return "";
-    if (typeof entity.name === 'string')
-      return entity.name;
-    if (entity.name?.en)
-      return entity.name.en;
-    return "";
-  }
-
-  getOrphans()
-  {
-    // Add orphan entities
-    this.orphanEntities = [];
-    this.activities.forEach(activity => {
-      activity.options?.included_entities?.forEach(include_entity => {
-        if (!this.entities.find(entity => entity.entity_id == include_entity.entity_id)) {
-          this.entities.push(include_entity);
-          let orphanEntity = this.orphanEntities.find(
-            orphanEntity => orphanEntity.entity_id == include_entity.entity_id);
-          if (!orphanEntity) {
-            orphanEntity = {...include_entity, activities: [activity]};
-            this.orphanEntities.push(orphanEntity);
-          }
-          else
-            orphanEntity.activities?.push(activity)
-        }
-      })
-    })
   }
 
   loadRemoteData():void
@@ -229,7 +193,8 @@ export class ReplaceEntityComponent implements OnInit{
 
     forkJoin(tasks).subscribe({next: (results) => {
       // Add orphan entities
-        this.getOrphans();
+        this.orphanEntities = Helper.getOrphans(this.activities, this.entities)
+        this.entities.push(...this.orphanEntities);
         this.availableEntities = [...this.entities];
         this.messageService.add({
           severity: "success", summary: "Remote data loaded",
@@ -240,7 +205,6 @@ export class ReplaceEntityComponent implements OnInit{
         localStorage.setItem("entities", JSON.stringify(this.entities));
         localStorage.setItem("activities", JSON.stringify(this.activities));
         localStorage.setItem("profiles", JSON.stringify(this.profiles));
-        localStorage.setItem("orphans", JSON.stringify(this.orphanEntities));
         localStorage.setItem("context", JSON.stringify(this.context));
         this.localMode = true;
         this.cdr.detectChanges();
@@ -489,19 +453,5 @@ export class ReplaceEntityComponent implements OnInit{
     return false;
   }
 
-  getValues(table: any[], field_name: string) {
-    const values = new Set<any>();
-    table.forEach(item => {
-      if (item?.[field_name]) {
-        values.add(item?.[field_name])
-      }
-    });
-    return Array.from(values).sort();
-  }
-
-  getItems(table: any[], field_name: string) {
-    return this.getValues(table, field_name).map(value => {
-      return {name: value.toString(), value}
-    });
-  }
+  protected readonly Helper = Helper;
 }

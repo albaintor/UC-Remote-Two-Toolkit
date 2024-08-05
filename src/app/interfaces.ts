@@ -331,3 +331,8 @@ export interface ActivityBackup {
   sequences: ActivitySequenceUsage[];
   options?: ActivityOption;
 }
+
+export interface OrphanEntity extends Entity
+{
+  activities?: Activity[];
+}

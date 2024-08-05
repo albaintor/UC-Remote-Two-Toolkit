@@ -35,14 +35,14 @@
 <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px" *ngFor="let item of replaceEntities">
   <div class="flex align-items-center justify-content-center">
     <ng-container *ngIf="!item.oldEntity">Entity to be replaced</ng-container>
-    <p-chip *ngIf="item.oldEntity" [label]="''+getEntityName(item.oldEntity)+' ('+item.oldEntity.entity_id+')'" />&nbsp;
+    <p-chip *ngIf="item.oldEntity" [label]="''+Helper.getEntityName(item.oldEntity)+' ('+item.oldEntity.entity_id+')'" />&nbsp;
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" (click)="invertEntities(item)"/>
   </div>
   <div class="flex align-items-center justify-content-center">
     <ng-container *ngIf="!item.newEntity">Entity to replace</ng-container>
-    <p-chip *ngIf="item.newEntity" [label]="''+getEntityName(item.newEntity)+' ('+item.newEntity.entity_id+')'" />
+    <p-chip *ngIf="item.newEntity" [label]="''+Helper.getEntityName(item.newEntity)+' ('+item.newEntity.entity_id+')'" />
   </div>
 </div>
 <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px">
@@ -95,7 +95,7 @@
     </ng-template>
     <ng-template pTemplate="body" let-entity>
       <tr>
-        <td>{{getEntityName(entity)}}</td>
+        <td>{{Helper.getEntityName(entity)}}</td>
         <td>{{entity.entity_id}}</td>
         <td><ng-container *ngIf="entity.activities">
           <ng-container *ngFor="let activity of entity.activities">
@@ -124,7 +124,7 @@
         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
           <p-multiSelect
             [ngModel]="value"
-            [options]="getItems(availableEntities, 'name')"
+            [options]="Helper.getItems(availableEntities, 'name')"
             placeholder="Name"
             (onChange)="filter($event.value)"
             optionLabel="name" optionValue="value" appendTo="body">
@@ -135,7 +135,7 @@
         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
           <p-multiSelect
             [ngModel]="value"
-            [options]="getItems(availableEntities, 'integration_id')"
+            [options]="Helper.getItems(availableEntities, 'integration_id')"
             placeholder="Integration ID"
             (onChange)="filter($event.value)"
             optionLabel="name" optionValue="value" appendTo="body">
@@ -146,13 +146,13 @@
         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
           <p-multiSelect
             [ngModel]="value"
-            [options]="getItems(availableEntities, 'entity_type')"
+            [options]="Helper.getItems(availableEntities, 'entity_type')"
             placeholder="Entity type"
             (onChange)="filter($event.value)"
             optionLabel="name" optionValue="value" appendTo="body">
           </p-multiSelect>
         </ng-template>
-      </p-columnFilter>
+      </p-columnFilter></th>
       <th></th>
       <th></th>
     </tr>
@@ -160,7 +160,7 @@
   <ng-template pTemplate="body" let-entity>
     <tr>
       <td><a [routerLink]="[]" (click)="selectEntity(entity)">{{entity.entity_id}}</a></td>
-      <td><p-chip [label]="getEntityName(entity)" [style]="getStyle(getEntityName(entity))" (click)="entityviewer.view(entity)"></p-chip></td>
+      <td><p-chip [label]="Helper.getEntityName(entity)" [style]="getStyle(Helper.getEntityName(entity))" (click)="entityviewer.view(entity)"></p-chip></td>
       <td><p-chip [label]="entity.integration_id" [style]="getStyle(entity.integration_id)"></p-chip></td>
       <td><p-chip [label]="entity.entity_type" [style]="getStyle(entity.entity_type)"></p-chip></td>
       <td><ng-container *ngFor="let activity of getUsedActivities(entity)">

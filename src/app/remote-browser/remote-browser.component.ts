@@ -26,7 +26,7 @@ import {
   EntitiesUsage,
   Entity,
   EntityCommand,
-  EntityUsage,
+  EntityUsage, OrphanEntity,
   Profile,
   Profiles,
   Remote
@@ -45,6 +45,7 @@ import {Helper} from "../helper";
 import {EntityViewerComponent} from "../entity-viewer/entity-viewer.component";
 import {MessagesModule} from "primeng/messages";
 import {DialogModule} from "primeng/dialog";
+import {MultiSelectModule} from "primeng/multiselect";
 
 interface FileProgress
 {
@@ -77,7 +78,8 @@ interface FileProgress
     ActivityViewerComponent,
     EntityViewerComponent,
     MessagesModule,
-    DialogModule
+    DialogModule,
+    MultiSelectModule
   ],
   templateUrl: './remote-browser.component.html',
   styleUrl: './remote-browser.component.css',
@@ -115,6 +117,8 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   localMode = true;
   configCommands: EntityCommand[] = [];
   viewerVisible = false;
+  orphanEntities: OrphanEntity[] = [];
+  unusedEntities: Entity[] = [];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
   }
@@ -144,6 +148,8 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       this.server.setEntities(this.entities);
       this.server.setActivities(this.activities);
       this.server.setProfiles(this.profiles);
+      this.unusedEntities = Helper.getUnusedEntities(this.activities, this.entities);
+      this.orphanEntities = Helper.getOrphans(this.activities, this.entities);
       // this.server.setContext(this.context);
       this.messageService.add({severity: "info", summary: `Remote data loaded from cache`});
       this.localMode = true;
@@ -157,31 +163,12 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   {
     localStorage.removeItem("entities");
     localStorage.removeItem("activities");
+    localStorage.removeItem("profiles");
+    localStorage.removeItem("configCommands");
   }
 
   init(): void {
     this.localMode = false;
-    /*this.server.getContext().subscribe(results => {
-      console.info("Context", results);
-      this.context = results;
-      this.cdr.detectChanges();
-    })*/
-    /*this.server.getEntitiesFromBackup().subscribe(entities => {
-      console.info("Entities", entities);
-      this.entities = entities;
-      this.cdr.detectChanges();
-    })
-    this.server.getActivitiesFromBackup().subscribe(activities => {
-      console.info("Activities", activities);
-      this.activities = activities;
-      this.cdr.detectChanges();
-    })
-    this.server.getProfilesFromBackup().subscribe(results => {
-      console.info("Profiles", results);
-      this.profiles = Object.values(results);
-      this.cdr.detectChanges();
-    })*/
-
   }
 
   loadRemoteData():void
@@ -234,6 +221,8 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     })))
 
     forkJoin(tasks).subscribe({next: (results) => {
+        this.unusedEntities = Helper.getUnusedEntities(this.activities, this.entities);
+        this.orphanEntities = Helper.getOrphans(this.activities, this.entities);
         this.messageService.add({
           severity: "success", summary: "Remote data loaded",
           detail: `${this.entities.length} entities and ${this.activities.length} activities extracted.`

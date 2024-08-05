@@ -42,6 +42,11 @@ class Message {
   message: string = "";
 }
 
+interface OrphanEntity extends Entity
+{
+  activities?: Activity[];
+}
+
 @Component({
   selector: 'app-replace-entity',
   standalone: true,
@@ -89,7 +94,7 @@ export class ReplaceEntityComponent implements OnInit{
   replaceEntities: {oldEntity: Entity | undefined, newEntity: Entity | undefined}[] = [{oldEntity: undefined, newEntity: undefined}];
   profiles: Profile[] | undefined;
   localMode: boolean = false;
-  orphanEntities: Entity[] = [];
+  orphanEntities: OrphanEntity[] = [];
   messages: Message[] = [];
 
   @ViewChild(RemoteOperationsComponent) operations: RemoteOperationsComponent | undefined;
@@ -154,11 +159,19 @@ export class ReplaceEntityComponent implements OnInit{
   getOrphans()
   {
     // Add orphan entities
+    this.orphanEntities = [];
     this.activities.forEach(activity => {
       activity.options?.included_entities?.forEach(include_entity => {
         if (!this.entities.find(entity => entity.entity_id == include_entity.entity_id)) {
           this.entities.push(include_entity);
-          this.orphanEntities.push(include_entity);
+          let orphanEntity = this.orphanEntities.find(
+            orphanEntity => orphanEntity.entity_id == include_entity.entity_id);
+          if (!orphanEntity) {
+            orphanEntity = {...include_entity, activities: [activity]};
+            this.orphanEntities.push(orphanEntity);
+          }
+          else
+            orphanEntity.activities?.push(activity)
         }
       })
     })
@@ -183,7 +196,6 @@ export class ReplaceEntityComponent implements OnInit{
     const tasks: Observable<any>[] = [];
     tasks.push(this.server.getRemoteEntities(this.selectedRemote).pipe(map((entities) => {
       this.entities = entities;
-      this.availableEntities = [...this.entities];
       // this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
       //   detail: `${this.entity_list.length} entities extracted`});
       this.cdr.detectChanges();
@@ -218,6 +230,7 @@ export class ReplaceEntityComponent implements OnInit{
     forkJoin(tasks).subscribe({next: (results) => {
       // Add orphan entities
         this.getOrphans();
+        this.availableEntities = [...this.entities];
         this.messageService.add({
           severity: "success", summary: "Remote data loaded",
           detail: `${this.entities.length} entities and ${this.activities.length} activities extracted.`

@@ -175,7 +175,7 @@ export class ActivityEditorComponent implements OnInit {
 
     if (createActivity)
     {
-      this.remoteOperations.push({method: "POST", api: `/api/activities`,
+      this.remoteOperations.push({name: `Create activity ${this.updatedActivity.name}`, method: "POST", api: `/api/activities`,
         body: {
           name: this.updatedActivity.name,
           options: {
@@ -187,7 +187,7 @@ export class ActivityEditorComponent implements OnInit {
       return;
     } else if (updateIncludedEntities)
     {
-      this.remoteOperations.push({method: "PATCH", api: `/api/activities/${this.updatedActivity?.entity_id}`,
+      this.remoteOperations.push({name: `Update activity ${this.updatedActivity.name}`, method: "PATCH", api: `/api/activities/${this.updatedActivity?.entity_id}`,
         body: {
           options: {
             entity_ids: newIncludedEntities.map((entity) => entity.entity_id),
@@ -200,7 +200,7 @@ export class ActivityEditorComponent implements OnInit {
       const originalButton = this.activity?.options?.button_mapping?.
         find(localButton=> localButton.button === button.button);
       if (!originalButton || !Helper.compareButtons(button, originalButton))
-        this.remoteOperations.push({method: "PATCH", api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
+        this.remoteOperations.push({name: `Button ${button.button}`,method: "PATCH", api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
         body: {
           ...button
         }, status: OperationStatus.Todo})
@@ -216,7 +216,7 @@ export class ActivityEditorComponent implements OnInit {
         method = "PATCH";
       }
 
-      this.remoteOperations.push({method , api,
+      this.remoteOperations.push({name: `Page ${page.name}`, method , api,
         body: {
           ...page
         }, status: OperationStatus.Todo})
@@ -330,7 +330,7 @@ export class ActivityEditorComponent implements OnInit {
       {
         let skip = false;
         page.features.forEach(feature => {
-          if (!selectedFeatures.includes(feature))
+          if (!selectedFeatures.includes(feature) || !entity.features?.includes(feature))
             skip = true;
           return;
         })
@@ -357,6 +357,7 @@ export class ActivityEditorComponent implements OnInit {
 
       page.items.forEach(item => {
         if (item.feature && !selectedFeatures.includes(item.feature)) return;
+        if (item.feature && !entity.features?.includes(item.feature)) return;
         let location = this.getItemLocation(targetPage!, item.size, item.location);
         if (location == null)
         {

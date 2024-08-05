@@ -3,20 +3,19 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import multer from 'multer';
 import JSZip from 'jszip';
-import got, {HTTPError, Options} from 'got'
+import got from 'got'
 import {rimraf} from 'rimraf';
-import createHttpError from 'http-errors';
 
 import path from 'path';
 // import indexRouter from './routes/index.js';
 // import usersRouter from './routes/users.js';
 import {RC2Model} from './RC2Model.js'
 import fs from "node:fs";
-import {elementAt} from "rxjs";
 import {Remote} from "./remote.js";
 import {getConfigFile, writeConfigFile} from "./config.js";
+import {program} from 'commander';
 
-const LISTEN_PORT = "8000";
+let LISTEN_PORT = "8000";
 const UPLOAD_DIR = './uploads';
 const RESOURCES_DIR = './resources';
 var app = express();
@@ -28,6 +27,17 @@ var storage = multer.diskStorage({
     callback(null, file.originalname);
   }
 });
+
+program
+  .usage('[OPTIONS]...')
+  // .option('-f, --flag', 'Detects if the flag is present.')
+  .option('-p, --port <value>', 'Listen on given port', '8000')
+  .parse(process.argv);
+const options = program.opts();
+if (options.port)
+{
+  LISTEN_PORT = options.port;
+}
 
 const upload = multer({storage: storage})
 

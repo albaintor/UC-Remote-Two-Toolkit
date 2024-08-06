@@ -7,10 +7,6 @@
         "feature": "on_off"
       },
       {
-        "commands":  ["media_player.back"],
-        "feature": "back"
-      },
-      {
         "commands":  ["media_player.toggle"],
         "feature": "toggle"
       },
@@ -59,11 +55,11 @@
         "feature": "context_menu"
       },
       {
-        "commands":  ["media_player.home"],
+        "commands":  ["media_player.home", "media_player.back"],
         "feature": "home"
       },
       {
-        "commands":  ["media_player.menu"],
+        "commands":  ["media_player.menu", "media_player.back"],
         "feature": "menu"
       },
       {
@@ -124,11 +120,11 @@
         "feature": "media_image_url"
       },
       {
-        "commands": ["media_player.guide"],
+        "commands": ["media_player.guide", "media_player.back"],
         "feature": "guide"
       },
       {
-        "commands": ["media_player.info"],
+        "commands": ["media_player.info", "media_player.back"],
         "feature": "info"
       },
       {

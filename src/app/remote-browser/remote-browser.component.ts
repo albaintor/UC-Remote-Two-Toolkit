@@ -258,17 +258,13 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   {
     this.config = config;
     this.remotes = config.remotes!;
-    const selectedRemoteAddress = localStorage.getItem('remote');
-    if (selectedRemoteAddress)
-    {
-      this.selectedRemote = this.remotes.find(remote => remote.address === selectedRemoteAddress)
-    }
+    this.selectedRemote  = Helper.getSelectedRemote(this.remotes);
     this.cdr.detectChanges();
   }
 
   setRemote(remote: Remote): void
   {
-    localStorage.setItem('remote', remote.address);
+    Helper.setRemote(remote);
     this.server.remote$.next(remote);
   }
 
@@ -475,5 +471,10 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
 
   setFilter(dt: any, $event: Event) {
     dt.filterGlobal(($event as any).target.value, 'contains')
+  }
+
+  updateRemotes($event: Remote[]) {
+    this.remotes = $event;
+    this.cdr.detectChanges();
   }
 }

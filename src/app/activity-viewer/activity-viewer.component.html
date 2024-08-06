@@ -22,8 +22,17 @@
 <p-toast key="activity"></p-toast>
 <app-command-editor #commandeditor></app-command-editor>
 <!--<p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">-->
-  <p-button *ngIf="!editMode" label="Edit this activity" [routerLink]="['/activity/edit', activity?.entity_id]" severity="danger" icon="pi pi-pen" size="small"></p-button>
+<div class="flex align-content-center flex-wrap gap-3">
+  <div class="flex align-items-center justify-content-center" *ngIf="!editMode">
+    <p-button label="Edit this activity" [routerLink]="['/activity/edit', activity?.entity_id]" severity="danger" icon="pi pi-pen" size="small"></p-button>&nbsp;&nbsp;
+  </div>
+  <div class="flex align-items-center justify-content-center" *ngIf="!editMode">
+    <p-button label="Clone this activity" [routerLink]="['/activity/copy', activity?.entity_id]" icon="pi pi-copy" size="small"></p-button>
+  </div>
+</div>
+
 <ng-container *ngIf="currentPage">
+  <br>
   <div class="grid-container"
        [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width), 'width': gridWidth+'px', 'height': gridHeight+'px'}">
     <grid-button [editable]="editMode" *ngFor="let item of grid; let index=index" [index]="index" [source]="gridSource" [item]="item" [grid]="currentPage.grid" [style]="getGridItemSize(item)"

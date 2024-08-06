@@ -25,6 +25,7 @@ import {ButtonModule} from "primeng/button";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {Helper} from "../helper";
 import {CommandEditorComponent} from "../activity-editor/command-editor/command-editor.component";
+import { saveAs } from 'file-saver-es';
 
 @Pipe({name: 'as', standalone: true, pure: true})
 export class AsPipe implements PipeTransform {
@@ -84,6 +85,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   firstRow = 0;
   gridWidth = 4*185;
   gridHeight = 6*185;
+  protected readonly Helper = Helper;
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
@@ -301,6 +303,4 @@ export class ActivityViewerComponent implements AfterViewInit {
     }
     return style;
   }
-
-  protected readonly Helper = Helper;
 }

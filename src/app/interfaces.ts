@@ -308,6 +308,7 @@ export interface ActivitySequence
 export interface ActivityOption
 {
   sequences?:{[type: string]: ActivitySequence[]};
+  prevent_sleep?: boolean;
   included_entities?:Entity[];
   activity_group?: any;
   button_mapping?:ButtonMapping[];
@@ -319,6 +320,8 @@ export interface ActivityOption
 export interface Activity {
   entity_id?: string;
   name: string;
+  icon?: string;
+  description?: any;
   options?: ActivityOption;
 }
 

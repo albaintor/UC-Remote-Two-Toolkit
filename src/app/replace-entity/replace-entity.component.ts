@@ -226,17 +226,13 @@ export class ReplaceEntityComponent implements OnInit{
   {
     this.config = config;
     this.remotes = config.remotes!;
-    const selectedRemoteAddress = localStorage.getItem('remote');
-    if (selectedRemoteAddress)
-    {
-      this.selectedRemote = this.remotes.find(remote => remote.address === selectedRemoteAddress)
-    }
+    this.selectedRemote  = Helper.getSelectedRemote(this.remotes);
     this.cdr.detectChanges();
   }
 
   setRemote(remote: Remote): void
   {
-    localStorage.setItem('remote', remote.address);
+    Helper.setRemote(remote);
     this.server.remote$.next(remote);
   }
 

@@ -37,6 +37,7 @@ export class RemoteRegistrationComponent {
   token = "1234";
   remotes: Remote[] = [];
   @Output() remoteSelected = new EventEmitter<Remote>();
+  @Output() remotesChanged = new EventEmitter<Remote[]>();
   selectedRemote: Remote | undefined;
   registrations: RemoteRegistration[] | undefined;
 
@@ -71,6 +72,7 @@ export class RemoteRegistrationComponent {
         this.messageService.add({severity: "success", summary: "Remote registered",
           detail: `Key ${results.api_key} valid to ${results.api_valid_to}`,
           key: "remote"});
+        this.remotesChanged.emit(this.remotes);
         this.cdr.detectChanges();
     }),
       error: ((error: any) => {
@@ -99,6 +101,7 @@ export class RemoteRegistrationComponent {
         this.messageService.add({severity: "success", summary: "Remote unregistered",
           key: "remote"});
         this.refresh();
+        this.remotesChanged.emit(this.remotes);
         this.cdr.detectChanges();
       }),
       error: ((error: any) => {

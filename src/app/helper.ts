@@ -7,7 +7,7 @@ import {
   ButtonMapping,
   UIPage,
   Remote,
-  ActivityPageCommand, OrphanEntity, Profiles
+  ActivityPageCommand, OrphanEntity, Profiles, Config
 } from "./interfaces";
 
 export class Helper
@@ -330,6 +330,12 @@ export class Helper
               return;
           }
         }
+        if (profile.groups)
+        for (let group of profile.groups)
+        {
+          if (group.entities.includes(entity.entity_id!))
+            return;
+        }
       }
       unusedEntities.push(entity);
     })
@@ -350,5 +356,25 @@ export class Helper
     return Helper.getValues(table, field_name).map(value => {
       return {name: value.toString(), value}
     });
+  }
+
+  static getSelectedRemote(remotes: Remote[]): Remote | undefined
+  {
+    const selectedRemoteAddress = localStorage.getItem('remote');
+    if (selectedRemoteAddress)
+    {
+      const address = selectedRemoteAddress.split(":")[0];
+      let port = "80";
+      if (selectedRemoteAddress.includes(":"))
+        port = selectedRemoteAddress.split(":")[1];
+      return remotes.find(remote => remote.address === address &&
+        remote.port === port)
+    }
+    return undefined;
+  }
+
+  static setRemote(remote: Remote): void
+  {
+    localStorage.setItem('remote', `${remote.address}:${remote.port}`);
   }
 }

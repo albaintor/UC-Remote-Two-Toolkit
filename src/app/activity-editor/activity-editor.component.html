@@ -20,6 +20,7 @@
   {{progressDetail}}<br>
   <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
 </ng-container>
+<h2>Edit activity : {{activity?.name}}</h2>
 <p-messages severity="info">
   <ng-template pTemplate>
     <div class="ml-2">Here you can edit an activity : you can see the original mapping and the new mapping with the 2 options above. In the new mapping you can only move UI icons.<br>
@@ -28,6 +29,16 @@
     Once done, click on <b>Save activity to remote</b> to update the remote with the pending operations.</div>
   </ng-template>
 </p-messages>
+<div class="flex align-content-center flex-wrap gap-3">
+  <div class="flex align-items-center justify-content-center">
+    <p-button label="Save this activity to file" (onClick)="saveActivity()" severity="success" icon="pi pi-save" size="small"></p-button>
+  </div>
+  <div class="flex align-items-center justify-content-center">
+    <p-button label="Import this activity from file" (onClick)="importActivity()" severity="danger" icon="pi pi-folder-open" size="small">
+      <input #input_file type="file" style="display:none" (change)="loadInputFile($event)">
+    </p-button>
+  </div>
+</div>
 <h3>Apply a predefined mapping from a given entity</h3>
 <div *ngIf="selectedEntity"><b>{{selectedEntity.name}}</b> ({{selectedEntity.entity_id}})</div>
 <div class="formgroup-inline">
@@ -72,14 +83,14 @@
       <p-autoComplete [(ngModel)]="entity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchActivityEntity($event)" appendTo="body"
                       field="entity_id" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
         <ng-template let-item pTemplate="item">
-          <div><b>{{item.name}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
+          <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
         </ng-template>
       </p-autoComplete></div><div style="width: 60px">&nbsp;with :&nbsp;</div>
     <div style="width: 50%;">
-      <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntity($event)" appendTo="body"
+      <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions2" (completeMethod)="searchEntity($event)" appendTo="body"
                       field="entity_id" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
         <ng-template let-item pTemplate="item">
-          <div><b>{{item.name}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
+          <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
         </ng-template>
       </p-autoComplete></div>
   </div>

@@ -1,1 +1,8 @@
-<p>remote-data-loader works!</p>
+<div class="progress-spinner" *ngIf="progress">
+  <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+</div>
+<p-toast key="remote-loader"></p-toast>
+<ng-container *ngIf="progress">
+  {{progressDetail}}<br>
+  <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
+</ng-container>

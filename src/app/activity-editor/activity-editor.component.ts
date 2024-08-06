@@ -40,7 +40,8 @@ import {RemoteOperationsComponent} from "../remote-operations/remote-operations.
 import {MessagesModule} from "primeng/messages";
 import {DialogModule} from "primeng/dialog";
 import {saveAs} from "file-saver-es";
-import {catchError, map, Observable, of} from "rxjs";
+import {catchError, map, mergeMap, Observable, of} from "rxjs";
+import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 
 @Component({
   selector: 'app-activity-editor',
@@ -63,7 +64,8 @@ import {catchError, map, Observable, of} from "rxjs";
     AutoCompleteModule,
     RemoteOperationsComponent,
     MessagesModule,
-    DialogModule
+    DialogModule,
+    RemoteDataLoaderComponent
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',
@@ -87,7 +89,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     {label: 'Save activity to remote', command: () => this.buildUpdateData(), icon: 'pi pi-cloud-upload'},
   ]
   items: MenuItem[] = [];
-  activity_list: Activity[] = [];
+  activities: Activity[] = [];
   entities: Entity[] = [];
   templates: RemoteMap[] = [];
   activity: Activity | undefined;
@@ -103,10 +105,13 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   newEntity: Entity | undefined;
   protected readonly Helper = Helper;
   viewerVisible = false;
+  createMode = false;
+  showOperations = false;
 
   @ViewChild("editor") activityEditor: ActivityViewerComponent | undefined;
   @ViewChild(RemoteOperationsComponent) operations: RemoteOperationsComponent | undefined;
   @ViewChild("input_file", {static: false}) input_file: ElementRef | undefined;
+  @ViewChild(RemoteDataLoaderComponent) remoteLoader: RemoteDataLoaderComponent | undefined;
 
   selectedEntity: Entity | undefined;
   suggestions: Entity[] = [];
@@ -142,10 +147,10 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     const activities = localStorage.getItem("activities");
     if (entities || activities)
     {
-      if (activities) this.activity_list = JSON.parse(activities);
+      if (activities) this.activities = JSON.parse(activities);
       if (entities) this.entities = JSON.parse(entities);
       this.server.setEntities(this.entities);
-      this.server.setActivities(this.activity_list);
+      this.server.setActivities(this.activities);
       // this.context = {source:"Cache", type: "Remote", date: new Date()};
       // this.messageService.add({severity: "info", summary: `Remote data loaded from cache`});
       this.updateActivity();
@@ -176,6 +181,12 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
   buildUpdateData()
   {
+    if (this.createMode)
+    {
+      this.showOperations = true;
+      this.cdr.detectChanges();
+      return;
+    }
     if (!this.updatedActivity) return;
     this.remoteOperations = [];
     const newIncludedEntities = Helper.getActivityEntities(this.updatedActivity!, this.entities);
@@ -254,77 +265,97 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       return;
     }
     else {
-      this.operations!.visible = true;
+      this.showOperations = true;
     }
 
     this.dump = this.remoteOperations;
     this.cdr.detectChanges();
   }
 
-  buildCreateData(): Observable<Activity | undefined>
+  buildCreateData(): Observable<RemoteOperation[] | undefined>
   {
-    if (!this.updatedActivity || !this.selectedRemote) return of(this.updatedActivity);
-    this.remoteOperations = [];
+    this.createMode = true;
+    const remoteOperations: RemoteOperation[] = [];
+    this.messageService.add({severity: "info", summary: "Loading target remote data..."});
+    this.cdr.detectChanges();
+    return this.remoteLoader!.loadRemoteData().pipe(map(data => {
+      if (!data || !this.updatedActivity || !this.targetRemote) return remoteOperations;
+      this.activities = data.activities;
+      this.entities = data.entities;
+      this.cdr.detectChanges();
 
-    const body: any = {
-      name: this.updatedActivity!.name,
-      options: {}
-    }
-    if (this.updatedActivity.icon)
-      body.icon = this.updatedActivity.icon;
-    if (this.updatedActivity.description)
-      body.description = this.updatedActivity.description;
-    if (this.updatedActivity.options?.prevent_sleep)
-      body.options.prevent_sleep = this.updatedActivity.options.prevent_sleep;
-    if (this.updatedActivity.options?.included_entities)
-      body.options.entity_ids = this.updatedActivity!.options!.included_entities!.map((entity) => entity.entity_id);
-    if (this.updatedActivity.options?.sequences)
-      body.sequences = {...this.updatedActivity.options.sequences};
+      const body: any = {
+        name: this.updatedActivity!.name,
+        options: {}
+      }
+      if (this.updatedActivity.icon)
+        body.icon = this.updatedActivity.icon;
+      if (this.updatedActivity.description)
+        body.description = this.updatedActivity.description;
+      if (this.updatedActivity.options?.prevent_sleep)
+        body.options.prevent_sleep = this.updatedActivity.options.prevent_sleep;
+      if (this.updatedActivity.options?.included_entities)
+        body.options.entity_ids = this.updatedActivity!.options!.included_entities!.map((entity) => entity.entity_id);
+      if (this.updatedActivity.options?.sequences)
+        body.sequences = {...this.updatedActivity.options.sequences};
 
 
-    return this.server.getRemoteActivity(this.selectedRemote, this.updatedActivity.entity_id!).pipe(
-      map(activity => {
+      if (this.updatedActivity?.options?.included_entities) {
+        const oprhanEntities = this.updatedActivity.options.included_entities.filter(included_entity => {
+          return !this.entities.find(entity => entity.entity_id === included_entity.entity_id);
+        });
+        if (oprhanEntities.length > 0) {
+          this.messageService.add({
+            severity: "error", summary: "Cannot import entities from file : some entities are orphans",
+            detail: oprhanEntities.map(entity => entity.entity_id).join(", ")
+          });
+          this.cdr.detectChanges();
+          return undefined;
+        }
+      }
+
+      const activity = this.activities.find(activity => activity.entity_id === this.updatedActivity?.entity_id);
+      if (activity)
+      {
         console.log("Activity to import exists, we will update it", body);
         activity.options?.button_mapping?.forEach(button => {
-          this.remoteOperations.push({name: `Delete button ${button.button} ${this.updatedActivity!.name}`,
+          remoteOperations.push({name: `Delete button ${button.button} ${this.updatedActivity!.name}`,
             method: "DELETE", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
             body: {}, status: OperationStatus.Todo});
         })
         activity.options?.user_interface?.pages?.forEach(page => {
-          this.remoteOperations.push({name: `Delete page ${page.name} ${this.updatedActivity!.name}`,
+          remoteOperations.push({name: `Delete page ${page.name} ${this.updatedActivity!.name}`,
             method: "DELETE", api: `/api/activities/${activity.entity_id}/ui/pages/${page.page_id}`,
             body: {}, status: OperationStatus.Todo});
         });
-        this.remoteOperations.push({name: `Update activity ${this.updatedActivity!.name}`, method: "PUT",
+        remoteOperations.push({name: `Update activity ${this.updatedActivity!.name}`, method: "PUT",
           api: `/api/activities/${activity.entity_id}`, body, status: OperationStatus.Todo});
-        return activity;
-    }),
-      catchError(error => {
+      }
+      else
+      {
         console.log("Activity to import does not exist, we will create it", body);
-        this.remoteOperations.push({name: `Create activity ${this.updatedActivity!.name}`, method: "POST", api: `/api/activities`,
+        remoteOperations.push({name: `Create activity ${this.updatedActivity!.name}`, method: "POST", api: `/api/activities`,
           body, status: OperationStatus.Todo});
-        return of(this.updatedActivity!);
-      }),
-      map(activity => {
-        this.updatedActivity!.options?.button_mapping?.forEach(button => {
-          if (!button.long_press && !button.short_press) return;
-          this.remoteOperations.push({name: `Button ${button.button}`,method: "PATCH",
-            api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
-            body: {
-              ...button
-            }, status: OperationStatus.Todo})
-        });
-        this.updatedActivity!.options?.user_interface?.pages?.forEach(page => {
-          const newPage = {...page};
-          delete newPage["page_id"];
-          this.remoteOperations.push({name: `Page ${page.name}`, method: "PATCH", api:
+      }
+      this.updatedActivity!.options?.button_mapping?.forEach(button => {
+        if (!button.long_press && !button.short_press) return;
+        remoteOperations.push({name: `Button ${button.button}`,method: "PATCH",
+          api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
+          body: {
+            ...button
+          }, status: OperationStatus.Todo})
+      });
+      this.updatedActivity!.options?.user_interface?.pages?.forEach(page => {
+        const newPage = {...page};
+        delete newPage["page_id"];
+        remoteOperations.push({name: `Page ${page.name}`, method: "PATCH", api:
             `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`,
-            body: {
-              ...newPage
-            }, status: OperationStatus.Todo});
-        })
-        return this.updatedActivity;
-    }));
+          body: {
+            ...newPage
+          }, status: OperationStatus.Todo});
+      })
+      return remoteOperations;
+    }))
   }
 
   clearMapping()
@@ -336,8 +367,8 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
   updateActivity()
   {
-    if (!this.activity_id || !this.activity_list) return;
-    this.activity = this.activity_list.find(activity => activity.entity_id === this.activity_id);
+    if (!this.activity_id || !this.activities) return;
+    this.activity = this.activities.find(activity => activity.entity_id === this.activity_id);
     if (this.activity)
     {
       this.updatedActivity = {
@@ -469,7 +500,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
         targetPage!.items.push(command);
       })
     })
-    this.operations!.visible = true;
+    this.showOperations = true;
     this.dump = updatedActivity as any;//JSON.stringify(updatedActivity, null, 2);
     this.activityEditor?.updateButtonsGrid();
     this.cdr.detectChanges();
@@ -655,24 +686,12 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       if (fileReader.result){
         this.updatedActivity = JSON.parse(fileReader.result.toString());
         console.log("Loaded activity from file", fileReader.result);
-        if (this.updatedActivity?.options?.included_entities) {
-          const oprhanEntities = this.updatedActivity.options.included_entities.filter(included_entity => {
-            return !this.entities.find(entity => entity.entity_id === included_entity.entity_id);
-          });
-          if (oprhanEntities.length > 0) {
-            this.messageService.add({
-              severity: "error", summary: "Cannot import entities from file : some entities are orphans",
-              detail: oprhanEntities.map(entity => entity.entity_id).join(", ")
-            });
-            this.cdr.detectChanges();
-            return;
-          }
-        }
         this.buildCreateData().subscribe({next: results => {
           this.messageService.add({severity: "success", summary: "Activity imported successfully"});
           console.log("Pending operations", this.remoteOperations);
           this.dump = this.remoteOperations;
-          this.operations!.visible = true;
+          if (results) this.remoteOperations = results;
+          this.showOperations = true;
           this.cdr.detectChanges();
         }, error: error => {
           this.messageService.add({severity: "error", summary: "Failed to import activity"});

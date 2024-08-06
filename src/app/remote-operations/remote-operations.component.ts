@@ -1,8 +1,8 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
-  Input,
+  Component, EventEmitter,
+  Input, Output,
   ViewEncapsulation
 } from '@angular/core';
 import {DialogModule} from "primeng/dialog";
@@ -38,7 +38,15 @@ import {ChipModule} from "primeng/chip";
   encapsulation: ViewEncapsulation.None
 })
 export class RemoteOperationsComponent {
-  visible = false;
+  _visible = false;
+  @Input() get visible(): boolean {
+    return this._visible;
+  }
+  set visible(value: boolean) {
+    this._visible = value;
+    this.visibleChange.emit(this._visible);
+  }
+  @Output() visibleChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Input() operations: RemoteOperation[] = [];
   @Input({required: true}) remote: Remote | undefined;
 

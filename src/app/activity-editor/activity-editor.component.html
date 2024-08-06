@@ -16,6 +16,7 @@
     </p-dropdown>
   </ng-template>
 </p-menubar>
+<app-remote-data-loader #loader [remote]="targetRemote"></app-remote-data-loader>
 <ng-container *ngIf="progress">
   {{progressDetail}}<br>
   <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
@@ -122,5 +123,5 @@
   <p>Generated mapping :</p>
   <ngx-json-viewer [json]="dump"></ngx-json-viewer>
 </ng-container>
-<app-remote-operations #operations [operations]="remoteOperations" [remote]="targetRemote"></app-remote-operations>
+<app-remote-operations #operations [operations]="remoteOperations" [remote]="targetRemote" [(visible)]="showOperations"></app-remote-operations>
 

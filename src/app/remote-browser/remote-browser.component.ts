@@ -48,6 +48,7 @@ import {MessagesModule} from "primeng/messages";
 import {DialogModule} from "primeng/dialog";
 import {MultiSelectModule} from "primeng/multiselect";
 import {AccordionModule} from "primeng/accordion";
+import {RemoteData, RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 
 interface FileProgress
 {
@@ -82,7 +83,8 @@ interface FileProgress
     MessagesModule,
     DialogModule,
     MultiSelectModule,
-    AccordionModule
+    AccordionModule,
+    RemoteDataLoaderComponent
   ],
   templateUrl: './remote-browser.component.html',
   styleUrl: './remote-browser.component.css',
@@ -94,6 +96,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   @ViewChild("fileUpload", {static: false}) fileUpload: ElementRef | undefined;
   @ViewChild(UploadedFilesComponent) uploadedFilesComponent: UploadedFilesComponent | undefined;
   @ViewChild(RemoteRegistrationComponent) remoteComponent: RemoteRegistrationComponent | undefined;
+  @ViewChild(RemoteDataLoaderComponent) remoteLoader: RemoteDataLoaderComponent | undefined;
 
   activities: Activity[] = [];
   entities: Entity[] = [];
@@ -108,12 +111,10 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   remotes: Remote[] = [];
   selectedRemote: Remote | undefined;
   progress = false;
-  remoteProgress = 0;
   protected readonly Math = Math;
-  progressDetail = "";
   items: MenuItem[] = [
     {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
-    {label: 'Load Remote data', command: () => this.loadRemoteData(), icon: 'pi pi-cloud-download', block: true},
+    {label: 'Load Remote data', command: () => this.remoteLoader?.load(), icon: 'pi pi-cloud-download', block: true},
     {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
     {label: 'Rename entities', routerLink:'/entity/rename', icon: 'pi pi-file-edit'},
     {label: 'Load activity from file', routerLink:'/activity/edit', icon: 'pi pi-folder-open'},
@@ -176,84 +177,6 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     this.localMode = false;
   }
 
-  loadRemoteData():void
-  {
-    if (!this.selectedRemote)
-    {
-      this.messageService.add({severity:'error', summary:'No remote selected'});
-      this.cdr.detectChanges();
-      return;
-    }
-    this.progress = true;
-    this.remoteProgress = 0;
-    // this.items.filter(item => (item as any).block == true).forEach(item => item.disabled = true);
-    this.cdr.detectChanges();
-    const tasks: Observable<any>[] = [];
-    tasks.push(this.server.getRemoteEntities(this.selectedRemote).pipe(map((entities) => {
-      this.entities = entities;
-      // this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
-      //   detail: `${this.entity_list.length} entities extracted`});
-      this.cdr.detectChanges();
-      return entities;
-    })));
-    tasks.push(this.server.getRemoteActivities(this.selectedRemote!).pipe(mergeMap((entities) => {
-      this.activities = entities;
-      this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
-        detail: `${this.activities.length} activities extracted. Extracting details now...`});
-      this.cdr.detectChanges();
-      return from(this.activities).pipe(mergeMap(activity => {
-        return this.server.getRemoteActivity(this.selectedRemote!, activity.entity_id!).pipe(map(activityDetails => {
-          this.progressDetail = activity.name;
-          const name = activity.name;
-          Object.assign(activity, activityDetails);
-          activity.name = name;
-          if ((activityDetails as any).options?.included_entities)
-            (activity as any).entities = (activityDetails as any).options.included_entities;
-          this.remoteProgress += 100/this.activities.length;
-          this.cdr.detectChanges();
-          console.log("Activity", activity);
-          return activity;
-        }))
-      }))
-    })));
-    tasks.push(this.server.getRemoteProfiles(this.selectedRemote).pipe(map(profiles => {
-      this.profiles = profiles;
-      console.log("Profiles", profiles);
-      return profiles;
-    })))
-    tasks.push(this.server.getConfigEntityCommands(this.selectedRemote).pipe(map(commands => {
-      this.configCommands = commands;
-    })))
-
-    forkJoin(tasks).subscribe({next: (results) => {
-        this.unusedEntities = Helper.getUnusedEntities(this.activities, this.profiles, this.entities);
-        this.orphanEntities = Helper.getOrphans(this.activities, this.entities);
-        this.messageService.add({
-          severity: "success", summary: "Remote data loaded",
-          detail: `${this.entities.length} entities and ${this.activities.length} activities extracted.`
-        });
-        this.context = {source: `${this.selectedRemote?.remote_name} (${this.selectedRemote?.address})`,
-          date: new Date(), type: "Remote", remote_ip: this.selectedRemote?.address, remote_name: this.selectedRemote?.remote_name};
-        localStorage.setItem("entities", JSON.stringify(this.entities));
-        localStorage.setItem("activities", JSON.stringify(this.activities));
-        localStorage.setItem("profiles", JSON.stringify(this.profiles));
-        localStorage.setItem("configCommands", JSON.stringify(this.configCommands));
-        localStorage.setItem("context", JSON.stringify(this.context));
-        this.localMode = true;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: "error", summary: "Error during remote data extraction"
-        });
-        this.cdr.detectChanges();
-      },
-      complete: () => {
-        // this.items.filter(item => (item as any).block == true).forEach(item => item.disabled = false);
-        this.progress = false;
-        this.cdr.detectChanges();
-      }})
-  }
 
   updateRemote(config: Config): void
   {
@@ -477,5 +400,19 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   updateRemotes($event: Remote[]) {
     this.remotes = $event;
     this.cdr.detectChanges();
+  }
+
+  remoteLoaded($event: RemoteData | undefined) {
+    if ($event)
+    {
+      this.activities = $event.activities;
+      this.orphanEntities = $event.orphanEntities;
+      this.entities = $event.entities;
+      this.unusedEntities = $event.unusedEntities;
+      this.profiles = $event.profiles;
+      this.configCommands = $event.configCommands;
+      this.context = $event.context;
+      this.cdr.detectChanges();
+    }
   }
 }

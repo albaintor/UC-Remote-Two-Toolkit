@@ -1,7 +1,3 @@
-<div class="progress-spinner" *ngIf="progress">
-  <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
-</div>
-
 <p-toast></p-toast>
 <h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Remote Two configuration toolkit</h2>
 <p-menubar [model]="items">
@@ -17,16 +13,13 @@
     </p-dropdown>
   </ng-template>
 </p-menubar>
+<app-remote-data-loader #loader [remote]="selectedRemote" (loaded)="remoteLoaded($event)"></app-remote-data-loader>
 <p-messages severity="info">
   <ng-template pTemplate>
     <div class="ml-2">Here you can review your activities and entities. When you click on an activity you can edit it (buttons and UI mapping, replace an entity by another...).<br>
     If you want to replace entities in all activities, please select <b>Rename entities</b> option above</div>
   </ng-template>
 </p-messages>
-<ng-container *ngIf="progress">
-  {{progressDetail}}<br>
-  <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
-</ng-container>
 <ng-container *ngIf="context && !context.type">
   <h4>Current source : <a (click)="downloadFile(context.source)" href="#">{{context.source}}</a> ({{context.date | date:'dd MMM yyyy \'at\' HH:mm'}})</h4>
 </ng-container>

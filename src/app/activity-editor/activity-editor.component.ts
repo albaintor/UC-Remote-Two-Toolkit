@@ -169,10 +169,9 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
   initMenu()
   {
-    if (this.updatedActivity)
-      this.items = [...this.availableItems];
-    else
-      this.items = [...this.availableItems.filter(item => item.label !== 'Save activity to remote')];
+    // if (this.updatedActivity)
+    this.items = [...this.availableItems];
+    //this.items = [...this.availableItems.filter(item => item.label !== 'Save activity to remote')];
   }
 
   buildUpdateData()

@@ -45,8 +45,8 @@
   <div class="flex align-items-center justify-content-center">
   <p-dropdown id="targetRemote" [(ngModel)]="targetRemote" [options]="remotes" placeholder="Target remote">
     <ng-template pTemplate="selectedItem">
-      <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
-      <ng-container *ngIf="!selectedRemote">No target remote selected</ng-container>
+      <ng-container *ngIf="targetRemote">{{targetRemote.remote_name}} ({{targetRemote.address}})</ng-container>
+      <ng-container *ngIf="!targetRemote">No target remote selected</ng-container>
     </ng-template>
     <ng-template let-item pTemplate="item">
       {{item.remote_name}} ({{item.address}})

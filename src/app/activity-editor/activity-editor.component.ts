@@ -42,6 +42,7 @@ import {DialogModule} from "primeng/dialog";
 import {saveAs} from "file-saver-es";
 import {catchError, map, mergeMap, Observable, of} from "rxjs";
 import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
+import {ChipModule} from "primeng/chip";
 
 @Component({
   selector: 'app-activity-editor',
@@ -65,7 +66,8 @@ import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loade
     RemoteOperationsComponent,
     MessagesModule,
     DialogModule,
-    RemoteDataLoaderComponent
+    RemoteDataLoaderComponent,
+    ChipModule
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',
@@ -107,6 +109,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   viewerVisible = false;
   createMode = false;
   showOperations = false;
+  orphanEntities : {oldEntity:Entity, newEntity:Entity | undefined}[] = [];
 
   @ViewChild("editor") activityEditor: ActivityViewerComponent | undefined;
   @ViewChild(RemoteOperationsComponent) operations: RemoteOperationsComponent | undefined;
@@ -116,7 +119,9 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   selectedEntity: Entity | undefined;
   suggestions: Entity[] = [];
   suggestions2: Entity[] = [];
+  suggestions3: Entity[] = [];
   targetRemote: Remote | undefined;
+
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private activatedRoute: ActivatedRoute) {
@@ -189,6 +194,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     }
     if (!this.updatedActivity) return;
     this.remoteOperations = [];
+    this.orphanEntities = [];
     const newIncludedEntities = Helper.getActivityEntities(this.updatedActivity!, this.entities);
     let updateIncludedEntities = false;
     let createActivity = false;
@@ -272,9 +278,26 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  buildCreateData(): Observable<RemoteOperation[] | undefined>
+  buildCreateData()
+  {
+    this.buildCreateDataWithUpdate().subscribe({next: results => {
+        this.messageService.add({severity: "success", summary: "Activity imported successfully"});
+        console.log("Pending operations", this.remoteOperations);
+        this.dump = this.remoteOperations;
+        if (results) this.remoteOperations = results;
+        if (!this.orphanEntities.find(entity => entity.newEntity == undefined))
+          this.showOperations = true;
+        this.cdr.detectChanges();
+      }, error: error => {
+        this.messageService.add({severity: "error", summary: "Failed to import activity"});
+        this.cdr.detectChanges();
+      }})
+  }
+
+  buildCreateDataWithUpdate(): Observable<RemoteOperation[] | undefined>
   {
     this.createMode = true;
+    this.orphanEntities = [];
     const remoteOperations: RemoteOperation[] = [];
     this.messageService.add({severity: "info", summary: "Loading target remote data..."});
     this.cdr.detectChanges();
@@ -301,17 +324,10 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
 
       if (this.updatedActivity?.options?.included_entities) {
-        const oprhanEntities = this.updatedActivity.options.included_entities.filter(included_entity => {
-          return !this.entities.find(entity => entity.entity_id === included_entity.entity_id);
-        });
-        if (oprhanEntities.length > 0) {
-          this.messageService.add({
-            severity: "error", summary: "Cannot import entities from file : some entities are orphans",
-            detail: oprhanEntities.map(entity => entity.entity_id).join(", ")
-          });
-          this.cdr.detectChanges();
-          return undefined;
-        }
+        this.orphanEntities = this.updatedActivity.options.included_entities.filter(included_entity => {
+          return !this.entities.find(entity => entity.entity_id === included_entity.entity_id)}).map(entity => { return {
+            oldEntity: entity, newEntity: undefined
+          }});
       }
 
       const activity = this.activities.find(activity => activity.entity_id === this.updatedActivity?.entity_id);
@@ -594,17 +610,17 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       .sort((a,b) => Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!));
   }
 
-  replaceEntity(entity_id: string, new_entity_id: string): any
+  replaceEntity(entity_id: string, new_entity_id: string, hideMessage = false): any
   {
     const newEntity = this.entities.find(entity => entity.entity_id === new_entity_id);
     if (!this.updatedActivity || !newEntity) return;
     if (!this.updatedActivity.options?.included_entities?.find(entity => entity.entity_id === new_entity_id))
       this.updatedActivity?.options!.included_entities!.push(newEntity);
 
-    if (this.updatedActivity.options?.included_entities?.find(entity => entity.entity_id === this.entity?.entity_id!))
+    if (this.updatedActivity.options?.included_entities?.find(entity => entity.entity_id === entity_id))
       this.updatedActivity.options.included_entities?.splice(
       this.updatedActivity.options.included_entities?.indexOf(
-        this.updatedActivity.options.included_entities.find(entity => entity.entity_id === this.entity!.entity_id!)!),1);
+        this.updatedActivity.options.included_entities.find(entity => entity.entity_id === entity_id)!),1);
 
     this.updatedActivity?.options?.button_mapping?.forEach(button => {
       if (button.long_press?.entity_id === entity_id)
@@ -628,7 +644,9 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
           sequence.command!.entity_id = new_entity_id;
       })
     })
-    this.messageService.add({severity: "success", summary: "Entity replaced"});
+    if (!hideMessage)
+      this.messageService.add({severity: "success", summary: "Entity replaced"});
+
     this.dump = this.updatedActivity as any;//JSON.stringify(updatedActivity, null, 2);
     this.activityEditor?.updateButtonsGrid();
     this.cdr.detectChanges();
@@ -648,6 +666,11 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     }
     this.suggestions2 = Helper.queryEntity($event.query, this.entities).filter(entity => this.entity?.entity_id !== entity.entity_id);
     this.cdr.detectChanges();
+  }
+
+  searchOrphanEntity(item:{oldEntity:Entity, newEntity:Entity | undefined}, $event: AutoCompleteCompleteEvent) {
+    this.suggestions3 = this.entities.filter(entity => entity.entity_type === item.oldEntity.entity_type &&
+      Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()));
   }
 
   searchActivityEntity($event: AutoCompleteCompleteEvent) {
@@ -686,21 +709,27 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       if (fileReader.result){
         this.updatedActivity = JSON.parse(fileReader.result.toString());
         console.log("Loaded activity from file", fileReader.result);
-        this.buildCreateData().subscribe({next: results => {
-          this.messageService.add({severity: "success", summary: "Activity imported successfully"});
-          console.log("Pending operations", this.remoteOperations);
-          this.dump = this.remoteOperations;
-          if (results) this.remoteOperations = results;
-          this.showOperations = true;
-          this.cdr.detectChanges();
-        }, error: error => {
-          this.messageService.add({severity: "error", summary: "Failed to import activity"});
-          this.cdr.detectChanges();
-        }})
+        this.buildCreateData();
         this.cdr.detectChanges();
       }
     }
     fileReader.readAsText(file);
   }
 
+  updateOperations() {
+    if (this.createMode)
+      this.buildCreateData();
+  }
+
+  submitOrphans() {
+    if (this.orphanEntities.find(item => !item.newEntity)) {
+      this.messageService.add({summary: "Replace all orphan entities", severity: "error"});
+      this.cdr.detectChanges();
+      return;
+    }
+    this.orphanEntities.forEach(item => {
+      this.replaceEntity(item.oldEntity.entity_id!, item.newEntity!.entity_id!, true);
+    })
+    this.buildCreateData();
+  }
 }

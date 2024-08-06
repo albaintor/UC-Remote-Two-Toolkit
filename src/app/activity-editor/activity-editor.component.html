@@ -44,7 +44,7 @@
     <label for="targetRemote">Target remote to save to :</label>
   </div>
   <div class="flex align-items-center justify-content-center">
-  <p-dropdown id="targetRemote" [(ngModel)]="targetRemote" [options]="remotes" placeholder="Target remote">
+  <p-dropdown id="targetRemote" [(ngModel)]="targetRemote" [options]="remotes" placeholder="Target remote" (ngModelChange)="updateOperations()">
     <ng-template pTemplate="selectedItem">
       <ng-container *ngIf="targetRemote">{{targetRemote.remote_name}} ({{targetRemote.address}})</ng-container>
       <ng-container *ngIf="!targetRemote">No target remote selected</ng-container>
@@ -55,6 +55,26 @@
   </p-dropdown>
   </div>
 </div>
+<ng-container *ngIf="orphanEntities.length > 0">
+  <h3>Some entities are orphans : replace them and click on apply</h3>
+  <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px" *ngFor="let item of orphanEntities">
+    <div class="flex align-items-center justify-content-center">
+      <p-chip [label]="''+Helper.getEntityName(item.oldEntity)+' ('+item.oldEntity.entity_id+')'" />&nbsp;
+    </div>
+    <div class="flex align-items-center justify-content-center">
+      <p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" [disabled]="true"/>
+    </div>
+    <div class="flex align-items-center justify-content-center">
+      <p-autoComplete [(ngModel)]="item.newEntity" [dropdown]="true" [suggestions]="suggestions3" (completeMethod)="searchOrphanEntity(item, $event)" appendTo="body"
+                      [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" optionLabel="entity_id">
+        <ng-template let-item pTemplate="item">
+          <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+  </div>
+  <p-button label="Submit" (onClick)="submitOrphans()" size="small"></p-button>
+</ng-container>
 <h3>Apply a predefined mapping from a given entity</h3>
 <div *ngIf="selectedEntity"><b>{{selectedEntity.name}}</b> ({{selectedEntity.entity_id}})</div>
 <div class="formgroup-inline">

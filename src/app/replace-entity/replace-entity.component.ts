@@ -37,6 +37,7 @@ import {forkJoin, from, map, mergeMap, Observable} from "rxjs";
 import {MessagesModule} from "primeng/messages";
 import {MultiSelectModule} from "primeng/multiselect";
 import {Helper} from "../helper";
+import {AutoCompleteModule} from "primeng/autocomplete";
 
 class Message {
   title: string = "";
@@ -46,25 +47,26 @@ class Message {
 @Component({
   selector: 'app-replace-entity',
   standalone: true,
-  imports: [
-    DropdownModule,
-    MenubarModule,
-    NgIf,
-    ProgressBarModule,
-    ProgressSpinnerModule,
-    SharedModule,
-    ToastModule,
-    FormsModule,
-    ChipModule,
-    NgForOf,
-    TableModule,
-    EntityViewerComponent,
-    ButtonModule,
-    RemoteOperationsComponent,
-    MessagesModule,
-    DatePipe,
-    MultiSelectModule,
-  ],
+    imports: [
+        DropdownModule,
+        MenubarModule,
+        NgIf,
+        ProgressBarModule,
+        ProgressSpinnerModule,
+        SharedModule,
+        ToastModule,
+        FormsModule,
+        ChipModule,
+        NgForOf,
+        TableModule,
+        EntityViewerComponent,
+        ButtonModule,
+        RemoteOperationsComponent,
+        MessagesModule,
+        DatePipe,
+        MultiSelectModule,
+        AutoCompleteModule,
+    ],
   templateUrl: './replace-entity.component.html',
   styleUrl: './replace-entity.component.css',
   providers: [MessageService],

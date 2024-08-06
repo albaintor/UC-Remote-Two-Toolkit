@@ -8,6 +8,7 @@ export const routes: Routes = [
   { path: 'home', component: RemoteBrowserComponent },
   { path: '',   redirectTo: '/home', pathMatch: 'full'},
   { path: 'activity/edit/:id', component: ActivityEditorComponent},
+  { path: 'activity/edit', component: ActivityEditorComponent},
   { path: 'activity/copy/:id', component: ActivityCopyComponent},
   { path: 'entity/rename', component: ReplaceEntityComponent}
 ];

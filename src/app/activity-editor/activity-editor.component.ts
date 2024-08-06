@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
 import {ActivatedRoute} from "@angular/router";
@@ -62,7 +70,7 @@ import {catchError, map, Observable, of} from "rxjs";
   providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ActivityEditorComponent implements OnInit {
+export class ActivityEditorComponent implements OnInit, AfterViewInit {
   buttonsMap:{ [id: string]: string } = {};
   activity_id = "";
   config: Config | undefined;
@@ -103,6 +111,7 @@ export class ActivityEditorComponent implements OnInit {
   selectedEntity: Entity | undefined;
   suggestions: Entity[] = [];
   suggestions2: Entity[] = [];
+  targetRemote: Remote | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private activatedRoute: ActivatedRoute) {
@@ -111,11 +120,7 @@ export class ActivityEditorComponent implements OnInit {
 
   ngOnInit(): void {
     this.initMenu();
-    this.activatedRoute.params.subscribe(params => {
-      this.activity_id = params['id'];
-      this.updateActivity();
-      this.cdr.detectChanges();
-    })
+
 
     this.server.getPictureRemoteMap().subscribe(butonsMap => {
       this.buttonsMap = butonsMap;
@@ -147,6 +152,20 @@ export class ActivityEditorComponent implements OnInit {
       this.cdr.detectChanges();
     }
   }
+
+  ngAfterViewInit(): void {
+    this.activatedRoute.params.subscribe(params => {
+      this.activity_id = params['id'];
+      if (!this.activity_id) {
+        this.importActivity();
+        return;
+      }
+      this.updateActivity();
+      this.cdr.detectChanges();
+    })
+  }
+
+
 
   initMenu()
   {
@@ -530,6 +549,7 @@ export class ActivityEditorComponent implements OnInit {
     this.config = config;
     this.remotes = config.remotes!;
     this.selectedRemote  = Helper.getSelectedRemote(this.remotes);
+    this.targetRemote = this.selectedRemote;
     this.cdr.detectChanges();
   }
 
@@ -664,4 +684,5 @@ export class ActivityEditorComponent implements OnInit {
     }
     fileReader.readAsText(file);
   }
+
 }

@@ -116,6 +116,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     {label: 'Load Remote data', command: () => this.loadRemoteData(), icon: 'pi pi-cloud-download', block: true},
     {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
     {label: 'Rename entities', routerLink:'/entity/rename', icon: 'pi pi-file-edit'},
+    {label: 'Load activity from file', routerLink:'/activity/edit', icon: 'pi pi-folder-open'},
   ]
   entityUsages: EntityUsage | null | undefined;
   localMode = true;

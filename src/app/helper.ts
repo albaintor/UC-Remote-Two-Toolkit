@@ -256,7 +256,7 @@ export class Helper
         new Array(gridWidth).fill(false)
       );
     let x= 0, y = 0;
-    for (let i=0; i < grid.length; i++)
+    for (let i=0; i < grid.length; )
     {
       let width = 1, height = 1;
       if (grid[i] && grid[i]?.size)
@@ -282,6 +282,7 @@ export class Helper
           if (rowFilled) break;
           if (index == i) return {x: col, y: row, width: width, height: height};
           Helper.fillSquare(matrix, col, row, width, height);
+          i++;
         }
       }
     }

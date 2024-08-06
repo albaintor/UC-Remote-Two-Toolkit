@@ -21,9 +21,10 @@
   <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
 </ng-container>
 <h2>Edit activity : {{activity?.name}}</h2>
+{{activity?.entity_id}}
 <p-messages severity="info">
   <ng-template pTemplate>
-    <div class="ml-2">Here you can edit an activity : you can see the original mapping and the new mapping with the 2 options above. In the new mapping you can only move UI icons.<br>
+    <div class="ml-2">Here you can edit an activity : you can see the original mapping with the option above. In the new mapping you can only move UI icons.<br>
     You can edit buttons and UI mapping (incomplete), or you can also apply automatic mapping from a given media player or remote entity to the buttons and UI.<br>
     You can also replace an entity by another within the activity.<br>
     Once done, click on <b>Save activity to remote</b> to update the remote with the pending operations.</div>
@@ -37,6 +38,20 @@
     <p-button label="Import this activity from file" (onClick)="importActivity()" severity="danger" icon="pi pi-folder-open" size="small">
       <input #input_file type="file" style="display:none" (change)="loadInputFile($event)">
     </p-button>
+  </div>
+  <div class="flex align-items-center justify-content-center">
+    <label for="targetRemote">Target remote to save to :</label>
+  </div>
+  <div class="flex align-items-center justify-content-center">
+  <p-dropdown id="targetRemote" [(ngModel)]="targetRemote" [options]="remotes" placeholder="Target remote">
+    <ng-template pTemplate="selectedItem">
+      <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
+      <ng-container *ngIf="!selectedRemote">No target remote selected</ng-container>
+    </ng-template>
+    <ng-template let-item pTemplate="item">
+      {{item.remote_name}} ({{item.address}})
+    </ng-template>
+  </p-dropdown>
   </div>
 </div>
 <h3>Apply a predefined mapping from a given entity</h3>
@@ -102,10 +117,10 @@
 <p-dialog [header]="'Activity '+activity?.name" [(visible)]="viewerVisible" [style]="{width: '50vw'}">
   <app-activity-viewer #viewer [remote]="selectedRemote" [editMode]="false" [activity]="activity"></app-activity-viewer>
 </p-dialog>
-<app-activity-viewer #editor [remote]="selectedRemote" [editMode]="true" [activity]="updatedActivity"></app-activity-viewer>
+<app-activity-viewer #editor [remote]="targetRemote" [editMode]="true" [activity]="updatedActivity"></app-activity-viewer>
 <ng-container *ngIf="dump">
   <p>Generated mapping :</p>
   <ngx-json-viewer [json]="dump"></ngx-json-viewer>
 </ng-container>
-<app-remote-operations #operations [operations]="remoteOperations" [remote]="selectedRemote"></app-remote-operations>
+<app-remote-operations #operations [operations]="remoteOperations" [remote]="targetRemote"></app-remote-operations>
 

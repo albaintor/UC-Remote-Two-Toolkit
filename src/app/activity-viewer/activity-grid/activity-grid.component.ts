@@ -97,6 +97,7 @@ export class ActivityGridComponent  implements AfterViewInit{
       this.source.gridItem.nativeElement.innerHTML = this.gridItem!.nativeElement.innerHTML;
       this.gridItem!.nativeElement.innerHTML = event.dataTransfer.getData('text/html');
       this.gridItem!.nativeElement.classList.remove('over');
+      console.log("DROP", event);
       this.destinationSelected.emit({gridItem: this.gridItem!.nativeElement,
         item: this.item!, index: this.index});
     }

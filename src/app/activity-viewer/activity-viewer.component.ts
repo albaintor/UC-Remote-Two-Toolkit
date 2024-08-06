@@ -181,10 +181,12 @@ export class ActivityViewerComponent implements AfterViewInit {
 
   getGridItems(): (ActivityPageCommand | null)[]
   {
-    const matrix: boolean[][] = new Array(this.gridHeight)
+    const width = this.currentPage?.grid?.width ? this.currentPage.grid.width : 4;
+    const height = this.currentPage?.grid?.height ? this.currentPage.grid.height : 6;
+    const matrix: boolean[][] = new Array(height)
       .fill(false)
       .map(() =>
-        new Array(this.gridWidth).fill(false)
+        new Array(width).fill(false)
       );
     const list: (ActivityPageCommand | null)[] = [];
     for (let y=0; y<this.currentPage?.grid.height!;y++)
@@ -244,8 +246,10 @@ export class ActivityViewerComponent implements AfterViewInit {
   }
 
   gridDestinationSelected($event: GridItem) {
-    let sourceLocation = Helper.getItemPosition(this.grid, this.gridSource?.index!, this.gridWidth, this.gridHeight);
-    let destinationLocation = Helper.getItemPosition(this.grid, $event.index, this.gridWidth, this.gridHeight);
+    let sourceLocation = Helper.getItemPosition(this.grid, this.gridSource?.index!,
+      this.currentPage!.grid.width, this.currentPage!.grid.height);
+    let destinationLocation = Helper.getItemPosition(this.grid, $event.index,
+      this.currentPage!.grid.width, this.currentPage!.grid.height);
     /*let sourceX = this.gridSource?.index! % this.currentPage?.grid.width!;
     let sourceY = Math.floor(this.gridSource?.index! / this.currentPage?.grid.width!);
     let destinationX = $event.index! % this.currentPage?.grid.width!;

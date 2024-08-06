@@ -1,5 +1,5 @@
 <p-toast key="operation"></p-toast>
-<p-dialog #operationsDialog header="Remotes operations" [(visible)]="visible" [style]="{width: '100vw'}" [draggable]="true"
+<p-dialog #operationsDialog [header]="'Remotes operations to '+remote?.remote_name+' ('+remote?.address+')'" [(visible)]="visible" [style]="{width: '100vw'}" [draggable]="true"
           [resizable]="true">
 
   <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px">

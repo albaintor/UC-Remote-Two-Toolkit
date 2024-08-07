@@ -117,8 +117,8 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     {label: 'Load Remote data', command: () => this.remoteLoader?.load(), icon: 'pi pi-cloud-download', block: true},
     {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
     {label: 'Replace entities', routerLink:'/entity/rename', icon: 'pi pi-file-edit'},
-    {label: 'Load activity from file', routerLink:'/activity/edit', queryParams: {'source': 'file'}, icon: 'pi pi-folder-open'},
-    {label: 'Load activity from clipboard', routerLink:'/activity/edit', queryParams: {'source': 'clipboard'}, icon: 'pi pi-clipboard'},
+    {label: 'Import activity from file', routerLink:'/activity/edit', queryParams: {'source': 'file'}, icon: 'pi pi-folder-open'},
+    {label: 'Import activity from clipboard', routerLink:'/activity/edit', queryParams: {'source': 'clipboard'}, icon: 'pi pi-clipboard'},
   ]
   entityUsages: EntityUsage | null | undefined;
   localMode = true;
@@ -172,6 +172,14 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     localStorage.removeItem("activities");
     localStorage.removeItem("profiles");
     localStorage.removeItem("configCommands");
+    this.entities = [];
+    this.activities = [];
+    this.profiles = [];
+    this.context = undefined;
+    this.configCommands = [];
+    this.orphanEntities = [];
+    this.unusedEntities = [];
+    this.cdr.detectChanges();
   }
 
   init(): void {

@@ -61,8 +61,10 @@ export class ActivityViewerComponent implements AfterViewInit {
   currentPage: UIPage | undefined;
   @Input('activity') set _activity(value: Activity | undefined) {
     this.activity = value;
-    if (value)
+    if (value) {
       this.initView();
+      this.updateButtonsGrid();
+    }
   }
   activity: Activity | undefined;
   @Input() remote: Remote | undefined;
@@ -104,6 +106,7 @@ export class ActivityViewerComponent implements AfterViewInit {
       makeIdsUnique: false, // do not make ids used within the SVG unique
       afterInject: (img: any, svg: any) => {
         this.remoteLoaded(img, svg);
+        this.updateButtonsGrid();
       }
     });
   }

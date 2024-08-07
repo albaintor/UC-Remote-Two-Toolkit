@@ -18,6 +18,7 @@ Just download the package for your system and execute the binary :
 - r2tool-server for Linux
 
 Then launch your browser to http://localhost:8000
+You can change the listening port by adding `--port <port number>` argument
 
 ## Usage
 
@@ -29,9 +30,20 @@ Then launch your browser to http://localhost:8000
 - Select a remote in the dropdown (a refresh may be necessary)
 
 ### Navigation
+![image](https://github.com/user-attachments/assets/f75dd2a3-175e-4fa9-a779-f8e7eb95e152)
 
-- You can check after all antities in activities : orphan entities will be displayed in red
+- `Manage Remotes` : add (register) or remove a remote from registration
+- `Load Remote Data` : load entities, activities and profils (UI pages) from the selected remote (in the drop down list)
+- `Load Remote Resources` : load remote custom resources (pictures) from the selected remote
+- `Replace Entities` : replace an entity by another in all activities and pages. Useful if an entity has changed of name/id, or the driver and you have orphan entities which are not usable anymore
+- `Load activity from file` : after saving an activity to a (json format) file from the ![image](https://github.com/user-attachments/assets/fe10c03b-7d98-4c70-a077-3878aa3281c9)
+ button you can import it. If the activity already exists, it will replace it, otherwise it will create it. Useful if you want to restore an activity after unexpected changes, or if you want to clone an activity from one remote to another remote.
+
+Main page :
+- You can check after all antities : orphan entities (defined in activities but not linked to any active integration), as well as unused entities
+- If you click on an activity, you can review it on a popup and edit it (see next sections)
 - If you click on an entity inside an activity, a new section will display where this entity is used in all other activities and UI pages
+
 
 ### Replace an entity by another
 
@@ -44,18 +56,17 @@ Sometimes,
 - when you just want to switch from one device to another in all the activities
 
 To perform a replacement of all commands (buttons and UI interface) from one entity to another :
-- Click on `Rename entity` on the menu bar
+- Click on `Replace entities` on the menu bar
 - Click on `Load Remote data` to download all the entities & activities
 - You should see all the entities in a table
 - Select the "old" entity you want to be replaced in the table
 - Then in the same table, select the "new" entity to replace to
+- You can repeat these two steps for all the other entities you want to replace : you should consider to do all of the replacements in the same sequence because if one entity is orphan (and should be replaced), then the updates will fail
 - Click on `Submit`
 - A popup will appear will all the pending operations to perform to the remote
 - You can check the list of operations and if you want to proceed : click on `Update remote`
 
 All done !
-
-
 
 
 ### Modification of an activity
@@ -71,10 +82,12 @@ If you click on the button `Edit this activity`, it will brings you to another p
   - Modify each button [in progress]
 - Apply pre-defined mapping from a given entity : for example if you select a media player entity, it will assign buttons according to the media player features (volume up/down to volume up/down buttons if the media player supports volume control, cursor up/left/right/down/center to corresponding buttons if it supports direction pad...), as well as predefined interface buttons. This mapping is realized from a template defined in the front end in `src/assets/remote/remote-map.json`. For now I have predefined mapping for media player entities and IR remotes. Note that this mapping can be tuned by user on the fly : you can unselect features to prevent mapping of some buttons, and you can prevent to overwrite already assigned buttons or not. In that way you can repeat the process for the same activity for other entities.
 - Replace one entity by another in the activity : useful if you have duplicated an activity where you want the same mapping (buttons & interface) but with another device (e.g you have 2 Android TVs or 2 Apple TVs)
+- Save the activity to a file (before doing modifications and restore it later, or to import it to another remote)
+- Import an activity from a file to the same remote or another remote
+- Copy a UI page to clipboard
+- Paste a UI page from clipboard : note that with this feature you can copy a page from one activity to another or even to another remote
 
 Once you have applied all your modifications, they are in local : you just have to click on `Save activity to remote` : it will shows all the operations that will be applied to the remote. You can have a final check before clicking on `Update remote` to update the Remote Two.
-
-
 
 
 

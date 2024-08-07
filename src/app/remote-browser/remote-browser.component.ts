@@ -191,6 +191,8 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   {
     Helper.setRemote(remote);
     this.server.remote$.next(remote);
+    if (!this.context || this.context.remote_ip !== `${remote.address}:${remote.port}`)
+      this.remoteLoader?.load();
   }
 
   viewBackups(): void

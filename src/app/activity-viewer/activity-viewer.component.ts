@@ -3,7 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef, Input,
+  ElementRef, EventEmitter, Input, Output,
   Pipe,
   PipeTransform,
   ViewChild, ViewEncapsulation
@@ -67,6 +67,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   activity: Activity | undefined;
   @Input() remote: Remote | undefined;
   @Input() editMode = true;
+  @Output() onChange: EventEmitter<void> = new EventEmitter();
   buttonsMap:{ [id: string]: string } = {};
   reversedButtonMap:{ [id: string]: string } = {};
   public Command!: Command;
@@ -283,11 +284,35 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  copyToClipboard(data: any) {
+  copyToClipboard(data: any, title: string | undefined = undefined) {
     navigator.clipboard.writeText(JSON.stringify(data)).then(r => {
-      this.messageService.add({severity:'info', summary: "Activity data copied to clipboard", key: 'activity'});
+      if (title)
+        this.messageService.add({severity:'info', summary: title, key: 'activity'});
+      else
+        this.messageService.add({severity:'info', summary: "Activity data copied to clipboard", key: 'activity'});
       this.cdr.detectChanges();
     });
+  }
+
+  pastePage() {
+    navigator.clipboard.readText().then(data => {
+      const page:UIPage = JSON.parse(data);
+      if (!this.activity) return;
+      if (!page || !page.grid || !page.items || !page.name)
+      {
+        this.messageService.add({severity:'error', summary: "Invalid data from clipboard, not an UI page", key: 'activity'});
+        this.cdr.detectChanges();
+        return;
+      }
+      if (!this.activity.options) this.activity.options = { user_interface: {} };
+      if (!this.activity.options.user_interface!.pages) this.activity.options.user_interface!.pages = [];
+      delete page.page_id;
+      this.activity.options.user_interface!.pages.push(page);
+      this.messageService.add({severity:'success', summary: `Page ${page.name} with ${page.items.length} items added successfully`, key: 'activity'});
+      this.updateButtonsGrid();
+      this.onChange.emit();
+      this.cdr.detectChanges();
+    })
   }
 
   getGridItemSize(item: ActivityPageCommand | null): any {

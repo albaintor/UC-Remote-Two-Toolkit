@@ -197,7 +197,7 @@ export class CommandEditorComponent {
 
   commandSelected($event: any) {
     if (!this.selectedCommand) return;
-    this.command!.command = {entity_id: this.selectedEntity?.entity_id!, cmd_id: this.selectedCommand.cmd_id};
+    this.command!.command = {entity_id: this.selectedEntity?.entity_id!, cmd_id: this.selectedCommand.id};
     this.messageService.add({severity: "info", summary: `Entity ${Helper.getEntityName(this.selectedEntity)}`,
       detail: `Entity id : ${this.selectedEntity?.entity_id}, command ${this.selectedCommand.cmd_id} assigned`});
     this.cdr.detectChanges();

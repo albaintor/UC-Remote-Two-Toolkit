@@ -29,6 +29,12 @@
   <div class="flex align-items-center justify-content-center" *ngIf="!editMode">
     <p-button label="Clone this activity" [routerLink]="['/activity/copy', activity?.entity_id]" icon="pi pi-copy" size="small"></p-button>
   </div>
+  <div class="flex align-items-center justify-content-center" *ngIf="!editMode && currentPage">
+    <p-button label="Copy this page" (onClick)="copyToClipboard(currentPage, 'Page '+currentPage.name+' copied to clipboard')" icon="pi pi-copy" size="small"></p-button>
+  </div>
+  <div class="flex align-items-center justify-content-center" *ngIf="editMode">
+    <p-button label="Paste the page from clipboard" (onClick)="pastePage()" icon="pi pi-clipboard" size="small"></p-button>
+  </div>
 </div>
 
 <ng-container *ngIf="currentPage">

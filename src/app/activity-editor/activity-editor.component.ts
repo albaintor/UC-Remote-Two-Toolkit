@@ -107,7 +107,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   newEntity: Entity | undefined;
   protected readonly Helper = Helper;
   viewerVisible = false;
-  createMode = false;
+  replaceMode = false;
   showOperations = false;
   orphanEntities : {oldEntity:Entity, newEntity:Entity | undefined}[] = [];
 
@@ -186,7 +186,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
   buildUpdateData()
   {
-    if (this.createMode)
+    if (this.replaceMode)
     {
       this.showOperations = true;
       this.cdr.detectChanges();
@@ -296,8 +296,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
   buildCreateDataWithUpdate(): Observable<RemoteOperation[] | undefined>
   {
-    this.createMode = true;
-    this.orphanEntities = [];
+    this.replaceMode = true;
     const remoteOperations: RemoteOperation[] = [];
     this.messageService.add({severity: "info", summary: "Loading target remote data..."});
     this.cdr.detectChanges();
@@ -306,72 +305,121 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       this.activities = data.activities;
       this.entities = data.entities;
       this.cdr.detectChanges();
-
-      const body: any = {
-        name: this.updatedActivity!.name,
-        options: {}
-      }
-      if (this.updatedActivity.icon)
-        body.icon = this.updatedActivity.icon;
-      if (this.updatedActivity.description)
-        body.description = this.updatedActivity.description;
-      if (this.updatedActivity.options?.prevent_sleep)
-        body.options.prevent_sleep = this.updatedActivity.options.prevent_sleep;
-      if (this.updatedActivity.options?.included_entities)
-        body.options.entity_ids = this.updatedActivity!.options!.included_entities!.map((entity) => entity.entity_id);
-      if (this.updatedActivity.options?.sequences)
-        body.sequences = {...this.updatedActivity.options.sequences};
-
-
-      if (this.updatedActivity?.options?.included_entities) {
-        this.orphanEntities = this.updatedActivity.options.included_entities.filter(included_entity => {
-          return !this.entities.find(entity => entity.entity_id === included_entity.entity_id)}).map(entity => { return {
-            oldEntity: entity, newEntity: undefined
-          }});
-      }
-
-      const activity = this.activities.find(activity => activity.entity_id === this.updatedActivity?.entity_id);
-      if (activity)
-      {
-        console.log("Activity to import exists, we will update it", body);
-        activity.options?.button_mapping?.forEach(button => {
-          remoteOperations.push({name: `Delete button ${button.button} ${this.updatedActivity!.name}`,
-            method: "DELETE", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
-            body: {}, status: OperationStatus.Todo});
-        })
-        activity.options?.user_interface?.pages?.forEach(page => {
-          remoteOperations.push({name: `Delete page ${page.name} ${this.updatedActivity!.name}`,
-            method: "DELETE", api: `/api/activities/${activity.entity_id}/ui/pages/${page.page_id}`,
-            body: {}, status: OperationStatus.Todo});
-        });
-        remoteOperations.push({name: `Update activity ${this.updatedActivity!.name}`, method: "PUT",
-          api: `/api/activities/${activity.entity_id}`, body, status: OperationStatus.Todo});
-      }
-      else
-      {
-        console.log("Activity to import does not exist, we will create it", body);
-        remoteOperations.push({name: `Create activity ${this.updatedActivity!.name}`, method: "POST", api: `/api/activities`,
-          body, status: OperationStatus.Todo});
-      }
-      this.updatedActivity!.options?.button_mapping?.forEach(button => {
-        if (!button.long_press && !button.short_press) return;
-        remoteOperations.push({name: `Button ${button.button}`,method: "PATCH",
-          api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
-          body: {
-            ...button
-          }, status: OperationStatus.Todo})
-      });
-      this.updatedActivity!.options?.user_interface?.pages?.forEach(page => {
-        const newPage = {...page};
-        delete newPage["page_id"];
-        remoteOperations.push({name: `Page ${page.name}`, method: "PATCH", api:
-            `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`,
-          body: {
-            ...newPage
-          }, status: OperationStatus.Todo});
-      })
-      return remoteOperations;
+      return this.buildData();
     }))
+  }
+
+  checkIncludedEntity(entityId: string, activity: Activity)
+  {
+    if (activity.options?.included_entities?.find(entity => entity.entity_id === entityId)) return;
+    let entity = this.entities.find(entity => entity.entity_id === entityId);
+    if (!entity) entity = {entity_id: entityId} as any;
+    if (!activity.options) activity.options = {included_entities: []}
+    if (!activity.options.included_entities) activity.options.included_entities = [];
+    activity.options.included_entities.push(entity!);
+  }
+
+  buildData(): RemoteOperation[]
+  {
+    const remoteOperations: RemoteOperation[] = [];
+    this.orphanEntities = [];
+    if (!this.updatedActivity || !this.targetRemote) return remoteOperations;
+    const body: any = {
+      name: this.updatedActivity!.name,
+      options: {}
+    }
+    if (this.updatedActivity.icon)
+      body.icon = this.updatedActivity.icon;
+    if (this.updatedActivity.description)
+      body.description = this.updatedActivity.description;
+    if (this.updatedActivity.options?.prevent_sleep)
+      body.options.prevent_sleep = this.updatedActivity.options.prevent_sleep;
+    if (this.updatedActivity.options?.included_entities)
+      body.options.entity_ids = this.updatedActivity!.options!.included_entities!.map((entity) => entity.entity_id);
+    if (this.updatedActivity.options?.sequences)
+      body.sequences = {...this.updatedActivity.options.sequences};
+
+
+    // Add missing included entities
+    for (let sequenceName in this.updatedActivity!.options?.sequences)
+    {
+      const sequences = this.updatedActivity.options!.sequences[sequenceName];
+      sequences.forEach(sequence => {
+        if (sequence.command?.entity_id) this.checkIncludedEntity(sequence.command!.entity_id, this.updatedActivity!);
+      })
+    }
+    this.updatedActivity!.options?.button_mapping?.forEach(button => {
+      if (!button.long_press && !button.short_press) return;
+      if (button.long_press) this.checkIncludedEntity(button.long_press.entity_id, this.updatedActivity!);
+      if (button.short_press) this.checkIncludedEntity(button.short_press.entity_id, this.updatedActivity!);
+    });
+    this.updatedActivity!.options?.user_interface?.pages?.forEach(page => {
+      page.items.forEach(item => {
+        if (item.media_player_id) this.checkIncludedEntity(item.media_player_id, this.updatedActivity!);
+        if ((item.command as Command)?.entity_id) this.checkIncludedEntity((item.command as Command)!.entity_id, this.updatedActivity!);
+      })
+    });
+
+
+    this.updatedActivity!.options?.user_interface?.pages?.forEach(page => {
+      const newPage = {...page};
+      delete newPage["page_id"];
+      remoteOperations.push({name: `Page ${page.name}`, method: "PATCH", api:
+          `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`,
+        body: {
+          ...newPage
+        }, status: OperationStatus.Todo});
+    })
+
+    if (this.updatedActivity?.options?.included_entities) {
+      this.orphanEntities = this.updatedActivity.options.included_entities.filter(included_entity => {
+        return !this.entities.find(entity => entity.entity_id === included_entity.entity_id)}).map(entity => { return {
+        oldEntity: entity, newEntity: undefined
+      }});
+    }
+
+    // Create or update
+    const activity = this.activities.find(activity => activity.entity_id === this.updatedActivity?.entity_id);
+    if (activity)
+    {
+      console.log("Activity to import exists, we will update it", body);
+      activity.options?.button_mapping?.forEach(button => {
+        remoteOperations.push({name: `Delete button ${button.button} ${this.updatedActivity!.name}`,
+          method: "DELETE", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
+          body: {}, status: OperationStatus.Todo});
+      })
+      activity.options?.user_interface?.pages?.forEach(page => {
+        remoteOperations.push({name: `Delete page ${page.name} ${this.updatedActivity!.name}`,
+          method: "DELETE", api: `/api/activities/${activity.entity_id}/ui/pages/${page.page_id}`,
+          body: {}, status: OperationStatus.Todo});
+      });
+      remoteOperations.push({name: `Update activity ${this.updatedActivity!.name}`, method: "PUT",
+        api: `/api/activities/${activity.entity_id}`, body, status: OperationStatus.Todo});
+    }
+    else
+    {
+      console.log("Activity to import does not exist, we will create it", body);
+      remoteOperations.push({name: `Create activity ${this.updatedActivity!.name}`, method: "POST", api: `/api/activities`,
+        body, status: OperationStatus.Todo});
+    }
+    this.updatedActivity!.options?.button_mapping?.forEach(button => {
+      if (!button.long_press && !button.short_press) return;
+      remoteOperations.push({name: `Button ${button.button}`,method: "PATCH",
+        api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
+        body: {
+          ...button
+        }, status: OperationStatus.Todo})
+    });
+    this.updatedActivity!.options?.user_interface?.pages?.forEach(page => {
+      const newPage = {...page};
+      delete newPage["page_id"];
+      remoteOperations.push({name: `Page ${page.name}`, method: "PATCH", api:
+          `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`,
+        body: {
+          ...newPage
+        }, status: OperationStatus.Todo});
+    })
+    return remoteOperations;
   }
 
   clearMapping()
@@ -717,7 +765,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   }
 
   updateOperations() {
-    if (this.createMode)
+    if (this.replaceMode)
       this.buildCreateData();
   }
 
@@ -731,5 +779,15 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       this.replaceEntity(item.oldEntity.entity_id!, item.newEntity!.entity_id!, true);
     })
     this.buildCreateData();
+  }
+
+  activityChanged() {
+    this.buildData();
+    /*const activityEntities = this.entities.filter(entity =>
+      this.updatedActivity?.options?.included_entities?.find(activityEntity => activityEntity.entity_id === entity.entity_id));
+    this.suggestions = activityEntities.sort((a, b) => {
+      return (a.name ? Helper.getEntityName(a)! : "").localeCompare(b.name ? Helper.getEntityName(b)! : "");
+    });*/
+    this.cdr.detectChanges();
   }
 }

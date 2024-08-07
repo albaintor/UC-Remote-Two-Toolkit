@@ -39,7 +39,7 @@
 
 <ng-container *ngIf="currentPage">
   <br>
-  <div class="grid-container"
+  <div class="grid-container" *ngIf="toggleGrid"
        [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width), 'width': gridWidth+'px', 'height': gridHeight+'px'}">
     <grid-button [editable]="editMode" *ngFor="let item of grid; let index=index" [index]="index" [source]="gridSource" [item]="item" [grid]="currentPage.grid" [style]="getGridItemSize(item)"
          (sourceSelected)="gridSourceSelected($event)" (destinationSelected)="gridDestinationSelected($event)"

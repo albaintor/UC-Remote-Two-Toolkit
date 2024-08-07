@@ -74,6 +74,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   @ViewChild("buttonpanel", {static: false}) buttonpanel: OverlayPanel | undefined;
   @ViewChild("commandeditor", {static: false}) commandeditor: CommandEditorComponent | undefined;
 
+
   selectedButton: string = "";
   selectedButtonMapping: ButtonMapping | undefined;
 
@@ -87,6 +88,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   gridWidth = 4*185;
   gridHeight = 6*185;
   protected readonly Helper = Helper;
+  toggleGrid = true;
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
@@ -209,8 +211,12 @@ export class ActivityViewerComponent implements AfterViewInit {
   }
 
   onPageChange($event: PaginatorState) {
+    this.toggleGrid = false;
+    this.cdr.detectChanges();
+    this.toggleGrid = true;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[$event.page!];
     this.updateButtonsGrid();
+    console.log("Page changed", this.grid);
     this.cdr.detectChanges();
   }
 

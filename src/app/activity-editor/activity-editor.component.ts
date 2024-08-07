@@ -164,10 +164,35 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    this.activatedRoute.queryParams.subscribe(param => {
+      const source = param['source'];
+      if (source)
+      {
+        if (!this.targetRemote)
+        {
+          this.server.getConfig().subscribe(config => {
+            this.updateRemote(config);
+            this.targetRemote = this.selectedRemote;
+            if (source === 'file')
+              this.importActivity();
+            else if (source === 'clipboard')
+              this.importActivityFromClipboard();
+            this.cdr.detectChanges();
+          })
+        }
+        else
+        {
+          if (source === 'file')
+            this.importActivity();
+          else if (source === 'clipboard')
+            this.importActivityFromClipboard();
+          this.cdr.detectChanges();
+        }
+      }
+    })
     this.activatedRoute.params.subscribe(params => {
       this.activity_id = params['id'];
       if (!this.activity_id) {
-        this.importActivity();
         return;
       }
       this.updateActivity();
@@ -747,6 +772,24 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
   importActivity() {
     this.input_file?.nativeElement.click();
+  }
+
+  importActivityFromClipboard()
+  {
+    navigator.clipboard.readText().then(data => {
+      this.updatedActivity = JSON.parse(data);
+      console.log("Loaded activity from clipboard", this.updatedActivity);
+      if (!this.updatedActivity || !this.updatedActivity.entity_id || !this.updatedActivity.options) {
+        this.messageService.add({
+          severity: 'error',
+          summary: "Invalid data from clipboard, not an activity",
+        });
+        this.cdr.detectChanges();
+        return;
+      }
+      this.buildCreateData();
+      this.cdr.detectChanges();
+    });
   }
 
 

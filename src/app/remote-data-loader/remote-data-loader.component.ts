@@ -81,13 +81,10 @@ export class RemoteDataLoaderComponent {
     }
     this.progress = true;
     this.remoteProgress = 0;
-    // this.items.filter(item => (item as any).block == true).forEach(item => item.disabled = true);
     this.cdr.detectChanges();
     const tasks: Observable<any>[] = [];
     tasks.push(this.server.getRemoteEntities(this.remote).pipe(map((entities) => {
       this.entities = entities;
-      // this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
-      //   detail: `${this.entity_list.length} entities extracted`});
       this.cdr.detectChanges();
       return entities;
     })));

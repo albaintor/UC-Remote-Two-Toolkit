@@ -36,9 +36,12 @@
     <p-button label="Save this activity to file" (onClick)="saveActivity()" severity="success" icon="pi pi-save" size="small"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-button label="Import this activity from file" (onClick)="importActivity()" severity="danger" icon="pi pi-folder-open" size="small">
+    <p-button label="Import activity from file" (onClick)="importActivity()" severity="danger" icon="pi pi-folder-open" size="small">
       <input #input_file type="file" style="display:none" (change)="loadInputFile($event)">
     </p-button>
+  </div>
+  <div class="flex align-items-center justify-content-center">
+    <p-button label="Import activity from clipboard" (onClick)="importActivityFromClipboard()" severity="danger" icon="pi pi-clipboard" size="small"/>
   </div>
   <div class="flex align-items-center justify-content-center">
     <label for="targetRemote">Target remote to save to :</label>

@@ -293,9 +293,9 @@ export class ActivityViewerComponent implements AfterViewInit {
   copyToClipboard(data: any, title: string | undefined = undefined) {
     navigator.clipboard.writeText(JSON.stringify(data)).then(r => {
       if (title)
-        this.messageService.add({severity:'info', summary: title, key: 'activity'});
+        this.messageService.add({severity:'success', summary: title, key: 'activity'});
       else
-        this.messageService.add({severity:'info', summary: "Activity data copied to clipboard", key: 'activity'});
+        this.messageService.add({severity:'success', summary: "Activity data copied to clipboard", key: 'activity'});
       this.cdr.detectChanges();
     });
   }
@@ -337,5 +337,12 @@ export class ActivityViewerComponent implements AfterViewInit {
       style['grid-row-end'] = `span ${item!.size.height}`;
     }
     return style;
+  }
+
+  saveActivity()
+  {
+    if (!this.activity) return;
+    saveAs(new Blob([JSON.stringify(this.activity)], {type: "text/plain;charset=utf-8"}),
+      `${this.activity.name}.json`);
   }
 }

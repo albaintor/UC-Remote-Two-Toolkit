@@ -43,10 +43,9 @@ export class Remote
     if (!fs.existsSync(target_path)) {
       fs.mkdirSync(target_path, { recursive: true });
     }
-    let headers = this.getHeaders();
     const limit = 100;
     const options = {
-      headers: headers,
+      ...this.getOptions(),
       searchParams: {
         limit,
         page: 1
@@ -93,6 +92,16 @@ export class Remote
     return this.protocol + this.address + ':' + this.port;
   }
 
+  getOptions()
+  {
+    return {
+      headers: this.getHeaders(),
+      timeout: {
+        request: 10000
+      }
+    }
+  }
+
   getHeaders()
   {
     let auth = 'Basic ' + Buffer.from(this.user + ':' + this.token).toString('base64')
@@ -108,10 +117,7 @@ export class Remote
 
   async getRemoteName()
   {
-    let headers = this.getHeaders();
-    const options = {
-      headers: headers
-    }
+    const options = this.getOptions();
     const url = this.getURL() + '/api/pub/version';
     console.log('Get remote info', url, options);
     const res = await got.get(url, options);
@@ -129,10 +135,7 @@ export class Remote
 
   async getRegisteredKeys()
   {
-    let headers = this.getHeaders();
-    const options = {
-      headers: headers
-    }
+    const options = this.getOptions();
     const url = this.getURL() + '/api/auth/api_keys';
     console.log('Register remote', url, options);
     const res = await got.get(url, options);
@@ -150,7 +153,7 @@ export class Remote
   {
     let headers = this.getHeaders();
     const options = {
-      headers: headers,
+      ...this.getOptions(),
       json: {
         name: api_key_name,
         scopes: ["admin"]
@@ -175,10 +178,7 @@ export class Remote
 
   async unregister(api_key_name)
   {
-    let headers = this.getHeaders();
-    const options = {
-      headers: headers
-    }
+    const options = this.getOptions();
     let url = this.getURL() + '/api/auth/api_keys';
     const res = await got.get(url, options);
     const keys = JSON.parse(res.body);
@@ -205,7 +205,7 @@ export class Remote
     let headers = this.getHeaders();
     const limit = 100;
     const options = {
-      headers: headers,
+      ...this.getOptions(),
       searchParams: {
         limit,
         page: 1
@@ -227,10 +227,9 @@ export class Remote
 
   async getActivities()
   {
-    let headers = this.getHeaders();
     const limit = 100;
     const options = {
-      headers: headers,
+      ...this.getOptions(),
       searchParams: {
         limit,
         page: 1
@@ -252,10 +251,9 @@ export class Remote
 
   async getActivity(activity_id)
   {
-    let headers = this.getHeaders();
     const limit = 100;
     const options = {
-      headers: headers,
+      ...this.getOptions(),
       searchParams: {
         limit,
         page: 1
@@ -268,10 +266,7 @@ export class Remote
 
   async getProfiles()
   {
-    let headers = this.getHeaders();
-    const options = {
-      headers: headers,
-    }
+    const options = this.getOptions();
     const url = this.getURL() + '/api/profiles';
     let res = await got.get(url, options);
     return JSON.parse(res.body);
@@ -279,10 +274,7 @@ export class Remote
 
   async getProfilePages(profileId)
   {
-    let headers = this.getHeaders();
-    const options = {
-      headers: headers,
-    }
+    const options = this.getOptions();
     const url = this.getURL() + `/api/profiles/${profileId}/pages`;
     let res = await got.get(url, options);
     return JSON.parse(res.body);
@@ -290,10 +282,7 @@ export class Remote
 
   async getProfileGroups(profileId)
   {
-    let headers = this.getHeaders();
-    const options = {
-      headers: headers,
-    }
+    const options = this.getOptions();
     const url = this.getURL() + `/api/profiles/${profileId}/groups`;
     let res = await got.get(url, options);
     return JSON.parse(res.body);
@@ -301,10 +290,9 @@ export class Remote
 
   async getConfigEntityCommands()
   {
-    let headers = this.getHeaders();
     const limit = 100;
     const options = {
-      headers: headers,
+      ...this.getOptions(),
       searchParams: {
         limit,
         page: 1

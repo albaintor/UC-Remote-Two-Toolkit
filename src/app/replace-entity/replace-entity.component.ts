@@ -8,12 +8,14 @@ import {
 } from '@angular/core';
 import {
   Activity,
-  ActivitySequence,
   Command,
+  CommandSequence,
   Config,
   Context,
   Entity,
-  OperationStatus, OrphanEntity,
+  Macro,
+  OperationStatus,
+  OrphanEntity,
   Profile,
   Remote,
   RemoteOperation
@@ -38,6 +40,7 @@ import {MessagesModule} from "primeng/messages";
 import {MultiSelectModule} from "primeng/multiselect";
 import {Helper} from "../helper";
 import {AutoCompleteModule} from "primeng/autocomplete";
+import {CheckboxModule} from "primeng/checkbox";
 
 class Message {
   title: string = "";
@@ -47,26 +50,27 @@ class Message {
 @Component({
   selector: 'app-replace-entity',
   standalone: true,
-    imports: [
-        DropdownModule,
-        MenubarModule,
-        NgIf,
-        ProgressBarModule,
-        ProgressSpinnerModule,
-        SharedModule,
-        ToastModule,
-        FormsModule,
-        ChipModule,
-        NgForOf,
-        TableModule,
-        EntityViewerComponent,
-        ButtonModule,
-        RemoteOperationsComponent,
-        MessagesModule,
-        DatePipe,
-        MultiSelectModule,
-        AutoCompleteModule,
-    ],
+  imports: [
+    DropdownModule,
+    MenubarModule,
+    NgIf,
+    ProgressBarModule,
+    ProgressSpinnerModule,
+    SharedModule,
+    ToastModule,
+    FormsModule,
+    ChipModule,
+    NgForOf,
+    TableModule,
+    EntityViewerComponent,
+    ButtonModule,
+    RemoteOperationsComponent,
+    MessagesModule,
+    DatePipe,
+    MultiSelectModule,
+    AutoCompleteModule,
+    CheckboxModule,
+  ],
   templateUrl: './replace-entity.component.html',
   styleUrl: './replace-entity.component.css',
   providers: [MessageService],
@@ -94,10 +98,14 @@ export class ReplaceEntityComponent implements OnInit{
   localMode: boolean = false;
   orphanEntities: OrphanEntity[] = [];
   messages: Message[] = [];
+  replaceProfiles = true;
+  replaceMacros = true;
+  replaceActivities = true;
 
   @ViewChild(RemoteOperationsComponent) operations: RemoteOperationsComponent | undefined;
   context: Context | undefined;
   availableEntities: Entity[] = [];
+  macros: Macro[] = [];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private activatedRoute: ActivatedRoute) {
@@ -114,6 +122,8 @@ export class ReplaceEntityComponent implements OnInit{
     })
     const entities = localStorage.getItem("entities");
     const activities = localStorage.getItem("activities");
+    const profiles = localStorage.getItem("profiles");
+    const macros = localStorage.getItem("macros");
     const context = localStorage.getItem("context");
     if (entities || activities)
     {
@@ -122,6 +132,8 @@ export class ReplaceEntityComponent implements OnInit{
         this.entities = JSON.parse(entities);
         this.availableEntities = [...this.entities];
       }
+      if (profiles) this.profiles = JSON.parse(profiles);
+      if (macros) this.macros = JSON.parse(macros);
       if (context) this.context = JSON.parse(context);
       this.server.setEntities(this.entities);
       this.orphanEntities = Helper.getOrphans(this.activities, this.entities)
@@ -192,6 +204,10 @@ export class ReplaceEntityComponent implements OnInit{
       console.log("Profiles", profiles);
       return profiles;
     })))
+    tasks.push(this.server.getRemoteMacros(this.selectedRemote!).pipe(map(macros => {
+      this.macros = macros;
+      return macros;
+    })));
 
     forkJoin(tasks).subscribe({next: (results) => {
       // Add orphan entities
@@ -200,13 +216,14 @@ export class ReplaceEntityComponent implements OnInit{
         this.availableEntities = [...this.entities];
         this.messageService.add({
           severity: "success", summary: "Remote data loaded",
-          detail: `${this.entities.length} entities and ${this.activities.length} activities extracted.`
+          detail: `${this.entities.length} entities, ${this.activities.length} activities, ${this.profiles?.length} profiles and ${this.macros.length} macros extracted.`
         });
         this.context = {source: `${this.selectedRemote?.remote_name} (${this.selectedRemote?.address})`,
           date: new Date(), type: "Remote", remote_ip: this.selectedRemote?.address, remote_name: this.selectedRemote?.remote_name};
         localStorage.setItem("entities", JSON.stringify(this.entities));
         localStorage.setItem("activities", JSON.stringify(this.activities));
         localStorage.setItem("profiles", JSON.stringify(this.profiles));
+        localStorage.setItem("macros", JSON.stringify(this.macros));
         localStorage.setItem("context", JSON.stringify(this.context));
         this.localMode = true;
         this.cdr.detectChanges();
@@ -286,6 +303,7 @@ export class ReplaceEntityComponent implements OnInit{
     const oldEntityIds: string[] = oldEntities.filter(entity=> entity!.entity_id != undefined).map(entity => entity!.entity_id!);
     this.remoteOperations = [];
     this.messages = [];
+    if (this.replaceActivities)
     this.activities.forEach(activity => {
       if (activity.options?.included_entities?.find(entity => oldEntityIds.includes(entity.entity_id!)))
       {
@@ -299,12 +317,12 @@ export class ReplaceEntityComponent implements OnInit{
             entity_ids.push(replaceEntity.newEntity!.entity_id!);
         })
 
-        let sequences_list: {[p: string]: ActivitySequence[]}  = {};
+        let sequences_list: {[p: string]: CommandSequence[]}  = {};
         ['on', 'off'].forEach(type => {
           if (activity?.options?.sequences?.[type])
           {
             let sequences = [...activity.options.sequences[type]];
-            let finalsequences: ActivitySequence[] = [];
+            let finalsequences: CommandSequence[] = [];
             sequences.forEach(sequence => {
               const item = replaceEntities.find(entity => entity.oldEntity!.entity_id === sequence.command?.entity_id);
               if (item) {
@@ -411,6 +429,82 @@ export class ReplaceEntityComponent implements OnInit{
       }
 
     });
+
+    if (this.replaceProfiles)
+    {
+      this.profiles?.forEach(profile => {
+        profile.pages?.forEach(page => {
+          const items = page.items?.filter(item =>
+            this.replaceEntities.find(entity => entity.oldEntity?.entity_id! === item.entity_id));
+          if (!items || items.length == 0) return;
+          const body = {
+            items: [...page.items!]
+          }
+          body.items.forEach(item => {
+            const entry = this.replaceEntities.find(entity =>
+              entity.oldEntity!.entity_id === item.entity_id);
+            if (!entry) return;
+            item.entity_id = entry.newEntity?.entity_id!;
+          });
+          let method: "PUT" | "POST" | "DELETE" | "PATCH" = "PATCH";
+          let api = `/api/profiles/${profile.profile_id}/pages/${page.page_id}`;
+          this.remoteOperations.push({name: `Profile ${profile.name} (page ${page.name})`,method , api,
+            body, status: OperationStatus.Todo})
+        });
+
+        profile.groups?.forEach(profileGroup => {
+          if (!profileGroup.entities.find(entity_id =>
+            this.replaceEntities.find(entity => entity.oldEntity?.entity_id! === entity_id)))
+            return;
+          const entity_ids = profileGroup.entities.map(entity_id => {
+            const entry = this.replaceEntities.find(entity => entity.oldEntity?.entity_id! === entity_id);
+            if (!entry) return entity_id;
+            return entry.newEntity?.entity_id!;
+          })
+          const body = {
+            entities: entity_ids
+          }
+          let method: "PUT" | "POST" | "DELETE" | "PATCH" = "PATCH";
+          let api = `/api/profiles/${profile.profile_id}/groups/${profileGroup.group_id}`;
+          this.remoteOperations.push({name: `Profile ${profile.name} (group ${profileGroup.name})`,method , api,
+            body, status: OperationStatus.Todo})
+        });
+      });
+    }
+
+    if (this.replaceMacros)
+    {
+      this.macros.forEach(macro => {
+        if (!macro.options?.included_entities?.find(entity =>
+          this.replaceEntities.find(replaceEntity => replaceEntity.oldEntity?.entity_id! === entity.entity_id))
+        && !macro.options?.sequence?.find(sequence =>
+            this.replaceEntities.find(replaceEntity => replaceEntity.oldEntity?.entity_id! === sequence?.command?.entity_id)))
+          return;
+        const body: any = {
+        };
+        if (macro.options?.included_entities) {
+          body.options.included_entities = macro.options.included_entities.map(entity_id => {
+            const entry = this.replaceEntities.find(entity =>
+              entity.oldEntity?.entity_id! === entity_id?.entity_id);
+            if (!entry) return entity_id;
+            return entry.newEntity?.entity_id!;
+          });
+        }
+        if (macro.options?.sequence) {
+          body.options.sequence = [...macro.options.sequence];
+          (body.options.sequence as CommandSequence[]).forEach(sequence => {
+            const entry = this.replaceEntities.find(entity =>
+              entity.oldEntity?.entity_id! === sequence.command?.entity_id);
+            if (entry && sequence.command) sequence.command.entity_id = entry.newEntity!.entity_id!;
+          });
+        }
+        let method: "PUT" | "POST" | "DELETE" | "PATCH" = "PATCH";
+        let api = `/api/macros/${macro.entity_id}`;
+        this.remoteOperations.push({name: `Macro ${macro.name}`,method , api,
+          body, status: OperationStatus.Todo})
+      });
+    }
+
     this.messageService.add({severity: "success", summary: `Operations are ready : ${this.remoteOperations.length} operations to execute`});
     this.operations!.visible = true;
     this.cdr.detectChanges();

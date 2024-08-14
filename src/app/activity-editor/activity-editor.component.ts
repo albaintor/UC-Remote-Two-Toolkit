@@ -108,6 +108,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   protected readonly Helper = Helper;
   viewerVisible = false;
   replaceMode = false;
+  createMode = false;
   showOperations = false;
   orphanEntities : {oldEntity:Entity, newEntity:Entity | undefined}[] = [];
 
@@ -195,7 +196,16 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       if (!this.activity_id) {
         return;
       }
-      this.updateActivity();
+      this.createMode = !!this.activatedRoute.snapshot.url.find(url => url.path === 'clone');
+      if (this.createMode) {
+        this.server.getConfig().subscribe(config => {
+          this.updateRemote(config);
+          this.targetRemote = this.selectedRemote;
+          this.buildCreateData();
+        });
+      }
+      else
+        this.updateActivity();
       this.cdr.detectChanges();
     })
   }
@@ -385,17 +395,6 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       })
     });
 
-
-    this.updatedActivity!.options?.user_interface?.pages?.forEach(page => {
-      const newPage = {...page};
-      delete newPage["page_id"];
-      remoteOperations.push({name: `Page ${page.name}`, method: "PATCH", api:
-          `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`,
-        body: {
-          ...newPage
-        }, status: OperationStatus.Todo});
-    })
-
     if (this.updatedActivity?.options?.included_entities) {
       this.orphanEntities = this.updatedActivity.options.included_entities.filter(included_entity => {
         return !this.entities.find(entity => entity.entity_id === included_entity.entity_id)}).map(entity => { return {
@@ -427,6 +426,17 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       remoteOperations.push({name: `Create activity ${this.updatedActivity!.name}`, method: "POST", api: `/api/activities`,
         body, status: OperationStatus.Todo});
     }
+
+    this.updatedActivity!.options?.user_interface?.pages?.forEach(page => {
+      const newPage = {...page};
+      delete newPage["page_id"];
+      remoteOperations.push({name: `Page ${page.name}`, method: "PATCH", api:
+          `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`,
+        body: {
+          ...newPage
+        }, status: OperationStatus.Todo});
+    })
+
     this.updatedActivity!.options?.button_mapping?.forEach(button => {
       if (!button.long_press && !button.short_press) return;
       remoteOperations.push({name: `Button ${button.button}`,method: "PATCH",
@@ -477,6 +487,8 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
         this.updatedActivity!.options!.button_mapping! = JSON.parse(JSON.stringify(this.activity.options.button_mapping));
       if (this.activity.options?.user_interface?.pages)
         this.updatedActivity!.options!.user_interface!.pages = JSON.parse(JSON.stringify(this.activity.options.user_interface.pages));
+
+      if (this.createMode) delete this.updatedActivity.entity_id;
     }
     this.initMenu();
     this.activityEditor?.updateButtonsGrid();

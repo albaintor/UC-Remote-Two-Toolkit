@@ -5,7 +5,7 @@
   <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px">
     <div class="flex align-items-center justify-content-center">
       <ng-container *ngIf="operations.length > 0">
-        <p-button label="Submit to remote" severity="danger" (onClick)="updateRemote()"></p-button>
+        <p-button label="Submit to remote" severity="danger" (onClick)="updateRemote()" pTooltip="Process all the selected operations to the target remote control"></p-button>
       </ng-container>
     </div>
     <div class="flex align-items-center justify-content-center" *ngIf="hasDone()">
@@ -16,14 +16,21 @@
     </div>
   </div>
   <p-table [value]="operations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
-           [scrollable]="true" [scrollHeight]="'calc(70vh - 50px)'">
+           [scrollable]="true" [scrollHeight]="'calc(70vh - 50px)'" [(selection)]="selectedOperations" >
     <ng-template pTemplate="header">
       <tr>
-        <th pResizableColumn>Name</th><th pResizableColumn>Method</th><th pResizableColumn>API</th><th pResizableColumn>Status</th><th pResizableColumn [style]="{width: '60%'}">Data</th><th>Actions</th>
+        <th style="width: 4rem"><p-tableHeaderCheckbox pTooltip="Execute or ignore all operations" /></th>
+        <th pResizableColumn>Name</th>
+        <th pResizableColumn>Method</th>
+        <th pResizableColumn>API</th>
+        <th pResizableColumn>Status</th>
+        <th pResizableColumn [style]="{width: '45%'}">Data</th>
+        <th pResizableColumn [style]="{width: '10%'}">Actions</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-operation>
       <tr>
+        <td><p-tableCheckbox [value]="operation" pTooltip="Execute or ignore this operation"/></td>
         <td>{{operation.name}}</td>
         <td>{{operation.method}}</td>
         <td>{{operation.api}}</td>
@@ -32,10 +39,10 @@
         <td [style]="{width: '60%'}"><ngx-json-viewer [json]="operation.body" [depth]="1"></ngx-json-viewer></td>
         <td>
           <ng-container *ngIf="operation.status !== OperationStatus.Todo">
-          <p-button icon="pi pi-replay" [rounded]="true" severity="warning" (onClick)="setStatus(operation, OperationStatus.Todo)"/>
+          <p-button pTooltip="Replay this operation" icon="pi pi-replay" [rounded]="true" severity="warning" (onClick)="setStatus(operation, OperationStatus.Todo)"/>
           </ng-container>
           <ng-container *ngIf="operation.status == OperationStatus.Todo">
-            <p-button icon="pi pi-times" [rounded]="true" severity="danger" (onClick)="setStatus(operation, OperationStatus.Cancelled)"/>
+            <p-button pTooltip="Cancel this operation" icon="pi pi-times" [rounded]="true" severity="danger" (onClick)="setStatus(operation, OperationStatus.Cancelled)"/>
           </ng-container>
         </td>
       </tr>

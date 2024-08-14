@@ -29,14 +29,25 @@
   <div class="flex align-items-center justify-content-center" *ngIf="!editMode">
     <p-button label="Copy this activity" (onClick)="copyToClipboard(activity, 'Activity '+activity?.name+' copied to clipboard')" icon="pi pi-copy" size="small"></p-button>
   </div>
+  <div class="flex align-items-center justify-content-center" *ngIf="!editMode">
+    <p-button label="Clone this activity" [routerLink]="['/activity/clone', activity?.entity_id]" severity="success" icon="pi pi-clone" size="small"></p-button>
+  </div>
   <div class="flex align-items-center justify-content-center">
     <p-button label="Save this activity to file" (onClick)="saveActivity()" icon="pi pi-save" size="small"></p-button>
+  </div>
+  <div class="flex align-items-center justify-content-center">
+    <p-button label="Save this page to file" (onClick)="savePage()" icon="pi pi-save" size="small"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center" *ngIf="!editMode && currentPage">
     <p-button label="Copy this page" (onClick)="copyToClipboard(currentPage, 'Page '+currentPage.name+' copied to clipboard')" icon="pi pi-copy" size="small"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center" *ngIf="editMode">
-    <p-button label="Paste the page from clipboard" (onClick)="pastePage()" icon="pi pi-clipboard" size="small"></p-button>
+    <p-button label="Paste the page from clipboard" (onClick)="pastePage()" severity="warning" icon="pi pi-clipboard" size="small"></p-button>
+  </div>
+  <div class="flex align-items-center justify-content-center" *ngIf="editMode">
+    <p-button label="Import the page from file" (onClick)="importPage()" severity="warning" icon="pi pi-file-import" size="small">
+      <input #input_file_page type="file" style="display:none" (change)="loadInputFilePage($event)">
+    </p-button>
   </div>
 </div>
 

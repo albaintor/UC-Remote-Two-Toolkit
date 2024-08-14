@@ -117,7 +117,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     {label: 'Load Remote data', command: () => this.remoteLoader?.load(), icon: 'pi pi-cloud-download', block: true},
     {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
     {label: 'Replace entities', routerLink:'/entity/rename', icon: 'pi pi-file-edit'},
-    {label: 'Import activity from file', routerLink:'/activity/edit', queryParams: {'source': 'file'}, icon: 'pi pi-folder-open'},
+    {label: 'Import activity from file', routerLink:'/activity/edit', queryParams: {'source': 'file'}, icon: 'pi pi-file-import'},
     {label: 'Import activity from clipboard', routerLink:'/activity/edit', queryParams: {'source': 'clipboard'}, icon: 'pi pi-clipboard'},
   ]
   entityUsages: EntityUsage | null | undefined;

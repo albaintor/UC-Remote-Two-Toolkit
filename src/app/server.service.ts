@@ -7,7 +7,7 @@ import {
   Context,
   EntitiesUsage,
   Entity, EntityCommand, EntityFeature,
-  EntityUsage, Page, Profile, ProfileGroup,
+  EntityUsage, Macro, Page, Profile, ProfileGroup,
   Profiles,
   Remote, RemoteMap, RemoteRegistration
 } from "./interfaces";
@@ -215,6 +215,18 @@ export class ServerService {
       this.profiles$.next(profiles);
       return results;
     }))
+  }
+
+  getRemoteMacros(remote: Remote): Observable<Macro[]>
+  {
+    return this.http.get<Macro[]>(`/api/remote/${remote.address}/macros`).pipe(mergeMap(macros => {
+      return forkJoin([from(macros).pipe(mergeMap(macro => {
+        return this.http.get<Macro>(`/api/remote/${remote.address}/macros/${macro.entity_id}`);
+      }))]).pipe(map(macros => {
+        console.debug("Retrieved all macros", macros);
+        return macros;
+      }))
+    }));
   }
 
   registerRemote(remote: Remote): Observable<Remote>

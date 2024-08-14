@@ -8,5 +8,6 @@ export const routes: Routes = [
   { path: '',   redirectTo: '/home', pathMatch: 'full'},
   { path: 'activity/edit/:id', component: ActivityEditorComponent},
   { path: 'activity/edit', component: ActivityEditorComponent},
+  { path: 'activity/clone/:id', component: ActivityEditorComponent},
   { path: 'entity/rename', component: ReplaceEntityComponent}
 ];

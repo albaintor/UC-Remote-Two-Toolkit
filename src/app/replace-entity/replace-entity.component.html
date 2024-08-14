@@ -56,6 +56,15 @@
     <p-button label="Remove" (onClick)="remove()" severity="danger" icon="pi pi-minus" size="small" [rounded]="true"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
+    <p-checkbox [(ngModel)]="replaceActivities" [binary]="true" label="Replace in activities" />
+  </div>
+  <div class="flex align-items-center justify-content-center">
+    <p-checkbox [(ngModel)]="replaceProfiles" [binary]="true" label="Replace in profile pages" />
+  </div>
+  <div class="flex align-items-center justify-content-center">
+    <p-checkbox [(ngModel)]="replaceMacros" [binary]="true" label="Replace in macros" />
+  </div>
+  <div class="flex align-items-center justify-content-center">
     <p-button [disabled]="checkSelection()" label="Submit" icon="pi pi-check"
               (click)="replaceEntity()"/>
   </div>

@@ -299,7 +299,7 @@ export interface Command
   params?: any;
 }
 
-export interface ActivitySequence
+export interface CommandSequence
 {
   type: string;
   command?: Command;
@@ -307,7 +307,7 @@ export interface ActivitySequence
 
 export interface ActivityOption
 {
-  sequences?:{[type: string]: ActivitySequence[]};
+  sequences?:{[type: string]: CommandSequence[]};
   prevent_sleep?: boolean;
   included_entities?:Entity[];
   activity_group?: any;
@@ -323,6 +323,27 @@ export interface Activity {
   icon?: string;
   description?: any;
   options?: ActivityOption;
+}
+
+export interface Macro {
+  entity_id: string;
+  entity_type: string;
+  integration_id: string;
+  name: LanguageName;
+  icon?: string;
+  description?: LanguageName;
+  features?: string[];
+  options?: {
+    editable?: boolean;
+    included_entities?: Entity[];
+    sequence?: CommandSequence[];
+  };
+  attributes?: {[key: string] : string};
+  device_class?: string;
+}
+
+export interface LanguageName {
+  [key: 'en' | 'fr' | 'de' | string]: string;
 }
 
 export interface ActivityBackup {

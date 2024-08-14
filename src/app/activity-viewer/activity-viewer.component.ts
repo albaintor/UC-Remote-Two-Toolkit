@@ -75,6 +75,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   public Command!: Command;
   @ViewChild("buttonpanel", {static: false}) buttonpanel: OverlayPanel | undefined;
   @ViewChild("commandeditor", {static: false}) commandeditor: CommandEditorComponent | undefined;
+  @ViewChild("input_file_page", {static: false}) input_file_page: ElementRef | undefined;
 
 
   selectedButton: string = "";
@@ -347,5 +348,43 @@ export class ActivityViewerComponent implements AfterViewInit {
     if (!this.activity) return;
     saveAs(new Blob([JSON.stringify(this.activity)], {type: "text/plain;charset=utf-8"}),
       `${this.activity.name}.json`);
+  }
+
+  savePage()
+  {
+    if (!this.currentPage ||!this.activity) return;
+    const fileName = this.currentPage?.name ? this.currentPage.name : "Page";
+    saveAs(new Blob([JSON.stringify(this.currentPage)], {type: "text/plain;charset=utf-8"}),
+      `${this.activity.name}_${fileName}.json`);
+  }
+
+  importPage() {
+    this.input_file_page?.nativeElement.click();
+  }
+
+  loadInputFilePage($event: Event) {
+    const file = ($event.target as any)?.files?.[0];
+    let fileReader = new FileReader();
+    fileReader.onload = (e) => {
+      if (fileReader.result){
+        const page:UIPage = JSON.parse(fileReader.result.toString());
+        if (!this.activity) return;
+        if (!page || !page.grid || !page.items || !page.name)
+        {
+          this.messageService.add({severity:'error', summary: "Invalid data from file, not an UI page", key: 'activity'});
+          this.cdr.detectChanges();
+          return;
+        }
+        if (!this.activity.options) this.activity.options = { user_interface: {} };
+        if (!this.activity.options.user_interface!.pages) this.activity.options.user_interface!.pages = [];
+        delete page.page_id;
+        this.activity.options.user_interface!.pages.push(page);
+        this.messageService.add({severity:'success', summary: `Page ${page.name} with ${page.items.length} items added successfully`, key: 'activity'});
+        this.updateButtonsGrid();
+        this.onChange.emit();
+        this.cdr.detectChanges();
+      }
+    }
+    fileReader.readAsText(file);
   }
 }

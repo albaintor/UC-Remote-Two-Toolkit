@@ -21,8 +21,13 @@
   {{progressDetail}}<br>
   <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
 </ng-container>
-<h2>Edit activity : {{activity?.name}}</h2>
-{{activity?.entity_id}}
+<ng-container *ngIf="!createMode">
+  <h2 *ngIf="!createMode">Edit activity : {{activity?.name}}</h2>
+  {{activity?.entity_id}}
+</ng-container>
+<ng-container *ngIf="createMode">
+  <h2 *ngIf="createMode">Create or clone activity : {{activity?.name}}</h2>
+</ng-container>
 <p-messages severity="info">
   <ng-template pTemplate>
     <div class="ml-2">Here you can edit an activity : you can see the original mapping with the option above. In the new mapping you can only move UI icons.<br>
@@ -36,7 +41,7 @@
     <p-button label="Save this activity to file" (onClick)="saveActivity()" severity="success" icon="pi pi-save" size="small"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-button label="Import activity from file" (onClick)="importActivity()" severity="danger" icon="pi pi-folder-open" size="small">
+    <p-button label="Import activity from file" (onClick)="importActivity()" severity="danger" icon="pi pi-file-import" size="small">
       <input #input_file type="file" style="display:none" (change)="loadInputFile($event)">
     </p-button>
   </div>

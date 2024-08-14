@@ -46,9 +46,19 @@ export class RemoteOperationsComponent {
     this._visible = value;
     this.visibleChange.emit(this._visible);
   }
-  @Output() visibleChange: EventEmitter<boolean> = new EventEmitter<boolean>();
-  @Input() operations: RemoteOperation[] = [];
+  @Input()
+  get operations(): RemoteOperation[] {
+    return this._operations;
+  }
+  set operations(value: RemoteOperation[])
+  {
+    this._operations = value;
+    this.selectedOperations = [...this.operations];
+  }
+  _operations: RemoteOperation[] = [];
   @Input({required: true}) remote: Remote | undefined;
+  selectedOperations: RemoteOperation[] = [];
+  @Output() visibleChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService)
   {
@@ -92,7 +102,7 @@ export class RemoteOperationsComponent {
 
   updateRemote() {
     if (!this.remote) return;
-    const operations = from(this.operations
+    const operations = from(this.selectedOperations
       .filter(operation => operation.status == OperationStatus.Todo)).pipe(
       mergeMap(operation => {
         if (operation.method === "POST")
@@ -165,14 +175,14 @@ export class RemoteOperationsComponent {
           const success = this.operations.filter(operation => operation.status === OperationStatus.Done).length;
           const errors = this.operations.filter(operation => operation.status === OperationStatus.Error).length;
           const severity = errors > 0 ? "info": "success";
-          this.messageService.add({severity, summary: "Operations executed to remote",
+          this.messageService.add({severity, summary: "Selected operations executed to remote",
             detail: `${success} success, ${errors} errors`,
             key: "operation"});
           this.cdr.detectChanges();
         },
         error: err => {
           console.log("Error during the execution of the operations", err);
-          this.messageService.add({severity: "error", summary: "Error during the execution of the operations",
+          this.messageService.add({severity: "error", summary: "Error during the execution of the selected operations",
             key: "operation"});
           this.cdr.detectChanges();
         }

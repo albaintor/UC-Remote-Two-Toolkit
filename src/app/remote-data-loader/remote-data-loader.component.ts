@@ -14,13 +14,14 @@ import {ProgressBarModule} from "primeng/progressbar";
 import {catchError, forkJoin, from, map, mergeMap, Observable, of} from "rxjs";
 import {ServerService} from "../server.service";
 import {MessageService} from "primeng/api";
-import {Activity, Context, Entity, EntityCommand, OrphanEntity, Profile, Remote} from "../interfaces";
+import {Activity, Context, Entity, EntityCommand, Macro, OrphanEntity, Profile, Remote} from "../interfaces";
 import {Helper} from "../helper";
 
 export interface RemoteData {
   activities: Activity[]
   entities: Entity[]
   profiles: Profile[]
+  macros: Macro[]
   configCommands: EntityCommand[]
   orphanEntities: OrphanEntity[]
   unusedEntities: Entity[]
@@ -53,6 +54,7 @@ export class RemoteDataLoaderComponent {
   activities: Activity[] = [];
   entities: Entity[] = [];
   profiles: Profile[] = [];
+  macros: Macro[] = [];
   configCommands: EntityCommand[] = [];
   orphanEntities: OrphanEntity[] = [];
   unusedEntities: Entity[] = [];
@@ -108,6 +110,11 @@ export class RemoteDataLoaderComponent {
         }))
       }))
     })));
+    tasks.push(this.server.getRemoteMacros(this.remote!).pipe(mergeMap(macros => {
+      this.macros = macros;
+      this.cdr.detectChanges();
+      return macros;
+    })));
     tasks.push(this.server.getRemoteProfiles(this.remote).pipe(map(profiles => {
       this.profiles = profiles;
       console.log("Profiles", profiles);
@@ -141,7 +148,7 @@ export class RemoteDataLoaderComponent {
         this.progress = false;
         this.cdr.detectChanges();
         const data: RemoteData = {context: this.context, activities: this.activities, configCommands: this.configCommands, entities: this.entities,
-        profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities};
+        profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities, macros: this.macros};
         this.loaded.emit(data);
         return data;
       }))

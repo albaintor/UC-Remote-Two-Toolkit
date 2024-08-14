@@ -521,6 +521,50 @@ app.get('/api/remote/:address/cfg/entity/commands', async (req, res, next) => {
   }
 })
 
+
+app.get('/api/remote/:address/macros', async (req, res, next) => {
+  const address = req.params.address;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getMacros());
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
+app.get('/api/remote/:address/macros/:macroid', async (req, res, next) => {
+  const address = req.params.address;
+  const macroid = req.params.macroid;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getMacro(macroid));
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
 app.post('/upload',upload.single('file'),(req,res)=>{
   console.log(req.file, req.body.name);
   res.status(200).json(req.file.filename)

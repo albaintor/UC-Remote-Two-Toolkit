@@ -328,4 +328,20 @@ export class Remote
     return JSON.parse(res.body);
   }
 
+  async getMacros()
+  {
+    const options = this.getOptions();
+    const url = this.getURL() + `/api/macros`;
+    let res = await got.get(url, options);
+    return JSON.parse(res.body);
+  }
+
+  async getMacro(macroid)
+  {
+    const options = this.getOptions();
+    const url = this.getURL() + `/api/macros/${macroid}`;
+    let res = await got.get(url, options);
+    return JSON.parse(res.body);
+  }
+
 }

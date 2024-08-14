@@ -450,6 +450,11 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       this.profiles = $event.profiles;
       this.configCommands = $event.configCommands;
       this.context = $event.context;
+      this.activities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
+      this.entities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
+      this.profiles.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
+      this.unusedEntities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
+      this.orphanEntities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
       this.cdr.detectChanges();
     }
   }

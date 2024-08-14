@@ -222,6 +222,7 @@ export class ReplaceEntityComponent implements OnInit{
           date: new Date(), type: "Remote", remote_ip: this.selectedRemote?.address, remote_name: this.selectedRemote?.remote_name};
         this.activities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
         this.entities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
+        this.activities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
         this.orphanEntities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
         localStorage.setItem("entities", JSON.stringify(this.entities));
         localStorage.setItem("activities", JSON.stringify(this.activities));
@@ -282,6 +283,7 @@ export class ReplaceEntityComponent implements OnInit{
     if (!this.replaceEntities.at(-1)!.oldEntity) {
       this.replaceEntities.at(-1)!.oldEntity = selectedEntity;
       this.availableEntities = this.entities.filter(entity => entity.entity_type == selectedEntity.entity_type);
+      this.availableEntities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
     }
     else
       this.replaceEntities.at(-1)!.newEntity = selectedEntity;
@@ -292,6 +294,7 @@ export class ReplaceEntityComponent implements OnInit{
     item.oldEntity = undefined;
     item.newEntity = undefined;
     this.availableEntities = [...this.entities];
+    this.availableEntities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
     this.cdr.detectChanges();
   }
 
@@ -524,6 +527,7 @@ export class ReplaceEntityComponent implements OnInit{
   add() {
     this.replaceEntities.push({oldEntity: undefined, newEntity: undefined});
     this.availableEntities = [...this.entities];
+    this.availableEntities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
     this.cdr.detectChanges();
   }
 
@@ -537,6 +541,7 @@ export class ReplaceEntityComponent implements OnInit{
     }
     else
       this.availableEntities = [...this.entities];
+    this.availableEntities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
     this.cdr.detectChanges();
   }
 

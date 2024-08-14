@@ -17,7 +17,11 @@
     </div>
   </div><br>
   <p-button label="Register remote" (click)="submit()"></p-button>
-  <p-table [value]="remotes" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true">
+  <p-blockUI [blocked]="blockedPanel" [target]="remotesTable"/>
+  <div class="progress-spinner" *ngIf="progress">
+    <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+  </div>
+  <p-table #remotesTable [value]="remotes" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true">
     <ng-template pTemplate="header">
       <tr>
         <th>Actions</th><th>Name</th><th>Address</th><th>Port</th><th>Username</th><th>Token</th><th>API key</th><th>Validity</th>
@@ -26,9 +30,10 @@
     <ng-template pTemplate="body" let-remote>
       <tr>
         <td>
-          <p-button icon="pi pi-play" pTooltip="Select this remote" [rounded]="true" (click)="selectRemote(remote)"></p-button>&nbsp;
+          <p-button icon="pi pi-play" pTooltip="Select this remote" [rounded]="true" (click)="selectRemote(remote)"></p-button>&nbsp;&nbsp;
           <p-button icon="pi pi-trash" pTooltip="Unregister this remote" [rounded]="true" (click)="deleteRemote(remote)" severity="danger"></p-button>&nbsp;
           <p-button icon="pi pi-barcode" pTooltip="Get registrations" [rounded]="true" (click)="getRemote(remote)"></p-button>&nbsp;
+          <p-button icon="pi pi-wifi" pTooltip="Test connection" [rounded]="true" (click)="testRemote(remote)"></p-button>
         </td>
         <td><ng-container *ngIf="selectedRemote == remote"><b>{{remote.remote_name}}</b> (selected)</ng-container>
           <ng-container *ngIf="selectedRemote != remote">{{remote.remote_name}}</ng-container>

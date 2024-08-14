@@ -97,8 +97,16 @@ export class Remote
     return {
       headers: this.getHeaders(),
       timeout: {
-        request: 10000
+        lookup: 100,
+        connect: 1000,
+        secureConnect: 1000,
+        socket: 1000,
+        send: 10000,
+        response: 3000
       }
+      /*timeout: {
+        request: 10000
+      }*/
     }
   }
 
@@ -133,11 +141,28 @@ export class Remote
     }
   }
 
+
+  async getVersion()
+  {
+    const options = this.getOptions();
+    const url = this.getURL() + '/api/pub/version';
+    console.log('Get remote info', url, options);
+    const res = await got.get(url, options);
+    let resBody;
+    try {
+      if (res?.body) resBody = JSON.parse(res.body);
+      return resBody;
+    } catch (err) {
+      console.error('Error', err, res?.body);
+      throw(err);
+    }
+  }
+
   async getRegisteredKeys()
   {
     const options = this.getOptions();
     const url = this.getURL() + '/api/auth/api_keys';
-    console.log('Register remote', url, options);
+    console.log('Get remote registering information', url, options);
     const res = await got.get(url, options);
     let resBody;
     try {

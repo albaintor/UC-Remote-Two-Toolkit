@@ -10,6 +10,8 @@ import {NgIf} from "@angular/common";
 import {TableModule} from "primeng/table";
 import {TooltipModule} from "primeng/tooltip";
 import {InputTextModule} from "primeng/inputtext";
+import {BlockUIModule} from "primeng/blockui";
+import {ProgressSpinnerModule} from "primeng/progressspinner";
 
 @Component({
   selector: 'app-remote-registration',
@@ -22,7 +24,9 @@ import {InputTextModule} from "primeng/inputtext";
     NgIf,
     TableModule,
     TooltipModule,
-    InputTextModule
+    InputTextModule,
+    BlockUIModule,
+    ProgressSpinnerModule
   ],
   templateUrl: './remote-registration.component.html',
   styleUrl: './remote-registration.component.css',
@@ -40,6 +44,8 @@ export class RemoteRegistrationComponent {
   @Output() remotesChanged = new EventEmitter<Remote[]>();
   selectedRemote: Remote | undefined;
   registrations: RemoteRegistration[] | undefined;
+  blockedPanel = false;
+  progress = false;
 
   constructor(private server: ServerService, private cdr: ChangeDetectorRef, private messageService: MessageService) {
   }
@@ -116,6 +122,9 @@ export class RemoteRegistrationComponent {
   }
 
   getRemote(remote: Remote) {
+    this.blockedPanel = true;
+    this.progress = true;
+    this.cdr.detectChanges();
     this.server.getRemoteRegistrations(remote).subscribe({
       next: ((results) => {
         this.messageService.add({severity: "success", summary: "Registrations retrieved",
@@ -125,10 +134,40 @@ export class RemoteRegistrationComponent {
       }),
       error: ((error: any) => {
         console.error("Error extracting remote info", error);
+        this.blockedPanel = false;
+        this.progress = false;
         this.messageService.add({severity: "error", summary: "Error while extracting remote registrations", key: "remote"});
         this.cdr.detectChanges();
       }),
       complete: () => {
+        this.blockedPanel = false;
+        this.progress = false;
+        this.cdr.detectChanges();
+      }})
+  }
+
+  testRemote(remote: Remote) {
+    this.blockedPanel = true;
+    this.progress = true;
+    this.cdr.detectChanges();
+    this.server.getRemoteVersion(remote).subscribe({
+      next: ((results) => {
+        const data = `Remote ${results.device_name} (${results.hostname} ${results.address}), OS ${results.os}, UI ${results.ui}`;
+        console.log("Remote version", results);
+        this.messageService.add({severity: "success", summary: "Connection successful", detail: data,
+          key: "remote", sticky: true});
+        this.cdr.detectChanges();
+      }),
+      error: ((error: any) => {
+        console.error("Error extracting remote info", error);
+        this.blockedPanel = false;
+        this.progress = false;
+        this.messageService.add({severity: "error", summary: "Error while connecting to the remote", key: "remote"});
+        this.cdr.detectChanges();
+      }),
+      complete: () => {
+        this.blockedPanel = false;
+        this.progress = false;
         this.cdr.detectChanges();
       }})
   }

@@ -49,6 +49,7 @@ import {DialogModule} from "primeng/dialog";
 import {MultiSelectModule} from "primeng/multiselect";
 import {AccordionModule} from "primeng/accordion";
 import {RemoteData, RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
+import {BlockUIModule} from "primeng/blockui";
 
 interface FileProgress
 {
@@ -60,32 +61,33 @@ interface FileProgress
 @Component({
   selector: 'app-remote-browser',
   standalone: true,
-  imports: [
-    TableModule,
-    CommonModule,
-    ChipModule,
-    OverlayPanelModule,
-    AutoCompleteModule,
-    FormsModule,
-    NgxJsonViewerModule,
-    InputTextModule,
-    ButtonModule,
-    TooltipModule,
-    MenubarModule,
-    ToastModule,
-    ProgressBarModule,
-    UploadedFilesComponent,
-    RemoteRegistrationComponent,
-    DropdownModule,
-    ProgressSpinnerModule,
-    ActivityViewerComponent,
-    EntityViewerComponent,
-    MessagesModule,
-    DialogModule,
-    MultiSelectModule,
-    AccordionModule,
-    RemoteDataLoaderComponent
-  ],
+    imports: [
+        TableModule,
+        CommonModule,
+        ChipModule,
+        OverlayPanelModule,
+        AutoCompleteModule,
+        FormsModule,
+        NgxJsonViewerModule,
+        InputTextModule,
+        ButtonModule,
+        TooltipModule,
+        MenubarModule,
+        ToastModule,
+        ProgressBarModule,
+        UploadedFilesComponent,
+        RemoteRegistrationComponent,
+        DropdownModule,
+        ProgressSpinnerModule,
+        ActivityViewerComponent,
+        EntityViewerComponent,
+        MessagesModule,
+        DialogModule,
+        MultiSelectModule,
+        AccordionModule,
+        RemoteDataLoaderComponent,
+        BlockUIModule
+    ],
   templateUrl: './remote-browser.component.html',
   styleUrl: './remote-browser.component.css',
   providers: [MessageService],
@@ -111,10 +113,11 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   remotes: Remote[] = [];
   selectedRemote: Remote | undefined;
   progress = false;
+  blockedMenu = false;
   protected readonly Math = Math;
   items: MenuItem[] = [
     {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
-    {label: 'Load Remote data', command: () => this.remoteLoader?.load(), icon: 'pi pi-cloud-download', block: true},
+    {label: 'Load Remote data', command: () => this.loadRemote(), icon: 'pi pi-cloud-download', block: true},
     {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
     {label: 'Replace entities', routerLink:'/entity/rename', icon: 'pi pi-file-edit'},
     {label: 'Import activity from file', routerLink:'/activity/edit', queryParams: {'source': 'file'}, icon: 'pi pi-file-import'},
@@ -184,6 +187,25 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
 
   init(): void {
     this.localMode = false;
+  }
+
+  loadRemote()
+  {
+    if (!this.remoteLoader) return;
+    this.blockedMenu = true;
+    this.progress = true;
+    this.cdr.detectChanges();
+    this.remoteLoader.loadRemoteData().subscribe({next: value => {
+        this.blockedMenu = false;
+        this.progress = false;
+        this.cdr.detectChanges();
+      }, error: error => {
+        console.error("Error during remote extraction", error);
+        this.blockedMenu = false;
+        this.progress = false;
+        this.messageService.add({severity:'error', summary:'Error during remote extraction'});
+        this.cdr.detectChanges();
+      }});
   }
 
 
@@ -379,10 +401,13 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       this.cdr.detectChanges();
       return;
     }
+    this.blockedMenu = true;
     this.progress = true;
     this.cdr.detectChanges();
     this.server.loadResources(this.selectedRemote, "Icon").subscribe({next: results => {
         this.messageService.add({severity: "success", summary: `Remote resources ${this.selectedRemote?.address} extracted successfully`});
+        this.progress = false;
+        this.blockedMenu = false;
         this.cdr.detectChanges();
       }, error: err => {
       console.error(err);
@@ -391,6 +416,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       },
       complete: () => {
       this.progress = false;
+      this.blockedMenu = false;
       this.cdr.detectChanges();
       }
     })

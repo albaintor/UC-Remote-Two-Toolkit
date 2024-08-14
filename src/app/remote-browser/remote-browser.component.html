@@ -1,6 +1,10 @@
 <p-toast></p-toast>
 <h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Remote Two configuration toolkit</h2>
-<p-menubar [model]="items">
+<p-blockUI [blocked]="blockedMenu"/>
+<div class="progress-spinner" *ngIf="progress">
+  <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+</div>
+<p-menubar #menubar [model]="items">
   <ng-template pTemplate="end">
     <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
       <ng-template pTemplate="selectedItem">

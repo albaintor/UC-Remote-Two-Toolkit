@@ -54,6 +54,22 @@ export interface RemoteRegistration
   scopes: string[];
 }
 
+export interface RemoteVersion
+{
+  device_name: string,
+  hostname: string,
+  address: string,
+  api: string,
+  core: string,
+  ui: string,
+  os: string,
+  integrations: {
+    additionalProp1: string,
+    additionalProp2: string,
+    additionalProp3: string
+  }
+}
+
 export enum OperationStatus
 {
   Todo ,

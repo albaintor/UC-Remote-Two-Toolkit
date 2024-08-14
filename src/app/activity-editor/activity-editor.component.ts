@@ -43,6 +43,7 @@ import {saveAs} from "file-saver-es";
 import {catchError, map, mergeMap, Observable, of} from "rxjs";
 import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 import {ChipModule} from "primeng/chip";
+import {InputTextModule} from "primeng/inputtext";
 
 @Component({
   selector: 'app-activity-editor',
@@ -67,7 +68,8 @@ import {ChipModule} from "primeng/chip";
     MessagesModule,
     DialogModule,
     RemoteDataLoaderComponent,
-    ChipModule
+    ChipModule,
+    InputTextModule
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',
@@ -131,8 +133,6 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.initMenu();
-
-
     this.server.getPictureRemoteMap().subscribe(butonsMap => {
       this.buttonsMap = butonsMap;
       this.cdr.detectChanges();
@@ -223,6 +223,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   {
     if (this.replaceMode)
     {
+      this.remoteOperations = this.buildData();
       this.showOperations = true;
       this.cdr.detectChanges();
       return;
@@ -268,6 +269,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     {
       this.remoteOperations.push({name: `Update activity ${this.updatedActivity.name}`, method: "PATCH", api: `/api/activities/${this.updatedActivity?.entity_id}`,
         body: {
+          name: this.updatedActivity.name,
           options: {
             entity_ids: newIncludedEntities.map((entity) => entity.entity_id),
           }
@@ -844,5 +846,14 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       return (a.name ? Helper.getEntityName(a)! : "").localeCompare(b.name ? Helper.getEntityName(b)! : "");
     });*/
     this.cdr.detectChanges();
+  }
+
+  operationsDone($event: RemoteOperation[]) {
+    return this.remoteLoader!.loadRemoteData().pipe(map(data => {
+      if (!data || !this.updatedActivity || !this.targetRemote) return;
+      this.activities = data.activities;
+      this.entities = data.entities;
+      this.cdr.detectChanges();
+    }))
   }
 }

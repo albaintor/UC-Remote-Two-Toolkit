@@ -554,4 +554,8 @@ export class ReplaceEntityComponent implements OnInit{
   }
 
   protected readonly Helper = Helper;
+
+  operationsDone($event: RemoteOperation[]) {
+    this.loadRemoteData();
+  }
 }

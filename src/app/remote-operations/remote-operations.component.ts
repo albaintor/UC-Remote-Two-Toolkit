@@ -59,6 +59,7 @@ export class RemoteOperationsComponent {
   @Input({required: true}) remote: Remote | undefined;
   selectedOperations: RemoteOperation[] = [];
   @Output() visibleChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() operationsDone: EventEmitter<RemoteOperation[]> = new EventEmitter<RemoteOperation[]>();
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService)
   {
@@ -178,12 +179,14 @@ export class RemoteOperationsComponent {
           this.messageService.add({severity, summary: "Selected operations executed to remote",
             detail: `${success} success, ${errors} errors`,
             key: "operation"});
+          this.operationsDone.emit(this.operations);
           this.cdr.detectChanges();
         },
         error: err => {
           console.log("Error during the execution of the operations", err);
           this.messageService.add({severity: "error", summary: "Error during the execution of the selected operations",
             key: "operation"});
+          this.operationsDone.emit(this.operations);
           this.cdr.detectChanges();
         }
       }

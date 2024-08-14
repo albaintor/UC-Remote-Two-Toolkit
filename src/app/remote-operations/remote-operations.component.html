@@ -41,9 +41,9 @@
           <ng-container *ngIf="operation.status !== OperationStatus.Todo">
           <p-button pTooltip="Replay this operation" icon="pi pi-replay" [rounded]="true" severity="warning" (onClick)="setStatus(operation, OperationStatus.Todo)"/>
           </ng-container>
-          <ng-container *ngIf="operation.status == OperationStatus.Todo">
+          <!--<ng-container *ngIf="operation.status == OperationStatus.Todo">
             <p-button pTooltip="Cancel this operation" icon="pi pi-times" [rounded]="true" severity="danger" (onClick)="setStatus(operation, OperationStatus.Cancelled)"/>
-          </ng-container>
+          </ng-container>-->
         </td>
       </tr>
     </ng-template>

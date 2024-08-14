@@ -22,11 +22,21 @@
   <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
 </ng-container>
 <ng-container *ngIf="!createMode">
-  <h2 *ngIf="!createMode">Edit activity : {{activity?.name}}</h2>
-  {{activity?.entity_id}}
+  <h2 *ngIf="!createMode">Edit activity : {{updatedActivity?.name}}</h2>
+  {{updatedActivity?.entity_id}}
 </ng-container>
 <ng-container *ngIf="createMode">
-  <h2 *ngIf="createMode">Create or clone activity : {{activity?.name}}</h2>
+  <h2 *ngIf="createMode">Create or clone activity : {{updatedActivity?.name}}</h2>
+</ng-container>
+<ng-container *ngIf="updatedActivity">
+  <div class="flex align-content-center flex-wrap gap-3">
+    <div class="flex align-items-center justify-content-center">
+      Activity name :
+    </div>
+    <div class="flex align-items-center justify-content-center">
+    <input type="text" pInputText [(ngModel)]="updatedActivity.name" />
+    </div>
+  </div>
 </ng-container>
 <p-messages severity="info">
   <ng-template pTemplate>
@@ -151,5 +161,6 @@
   <p>Generated mapping :</p>
   <ngx-json-viewer [json]="dump"></ngx-json-viewer>
 </ng-container>
-<app-remote-operations #operations [operations]="remoteOperations" [remote]="targetRemote" [(visible)]="showOperations"></app-remote-operations>
+<app-remote-operations #operations [operations]="remoteOperations" [remote]="targetRemote"
+                       [(visible)]="showOperations" (operationsDone)="operationsDone($event)"></app-remote-operations>
 

@@ -7,7 +7,7 @@ import {
   Context,
   EntitiesUsage,
   Entity, EntityCommand, EntityFeature,
-  EntityUsage, Macro, Page, Profile, ProfileGroup,
+  EntityUsage, Integration, Macro, Page, Profile, ProfileGroup,
   Profiles,
   Remote, RemoteMap, RemoteRegistration, RemoteVersion
 } from "./interfaces";
@@ -186,6 +186,12 @@ export class ServerService {
     }))
   }
 
+  getRemoteIntegrations(remote: Remote): Observable<Integration[]>
+  {
+    return this.http.get<Integration[]>(`/api/remote/${remote.address}/intg`).pipe(map(results => {
+      return results;
+    }))
+  }
 
   getRemoteProfiles(remote: Remote): Observable<Profile[]>
   {

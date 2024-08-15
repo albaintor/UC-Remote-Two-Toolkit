@@ -1,0 +1,54 @@
+<div class="progress-spinner" *ngIf="progress">
+  <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+</div>
+<p-toast></p-toast>
+<h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Remote Two configuration toolkit</h2>
+<p-menubar [model]="menuItems">
+  <ng-template pTemplate="end">
+    <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
+      <ng-template pTemplate="selectedItem">
+        <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
+        <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
+      </ng-template>
+      <ng-template let-item pTemplate="item">
+        {{item.remote_name}} ({{item.address}})
+      </ng-template>
+    </p-dropdown>
+  </ng-template>
+</p-menubar>
+<p-messages severity="info">
+  <ng-template pTemplate>
+    <div class="ml-2">Here you can review and upload custom integrations</div>
+  </ng-template>
+</p-messages>
+<p-fileUpload
+  mode="basic"
+  name="file"
+  chooseIcon="pi pi-upload"
+  [url]="'/api/remote/'+selectedRemote?.address+'/intg/install'"
+  accept=".gz,.tgz" maxFileSize="100000000"
+  (onUpload)="onUploadIntegration($event)"
+  (onBeforeUpload)="onUploadingIntegration($event)"
+  [auto]="true"
+  chooseLabel="Select integration driver to upload..." /><br>
+<p-table [value]="integrations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+         dataKey="message" columnResizeMode="expand">
+  <ng-template pTemplate="header">
+    <tr>
+      <th pSortableColumn="name" pResizableColumn>Integration name<p-sortIcon field="name"></p-sortIcon></th>
+      <th pSortableColumn="integration_id" pResizableColumn>Integration ID<p-sortIcon field="integration_id"></p-sortIcon></th>
+      <th pSortableColumn="driver_type" pResizableColumn>Driver type<p-sortIcon field="driver_type"></p-sortIcon></th>
+      <th pSortableColumn="state" pResizableColumn>Driver state<p-sortIcon field="state"></p-sortIcon></th>
+      <th pSortableColumn="device_state" pResizableColumn>Device state<p-sortIcon field="device_state"></p-sortIcon></th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-integration>
+    <tr>
+      <td>{{Helper.getEntityName(integration)}}</td>
+      <td>{{integration.integration_id}}</td>
+      <td><p-chip [label]="integration.driver_type" [style]="Helper.getStyle(integration.driver_type)"></p-chip></td>
+      <td><p-chip [label]="integration.state" [style]="Helper.getStyle(integration.state)"></p-chip></td>
+      <td><p-chip [label]="integration.device_state" [style]="Helper.getStyle(integration.device_state)"></p-chip></td>
+    </tr>
+  </ng-template>
+</p-table>

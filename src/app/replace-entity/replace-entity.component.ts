@@ -107,10 +107,7 @@ export class ReplaceEntityComponent implements OnInit{
   availableEntities: Entity[] = [];
   macros: Macro[] = [];
 
-  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
-              private activatedRoute: ActivatedRoute) {
-
-  }
+  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {}
 
   ngOnInit(): void {
     this.initMenu();

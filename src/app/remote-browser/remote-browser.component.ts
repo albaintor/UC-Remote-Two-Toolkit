@@ -122,6 +122,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     {label: 'Replace entities', routerLink:'/entity/rename', icon: 'pi pi-file-edit'},
     {label: 'Import activity from file', routerLink:'/activity/edit', queryParams: {'source': 'file'}, icon: 'pi pi-file-import'},
     {label: 'Import activity from clipboard', routerLink:'/activity/edit', queryParams: {'source': 'clipboard'}, icon: 'pi pi-clipboard'},
+    {label: 'Integrations', routerLink:'/integrations', icon: 'pi pi-microchip'},
   ]
   entityUsages: EntityUsage | null | undefined;
   localMode = true;

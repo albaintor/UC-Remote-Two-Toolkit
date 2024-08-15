@@ -321,7 +321,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
   buildCreateData()
   {
-    this.buildCreateDataWithUpdate().subscribe({next: results => {
+    this.buildCreateDataPromise().subscribe({next: results => {
         this.messageService.add({severity: "success", summary: "Activity imported successfully"});
         console.log("Pending operations", this.remoteOperations);
         this.dump = this.remoteOperations;
@@ -335,7 +335,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       }})
   }
 
-  buildCreateDataWithUpdate(): Observable<RemoteOperation[] | undefined>
+  buildCreateDataPromise(): Observable<RemoteOperation[] | undefined>
   {
     this.replaceMode = true;
     const remoteOperations: RemoteOperation[] = [];

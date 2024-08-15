@@ -3,6 +3,7 @@ import fs from "node:fs";
 import { readdir } from 'node:fs/promises';
 import path from "path";
 import {pipeline as streamPipeline} from 'node:stream/promises';
+import * as url from "node:url";
 
 export class Remote
 {
@@ -104,9 +105,6 @@ export class Remote
         send: 10000,
         response: 3000
       }
-      /*timeout: {
-        request: 10000
-      }*/
     }
   }
 
@@ -339,6 +337,32 @@ export class Remote
     const options = this.getOptions();
     const url = this.getURL() + `/api/macros/${macroid}`;
     let res = await got.get(url, options);
+    return JSON.parse(res.body);
+  }
+
+  async getIntegrations()
+  {
+    const options = this.getOptions();
+    const url = this.getURL() + `/api/intg`;
+    let res = await got.get(url, options);
+    return JSON.parse(res.body);
+  }
+
+  async uploadIntegration(fileData)
+  {
+    const formData = new FormData();
+    let buffer = fs.readFileSync(fileData.path);
+    let blob = new Blob([buffer]);
+    let file = new File([blob], fileData.filename, { type: fileData.mimetype });
+    formData.append("file", file);
+    const options = {
+      headers: this.getHeaders(),
+      body: formData
+      //...formData
+    };
+    const url = this.getURL() + `/api/intg/install`;
+    console.log("Upload file to remote", url, formData, options);
+    let res = await got.post(url, options);
     return JSON.parse(res.body);
   }
 

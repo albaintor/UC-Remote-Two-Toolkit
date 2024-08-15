@@ -385,3 +385,15 @@ export interface OrphanEntity extends Entity
 {
   activities?: Activity[];
 }
+
+export interface Integration
+{
+  driver_id?: string
+  integration_id: string
+  name: LanguageName
+  icon?: string
+  driver_type: "LOCAL" | "CUSTOM" | "EXTERNAL"
+  state: "NOT_CONFIGURED"| "UNKNOWN"| "IDLE"| "CONNECTING"| "CONNECTED"| "DISCONNECTED"| "RECONNECTING"| "ACTIVE"| "ERROR"
+  device_state?: string
+  driver_state?: string
+}

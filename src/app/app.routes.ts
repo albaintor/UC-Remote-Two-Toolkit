@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import {ActivityEditorComponent} from "./activity-editor/activity-editor.component";
 import {RemoteBrowserComponent} from "./remote-browser/remote-browser.component";
 import {ReplaceEntityComponent} from "./replace-entity/replace-entity.component";
+import {IntegrationsComponent} from "./integrations/integrations.component";
 
 export const routes: Routes = [
   { path: 'home', component: RemoteBrowserComponent },
@@ -9,5 +10,6 @@ export const routes: Routes = [
   { path: 'activity/edit/:id', component: ActivityEditorComponent},
   { path: 'activity/edit', component: ActivityEditorComponent},
   { path: 'activity/clone/:id', component: ActivityEditorComponent},
-  { path: 'entity/rename', component: ReplaceEntityComponent}
+  { path: 'entity/rename', component: ReplaceEntityComponent},
+  { path: 'integrations', component: IntegrationsComponent},
 ];

@@ -29,6 +29,8 @@ var storage = multer.diskStorage({
   }
 });
 
+fs.mkdirSync(UPLOAD_DIR, {recursive: true});
+
 program
   .usage('[OPTIONS]...')
   // .option('-f, --flag', 'Detects if the flag is present.')
@@ -567,6 +569,56 @@ app.get('/api/remote/:address/macros/:macroid', async (req, res, next) => {
   } catch (error)
   {
     errorHandler(error, req, res, next);
+  }
+})
+
+
+app.get('/api/remote/:address/intg', async (req, res, next) => {
+  const address = req.params.address;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getIntegrations());
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
+app.post('/api/remote/:address/intg/install', upload.single('file'),async (req, res, next) => {
+  const address = req.params.address;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  console.log("Upload integration", req.file);
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.uploadIntegration(req.file));
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+  try {
+    fs.rmSync(req.file.path)
+  } catch (error)
+  {
+    console.error("Error while deleting uploaded integration", req.file, error);
   }
 })
 

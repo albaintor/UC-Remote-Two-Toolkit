@@ -101,16 +101,29 @@ export class RemoteOperationsComponent {
     return error.toString();
   }
 
+  updateOperation(operation: RemoteOperation)
+  {
+    if (!operation.resultFields) return;
+    operation.resultFields.forEach(resultField => {
+      if (!resultField.linkedOperation.results) return;
+      const value = resultField.linkedOperation.results[resultField.fieldName];
+      operation.api = operation.api.replace(resultField.keyName, value);
+    });
+    this.cdr.detectChanges();
+  }
+
   updateRemote() {
     if (!this.remote) return;
     const operations = from(this.selectedOperations
       .filter(operation => operation.status == OperationStatus.Todo)).pipe(
       mergeMap(operation => {
+        this.updateOperation(operation);
         if (operation.method === "POST")
           return this.server.remotePost(this.remote!, operation.api, operation.body).pipe(
             map(results => {
               console.log("Results from remote for operation", operation, results);
               operation.status = OperationStatus.Done;
+              operation.results = results;
               this.cdr.detectChanges();
               return of(operation);
           }),
@@ -126,6 +139,7 @@ export class RemoteOperationsComponent {
             map(results => {
               console.log("Results from remote for operation", operation, results);
               operation.status = OperationStatus.Done;
+              operation.results = results;
               this.cdr.detectChanges();
               return of(operation);
             }),
@@ -141,6 +155,7 @@ export class RemoteOperationsComponent {
             map(results => {
               console.log("Results from remote for operation", operation, results);
               operation.status = OperationStatus.Done;
+              operation.results = results;
               this.cdr.detectChanges();
               return of(operation);
             }),
@@ -156,6 +171,7 @@ export class RemoteOperationsComponent {
             map(results => {
               console.log("Results from remote for operation", operation, results);
               operation.status = OperationStatus.Done;
+              operation.results = results;
               this.cdr.detectChanges();
               return of(operation);
             }),
@@ -178,14 +194,17 @@ export class RemoteOperationsComponent {
           const severity = errors > 0 ? "info": "success";
           this.messageService.add({severity, summary: "Selected operations executed to remote",
             detail: `${success} success, ${errors} errors`,
-            key: "operation"});
+            key: "operation", sticky: true});
           this.operationsDone.emit(this.operations);
           this.cdr.detectChanges();
         },
         error: err => {
+          const success = this.operations.filter(operation => operation.status === OperationStatus.Done).length;
+          const errors = this.operations.filter(operation => operation.status === OperationStatus.Error).length;
           console.log("Error during the execution of the operations", err);
           this.messageService.add({severity: "error", summary: "Error during the execution of the selected operations",
-            key: "operation"});
+            detail: `${success} success, ${errors} errors`,
+            key: "operation", sticky: true});
           this.operationsDone.emit(this.operations);
           this.cdr.detectChanges();
         }

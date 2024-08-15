@@ -85,19 +85,37 @@ export class RemoteDataLoaderComponent {
     this.remoteProgress = 0;
     this.cdr.detectChanges();
     const tasks: Observable<any>[] = [];
-    tasks.push(this.server.getRemoteEntities(this.remote).pipe(map((entities) => {
+    tasks.push(this.server.getRemoteEntities(this.remote).pipe(
+      catchError(error => {
+        console.error("Error entities", error);
+        throw error;
+      }),
+      map((entities) => {
+      console.debug("Get remote entities", this.remote, entities);
       this.entities = entities;
       this.cdr.detectChanges();
       return entities;
     })));
-    tasks.push(this.server.getRemoteActivities(this.remote!).pipe(mergeMap((entities) => {
+    tasks.push(this.server.getRemoteActivities(this.remote!).pipe(
+      catchError(error => {
+        console.error("Error activities", error);
+        throw error;
+      }),
+      mergeMap((entities) => {
+      console.debug("Get remote activities", this.remote, entities);
       this.activities = entities;
       this.messageService.add({key: "remote-loader", severity: "success", summary: `Remote data ${this.remote?.address}`,
         detail: `${this.activities.length} activities extracted. Extracting details now...`});
       this.cdr.detectChanges();
       return from(this.activities).pipe(mergeMap(activity => {
-        return this.server.getRemoteActivity(this.remote!, activity.entity_id!).pipe(map(activityDetails => {
-          this.progressDetail = activity.name;
+        return this.server.getRemoteActivity(this.remote!, activity.entity_id!).pipe(
+          catchError(error => {
+            console.error("Error activity", error);
+            throw error;
+          }),
+          map(activityDetails => {
+          // console.debug("Get remote activity details", this.remote, activityDetails);
+          this.progressDetail = Helper.getEntityName(activity);
           const name = activity.name;
           Object.assign(activity, activityDetails);
           activity.name = name;
@@ -105,31 +123,50 @@ export class RemoteDataLoaderComponent {
             (activity as any).entities = (activityDetails as any).options.included_entities;
           this.remoteProgress += 100/this.activities.length;
           this.cdr.detectChanges();
-          console.log("Activity", activity);
           return activity;
         }))
-      }))
+      }, 2))
     })));
-    tasks.push(this.server.getRemoteMacros(this.remote!).pipe(mergeMap(macros => {
+    tasks.push(this.server.getRemoteMacros(this.remote!).pipe(
+      catchError(error => {
+        console.error("Error macros", error);
+        throw error;
+      }),
+      map(macros => {
+      console.debug("Get remote macros", this.remote, macros);
       this.macros = macros;
       this.cdr.detectChanges();
       return macros;
     })));
-    tasks.push(this.server.getRemoteProfiles(this.remote).pipe(map(profiles => {
+    tasks.push(this.server.getRemoteProfiles(this.remote).pipe(
+      catchError(error => {
+        console.error("Error profiles", error);
+        throw error;
+      }),
+      map(profiles => {
+      console.debug("Get remote profiles", this.remote, profiles);
       this.profiles = profiles;
-      console.log("Profiles", profiles);
       return profiles;
     })))
-    tasks.push(this.server.getConfigEntityCommands(this.remote).pipe(map(commands => {
+    tasks.push(this.server.getConfigEntityCommands(this.remote).pipe(
+      catchError(error => {
+        console.error("Error commands", error);
+        throw error;
+      }),
+      map(commands => {
+      console.debug("Get remote config entity commands", this.remote, commands);
       this.configCommands = commands;
     })))
-
+    console.debug("Refresh tasks", tasks);
     return forkJoin(tasks).pipe(
       catchError(error => {
+        console.error("Error during extraction", this.remote, error);
         this.progress = false;
+        this.cdr.detectChanges();
         throw error;
       }),
       map(results => {
+        console.log("Get remote data over", this.remote, results);
         this.unusedEntities = Helper.getUnusedEntities(this.activities, this.profiles, this.entities);
         this.orphanEntities = Helper.getOrphans(this.activities, this.entities);
         this.messageService.add({

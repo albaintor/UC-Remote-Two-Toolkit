@@ -67,20 +67,20 @@ export class Helper
     activities.forEach(activity => {
       if (activity?.options?.included_entities?.find(activityEntity => entity.entity_id === activityEntity.entity_id))
       {
-        entityUsage.activity_entities.push({activity_id: activity.entity_id!, name: activity.name});
+        entityUsage.activity_entities.push({activity_id: activity.entity_id!, name: Helper.getEntityName(activity)});
       }
       activity.options?.button_mapping?.filter(button =>
         button.long_press?.entity_id === entity.entity_id ||
         button.short_press?.entity_id === entity.entity_id).forEach(button => {
           if (button.short_press?.entity_id === entity.entity_id)
-            entityUsage.activity_buttons.push({activity_id: activity.entity_id!, name: activity.name,
+            entityUsage.activity_buttons.push({activity_id: activity.entity_id!, name: Helper.getEntityName(activity),
             button: button.button, short_press: (button.short_press?.entity_id === entity.entity_id)});
       });
       activity.options?.user_interface?.pages?.forEach(page => {
         page.items.forEach(item => {
           if (typeof item.command != "string" && (item.command as Command)?.entity_id === entity.entity_id)
           {
-            entityUsage.activity_interface.push({activity_id: activity.entity_id!, name: activity.name,
+            entityUsage.activity_interface.push({activity_id: activity.entity_id!, name: Helper.getEntityName(activity),
               page_id: page.page_id!, page_name: page.name, command: (item.command as Command).cmd_id
             })
           }
@@ -210,6 +210,7 @@ export class Helper
 
   static getEntityName(entity: any): string
   {
+    if (!entity) return "";
     if (typeof entity.name === "string") return entity.name;
     if (entity.name?.['en']) return entity.name['en'];
     if (entity.name?.['fr']) return entity.name['fr'];

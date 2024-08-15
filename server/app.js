@@ -14,6 +14,7 @@ import fs from "node:fs";
 import {Remote} from "./remote.js";
 import {getConfigFile, writeConfigFile} from "./config.js";
 import {program} from 'commander';
+import cors from 'cors';
 
 let LISTEN_PORT = "8000";
 const UPLOAD_DIR = './uploads';
@@ -41,6 +42,7 @@ if (options.port)
 
 const upload = multer({storage: storage})
 
+app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
@@ -376,12 +378,15 @@ app.get('/api/remote/:address/activities/:activity_id', async (req, res, next) =
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
+    console.error("Unknown remote", address);
     res.status(404).json(address);
     return;
   }
   const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
   try {
-    res.status(200).json(await remote.getActivity(activity_id));
+    const results = await remote.getActivity(activity_id);
+    // console.log(results);
+    res.status(200).json(results);
   } catch (error)
   {
     errorHandler(error, req, res, next);

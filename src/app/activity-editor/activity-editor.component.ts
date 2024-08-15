@@ -26,7 +26,7 @@ import {
   OperationStatus,
   Remote,
   RemoteMap,
-  RemoteOperation,
+  RemoteOperation, RemoteOperationResultField,
   UIPage
 } from "../interfaces";
 import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
@@ -44,6 +44,8 @@ import {catchError, map, mergeMap, Observable, of} from "rxjs";
 import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 import {ChipModule} from "primeng/chip";
 import {InputTextModule} from "primeng/inputtext";
+
+export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
 
 @Component({
   selector: 'app-activity-editor',
@@ -255,7 +257,9 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     {
       this.remoteOperations.push({name: `Create activity ${this.updatedActivity.name}`, method: "POST", api: `/api/activities`,
         body: {
-          name: this.updatedActivity.name,
+          name: {
+            en: this.updatedActivity.name
+          },
           icon: this.updatedActivity.icon,
           description: this.updatedActivity.description,
           options: {
@@ -269,7 +273,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     {
       this.remoteOperations.push({name: `Update activity ${this.updatedActivity.name}`, method: "PATCH", api: `/api/activities/${this.updatedActivity?.entity_id}`,
         body: {
-          name: this.updatedActivity.name,
+          name: {en: this.updatedActivity.name},
           options: {
             entity_ids: newIncludedEntities.map((entity) => entity.entity_id),
           }
@@ -362,7 +366,9 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     this.orphanEntities = [];
     if (!this.updatedActivity || !this.targetRemote) return remoteOperations;
     const body: any = {
-      name: this.updatedActivity!.name,
+      name: {
+        en: Helper.getEntityName(this.updatedActivity),
+      },
       options: {}
     }
     if (this.updatedActivity.icon)
@@ -406,6 +412,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
     // Create or update
     const activity = this.activities.find(activity => activity.entity_id === this.updatedActivity?.entity_id);
+    let resultField: RemoteOperationResultField | undefined = undefined;
     if (activity)
     {
       console.log("Activity to import exists, we will update it", body);
@@ -425,37 +432,62 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     else
     {
       console.log("Activity to import does not exist, we will create it", body);
-      remoteOperations.push({name: `Create activity ${this.updatedActivity!.name}`, method: "POST", api: `/api/activities`,
-        body, status: OperationStatus.Todo});
+      let createOperation: RemoteOperation = {name: `Create activity ${this.updatedActivity!.name}`, method: "POST", api: `/api/activities`,
+        body, status: OperationStatus.Todo};
+      remoteOperations.push(createOperation);
+      resultField = {fieldName: "entity_id", linkedOperation: createOperation, keyName: NEW_ACTIVITY_ID_KEY};
     }
 
+    let first = true;
     this.updatedActivity!.options?.user_interface?.pages?.forEach(page => {
       const newPage = {...page};
       delete newPage["page_id"];
-      remoteOperations.push({name: `Page ${page.name}`, method: "PATCH", api:
-          `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`,
-        body: {
-          ...newPage
-        }, status: OperationStatus.Todo});
+      if (resultField) {
+        if (first)
+        {
+          remoteOperations.push({
+            name: `Page ${page.name}`, method: "PATCH", api:
+              `/api/activities/${NEW_ACTIVITY_ID_KEY}/ui/pages/main`,
+            resultFields: [resultField],
+            body: {
+              ...newPage
+            }, status: OperationStatus.Todo
+          });
+          first = false;
+        } else
+        remoteOperations.push({
+          name: `Page ${page.name}`, method: "POST", api:
+            `/api/activities/${NEW_ACTIVITY_ID_KEY}/ui/pages`,
+          resultFields: [resultField],
+          body: {
+            ...newPage
+          }, status: OperationStatus.Todo
+        });
+      }
+      else
+        remoteOperations.push({name: `Page ${page.name}`, method: "POST", api:
+            `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`,
+          body: {
+            ...newPage
+          }, status: OperationStatus.Todo});
     })
 
     this.updatedActivity!.options?.button_mapping?.forEach(button => {
       if (!button.long_press && !button.short_press) return;
-      remoteOperations.push({name: `Button ${button.button}`,method: "PATCH",
-        api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
-        body: {
-          ...button
-        }, status: OperationStatus.Todo})
+      if (resultField)
+        remoteOperations.push({name: `Button ${button.button}`,method: "PATCH",
+          api: `/api/activities/${NEW_ACTIVITY_ID_KEY}/buttons/${button.button}`,
+          resultFields: [resultField],
+          body: {
+            ...button
+          }, status: OperationStatus.Todo})
+      else
+        remoteOperations.push({name: `Button ${button.button}`,method: "PATCH",
+          api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
+          body: {
+            ...button
+          }, status: OperationStatus.Todo})
     });
-    this.updatedActivity!.options?.user_interface?.pages?.forEach(page => {
-      const newPage = {...page};
-      delete newPage["page_id"];
-      remoteOperations.push({name: `Page ${page.name}`, method: "PATCH", api:
-          `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`,
-        body: {
-          ...newPage
-        }, status: OperationStatus.Todo});
-    })
     return remoteOperations;
   }
 
@@ -474,7 +506,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     {
       this.updatedActivity = {
         entity_id: this.activity.entity_id,
-        name: this.activity.name,
+        name: Helper.getEntityName(this.activity),
         description: this.activity.description,
         icon: this.activity.icon,
         options: {//activity_group: this.activity.options?.activity_group, sequences: this.activity.options?.sequences,
@@ -482,7 +514,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
           button_mapping: [],
           user_interface: {pages: []}}};
       if (this.activity.options?.included_entities)
-        this.updatedActivity.options!.included_entities = [...this.activity.options?.included_entities!];
+        this.updatedActivity!.options!.included_entities = [...this.activity.options?.included_entities!];
       if (this.activity!.options?.sequences)
         this.updatedActivity!.options!.sequences = JSON.parse(JSON.stringify(this.activity.options.sequences));
       if (this.activity.options?.button_mapping)
@@ -490,14 +522,21 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       if (this.activity.options?.user_interface?.pages)
         this.updatedActivity!.options!.user_interface!.pages = JSON.parse(JSON.stringify(this.activity.options.user_interface.pages));
 
-      if (this.createMode) delete this.updatedActivity.entity_id;
+      if (this.createMode) delete this.updatedActivity!.entity_id;
     }
     this.initMenu();
     this.activityEditor?.updateButtonsGrid();
     this.cdr.detectChanges();
   }
 
-  applyTemplate(updatedActivity: Activity)
+  applyTemplate()
+  {
+    this.applyTemplateOnActivity(this.updatedActivity!);
+    this.buildUpdateData();
+    // this.viewer.view(updatedActivity!, true)
+  }
+
+  applyTemplateOnActivity(updatedActivity: Activity)
   {
     if (!this.selectedEntity || !this.activity) return;
     const template = this.templates.find(template => template.entity_type === this.selectedEntity?.entity_type!);
@@ -849,11 +888,14 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   }
 
   operationsDone($event: RemoteOperation[]) {
-    return this.remoteLoader!.loadRemoteData().pipe(map(data => {
+    console.log("Operations executed", $event);
+    this.progress = false;
+    this.cdr.detectChanges();
+    return this.remoteLoader!.loadRemoteData().subscribe(data => {
       if (!data || !this.updatedActivity || !this.targetRemote) return;
       this.activities = data.activities;
       this.entities = data.entities;
       this.cdr.detectChanges();
-    }))
+    });
   }
 }

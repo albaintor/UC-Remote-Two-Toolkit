@@ -85,7 +85,16 @@ export interface RemoteOperation
   api: string;
   body: any;
   status?: OperationStatus;
+  results?: any;
   message?: any;
+  resultFields?: RemoteOperationResultField[];
+}
+
+export interface RemoteOperationResultField
+{
+  fieldName: string;
+  keyName: string;
+  linkedOperation: RemoteOperation;
 }
 
 export interface RemoteButtonMap

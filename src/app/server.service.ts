@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
-import {forkJoin, from, map, mergeMap, Observable, Subject} from "rxjs";
+import {forkJoin, from, map, mergeMap, Observable, of, Subject} from "rxjs";
 import {
   Activity,
   Config,
@@ -220,6 +220,7 @@ export class ServerService {
   getRemoteMacros(remote: Remote): Observable<Macro[]>
   {
     return this.http.get<Macro[]>(`/api/remote/${remote.address}/macros`).pipe(mergeMap(macros => {
+      if (macros.length == 0) return of(macros);
       return forkJoin([from(macros).pipe(mergeMap(macro => {
         return this.http.get<Macro>(`/api/remote/${remote.address}/macros/${macro.entity_id}`);
       }))]).pipe(map(macros => {

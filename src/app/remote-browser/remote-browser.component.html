@@ -160,7 +160,7 @@
       </ng-template>
       <ng-template pTemplate="body" let-activity>
         <tr>
-          <td><a [routerLink]="[]" (click)="viewActivity(activityeditor, activity)">{{ activity.name }}</a></td>
+          <td><a [routerLink]="[]" (click)="viewActivity(activityeditor, activity)">{{ Helper.getEntityName(activity) }}</a></td>
           <td><a [routerLink]="[]" (click)="viewActivity(activityeditor, activity)">{{ activity.entity_id }}</a></td>
           <td><ng-container *ngFor="let activity_entity of activity['entities']">
             <p-chip [label]="getEntityName(activity_entity.entity_id)" (mouseover)="showEntity(activity_entity.entity_id);oventity.show($event)"

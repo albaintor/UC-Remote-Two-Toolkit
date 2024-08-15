@@ -173,7 +173,7 @@
       <td><p-chip [label]="entity.integration_id" [style]="getStyle(entity.integration_id)"></p-chip></td>
       <td><p-chip [label]="entity.entity_type" [style]="getStyle(entity.entity_type)"></p-chip></td>
       <td><ng-container *ngFor="let activity of getUsedActivities(entity)">
-        <p-chip [label]="activity.name" [style]="getStyle(activity.name)" [pTooltip]="activity.entity_id"></p-chip>
+        <p-chip [label]="Helper.getEntityName(activity)" [style]="getStyle(Helper.getEntityName(activity))" [pTooltip]="activity.entity_id"></p-chip>
       </ng-container></td>
       <td><ng-container *ngFor="let feature of entity['features']">
         <p-chip [label]="feature" [style]="getStyle(feature)"></p-chip> </ng-container></td>

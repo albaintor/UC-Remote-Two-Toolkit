@@ -240,7 +240,6 @@ export class Remote
     let res = await got.head(url, options);
     const count = res.headers['pagination-count']
     let entities = [];
-    console.log('Get entities', url, options);
     for (let i=1; i<=Math.ceil(count/limit); i++)
     {
       options.searchParams.page = i;
@@ -264,7 +263,6 @@ export class Remote
     let res = await got.head(url, options);
     const count = res.headers['pagination-count']
     let entities = [];
-    console.log('Get entities', url, options);
     for (let i=1; i<=Math.ceil(count/limit); i++)
     {
       options.searchParams.page = i;

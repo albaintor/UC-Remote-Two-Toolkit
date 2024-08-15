@@ -22,11 +22,11 @@
   <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
 </ng-container>
 <ng-container *ngIf="!createMode">
-  <h2 *ngIf="!createMode">Edit activity : {{updatedActivity?.name}}</h2>
+  <h2 *ngIf="!createMode">Edit activity : {{Helper.getEntityName(updatedActivity)}}</h2>
   {{updatedActivity?.entity_id}}
 </ng-container>
 <ng-container *ngIf="createMode">
-  <h2 *ngIf="createMode">Create or clone activity : {{updatedActivity?.name}}</h2>
+  <h2 *ngIf="createMode">Create or clone activity : {{Helper.getEntityName(updatedActivity)}}</h2>
 </ng-container>
 <ng-container *ngIf="updatedActivity">
   <div class="flex align-content-center flex-wrap gap-3">
@@ -125,7 +125,7 @@
     <p-checkbox [(ngModel)]="keepDefinedPositions" [binary]="true" label="Preserve defined interface buttons"></p-checkbox>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-button label="Apply mapping" (onClick)="applyTemplate(this.updatedActivity!);viewer.view(updatedActivity!, true)"></p-button><br>
+    <p-button label="Apply mapping" (onClick)="applyTemplate()"></p-button><br>
   </div>
 </div>
 <h3>Replace an entity by another</h3>

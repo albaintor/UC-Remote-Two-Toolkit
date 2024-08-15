@@ -186,7 +186,7 @@ export class ReplaceEntityComponent implements OnInit{
       this.cdr.detectChanges();
       return from(this.activities).pipe(mergeMap(activity => {
         return this.server.getRemoteActivity(this.selectedRemote!, activity.entity_id!).pipe(map(activityDetails => {
-          this.progressDetail = activity.name;
+          this.progressDetail = Helper.getEntityName(activity);
           const name = activity.name;
           Object.assign(activity, activityDetails);
           activity.name = name;

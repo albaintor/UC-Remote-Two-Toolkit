@@ -4,7 +4,7 @@ import {forkJoin, from, map, mergeMap, Observable, of, Subject} from "rxjs";
 import {
   Activity,
   Config,
-  Context,
+  Context, Driver,
   EntitiesUsage,
   Entity, EntityCommand, EntityFeature,
   EntityUsage, Integration, Macro, Page, Profile, ProfileGroup,
@@ -189,6 +189,13 @@ export class ServerService {
   getRemoteIntegrations(remote: Remote): Observable<Integration[]>
   {
     return this.http.get<Integration[]>(`/api/remote/${remote.address}/intg`).pipe(map(results => {
+      return results;
+    }))
+  }
+
+  getRemoteDrivers(remote: Remote): Observable<Driver[]>
+  {
+    return this.http.get<Driver[]>(`/api/remote/${remote.address}/intg/drivers`).pipe(map(results => {
       return results;
     }))
   }

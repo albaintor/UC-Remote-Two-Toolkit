@@ -31,24 +31,28 @@
   (onBeforeUpload)="onUploadingIntegration($event)"
   [auto]="true"
   chooseLabel="Select integration driver to upload..." /><br>
-<p-table [value]="integrations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+<p-table [value]="driverIntegrations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
          dataKey="message" columnResizeMode="expand">
   <ng-template pTemplate="header">
     <tr>
-      <th pSortableColumn="name" pResizableColumn>Integration name<p-sortIcon field="name"></p-sortIcon></th>
-      <th pSortableColumn="integration_id" pResizableColumn>Integration ID<p-sortIcon field="integration_id"></p-sortIcon></th>
+      <th pSortableColumn="name" pResizableColumn>Name<p-sortIcon field="name"></p-sortIcon></th>
+      <th pSortableColumn="driver_id" pResizableColumn>Identifier<p-sortIcon field="driver_id"></p-sortIcon></th>
       <th pSortableColumn="driver_type" pResizableColumn>Driver type<p-sortIcon field="driver_type"></p-sortIcon></th>
-      <th pSortableColumn="state" pResizableColumn>Driver state<p-sortIcon field="state"></p-sortIcon></th>
-      <th pSortableColumn="device_state" pResizableColumn>Device state<p-sortIcon field="device_state"></p-sortIcon></th>
+      <th pSortableColumn="driver_state" pResizableColumn>Driver state<p-sortIcon field="driver_state"></p-sortIcon></th>
+      <th pSortableColumn="version" pResizableColumn>Driver version<p-sortIcon field="version"></p-sortIcon></th>
+      <th pSortableColumn="instance_count" pResizableColumn>Instances configured<p-sortIcon field="instance_count"></p-sortIcon></th>
+      <th>Actions</th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-integration>
     <tr>
       <td>{{Helper.getEntityName(integration)}}</td>
-      <td>{{integration.integration_id}}</td>
+      <td>{{integration.driver_id}}{{integration.integration_id}}</td>
       <td><p-chip [label]="integration.driver_type" [style]="Helper.getStyle(integration.driver_type)"></p-chip></td>
-      <td><p-chip [label]="integration.state" [style]="Helper.getStyle(integration.state)"></p-chip></td>
-      <td><p-chip [label]="integration.device_state" [style]="Helper.getStyle(integration.device_state)"></p-chip></td>
+      <td><p-chip [label]="integration.driver_state" [style]="Helper.getStyle(integration.driver_state)"></p-chip></td>
+      <td>{{integration.version}}</td>
+      <td><p-chip [label]="integration.instance_count" [style]="Helper.getStyle(integration.instance_count)"></p-chip></td>
+      <td><p-button [pTooltip]="'Delete driver '+integration.name" (onClick)="deleteDriver(integration)"  [rounded]="true" severity="danger" icon="pi pi-times" size="small"></p-button></td>
     </tr>
   </ng-template>
 </p-table>

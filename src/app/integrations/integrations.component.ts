@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation} from '@angular/core';
 import {MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
-import {Config, Integration, Remote} from "../interfaces";
+import {Config, Driver, Integration, Remote} from "../interfaces";
 import {forkJoin, from, map, mergeMap, Observable} from "rxjs";
 import {Helper} from "../helper";
 import {DropdownModule} from "primeng/dropdown";
@@ -14,6 +14,8 @@ import {MessagesModule} from "primeng/messages";
 import {TableModule} from "primeng/table";
 import {ChipModule} from "primeng/chip";
 import {FileBeforeUploadEvent, FileUploadEvent, FileUploadModule} from "primeng/fileupload";
+
+type DriverIntegration = Driver | Integration;
 
 @Component({
   selector: 'app-integrations',
@@ -47,6 +49,8 @@ export class IntegrationsComponent implements OnInit {
   selectedRemote: Remote | undefined;
   progress = false;
   integrations: Integration[] = [];
+  drivers: Driver[] = [];
+  driverIntegrations: DriverIntegration[] = [];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {}
 
@@ -90,6 +94,7 @@ export class IntegrationsComponent implements OnInit {
     const tasks: Observable<any>[] = [];
     tasks.push(this.server.getRemoteIntegrations(this.selectedRemote).pipe(map(integrations => {
       this.integrations = integrations;
+      console.log("Integrations", integrations);
       this.integrations.forEach(integration => (integration.name as any) = Helper.getEntityName(integration))
       // this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
       //   detail: `${this.entity_list.length} entities extracted`});
@@ -97,9 +102,19 @@ export class IntegrationsComponent implements OnInit {
       return integrations;
     })));
 
+    tasks.push(this.server.getRemoteDrivers(this.selectedRemote).pipe(map(drivers => {
+      this.drivers = drivers;
+      console.log("Drivers", drivers);
+      this.drivers.forEach(driver => (driver.name as any) = Helper.getEntityName(driver))
+      this.cdr.detectChanges();
+      return drivers;
+    })));
+
     forkJoin(tasks).subscribe({next: (results) => {
+        //this.driverIntegrations = [...this.integrations, ...this.drivers];
+        this.driverIntegrations = [...this.drivers];
         this.messageService.add({
-          severity: "success", summary: "Remote integrations loaded",
+          severity: "success", summary: "Remote drivers and integrations loaded",
         });
         this.cdr.detectChanges();
       },
@@ -130,6 +145,11 @@ export class IntegrationsComponent implements OnInit {
   onUploadingIntegration($event: FileBeforeUploadEvent) {
     console.log("Integration uploading", $event);
     this.progress = true;
+    this.cdr.detectChanges();
+  }
+
+  deleteDriver(integration: Driver | Integration) {
+    this.messageService.add({severity: "info", summary: `Not implemented yet`});
     this.cdr.detectChanges();
   }
 }

@@ -340,6 +340,14 @@ export class Remote
     return JSON.parse(res.body);
   }
 
+  async getDrivers()
+  {
+    const options = this.getOptions();
+    const url = this.getURL() + `/api/intg/drivers`;
+    let res = await got.get(url, options);
+    return JSON.parse(res.body);
+  }
+
   async getIntegrations()
   {
     const options = this.getOptions();

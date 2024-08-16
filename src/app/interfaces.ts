@@ -397,3 +397,16 @@ export interface Integration
   device_state?: string
   driver_state?: string
 }
+
+export interface Driver
+{
+  driver_id: string
+  developer_name?: string
+  name: LanguageName
+  icon?: string
+  driver_type: "LOCAL" | "CUSTOM" | "EXTERNAL"
+  driver_url?: string
+  version: string;
+  driver_state: "NOT_CONFIGURED"| "IDLE"| "CONNECTING"| "CONNECTED"| "DISCONNECTED"| "RECONNECTING"| "ACTIVE"| "ERROR"
+  enabled: boolean
+}

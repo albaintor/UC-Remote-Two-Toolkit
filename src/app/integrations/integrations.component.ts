@@ -42,7 +42,6 @@ type DriverIntegration = Driver | Integration;
 export class IntegrationsComponent implements OnInit {
   menuItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
-    {label: 'Load Remote data', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true},
   ]
   config: Config | undefined;
   remotes: Remote[] | undefined;

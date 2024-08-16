@@ -117,12 +117,12 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   protected readonly Math = Math;
   items: MenuItem[] = [
     {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
+    {label: 'Integrations', routerLink:'/integrations', icon: 'pi pi-microchip'},
     {label: 'Load Remote data', command: () => this.loadRemote(), icon: 'pi pi-cloud-download', block: true},
     {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
     {label: 'Replace entities', routerLink:'/entity/rename', icon: 'pi pi-file-edit'},
     {label: 'Import activity from file', routerLink:'/activity/edit', queryParams: {'source': 'file'}, icon: 'pi pi-file-import'},
     {label: 'Import activity from clipboard', routerLink:'/activity/edit', queryParams: {'source': 'clipboard'}, icon: 'pi pi-clipboard'},
-    {label: 'Integrations', routerLink:'/integrations', icon: 'pi pi-microchip'},
   ]
   entityUsages: EntityUsage | null | undefined;
   localMode = true;

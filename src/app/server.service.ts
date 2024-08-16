@@ -188,7 +188,7 @@ export class ServerService {
 
   getRemoteIntegrations(remote: Remote): Observable<Integration[]>
   {
-    return this.http.get<Integration[]>(`/api/remote/${remote.address}/intg`).pipe(map(results => {
+    return this.http.get<Integration[]>(`/api/remote/${remote.address}/intg/instances`).pipe(map(results => {
       return results;
     }))
   }

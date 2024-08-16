@@ -593,7 +593,7 @@ app.get('/api/remote/:address/intg/drivers', async (req, res, next) => {
   }
 })
 
-app.get('/api/remote/:address/intg', async (req, res, next) => {
+app.get('/api/remote/:address/intg/instances', async (req, res, next) => {
   const address = req.params.address;
   let user = REMOTE_USER
   if (req.body?.user)

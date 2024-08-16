@@ -342,7 +342,14 @@ export class Remote
 
   async getDrivers()
   {
-    const options = this.getOptions();
+    const limit = 100;
+    const options = {
+      ...this.getOptions(),
+      searchParams: {
+        limit,
+        page: 1
+      }
+    }
     const url = this.getURL() + `/api/intg/drivers`;
     let res = await got.get(url, options);
     return JSON.parse(res.body);
@@ -350,8 +357,15 @@ export class Remote
 
   async getIntegrations()
   {
-    const options = this.getOptions();
-    const url = this.getURL() + `/api/intg`;
+    const limit = 100;
+    const options = {
+      ...this.getOptions(),
+      searchParams: {
+        limit,
+        page: 1
+      }
+    }
+    const url = this.getURL() + `/api/intg/instances`;
     let res = await got.get(url, options);
     return JSON.parse(res.body);
   }

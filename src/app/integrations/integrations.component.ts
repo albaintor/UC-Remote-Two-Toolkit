@@ -149,7 +149,36 @@ export class IntegrationsComponent implements OnInit {
   }
 
   deleteDriver(integration: Driver | Integration) {
-    this.messageService.add({severity: "info", summary: `Not implemented yet`});
-    this.cdr.detectChanges();
+    if (!this.selectedRemote) return;
+    if ((integration as Integration).integration_id && (integration as Integration).integration_id.length > 0)
+    {
+      this.server.deleteRemoteIntegration(this.selectedRemote, (integration as Integration).integration_id).subscribe(
+        {next: results => {
+            this.messageService.add({severity: "success", summary: `Integration ${integration.name} successfully deleted`});
+            console.debug("Deleted integration", integration, results);
+            this.loadRemoteData();
+            this.cdr.detectChanges();
+      },
+        error: (error) => {
+          this.messageService.add({severity: "error", summary: `Error during deletion of integration ${integration.name}`});
+          console.error("Error while deleting integration", error);
+          this.cdr.detectChanges();
+        }});
+    }
+    else
+    {
+      this.server.deleteRemoteDriver(this.selectedRemote, (integration as Driver).driver_id).subscribe(
+        {next: results => {
+            this.messageService.add({severity: "success", summary: `Driver ${integration.name} successfully deleted`});
+            console.debug("Deleted driver", integration, results);
+            this.loadRemoteData();
+            this.cdr.detectChanges();
+          },
+          error: (error) => {
+            this.messageService.add({severity: "error", summary: `Error during deletion of driver ${integration.name}`});
+            console.error("Error while deleting driver", error);
+            this.cdr.detectChanges();
+          }});
+    }
   }
 }

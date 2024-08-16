@@ -642,6 +642,50 @@ app.post('/api/remote/:address/intg/install', upload.single('file'),async (req, 
   }
 })
 
+app.delete('/api/remote/:address/intg/drivers/:driverid', async (req, res, next) => {
+  const address = req.params.address;
+  const driverId = req.params.driverid;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.deleteDriver(driverId));
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
+app.delete('/api/remote/:address/intg/instances/:integrationid', async (req, res, next) => {
+  const address = req.params.address;
+  const integrationId = req.params.integrationid;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.deleteIntegration(integrationId));
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
 app.post('/upload',upload.single('file'),(req,res)=>{
   console.log(req.file, req.body.name);
   res.status(200).json(req.file.filename)

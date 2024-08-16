@@ -200,6 +200,20 @@ export class ServerService {
     }))
   }
 
+  deleteRemoteDriver(remote: Remote, driverId: string): Observable<any>
+  {
+    return this.http.delete<any>(`/api/remote/${remote.address}/intg/drivers/${driverId}`).pipe(map(results => {
+      return results;
+    }))
+  }
+
+  deleteRemoteIntegration(remote: Remote, integrationId: string): Observable<any>
+  {
+    return this.http.delete<any>(`/api/remote/${remote.address}/intg/instances/${integrationId}`).pipe(map(results => {
+      return results;
+    }))
+  }
+
   getRemoteProfiles(remote: Remote): Observable<Profile[]>
   {
     const profiles: Profile[] = [];

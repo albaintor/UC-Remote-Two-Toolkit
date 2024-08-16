@@ -356,6 +356,14 @@ export class Remote
     return JSON.parse(res.body);
   }
 
+  async deleteDriver(driverId)
+  {
+    const options = this.getOptions();
+    const url = this.getURL() + `/api/intg/drivers/${driverId}`;
+    let res = await got.delete(url, options);
+    return JSON.parse(res.body);
+  }
+
   async uploadIntegration(fileData)
   {
     const formData = new FormData();
@@ -371,6 +379,14 @@ export class Remote
     const url = this.getURL() + `/api/intg/install`;
     console.log("Upload file to remote", url, formData, options);
     let res = await got.post(url, options);
+    return JSON.parse(res.body);
+  }
+
+  async deleteIntegration(integrationId)
+  {
+    const options = this.getOptions();
+    const url = this.getURL() + `/api/intg/instances/${integrationId}`;
+    let res = await got.delete(url, options);
     return JSON.parse(res.body);
   }
 

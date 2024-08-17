@@ -21,7 +21,7 @@ import {
   repeat, skipWhile,
   Subscription,
   take,
-  takeWhile
+  takeWhile, timer
 } from "rxjs";
 import {Helper} from "../helper";
 import {DropdownModule} from "primeng/dropdown";
@@ -102,7 +102,7 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
     Helper.setRemote(remote);
     this.server.remote$.next(remote);
     this.loadRemoteData();
-    // this.startUpdateTask();
+    this.startUpdateTask();
   }
 
   startUpdateTask()
@@ -222,34 +222,17 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
     if (!this.selectedRemote) return undefined;
     const remote = this.selectedRemote;
 
-    this.server.getRemoteStatus(this.selectedRemote).subscribe(results => {
-      this.remoteStatus = results;
-      this.cdr.detectChanges();
-    })
-    
-    return interval(5000)
-      .pipe(
-        mergeMap(() => {
-          if (!this.selectedRemote) return of({} as RemoteStatus);
-          return this.server.getRemoteStatus(this.selectedRemote)
-        }),
-        takeWhile(results=> {
-          console.debug("Updated remote status", results);
-          if (results) this.remoteStatus = results;
-          this.cdr.detectChanges();
-          return this.selectedRemote != undefined
-        }),
-        finalize(()=>console.log("Finished update status"))
-      )
-
-    /*return this.server.getRemoteStatus(this.selectedRemote).pipe(repeat({ delay: 5000 }),
-      skipWhile(results => {
-        console.debug("Updated remote status", results);
-        this.remoteStatus = results;
-        this.cdr.detectChanges();
-        return remote == this.selectedRemote && this.selectedRemote != undefined;
-      }),
-      take(1));*/
+   return timer(0, 5000).pipe(mergeMap(() => {
+     if (!this.selectedRemote) return of({} as RemoteStatus);
+     return this.server.getRemoteStatus(this.selectedRemote)
+   }),
+     takeWhile(results=> {
+       console.debug("Updated remote status", results);
+       if (results) this.remoteStatus = results;
+       this.cdr.detectChanges();
+       return this.selectedRemote != undefined
+     }),
+     finalize(()=>console.log("Finished update status")))
   }
 
   protected readonly Math = Math;

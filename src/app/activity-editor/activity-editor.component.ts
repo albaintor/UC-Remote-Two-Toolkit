@@ -7,7 +7,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {MenuItem, MessageService, SharedModule} from "primeng/api";
+import {ConfirmationService, MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
 import {ActivatedRoute} from "@angular/router";
 import {DropdownModule} from "primeng/dropdown";
@@ -44,6 +44,7 @@ import {catchError, map, mergeMap, Observable, of} from "rxjs";
 import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 import {ChipModule} from "primeng/chip";
 import {InputTextModule} from "primeng/inputtext";
+import {ConfirmDialogModule} from "primeng/confirmdialog";
 
 export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
 
@@ -71,11 +72,12 @@ export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
     DialogModule,
     RemoteDataLoaderComponent,
     ChipModule,
-    InputTextModule
+    InputTextModule,
+    ConfirmDialogModule
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ActivityEditorComponent implements OnInit, AfterViewInit {
@@ -129,7 +131,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
-              private activatedRoute: ActivatedRoute) {
+              private activatedRoute: ActivatedRoute, private confirmationService: ConfirmationService) {
 
   }
 
@@ -269,15 +271,33 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       this.messageService.add({severity: "info", summary: "The activity has to be created first : execute this one-task first and reload"});
       this.cdr.detectChanges();
       return;
-    } else if (updateIncludedEntities)
-    {
-      this.remoteOperations.push({name: `Update activity ${this.updatedActivity.name}`, method: "PATCH", api: `/api/activities/${this.updatedActivity?.entity_id}`,
-        body: {
-          name: {en: this.updatedActivity.name},
-          options: {
-            entity_ids: newIncludedEntities.map((entity) => entity.entity_id),
-          }
-        }, status: OperationStatus.Todo})
+    } else {
+      if (updateIncludedEntities) {
+        this.remoteOperations.push({
+          name: `Update activity ${this.updatedActivity.name}`,
+          method: "PATCH",
+          api: `/api/activities/${this.updatedActivity?.entity_id}`,
+          body: {
+            name: {en: this.updatedActivity.name},
+            options: {
+              entity_ids: newIncludedEntities.map((entity) => entity.entity_id),
+            }
+          },
+          status: OperationStatus.Todo
+        })
+      }
+      else if (Helper.getEntityName(this.activity) !== this.updatedActivity.name)
+      {
+        this.remoteOperations.push({
+          name: `Update activity ${this.updatedActivity.name}`,
+          method: "PATCH",
+          api: `/api/activities/${this.updatedActivity?.entity_id}`,
+          body: {
+            name: {en: this.updatedActivity.name},
+          },
+          status: OperationStatus.Todo
+        })
+      }
     }
 
     this.updatedActivity?.options?.button_mapping?.forEach(button => {
@@ -426,7 +446,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
           method: "DELETE", api: `/api/activities/${activity.entity_id}/ui/pages/${page.page_id}`,
           body: {}, status: OperationStatus.Todo});
       });
-      remoteOperations.push({name: `Update activity ${this.updatedActivity!.name}`, method: "PUT",
+      remoteOperations.push({name: `Update activity ${this.updatedActivity!.name}`, method: "PATCH",
         api: `/api/activities/${activity.entity_id}`, body, status: OperationStatus.Todo});
     }
     else
@@ -853,7 +873,34 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       if (fileReader.result){
         this.updatedActivity = JSON.parse(fileReader.result.toString());
         console.log("Loaded activity from file", fileReader.result);
-        this.buildCreateData();
+        // this.buildCreateData();
+        this.buildCreateDataPromise().subscribe(results => {
+          if (this.activities.find(activity => activity.entity_id === this.updatedActivity?.entity_id)) {
+            this.confirmationService.confirm({
+              header: `Activity "${this.updatedActivity?.name}" to import already exists`,
+              message: 'Do you want to replace it ?',
+              acceptIcon: 'pi pi-check mr-2',
+              rejectIcon: 'pi pi-times mr-2',
+              rejectButtonStyleClass: 'p-button-sm',
+              acceptButtonStyleClass: 'p-button-outlined p-button-sm',
+              accept: () => {
+                delete this.updatedActivity?.entity_id;
+                this.remoteOperations = this.buildData();
+                this.messageService.add({ severity: 'info', summary: 'Information', detail: 'The activity will be cloned', life: 3000 });
+                this.showOperations = true;
+                this.cdr.detectChanges();
+              },
+              reject: () => {
+                this.remoteOperations = this.buildData();
+                this.messageService.add({ severity: 'info', summary: 'Information', detail: 'Activity imported will be replaced', life: 3000 });
+                this.showOperations = true;
+                this.cdr.detectChanges();
+              }
+            });
+            this.cdr.detectChanges();
+          }
+        })
+
         this.cdr.detectChanges();
       }
     }

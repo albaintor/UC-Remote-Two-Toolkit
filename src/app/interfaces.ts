@@ -70,6 +70,28 @@ export interface RemoteVersion
   }
 }
 
+export interface RemoteStatus
+{
+  memory: {
+    total_memory: number,
+    available_memory: number,
+    used_memory: number,
+    total_swap: number,
+    used_swap: number
+  },
+  load_avg: {
+    one: number,
+    five: number,
+    fifteen: number
+  },
+  filesystem: {
+    user_data: {
+      available: number,
+      used: number
+    }
+  }
+}
+
 export enum OperationStatus
 {
   Todo ,

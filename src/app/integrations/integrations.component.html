@@ -5,15 +5,36 @@
 <h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Remote Two configuration toolkit</h2>
 <p-menubar [model]="menuItems">
   <ng-template pTemplate="end">
-    <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
-      <ng-template pTemplate="selectedItem">
-        <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
-        <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
-      </ng-template>
-      <ng-template let-item pTemplate="item">
-        {{item.remote_name}} ({{item.address}})
-      </ng-template>
-    </p-dropdown>
+    <div class="flex align-items-center gap-2">
+      <ng-container *ngIf="selectedRemote">
+        <span class="pi pi-chart-line"></span>
+        <p-progressBar *ngIf="remoteStatus?.memory" [value]="remoteStatus!.memory!.available_memory!/remoteStatus!.memory!.total_memory!*100" [style]="{width: '100px'}"
+            [pTooltip]="'Memory : '+remoteStatus!.memory!.available_memory!.toLocaleString()+' bytes available on '
+                +remoteStatus!.memory!.total_memory!.toLocaleString()">
+          <ng-template pTemplate="content" let-value>
+            <span>{{remoteStatus!.memory!.available_memory!/1000000 | number:'1.0-0'}} Mb</span>
+          </ng-template>
+        </p-progressBar>
+        <span class="pi pi-database"></span>
+        <p-progressBar *ngIf="remoteStatus?.filesystem?.user_data" [value]="remoteStatus!.filesystem!.user_data!.available!/
+        (remoteStatus!.filesystem!.user_data!.available!+remoteStatus!.filesystem!.user_data!.used!)*100" [style]="{width: '100px'}"
+                       [pTooltip]="'Storage : '+remoteStatus!.filesystem!.user_data!.available!.toLocaleString()+' bytes available on '+
+                        (remoteStatus!.filesystem!.user_data!.available!+remoteStatus!.filesystem!.user_data!.used!).toLocaleString()">
+          <ng-template pTemplate="content" let-value>
+            <span>{{remoteStatus!.filesystem!.user_data!.available/1000000 | number:'1.0-0'}} Mb</span>
+          </ng-template>
+        </p-progressBar>
+      </ng-container>
+      <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
+        <ng-template pTemplate="selectedItem">
+          <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
+          <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
+        </ng-template>
+        <ng-template let-item pTemplate="item">
+          {{item.remote_name}} ({{item.address}})
+        </ng-template>
+      </p-dropdown>
+    </div>
   </ng-template>
 </p-menubar>
 <p-messages severity="info">

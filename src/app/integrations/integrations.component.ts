@@ -1,12 +1,12 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation} from '@angular/core';
 import {MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
-import {Config, Driver, Integration, Remote} from "../interfaces";
-import {forkJoin, from, map, mergeMap, Observable} from "rxjs";
+import {Config, Driver, Integration, Remote, RemoteStatus} from "../interfaces";
+import {filter, forkJoin, from, map, mergeMap, Observable, repeat, Subscription, take} from "rxjs";
 import {Helper} from "../helper";
 import {DropdownModule} from "primeng/dropdown";
 import {MenubarModule} from "primeng/menubar";
-import {NgIf} from "@angular/common";
+import {DecimalPipe, NgIf} from "@angular/common";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
@@ -31,7 +31,8 @@ type DriverIntegration = Driver | Integration;
     MessagesModule,
     TableModule,
     ChipModule,
-    FileUploadModule
+    FileUploadModule,
+    DecimalPipe
   ],
   templateUrl: './integrations.component.html',
   styleUrl: './integrations.component.css',
@@ -50,6 +51,8 @@ export class IntegrationsComponent implements OnInit {
   integrations: Integration[] = [];
   drivers: Driver[] = [];
   driverIntegrations: DriverIntegration[] = [];
+  remoteStatus: RemoteStatus | undefined;
+  updateTask: Subscription | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {}
 
@@ -57,8 +60,10 @@ export class IntegrationsComponent implements OnInit {
   ngOnInit(): void {
     this.server.getConfig().subscribe(config => {
       this.updateRemote(config);
+      this.startUpdateTask();
       this.server.config$.subscribe(config => {
         this.updateRemote(config);
+        this.startUpdateTask();
       })
     })
   }
@@ -77,6 +82,17 @@ export class IntegrationsComponent implements OnInit {
     Helper.setRemote(remote);
     this.server.remote$.next(remote);
     this.loadRemoteData();
+    this.startUpdateTask();
+  }
+
+  startUpdateTask()
+  {
+    if (this.updateTask)
+    {
+      this.updateTask.unsubscribe();
+      this.updateTask = undefined;
+    }
+    this.updateTask = this.getRemoteStatus()?.subscribe();
   }
 
 
@@ -179,5 +195,18 @@ export class IntegrationsComponent implements OnInit {
             this.cdr.detectChanges();
           }});
     }
+  }
+
+  getRemoteStatus(): Observable<RemoteStatus> | undefined
+  {
+    if (!this.selectedRemote) return undefined;
+    return this.server.getRemoteStatus(this.selectedRemote).pipe(repeat({ delay: 5000 }),
+      filter(results => {
+        console.debug("Updated remote status", results);
+        this.remoteStatus = results;
+        this.cdr.detectChanges();
+        return this.selectedRemote == null;
+      }),
+      take(1))
   }
 }

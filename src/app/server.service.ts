@@ -9,7 +9,7 @@ import {
   Entity, EntityCommand, EntityFeature,
   EntityUsage, Integration, Macro, Page, Profile, ProfileGroup,
   Profiles,
-  Remote, RemoteMap, RemoteRegistration, RemoteVersion
+  Remote, RemoteMap, RemoteRegistration, RemoteStatus, RemoteVersion
 } from "./interfaces";
 import {compileResults} from "@angular/compiler-cli/src/ngtsc/annotations/common";
 
@@ -281,6 +281,13 @@ export class ServerService {
   getRemoteVersion(remote: Remote): Observable<RemoteVersion>
   {
     return this.http.get<RemoteVersion>(`/api/remote/${remote.address}/version`).pipe(map(results => {
+      return results;
+    }))
+  }
+
+  getRemoteStatus(remote: Remote): Observable<RemoteStatus>
+  {
+    return this.http.get<RemoteStatus>(`/api/remote/${remote.address}/pub/status`).pipe(map(results => {
       return results;
     }))
   }

@@ -170,7 +170,7 @@ app.patch('/server/api', (req, res, next) => {
     json: req.body
   }
 
-  console.log('Proxy post', url, req.query, req.body, req.headers);
+  console.log('Proxy patch', url, req.query, req.body, req.headers);
   got.patch(url, options).then(proxyres => {
     let resBody;
     try {
@@ -680,6 +680,28 @@ app.delete('/api/remote/:address/intg/instances/:integrationid', async (req, res
   const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
   try {
     res.status(200).json(await remote.deleteIntegration(integrationId));
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
+
+app.get('/api/remote/:address/pub/status', async (req, res, next) => {
+  const address = req.params.address;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getStatus());
   } catch (error)
   {
     errorHandler(error, req, res, next);

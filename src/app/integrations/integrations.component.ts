@@ -1,8 +1,28 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewEncapsulation
+} from '@angular/core';
 import {MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
 import {Config, Driver, Integration, Remote, RemoteStatus} from "../interfaces";
-import {filter, forkJoin, from, map, mergeMap, Observable, repeat, Subscription, take} from "rxjs";
+import {
+  config,
+  filter, finalize,
+  forkJoin,
+  from,
+  interval,
+  map,
+  mergeMap,
+  Observable, of,
+  repeat, skipWhile,
+  Subscription,
+  take,
+  takeWhile
+} from "rxjs";
 import {Helper} from "../helper";
 import {DropdownModule} from "primeng/dropdown";
 import {MenubarModule} from "primeng/menubar";
@@ -40,7 +60,7 @@ type DriverIntegration = Driver | Integration;
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class IntegrationsComponent implements OnInit {
+export class IntegrationsComponent implements OnInit, OnDestroy {
   menuItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
   ]
@@ -63,7 +83,7 @@ export class IntegrationsComponent implements OnInit {
       this.startUpdateTask();
       this.server.config$.subscribe(config => {
         this.updateRemote(config);
-        this.startUpdateTask();
+        // this.startUpdateTask();
       })
     })
   }
@@ -82,7 +102,7 @@ export class IntegrationsComponent implements OnInit {
     Helper.setRemote(remote);
     this.server.remote$.next(remote);
     this.loadRemoteData();
-    this.startUpdateTask();
+    // this.startUpdateTask();
   }
 
   startUpdateTask()
@@ -200,15 +220,46 @@ export class IntegrationsComponent implements OnInit {
   getRemoteStatus(): Observable<RemoteStatus> | undefined
   {
     if (!this.selectedRemote) return undefined;
-    return this.server.getRemoteStatus(this.selectedRemote).pipe(repeat({ delay: 5000 }),
-      filter(results => {
+    const remote = this.selectedRemote;
+
+    this.server.getRemoteStatus(this.selectedRemote).subscribe(results => {
+      this.remoteStatus = results;
+      this.cdr.detectChanges();
+    })
+    
+    return interval(5000)
+      .pipe(
+        mergeMap(() => {
+          if (!this.selectedRemote) return of({} as RemoteStatus);
+          return this.server.getRemoteStatus(this.selectedRemote)
+        }),
+        takeWhile(results=> {
+          console.debug("Updated remote status", results);
+          if (results) this.remoteStatus = results;
+          this.cdr.detectChanges();
+          return this.selectedRemote != undefined
+        }),
+        finalize(()=>console.log("Finished update status"))
+      )
+
+    /*return this.server.getRemoteStatus(this.selectedRemote).pipe(repeat({ delay: 5000 }),
+      skipWhile(results => {
         console.debug("Updated remote status", results);
         this.remoteStatus = results;
         this.cdr.detectChanges();
-        return this.selectedRemote == null;
+        return remote == this.selectedRemote && this.selectedRemote != undefined;
       }),
-      take(1))
+      take(1));*/
   }
 
   protected readonly Math = Math;
+
+  ngOnDestroy(): void {
+    this.selectedRemote = undefined;
+    if (this.updateTask)
+    {
+      this.updateTask.unsubscribe();
+      this.updateTask = undefined;
+    }
+  }
 }

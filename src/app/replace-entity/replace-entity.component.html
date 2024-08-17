@@ -20,6 +20,7 @@
   {{progressDetail}}<br>
   <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
 </ng-container>
+<app-remote-data-loader #loader [remote]="selectedRemote" (loaded)="remoteLoaded($event)"></app-remote-data-loader>
 <app-entity-viewer #entityviewer></app-entity-viewer>
 <p-messages severity="info">
   <ng-template pTemplate>

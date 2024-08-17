@@ -144,7 +144,7 @@ export class Helper
     return suggestions;
   }
 
-  static getActivityEntities(activity: Activity, entities: Entity[]): Entity[]
+  /*static getActivityEntities(activity: Activity, entities: Entity[]): Entity[]
   {
     const entityIds = new Set<string>();
     activity.options?.included_entities?.forEach(entity => entityIds.add(entity.entity_id!));
@@ -170,7 +170,7 @@ export class Helper
       else console.error(`Entity ${entityId} not found in the catalog`);
     })
     return activityEntities;
-  }
+  }*/
 
   static findExistingMatchPage(activity: Activity, width: number, height: number): UIPage | null
   {

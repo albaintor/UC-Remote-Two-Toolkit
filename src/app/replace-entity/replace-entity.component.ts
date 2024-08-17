@@ -41,6 +41,7 @@ import {MultiSelectModule} from "primeng/multiselect";
 import {Helper} from "../helper";
 import {AutoCompleteModule} from "primeng/autocomplete";
 import {CheckboxModule} from "primeng/checkbox";
+import {RemoteData, RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 
 class Message {
   title: string = "";
@@ -70,6 +71,7 @@ class Message {
     MultiSelectModule,
     AutoCompleteModule,
     CheckboxModule,
+    RemoteDataLoaderComponent,
   ],
   templateUrl: './replace-entity.component.html',
   styleUrl: './replace-entity.component.css',
@@ -103,6 +105,8 @@ export class ReplaceEntityComponent implements OnInit{
   replaceActivities = true;
 
   @ViewChild(RemoteOperationsComponent) operations: RemoteOperationsComponent | undefined;
+  @ViewChild(RemoteDataLoaderComponent) remoteLoader: RemoteDataLoaderComponent | undefined;
+
   context: Context | undefined;
   availableEntities: Entity[] = [];
   macros: Macro[] = [];
@@ -254,6 +258,25 @@ export class ReplaceEntityComponent implements OnInit{
   {
     Helper.setRemote(remote);
     this.server.remote$.next(remote);
+    this.cdr.detectChanges();
+    if (!this.context || this.context.remote_ip !== `${remote.address}:${remote.port}`)
+      this.remoteLoader?.load();
+  }
+
+  remoteLoaded($event: RemoteData | undefined) {
+    if ($event)
+    {
+      this.activities = $event.activities;
+      this.orphanEntities = $event.orphanEntities;
+      this.entities = $event.entities;
+      this.profiles = $event.profiles;
+      this.context = $event.context;
+      this.activities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
+      this.entities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
+      this.profiles.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
+      this.orphanEntities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
+      this.cdr.detectChanges();
+    }
   }
 
   getStyle(value: string): any

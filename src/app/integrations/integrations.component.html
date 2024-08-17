@@ -73,7 +73,7 @@
       <td><p-chip [label]="integration.driver_state" [style]="Helper.getStyle(integration.driver_state)"></p-chip></td>
       <td>{{integration.version}}</td>
       <td><p-chip [label]="integration.instance_count" [style]="Helper.getStyle(integration.instance_count)"></p-chip></td>
-      <td><p-button [pTooltip]="'Delete driver '+integration.name" (onClick)="deleteDriver(integration)"  [rounded]="true" severity="danger" icon="pi pi-times" size="small"></p-button></td>
+      <td><p-button *ngIf="integration.driver_type !== 'LOCAL'" [pTooltip]="'Delete driver '+integration.name" (onClick)="deleteDriver(integration)"  [rounded]="true" severity="danger" icon="pi pi-times" size="small"></p-button></td>
     </tr>
   </ng-template>
 </p-table>

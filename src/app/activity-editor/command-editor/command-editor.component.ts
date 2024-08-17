@@ -102,6 +102,7 @@ export class CommandEditorComponent {
   }
 
   show(remote: Remote, activity: Activity, command: ActivityPageCommand): void {
+    console.debug("Editing command", activity, command);
     this.remote = remote;
     this.activity = activity;
     this.activityEntities = this.activity?.options?.included_entities?.sort((a, b) =>

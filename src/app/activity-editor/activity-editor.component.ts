@@ -41,12 +41,18 @@ import {MessagesModule} from "primeng/messages";
 import {DialogModule} from "primeng/dialog";
 import {saveAs} from "file-saver-es";
 import {catchError, map, mergeMap, Observable, of} from "rxjs";
-import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
+import {RemoteData, RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 import {ChipModule} from "primeng/chip";
 import {InputTextModule} from "primeng/inputtext";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 
 export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
+
+enum OperationMode {
+  Undefined,
+  ReplaceMode,
+  CreateMode
+}
 
 @Component({
   selector: 'app-activity-editor',
@@ -92,9 +98,9 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   availableItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
     {label: 'View original activity', command: () => this.viewerVisible = true, icon: 'pi pi-folder-open'},
-    {label: 'Reset mapping to original', command: () => this.updateActivity(), icon: 'pi pi-times'},
+    {label: 'Reset mapping to original', command: () => this.resetActivity(), icon: 'pi pi-times'},
     {label: 'Clear mapping', command: () => this.clearMapping(), icon: 'pi pi-times'},
-    {label: 'Save activity to remote', command: () => this.buildUpdateData(), icon: 'pi pi-cloud-upload'},
+    {label: 'Save activity to remote', command: () => this.buildDataAndShowOperations(), icon: 'pi pi-cloud-upload'},
   ]
   items: MenuItem[] = [];
   activities: Activity[] = [];
@@ -113,8 +119,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   newEntity: Entity | undefined;
   protected readonly Helper = Helper;
   viewerVisible = false;
-  replaceMode = false;
-  createMode = false;
+  mode: OperationMode = OperationMode.Undefined;
   showOperations = false;
   orphanEntities : {oldEntity:Entity, newEntity:Entity | undefined}[] = [];
 
@@ -150,7 +155,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     })
     this.server.getTemplateRemoteMap().subscribe(templates => {
       this.templates = templates;
-      this.updateActivity();
+      this.remoteOperations = this.buildData();
       this.cdr.detectChanges();
     })
     const entities = localStorage.getItem("entities");
@@ -161,9 +166,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       if (entities) this.entities = JSON.parse(entities);
       this.server.setEntities(this.entities);
       this.server.setActivities(this.activities);
-      // this.context = {source:"Cache", type: "Remote", date: new Date()};
-      // this.messageService.add({severity: "info", summary: `Remote data loaded from cache`});
-      this.updateActivity();
+      this.remoteOperations = this.buildData();
       this.cdr.detectChanges();
     }
   }
@@ -200,17 +203,17 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       if (!this.activity_id) {
         return;
       }
-      this.createMode = !!this.activatedRoute.snapshot.url.find(url => url.path === 'clone');
-      if (this.createMode) {
+      if (this.activatedRoute.snapshot.url.find(url => url.path === 'clone')) {
+        this.mode = OperationMode.CreateMode;
         this.server.getConfig().subscribe(config => {
           this.updateRemote(config);
           this.targetRemote = this.selectedRemote;
-          this.buildCreateData();
+          this.reloadAndBuildData();
         });
-      }
-      else
-        this.updateActivity();
+      } else
+        this.remoteOperations = this.buildData();
       this.cdr.detectChanges();
+
     })
   }
 
@@ -223,83 +226,9 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     //this.items = [...this.availableItems.filter(item => item.label !== 'Save activity to remote')];
   }
 
-  buildUpdateData()
+  //TODO delta mode
+  /*buildUpdateData()
   {
-    if (this.replaceMode)
-    {
-      this.remoteOperations = this.buildData();
-      this.showOperations = true;
-      this.cdr.detectChanges();
-      return;
-    }
-    if (!this.updatedActivity) return;
-    this.remoteOperations = [];
-    this.orphanEntities = [];
-    const newIncludedEntities = Helper.getActivityEntities(this.updatedActivity!, this.entities);
-    let updateIncludedEntities = false;
-    let createActivity = false;
-    if (!this.updatedActivity.entity_id ||
-      !this.entities.find(entity => entity.entity_id === this.updatedActivity!.entity_id)) {
-      this.updatedActivity!.entity_id = undefined;
-      createActivity = true;
-    }
-
-    if (this.activity)
-    {
-      const currentIncludedEntities = Helper.getActivityEntities(this.activity!, this.entities);
-      newIncludedEntities.forEach(entity => {
-        if (!currentIncludedEntities.find(currentEntity => currentEntity.entity_id === entity.entity_id))
-          updateIncludedEntities = true;
-      });
-    }
-    else
-      updateIncludedEntities = true;
-
-    if (createActivity)
-    {
-      this.remoteOperations.push({name: `Create activity ${this.updatedActivity.name}`, method: "POST", api: `/api/activities`,
-        body: {
-          name: {
-            en: this.updatedActivity.name
-          },
-          icon: this.updatedActivity.icon,
-          description: this.updatedActivity.description,
-          options: {
-            entity_ids: newIncludedEntities.map((entity) => entity.entity_id),
-          }
-        }, status: OperationStatus.Todo});
-      this.messageService.add({severity: "info", summary: "The activity has to be created first : execute this one-task first and reload"});
-      this.cdr.detectChanges();
-      return;
-    } else {
-      if (updateIncludedEntities) {
-        this.remoteOperations.push({
-          name: `Update activity ${this.updatedActivity.name}`,
-          method: "PATCH",
-          api: `/api/activities/${this.updatedActivity?.entity_id}`,
-          body: {
-            name: {en: this.updatedActivity.name},
-            options: {
-              entity_ids: newIncludedEntities.map((entity) => entity.entity_id),
-            }
-          },
-          status: OperationStatus.Todo
-        })
-      }
-      else if (Helper.getEntityName(this.activity) !== this.updatedActivity.name)
-      {
-        this.remoteOperations.push({
-          name: `Update activity ${this.updatedActivity.name}`,
-          method: "PATCH",
-          api: `/api/activities/${this.updatedActivity?.entity_id}`,
-          body: {
-            name: {en: this.updatedActivity.name},
-          },
-          status: OperationStatus.Todo
-        })
-      }
-    }
-
     this.updatedActivity?.options?.button_mapping?.forEach(button => {
       const originalButton = this.activity?.options?.button_mapping?.
         find(localButton=> localButton.button === button.button);
@@ -337,11 +266,11 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
     this.dump = this.remoteOperations;
     this.cdr.detectChanges();
-  }
+  }*/
 
-  buildCreateData()
+  reloadAndBuildData()
   {
-    this.buildCreateDataPromise().subscribe({next: results => {
+    this.reloadRemoteAndbuildData().subscribe({next: results => {
         this.messageService.add({severity: "success", summary: "Activity imported successfully"});
         console.log("Pending operations", this.remoteOperations);
         this.dump = this.remoteOperations;
@@ -355,19 +284,50 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       }})
   }
 
-  buildCreateDataPromise(): Observable<RemoteOperation[] | undefined>
+  reloadRemoteAndbuildData(): Observable<RemoteOperation[] | undefined>
   {
-    this.replaceMode = true;
-    const remoteOperations: RemoteOperation[] = [];
     this.messageService.add({severity: "info", summary: "Loading target remote data..."});
     this.cdr.detectChanges();
     return this.remoteLoader!.loadRemoteData().pipe(map(data => {
-      if (!data || !this.updatedActivity || !this.targetRemote) return remoteOperations;
+      if (!data || !this.updatedActivity || !this.targetRemote) return [];
       this.activities = data.activities;
       this.entities = data.entities;
       this.cdr.detectChanges();
-      return this.buildData();
+      const remoteOperations = this.buildData();
+      this.checkExistingActivity();
+      return remoteOperations;
     }))
+  }
+
+  checkExistingActivity()
+  {
+    if (this.mode != OperationMode.Undefined) return;
+    if (this.activities.find(activity => activity.entity_id === this.updatedActivity?.entity_id)) {
+      this.confirmationService.confirm({
+        header: `Activity "${this.updatedActivity?.name}" to import already exists`,
+        message: 'Do you want to replace it ?',
+        acceptIcon: 'pi pi-check mr-2',
+        rejectIcon: 'pi pi-times mr-2',
+        rejectButtonStyleClass: 'p-button-sm',
+        acceptButtonStyleClass: 'p-button-outlined p-button-sm',
+        reject: () => {
+          delete this.updatedActivity?.entity_id;
+          this.mode = OperationMode.CreateMode;
+          this.remoteOperations = this.buildData();
+          this.messageService.add({ severity: 'info', summary: 'Information', detail: 'The activity will be cloned', life: 3000 });
+          this.showOperations = true;
+          this.cdr.detectChanges();
+        },
+        accept: () => {
+          this.mode = OperationMode.ReplaceMode;
+          // this.remoteOperations = this.buildData();
+          this.messageService.add({ severity: 'info', summary: 'Information', detail: 'Activity imported will be replaced', life: 3000 });
+          this.showOperations = true;
+          this.cdr.detectChanges();
+        }
+      });
+      this.cdr.detectChanges();
+    }
   }
 
   checkIncludedEntity(entityId: string, activity: Activity)
@@ -380,10 +340,41 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     activity.options.included_entities.push(entity!);
   }
 
+  buildDataAndShowOperations()
+  {
+    this.remoteOperations = this.buildData();
+    this.showOperations = true;
+    this.cdr.detectChanges();
+  }
+
   buildData(): RemoteOperation[]
   {
     const remoteOperations: RemoteOperation[] = [];
+    if (!this.activities) return remoteOperations;
     this.orphanEntities = [];
+    if (this.activity_id) this.activity = this.activities.find(activity => activity.entity_id === this.activity_id);
+    if (!this.updatedActivity && this.activity)
+    {
+      this.updatedActivity = {
+        entity_id: this.activity.entity_id,
+        name: Helper.getEntityName(this.activity),
+        description: this.activity.description,
+        icon: this.activity.icon,
+        options: {//activity_group: this.activity.options?.activity_group, sequences: this.activity.options?.sequences,
+          included_entities: [],
+          button_mapping: [],
+          user_interface: {pages: []}}};
+      if (this.activity.options?.included_entities)
+        this.updatedActivity!.options!.included_entities = [...this.activity.options?.included_entities!];
+      if (this.activity!.options?.sequences)
+        this.updatedActivity!.options!.sequences = JSON.parse(JSON.stringify(this.activity.options.sequences));
+      if (this.activity.options?.button_mapping)
+        this.updatedActivity!.options!.button_mapping! = JSON.parse(JSON.stringify(this.activity.options.button_mapping));
+      if (this.activity.options?.user_interface?.pages)
+        this.updatedActivity!.options!.user_interface!.pages = JSON.parse(JSON.stringify(this.activity.options.user_interface.pages));
+      this.activityEditor?.updateButtonsGrid();
+    }
+
     if (!this.updatedActivity || !this.targetRemote) return remoteOperations;
     const body: any = {
       name: {
@@ -431,7 +422,10 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     }
 
     // Create or update
+    if (this.mode == OperationMode.CreateMode)
+      delete this.updatedActivity?.entity_id;
     const activity = this.activities.find(activity => activity.entity_id === this.updatedActivity?.entity_id);
+
     let resultField: RemoteOperationResultField | undefined = undefined;
     if (activity)
     {
@@ -518,41 +512,11 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  updateActivity()
-  {
-    if (!this.activity_id || !this.activities) return;
-    this.activity = this.activities.find(activity => activity.entity_id === this.activity_id);
-    if (this.activity)
-    {
-      this.updatedActivity = {
-        entity_id: this.activity.entity_id,
-        name: Helper.getEntityName(this.activity),
-        description: this.activity.description,
-        icon: this.activity.icon,
-        options: {//activity_group: this.activity.options?.activity_group, sequences: this.activity.options?.sequences,
-          included_entities: [],
-          button_mapping: [],
-          user_interface: {pages: []}}};
-      if (this.activity.options?.included_entities)
-        this.updatedActivity!.options!.included_entities = [...this.activity.options?.included_entities!];
-      if (this.activity!.options?.sequences)
-        this.updatedActivity!.options!.sequences = JSON.parse(JSON.stringify(this.activity.options.sequences));
-      if (this.activity.options?.button_mapping)
-        this.updatedActivity!.options!.button_mapping! = JSON.parse(JSON.stringify(this.activity.options.button_mapping));
-      if (this.activity.options?.user_interface?.pages)
-        this.updatedActivity!.options!.user_interface!.pages = JSON.parse(JSON.stringify(this.activity.options.user_interface.pages));
-
-      if (this.createMode) delete this.updatedActivity!.entity_id;
-    }
-    this.initMenu();
-    this.activityEditor?.updateButtonsGrid();
-    this.cdr.detectChanges();
-  }
-
   applyTemplate()
   {
     this.applyTemplateOnActivity(this.updatedActivity!);
-    this.buildUpdateData();
+    this.remoteOperations = this.buildData();
+    this.cdr.detectChanges();
     // this.viewer.view(updatedActivity!, true)
   }
 
@@ -751,6 +715,27 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     this.server.remote$.next(remote);
   }
 
+  remoteLoaded($event: RemoteData | undefined) {
+    if ($event)
+    {
+      this.reset();
+      this.activities = $event.activities;
+      this.entities = $event.entities;
+      this.activities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
+      this.entities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
+      this.remoteOperations = this.buildData();
+      this.cdr.detectChanges();
+    }
+  }
+
+  setTargetRemote(remote: Remote): void
+  {
+    this.cdr.detectChanges();
+    console.log("Changed target remote", this.targetRemote, this.updatedActivity);
+    this.remoteLoader?.load();
+    this.cdr.detectChanges();
+  }
+
   getEntities(entity_type: string) {
     return this.entities.filter(entity => entity.entity_type === entity_type)
       .sort((a,b) => Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!));
@@ -847,10 +832,19 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     this.input_file?.nativeElement.click();
   }
 
+  reset()
+  {
+    this.mode = OperationMode.Undefined;
+    this.remoteOperations = [];
+    this.cdr.detectChanges();
+  }
+
   importActivityFromClipboard()
   {
     navigator.clipboard.readText().then(data => {
+      this.reset();
       this.updatedActivity = JSON.parse(data);
+      this.activityEditor?.updateButtonsGrid();
       console.log("Loaded activity from clipboard", this.updatedActivity);
       if (!this.updatedActivity || !this.updatedActivity.entity_id || !this.updatedActivity.options) {
         this.messageService.add({
@@ -860,7 +854,12 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
         return;
       }
-      this.buildCreateData();
+      this.reloadRemoteAndbuildData().subscribe(results => {
+        if (results) {
+          this.remoteOperations = results;
+          this.cdr.detectChanges();
+        }
+      })
       this.cdr.detectChanges();
     });
   }
@@ -871,45 +870,20 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     let fileReader = new FileReader();
     fileReader.onload = (e) => {
       if (fileReader.result){
+        this.reset();
         this.updatedActivity = JSON.parse(fileReader.result.toString());
+        this.activityEditor?.updateButtonsGrid();
         console.log("Loaded activity from file", fileReader.result);
-        // this.buildCreateData();
-        this.buildCreateDataPromise().subscribe(results => {
-          if (this.activities.find(activity => activity.entity_id === this.updatedActivity?.entity_id)) {
-            this.confirmationService.confirm({
-              header: `Activity "${this.updatedActivity?.name}" to import already exists`,
-              message: 'Do you want to replace it ?',
-              acceptIcon: 'pi pi-check mr-2',
-              rejectIcon: 'pi pi-times mr-2',
-              rejectButtonStyleClass: 'p-button-sm',
-              acceptButtonStyleClass: 'p-button-outlined p-button-sm',
-              accept: () => {
-                delete this.updatedActivity?.entity_id;
-                this.remoteOperations = this.buildData();
-                this.messageService.add({ severity: 'info', summary: 'Information', detail: 'The activity will be cloned', life: 3000 });
-                this.showOperations = true;
-                this.cdr.detectChanges();
-              },
-              reject: () => {
-                this.remoteOperations = this.buildData();
-                this.messageService.add({ severity: 'info', summary: 'Information', detail: 'Activity imported will be replaced', life: 3000 });
-                this.showOperations = true;
-                this.cdr.detectChanges();
-              }
-            });
+        this.reloadRemoteAndbuildData().subscribe(results => {
+          if (results) {
+            this.remoteOperations = results;
             this.cdr.detectChanges();
           }
         })
-
         this.cdr.detectChanges();
       }
     }
     fileReader.readAsText(file);
-  }
-
-  updateOperations() {
-    if (this.replaceMode)
-      this.buildCreateData();
   }
 
   submitOrphans() {
@@ -921,16 +895,11 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     this.orphanEntities.forEach(item => {
       this.replaceEntity(item.oldEntity.entity_id!, item.newEntity!.entity_id!, true);
     })
-    this.buildCreateData();
+    this.reloadAndBuildData();
   }
 
   activityChanged() {
-    this.buildData();
-    /*const activityEntities = this.entities.filter(entity =>
-      this.updatedActivity?.options?.included_entities?.find(activityEntity => activityEntity.entity_id === entity.entity_id));
-    this.suggestions = activityEntities.sort((a, b) => {
-      return (a.name ? Helper.getEntityName(a)! : "").localeCompare(b.name ? Helper.getEntityName(b)! : "");
-    });*/
+    this.remoteOperations = this.buildData();
     this.cdr.detectChanges();
   }
 
@@ -944,5 +913,14 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       this.entities = data.entities;
       this.cdr.detectChanges();
     });
+  }
+
+  private resetActivity() {
+    if (!this.activity) return;
+    this.reset();
+    this.updatedActivity = {...this.activity};
+    this.activityEditor?.updateButtonsGrid();
+    this.remoteOperations = this.buildData();
+    this.cdr.detectChanges();
   }
 }

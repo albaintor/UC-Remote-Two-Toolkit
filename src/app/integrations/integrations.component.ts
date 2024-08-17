@@ -209,4 +209,6 @@ export class IntegrationsComponent implements OnInit {
       }),
       take(1))
   }
+
+  protected readonly Math = Math;
 }

@@ -25,6 +25,14 @@ a:visited {
   color: #bed8ff;
 }
 
+a.p-menuitem-link:hover {
+  text-decoration: none;
+}
+
+a.p-menuitem-link:active {
+  text-decoration: none;
+}
+
 /* mouse over link */
 a:hover {
   /*font-weight: bold;*/

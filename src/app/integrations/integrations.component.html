@@ -9,8 +9,8 @@
       <ng-container *ngIf="selectedRemote">
         <span class="pi pi-chart-line"></span>
         <p-progressBar *ngIf="remoteStatus?.memory" [value]="remoteStatus!.memory!.available_memory!/remoteStatus!.memory!.total_memory!*100" [style]="{width: '100px'}"
-            [pTooltip]="'Memory : '+remoteStatus!.memory!.available_memory!.toLocaleString()+' bytes available on '
-                +remoteStatus!.memory!.total_memory!.toLocaleString()">
+            [pTooltip]="'Memory : '+Math.floor(remoteStatus!.memory!.available_memory!/1000000).toLocaleString()+' megabytes available on '
+                +Math.floor(remoteStatus!.memory!.total_memory!/1000000).toLocaleString()">
           <ng-template pTemplate="content" let-value>
             <span>{{remoteStatus!.memory!.available_memory!/1000000 | number:'1.0-0'}} Mb</span>
           </ng-template>
@@ -18,8 +18,8 @@
         <span class="pi pi-database"></span>
         <p-progressBar *ngIf="remoteStatus?.filesystem?.user_data" [value]="remoteStatus!.filesystem!.user_data!.available!/
         (remoteStatus!.filesystem!.user_data!.available!+remoteStatus!.filesystem!.user_data!.used!)*100" [style]="{width: '100px'}"
-                       [pTooltip]="'Storage : '+remoteStatus!.filesystem!.user_data!.available!.toLocaleString()+' bytes available on '+
-                        (remoteStatus!.filesystem!.user_data!.available!+remoteStatus!.filesystem!.user_data!.used!).toLocaleString()">
+                       [pTooltip]="'Storage : '+Math.floor(remoteStatus!.filesystem!.user_data!.available!/1000000).toLocaleString()+' megabytes available on '+
+                        Math.floor((remoteStatus!.filesystem!.user_data!.available!+remoteStatus!.filesystem!.user_data!.used!)/1000000).toLocaleString()">
           <ng-template pTemplate="content" let-value>
             <span>{{remoteStatus!.filesystem!.user_data!.available/1000000 | number:'1.0-0'}} Mb</span>
           </ng-template>

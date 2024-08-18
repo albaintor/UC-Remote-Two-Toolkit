@@ -21,7 +21,8 @@
 </p-overlayPanel>
 <p-toast key="activity"></p-toast>
 <app-command-editor #commandeditor (updateItemHeight)="updateGridItemHeight($event)" (updateItemWidth)="updateGridItemWidth($event)"
-  (addItem)="addGridItem($event)" (deleteItem)="deleteGridItem($event)"></app-command-editor>
+  (addItem)="addGridItem($event)" (deleteItem)="deleteGridItem($event)"
+  [remote]="remote" [activity]="activity" [gridItem]="gridItem"></app-command-editor>
 <!--<p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">-->
 <div class="flex align-content-center flex-wrap gap-3" *ngIf="!editMode">
   <div class="flex align-items-center justify-content-center">
@@ -101,6 +102,7 @@
     <img src="assets/remote/remote.svg" id="remote" onload="SVGInject(this)">
 <!--    <object data="assets/remote/remote.svg" type="image/svg+xml" #remote id="remote"></object>-->
   </div>
+<app-button-editor #buttonEditor [activity]="activity" [remote]="remote" [item]="selectedButtonMapping"></app-button-editor>
   <ng-container *ngIf="activity"><br><p-button label="Show data" (onClick)="showDump = true"></p-button>&nbsp;
     <p-button *ngIf="showDump"  label="Copy data to clipboard" (onClick)="copyToClipboard(activity)"></p-button>
     <ngx-json-viewer *ngIf="showDump" [json]="activity"></ngx-json-viewer>

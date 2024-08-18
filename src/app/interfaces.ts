@@ -393,16 +393,6 @@ export interface LanguageName {
   [key: 'en' | 'fr' | 'de' | string]: string;
 }
 
-export interface ActivityBackup {
-  entity_id?: string;
-  name: string;
-  entities: Entity[];
-  buttons: Button[];
-  interface: UIPage[];
-  sequences: ActivitySequenceUsage[];
-  options?: ActivityOption;
-}
-
 export interface OrphanEntity extends Entity
 {
   activities?: Activity[];

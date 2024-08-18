@@ -5,8 +5,8 @@ import {
   Component,
   ElementRef, EventEmitter, Input, Output,
   Pipe,
-  PipeTransform,
-  ViewChild, ViewEncapsulation
+  PipeTransform, QueryList,
+  ViewChild, ViewChildren, ViewEncapsulation
 } from '@angular/core';
 import {ConfirmationService, MessageService} from "primeng/api";
 import {ServerService} from "../server.service";
@@ -36,6 +36,7 @@ import {Helper} from "../helper";
 import {CommandEditorComponent} from "../activity-editor/command-editor/command-editor.component";
 import { saveAs } from 'file-saver-es';
 import {ConfirmDialogModule} from "primeng/confirmdialog";
+import {ButtonEditorComponent} from "../activity-editor/button-editor/button-editor.component";
 
 @Pipe({name: 'as', standalone: true, pure: true})
 export class AsPipe implements PipeTransform {
@@ -60,7 +61,8 @@ export class AsPipe implements PipeTransform {
     ButtonModule,
     NgxJsonViewerModule,
     CommandEditorComponent,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    ButtonEditorComponent
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',
@@ -89,11 +91,12 @@ export class ActivityViewerComponent implements AfterViewInit {
   @ViewChild("buttonpanel", {static: false}) buttonpanel: OverlayPanel | undefined;
   @ViewChild("commandeditor", {static: false}) commandeditor: CommandEditorComponent | undefined;
   @ViewChild("input_file_page", {static: false}) input_file_page: ElementRef | undefined;
+  @ViewChildren(ActivityGridComponent) gridButtons:QueryList<ActivityGridComponent> | undefined;
+  @ViewChild(ButtonEditorComponent) buttonEditor:ButtonEditorComponent | undefined;
 
 
   selectedButton: string = "";
   selectedButtonMapping: ButtonMapping | undefined;
-
   buttonPanelStyle: any = { width: '450px' };
   svg: SVGElement | undefined;
   protected readonly JSON = JSON;
@@ -105,6 +108,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   gridHeight = 6*185;
   protected readonly Helper = Helper;
   toggleGrid = true;
+  gridItem: GridItem | undefined;
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
@@ -235,6 +239,18 @@ export class ActivityViewerComponent implements AfterViewInit {
         this.cdr.detectChanges();
       }
     })
+    svg.addEventListener("click", (e) => {
+      if ((e.target as SVGImageElement).classList.contains('button'))
+      {
+        const target = e.target as SVGImageElement;
+        const buttonId = target.id;
+        this.selectedButton = this.buttonsMap[buttonId];
+        this.selectedButtonMapping = this.activity?.options?.button_mapping?.find(button => button.button === this.selectedButton);
+
+        this.buttonEditor?.show();
+        this.cdr.detectChanges();
+      }
+    })
   }
 
   getParams(command: Command | undefined | string): string
@@ -343,9 +359,9 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-
   gridItemClicked($event: GridItem) {
-    this.commandeditor?.show(this.remote!, this.activity!, $event);
+    this.gridItem = $event;
+    this.commandeditor?.show();
     this.cdr.detectChanges();
   }
 
@@ -485,20 +501,28 @@ export class ActivityViewerComponent implements AfterViewInit {
     if (!position || !this.activity?.options?.included_entities || this.activity.options.included_entities.length == 0 ||
       !this.configEntityCommands) return;
     if (!this.currentEntity)
-    {
       this.currentEntity = this.activity.options.included_entities[0];
-    }
+
     const commands = this.configEntityCommands.filter(command =>
       command.id.startsWith(this.currentEntity!.entity_type!));
+    let cmd_id = "";
     if (commands.length == 0)
     {
       console.error("No commands available to add a new grid item", this.configEntityCommands, this.currentEntity);
-      return;
     }
+    else
+      cmd_id = commands[0].cmd_id;
     this.currentPage?.items.push({location: {x: position.x, y: position.y},
       size: {width: 1, height: 1}, type: "text", text:"New command", command: {entity_id: this.currentEntity.entity_id!,
-      cmd_id: commands[0].cmd_id}})
+      cmd_id}});
     this.updateButtonsGrid();
+    this.cdr.detectChanges();
+    const targetGridItem = this.gridButtons?.find(gridButton =>
+      gridButton.item?.location.x == position.x && gridButton.item?.location.y == position.y)
+    this.gridItem = targetGridItem?.getGridItem();
+    console.log("New command", targetGridItem?.getGridItem(), this.gridButtons, position);
+    this.commandeditor?.show();
+    this.cdr.detectChanges();
   }
 
   deleteGridItem($event: GridItem) {

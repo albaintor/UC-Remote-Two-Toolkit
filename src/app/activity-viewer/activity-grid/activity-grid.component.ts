@@ -50,10 +50,14 @@ export class ActivityGridComponent  implements AfterViewInit{
     this.cdr.detectChanges();
   }
 
+  getGridItem()
+  {
+    return {gridItem: this.gridItem!, item: this.item!, index: this.index};
+  }
+
   @HostListener('click', ['$event']) onClick(event: any) {
     if (!this.editable) return;
-    this.itemClicked.emit({gridItem: this.gridItem!,
-      item: this.item!, index: this.index})
+    this.itemClicked.emit(this.getGridItem())
     this.cdr.detectChanges();
   }
 

@@ -54,6 +54,8 @@ import {GridItem} from "../../activity-viewer/activity-grid/activity-grid.compon
 })
 export class CommandEditorComponent {
   @Input() remote: Remote | undefined;
+  @Input() gridItem: GridItem | undefined;
+  @Input() activity: Activity | undefined;
   @Output() updateItemWidth: EventEmitter<{gridItem: GridItem, width: number}> = new EventEmitter();
   @Output() updateItemHeight: EventEmitter<{gridItem: GridItem, height: number}> = new EventEmitter();
   @Output() addItem: EventEmitter<GridItem> = new EventEmitter();
@@ -68,7 +70,6 @@ export class CommandEditorComponent {
   visible = false;
   @ViewChild(IconSelectorComponent) iconSelector: IconSelectorComponent | undefined;
   currentCommand: ActivityPageCommand | undefined;
-  activity: Activity | undefined;
   entities: Entity[] = [];
   activityEntities: Entity[] = [];
   selectedEntity: Entity | undefined;
@@ -78,7 +79,6 @@ export class CommandEditorComponent {
   featuresMap: EntityFeature[] = [];
   backupCommand : ActivityPageCommand | undefined;
   grid: (ActivityPageCommand | null)[] = [];
-  gridItem: GridItem | undefined;
   mediaPlayers: Entity[] = [];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
@@ -107,15 +107,13 @@ export class CommandEditorComponent {
     return this.configEntityCommands.filter(command => {command.id.startsWith(entity.entity_id!)});
   }
 
-  show(remote: Remote, activity: Activity, gridItem: GridItem): void {
-    console.debug("Editing command", activity, gridItem);
-    this.remote = remote;
-    this.activity = activity;
+  show(): void {
+    console.debug("Editing command", this.activity, this.gridItem);
     this.activityEntities = this.activity?.options?.included_entities?.sort((a, b) =>
       Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!))!;
     this.mediaPlayers = this.activityEntities.filter(entity => entity.entity_type === 'media_player');
-    this.gridItem = gridItem;
-    this.backupCommand = JSON.parse(JSON.stringify(gridItem.item));
+    if (this.gridItem?.item)
+      this.backupCommand = JSON.parse(JSON.stringify(this.gridItem.item));
     this.visible = true;
     this.cdr.detectChanges();
     if (this.configEntityCommands.length == 0)
@@ -252,7 +250,6 @@ export class CommandEditorComponent {
     if (!this.gridItem?.item)
     {
       this.addItem.emit(this.gridItem);
-      this.visible = false;
       this.cdr.detectChanges();
     }
   }

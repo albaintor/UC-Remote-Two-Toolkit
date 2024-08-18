@@ -5,7 +5,8 @@ import {
   Component,
   ElementRef,
   OnInit,
-  ViewChild
+  ViewChild,
+  ViewEncapsulation
 } from '@angular/core';
 import {ConfirmationService, MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
@@ -26,7 +27,8 @@ import {
   OperationStatus,
   Remote,
   RemoteMap,
-  RemoteOperation, RemoteOperationResultField,
+  RemoteOperation,
+  RemoteOperationResultField,
   UIPage
 } from "../interfaces";
 import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
@@ -40,11 +42,12 @@ import {RemoteOperationsComponent} from "../remote-operations/remote-operations.
 import {MessagesModule} from "primeng/messages";
 import {DialogModule} from "primeng/dialog";
 import {saveAs} from "file-saver-es";
-import {catchError, map, mergeMap, Observable, of} from "rxjs";
+import {map, Observable} from "rxjs";
 import {RemoteData, RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 import {ChipModule} from "primeng/chip";
 import {InputTextModule} from "primeng/inputtext";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
+import {BlockUIModule} from "primeng/blockui";
 
 export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
 
@@ -79,12 +82,14 @@ enum OperationMode {
     RemoteDataLoaderComponent,
     ChipModule,
     InputTextModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    BlockUIModule
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',
   providers: [MessageService, ConfirmationService],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class ActivityEditorComponent implements OnInit, AfterViewInit {
   buttonsMap:{ [id: string]: string } = {};

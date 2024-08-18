@@ -285,6 +285,16 @@ export class Remote
     return JSON.parse(res.body);
   }
 
+  async deleteActivity(activity_id)
+  {
+    const options = {
+      ...this.getOptions()
+    }
+    const url = this.getURL() + '/api/activities/'+activity_id;
+    let res = await got.delete(url, options);
+    return JSON.parse(res.body);
+  }
+
   async getProfiles()
   {
     const options = this.getOptions();

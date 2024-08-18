@@ -37,7 +37,7 @@
 <app-remote-registration (remoteSelected)="selectedRemote=$event" (remotesChanged)="updateRemotes($event)"></app-remote-registration>
 <app-entity-viewer #entityviewer></app-entity-viewer>
 <p-dialog [header]="'Activity viewer : '+activityeditor?.activity?.name" [(visible)]="viewerVisible" [style]="{width: '50vw'}">
-  <app-activity-viewer #activityeditor [remote]="selectedRemote" [editMode]="false"></app-activity-viewer>
+  <app-activity-viewer #activityeditor [remote]="selectedRemote" [editMode]="false" (onChange)="loadRemote()"></app-activity-viewer>
 </p-dialog>
 <app-uploaded-files (configurationUpdated)="updateConfiguration()" [currentSource]="context?.source!"></app-uploaded-files>
 <input type="file" #fileUpload class="upload">

@@ -8,7 +8,7 @@ import {
   PipeTransform,
   ViewChild, ViewEncapsulation
 } from '@angular/core';
-import {MessageService} from "primeng/api";
+import {ConfirmationService, MessageService} from "primeng/api";
 import {ServerService} from "../server.service";
 import {Activity, ButtonMapping, UIPage, ActivityPageCommand, Command, Remote} from "../interfaces";
 import {DialogModule} from "primeng/dialog";
@@ -19,13 +19,14 @@ import {ChipModule} from "primeng/chip";
 // @ts-ignore
 import SVGInject from "@iconfu/svg-inject";
 import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
-import {RouterLink, withComponentInputBinding} from "@angular/router";
+import {RouterLink} from "@angular/router";
 import {ActivityGridComponent, GridItem} from "./activity-grid/activity-grid.component";
 import {ButtonModule} from "primeng/button";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {Helper} from "../helper";
 import {CommandEditorComponent} from "../activity-editor/command-editor/command-editor.component";
 import { saveAs } from 'file-saver-es';
+import {ConfirmDialogModule} from "primeng/confirmdialog";
 
 @Pipe({name: 'as', standalone: true, pure: true})
 export class AsPipe implements PipeTransform {
@@ -49,11 +50,12 @@ export class AsPipe implements PipeTransform {
     ActivityGridComponent,
     ButtonModule,
     NgxJsonViewerModule,
-    CommandEditorComponent
+    CommandEditorComponent,
+    ConfirmDialogModule
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
@@ -94,7 +96,8 @@ export class ActivityViewerComponent implements AfterViewInit {
   toggleGrid = true;
 
 
-  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
+  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
+              private confirmationService: ConfirmationService) {
     this.server.getPictureRemoteMap().subscribe(buttonsMap => {
       this.buttonsMap = buttonsMap;
       this.reversedButtonMap = Object.fromEntries(Object.entries(buttonsMap).map(([key, value]) => [value, key]));
@@ -417,5 +420,41 @@ export class ActivityViewerComponent implements AfterViewInit {
       }
     }
     fileReader.readAsText(file);
+  }
+
+  deleteActivity($event: any) {
+    this.confirmationService.confirm({
+      target: $event.target as EventTarget,
+      key: "activityViewerDialog",
+      message: `Are you sure that you want to delete the activity "${this.activity?.name}" ?`,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon:"none",
+      rejectIcon:"none",
+      rejectButtonStyleClass:"p-button-text",
+      accept: () => {
+        if (!this.activity?.entity_id || !this.remote) return;
+        this.server.deleteRemoteActivity(this.remote, this.activity.entity_id).subscribe({next: results =>
+          {
+            this.messageService.add({
+              severity: 'success',
+              summary: `Activity "${this.activity?.name}" successfully deleted`
+            });
+            this.onChange.emit();
+            this.cdr.detectChanges();
+          },
+          error: (error) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: `Error while deleting activity "${this.activity?.name}"`
+            });
+            this.cdr.detectChanges();
+          }
+      });
+
+      },
+      reject: () => {
+      }
+    });
   }
 }

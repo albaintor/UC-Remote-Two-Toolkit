@@ -78,6 +78,7 @@ export class CommandEditorComponent {
   backupCommand : ActivityPageCommand | undefined;
   grid: (ActivityPageCommand | null)[] = [];
   gridItem: GridItem | undefined;
+  mediaPlayers: Entity[] = [];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
     this.server.getTemplateRemoteMap().subscribe(templates => {
@@ -111,6 +112,7 @@ export class CommandEditorComponent {
     this.activity = activity;
     this.activityEntities = this.activity?.options?.included_entities?.sort((a, b) =>
       Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!))!;
+    this.mediaPlayers = this.activityEntities.filter(entity => entity.entity_type === 'media_player');
     this.command = gridItem.item;
     this.gridItem = gridItem;
     this.backupCommand = JSON.parse(JSON.stringify(gridItem.item));
@@ -201,9 +203,22 @@ export class CommandEditorComponent {
     this.updateSelection();
   }
 
+  mediaPlayerSelected($event: any) {
+    if (!this.command || !this.selectedEntity) return;
+    this.command.media_player_id = this.selectedEntity.entity_id;
+    this.cdr.detectChanges();
+  }
+
   commandSelected($event: any) {
-    if (!this.selectedCommand) return;
-    this.command!.command = {entity_id: this.selectedEntity?.entity_id!, cmd_id: this.selectedCommand.id};
+    if (!this.selectedCommand || !this.command) return;
+    if (this.command.type === "media_player")
+    {
+      delete this.command.command
+      if (this.selectedEntity?.entity_type !== 'media_player') this.selectedEntity = undefined;
+      this.cdr.detectChanges();
+      return;
+    }
+    this.command.command = {entity_id: this.selectedEntity?.entity_id!, cmd_id: this.selectedCommand.id};
     this.messageService.add({severity: "info", summary: `Entity ${Helper.getEntityName(this.selectedEntity)}`,
       detail: `Entity id : ${this.selectedEntity?.entity_id}, command ${this.selectedCommand.cmd_id} assigned`});
     this.cdr.detectChanges();

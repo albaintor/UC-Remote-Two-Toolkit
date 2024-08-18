@@ -113,6 +113,8 @@ export class RemoteRegistrationComponent {
       error: ((error: any) => {
         console.error("Error unregistering remote", error);
         this.messageService.add({severity: "error", summary: "Error while unregistering remote", key: "remote"});
+        this.remotesChanged.emit(this.remotes);
+        this.refresh();
         this.cdr.detectChanges();
       }),
       complete: () => {

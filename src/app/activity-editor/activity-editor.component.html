@@ -17,13 +17,20 @@
   </ng-template>
 </p-menubar>
 <app-remote-data-loader #loader [remote]="targetRemote" (loaded)="remoteLoaded($event)"></app-remote-data-loader>
+<p-blockUI [blocked]="loader.progress"></p-blockUI>
 <ng-container *ngIf="progress">
   {{progressDetail}}<br>
   <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
 </ng-container>
 <ng-container *ngIf="mode != 2">
-  <h2>Edit activity : {{Helper.getEntityName(updatedActivity)}}</h2>
-  {{updatedActivity?.entity_id}}
+  <div class="flex align-content-center flex-wrap gap-3">
+    <div class="flex align-items-center justify-content-center">
+      <h2>Edit activity : {{Helper.getEntityName(updatedActivity)}}</h2>
+    </div>
+    <div class="flex align-items-center justify-content-center">
+      {{updatedActivity?.entity_id}}
+    </div>
+  </div>
 </ng-container>
 <ng-container *ngIf="mode == 2">
   <h2>Create or clone activity : {{Helper.getEntityName(updatedActivity)}}</h2>
@@ -51,12 +58,12 @@
     <p-button label="Save this activity to file" (onClick)="saveActivity()" severity="success" icon="pi pi-save" size="small"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-button label="Import activity from file" (onClick)="importActivity()" severity="danger" icon="pi pi-file-import" size="small">
+    <p-button label="Import activity from file" (onClick)="importActivity()" severity="warning" icon="pi pi-file-import" size="small">
       <input #input_file type="file" style="display:none" (change)="loadInputFile($event)">
     </p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-button label="Import activity from clipboard" (onClick)="importActivityFromClipboard()" severity="danger" icon="pi pi-clipboard" size="small"/>
+    <p-button label="Import activity from clipboard" (onClick)="importActivityFromClipboard()" severity="warning" icon="pi pi-clipboard" size="small"/>
   </div>
   <div class="flex align-items-center justify-content-center">
     <label for="targetRemote">Target remote to save to :</label>

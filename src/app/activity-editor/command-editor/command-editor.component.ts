@@ -56,7 +56,8 @@ export class CommandEditorComponent {
   @Input() remote: Remote | undefined;
   @Output() updateItemWidth: EventEmitter<{gridItem: GridItem, width: number}> = new EventEmitter();
   @Output() updateItemHeight: EventEmitter<{gridItem: GridItem, height: number}> = new EventEmitter();
-  command: ActivityPageCommand | undefined;
+  @Output() addItem: EventEmitter<GridItem> = new EventEmitter();
+  @Output() deleteItem: EventEmitter<GridItem> = new EventEmitter();
   templates: RemoteMap[] | undefined;
   stateOptions: any[] = [
     { label: 'Text', value: 'text' },
@@ -113,7 +114,6 @@ export class CommandEditorComponent {
     this.activityEntities = this.activity?.options?.included_entities?.sort((a, b) =>
       Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!))!;
     this.mediaPlayers = this.activityEntities.filter(entity => entity.entity_type === 'media_player');
-    this.command = gridItem.item;
     this.gridItem = gridItem;
     this.backupCommand = JSON.parse(JSON.stringify(gridItem.item));
     this.visible = true;
@@ -131,15 +131,16 @@ export class CommandEditorComponent {
 
   initSelection()
   {
-    if (this.command)
-      if (this.command.media_player_id)
+    if (this.gridItem?.item?.command)
+      if (this.gridItem?.item?.media_player_id)
       {
-        this.selectedEntity = this.activity?.options?.included_entities?.find(entity => entity.entity_id == this.command!.media_player_id);
+        this.selectedEntity = this.activity?.options?.included_entities?.find(entity => entity.entity_id ==
+          this.gridItem?.item?.media_player_id);
         this.selectedCommand = undefined;
       }
-      else if (this.command.command)
+      else if (this.gridItem?.item?.command)
       {
-        const command = this.command.command as Command;
+        const command = this.gridItem?.item?.command as Command;
 
         this.selectedEntity = this.activity?.options?.included_entities?.find(entity => entity.entity_id === command?.entity_id);
         if (command.cmd_id && this.selectedEntity)
@@ -204,29 +205,35 @@ export class CommandEditorComponent {
   }
 
   mediaPlayerSelected($event: any) {
-    if (!this.command || !this.selectedEntity) return;
-    this.command.media_player_id = this.selectedEntity.entity_id;
+    if (!this.gridItem?.item || !this.selectedEntity) return;
+    this.gridItem.item.media_player_id = this.selectedEntity.entity_id;
     this.cdr.detectChanges();
   }
 
   commandSelected($event: any) {
-    if (!this.selectedCommand || !this.command) return;
-    if (this.command.type === "media_player")
+    if (!this.gridItem?.item)
     {
-      delete this.command.command
+      this.addItem.emit(this.gridItem);
+      return;
+    }
+    if (!this.selectedCommand) return;
+    if (this.gridItem.item.type === "media_player")
+    {
+      delete this.gridItem.item.command
       if (this.selectedEntity?.entity_type !== 'media_player') this.selectedEntity = undefined;
       this.cdr.detectChanges();
       return;
     }
-    this.command.command = {entity_id: this.selectedEntity?.entity_id!, cmd_id: this.selectedCommand.id};
+    this.gridItem.item.command = {entity_id: this.selectedEntity?.entity_id!, cmd_id: this.selectedCommand.id};
     this.messageService.add({severity: "info", summary: `Entity ${Helper.getEntityName(this.selectedEntity)}`,
       detail: `Entity id : ${this.selectedEntity?.entity_id}, command ${this.selectedCommand.cmd_id} assigned`});
     this.cdr.detectChanges();
   }
 
   undoChanges($event: MouseEvent) {
-    this.command = this.backupCommand;
-    this.backupCommand = JSON.parse(JSON.stringify(this.command));
+    if (!this.gridItem) return;
+    this.gridItem.item = this.backupCommand;
+    this.backupCommand = JSON.parse(JSON.stringify(this.gridItem.item));
     this.initSelection();
     this.updateSelection();
   }
@@ -239,5 +246,23 @@ export class CommandEditorComponent {
   checkGridWidth($event: number) {
     if (!this.gridItem) return;
     this.updateItemWidth.emit({gridItem: this.gridItem, width: $event});
+  }
+
+  addCommand() {
+    if (!this.gridItem?.item)
+    {
+      this.addItem.emit(this.gridItem);
+      this.visible = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  deleteCommand() {
+    if (this.gridItem?.item)
+    {
+      this.deleteItem.emit(this.gridItem);
+      this.visible = false;
+      this.cdr.detectChanges();
+    }
   }
 }

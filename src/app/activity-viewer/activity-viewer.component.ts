@@ -10,7 +10,16 @@ import {
 } from '@angular/core';
 import {ConfirmationService, MessageService} from "primeng/api";
 import {ServerService} from "../server.service";
-import {Activity, ButtonMapping, UIPage, ActivityPageCommand, Command, Remote} from "../interfaces";
+import {
+  Activity,
+  ButtonMapping,
+  UIPage,
+  ActivityPageCommand,
+  Command,
+  Remote,
+  Entity,
+  EntityCommand
+} from "../interfaces";
 import {DialogModule} from "primeng/dialog";
 import {ToastModule} from "primeng/toast";
 import {NgForOf, NgIf} from "@angular/common";
@@ -61,6 +70,7 @@ export class AsPipe implements PipeTransform {
 })
 export class ActivityViewerComponent implements AfterViewInit {
   currentPage: UIPage | undefined;
+  configEntityCommands: EntityCommand[] | undefined;
   @Input('activity') set _activity(value: Activity | undefined) {
     this.activity = value;
     if (value) {
@@ -69,6 +79,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     }
   }
   activity: Activity | undefined;
+  currentEntity: Entity | undefined;
   @Input() remote: Remote | undefined;
   @Input() editMode = true;
   @Output() onChange: EventEmitter<void> = new EventEmitter();
@@ -102,6 +113,20 @@ export class ActivityViewerComponent implements AfterViewInit {
       this.buttonsMap = buttonsMap;
       this.reversedButtonMap = Object.fromEntries(Object.entries(buttonsMap).map(([key, value]) => [value, key]));
     })
+    const configCommands = localStorage.getItem("configCommands");
+    if (configCommands)
+      this.configEntityCommands = JSON.parse(configCommands);
+
+    this.server.configCommands$.subscribe(entityCommands => {
+      this.configEntityCommands = entityCommands;
+    })
+    if (!this.configEntityCommands || this.configEntityCommands.length == 0)
+    {
+      this.server.getConfigEntityCommands(this.remote!).subscribe(entityCommands => {
+        this.configEntityCommands = entityCommands;
+        this.cdr.detectChanges();
+      })
+    }
   }
 
   ngAfterViewInit(): void {
@@ -159,7 +184,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   }
 
   updateGridItemHeight(data: {gridItem: GridItem, height: number}) {
-    if (!data.gridItem) return;
+    if (!data.gridItem?.item) return;
     const position = Helper.getItemPosition(this.grid, data.gridItem.index, this.currentPage!.grid.width,
       this.currentPage!.grid.height);
     if (!position) return;
@@ -174,7 +199,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   }
 
   updateGridItemWidth(data: {gridItem: GridItem, width: number}) {
-    if (!data.gridItem) return;
+    if (!data.gridItem?.item) return;
     const position = Helper.getItemPosition(this.grid, data.gridItem.index, this.currentPage!.grid.width,
       this.currentPage!.grid.height);
     if (!position) return;
@@ -320,10 +345,6 @@ export class ActivityViewerComponent implements AfterViewInit {
 
 
   gridItemClicked($event: GridItem) {
-    if ($event.item == undefined)
-    {
-      //$event.item = {size: {width: 1, height: 1}, text: "", location: $event.};
-    }
     this.commandeditor?.show(this.remote!, this.activity!, $event);
     this.cdr.detectChanges();
   }
@@ -456,5 +477,34 @@ export class ActivityViewerComponent implements AfterViewInit {
       reject: () => {
       }
     });
+  }
+
+  addGridItem($event: GridItem) {
+    const position = Helper.getItemPosition(this.grid, $event.index, this.currentPage!.grid.width,
+      this.currentPage!.grid.height);
+    if (!position || !this.activity?.options?.included_entities || this.activity.options.included_entities.length == 0 ||
+      !this.configEntityCommands) return;
+    if (!this.currentEntity)
+    {
+      this.currentEntity = this.activity.options.included_entities[0];
+    }
+    const commands = this.configEntityCommands.filter(command =>
+      command.id.startsWith(this.currentEntity!.entity_type!));
+    if (commands.length == 0)
+    {
+      console.error("No commands available to add a new grid item", this.configEntityCommands, this.currentEntity);
+      return;
+    }
+    this.currentPage?.items.push({location: {x: position.x, y: position.y},
+      size: {width: 1, height: 1}, type: "text", text:"New command", command: {entity_id: this.currentEntity.entity_id!,
+      cmd_id: commands[0].cmd_id}})
+    this.updateButtonsGrid();
+  }
+
+  deleteGridItem($event: GridItem) {
+    if (!$event.item) return;
+    const index = this.currentPage?.items.indexOf($event.item as ActivityPageCommand);
+    if (index) this.currentPage?.items.splice(index, 1);
+    this.updateButtonsGrid();
   }
 }

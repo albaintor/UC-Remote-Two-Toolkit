@@ -20,7 +20,8 @@
   </ng-template>
 </p-overlayPanel>
 <p-toast key="activity"></p-toast>
-<app-command-editor #commandeditor (updateItemHeight)="updateGridItemHeight($event)" (updateItemWidth)="updateGridItemWidth($event)"></app-command-editor>
+<app-command-editor #commandeditor (updateItemHeight)="updateGridItemHeight($event)" (updateItemWidth)="updateGridItemWidth($event)"
+  (addItem)="addGridItem($event)" (deleteItem)="deleteGridItem($event)"></app-command-editor>
 <!--<p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">-->
 <div class="flex align-content-center flex-wrap gap-3" *ngIf="!editMode">
   <div class="flex align-items-center justify-content-center">
@@ -44,7 +45,7 @@
 </div>
 <div class="flex align-content-center flex-wrap gap-3">
   <div class="flex align-items-center justify-content-center">
-    <h3>Page</h3>
+    <h3>Current Page</h3>
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-button label="Save to file" (onClick)="savePage()" icon="pi pi-save" size="small" severity="success"></p-button>

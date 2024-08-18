@@ -13,7 +13,7 @@ import {ActivityPageCommand} from "../../interfaces";
 
 export interface GridItem
 {
-  item: ActivityPageCommand;
+  item: ActivityPageCommand | undefined;
   gridItem: ElementRef;
   index: number;
 }

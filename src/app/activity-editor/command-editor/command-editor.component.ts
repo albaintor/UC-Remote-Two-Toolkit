@@ -1,8 +1,8 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
-  Input,
+  Component, EventEmitter,
+  Input, Output,
   ViewChild,
   ViewEncapsulation
 } from '@angular/core';
@@ -25,12 +25,11 @@ import {SelectButtonModule} from "primeng/selectbutton";
 import {Helper} from "../../helper";
 import {NgIf} from "@angular/common";
 import {ToastModule} from "primeng/toast";
-import {jsonHelpUsage} from "@angular/cli/src/command-builder/utilities/json-help";
 import {DialogModule} from "primeng/dialog";
 import {IconSelectorComponent} from "../../icon-selector/icon-selector.component";
-import {RemoteOperationsComponent} from "../../remote-operations/remote-operations.component";
 import {DropdownModule} from "primeng/dropdown";
 import {ButtonModule} from "primeng/button";
+import {GridItem} from "../../activity-viewer/activity-grid/activity-grid.component";
 
 @Component({
   selector: 'app-command-editor',
@@ -55,11 +54,14 @@ import {ButtonModule} from "primeng/button";
 })
 export class CommandEditorComponent {
   @Input() remote: Remote | undefined;
+  @Output() updateItemWidth: EventEmitter<{gridItem: GridItem, width: number}> = new EventEmitter();
+  @Output() updateItemHeight: EventEmitter<{gridItem: GridItem, height: number}> = new EventEmitter();
   command: ActivityPageCommand | undefined;
   templates: RemoteMap[] | undefined;
   stateOptions: any[] = [
     { label: 'Text', value: 'text' },
-    { label: 'Icon', value: 'icon' }
+    { label: 'Icon', value: 'icon' },
+    { label: 'Media Player', value: 'media_player' },
   ];
   protected readonly Helper = Helper;
   visible = false;
@@ -74,6 +76,8 @@ export class CommandEditorComponent {
   selectedCommand: EntityCommand | undefined;
   featuresMap: EntityFeature[] = [];
   backupCommand : ActivityPageCommand | undefined;
+  grid: (ActivityPageCommand | null)[] = [];
+  gridItem: GridItem | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
     this.server.getTemplateRemoteMap().subscribe(templates => {
@@ -101,14 +105,15 @@ export class CommandEditorComponent {
     return this.configEntityCommands.filter(command => {command.id.startsWith(entity.entity_id!)});
   }
 
-  show(remote: Remote, activity: Activity, command: ActivityPageCommand): void {
-    console.debug("Editing command", activity, command);
+  show(remote: Remote, activity: Activity, gridItem: GridItem): void {
+    console.debug("Editing command", activity, gridItem);
     this.remote = remote;
     this.activity = activity;
     this.activityEntities = this.activity?.options?.included_entities?.sort((a, b) =>
       Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!))!;
-    this.command = command;
-    this.backupCommand = JSON.parse(JSON.stringify(command));
+    this.command = gridItem.item;
+    this.gridItem = gridItem;
+    this.backupCommand = JSON.parse(JSON.stringify(gridItem.item));
     this.visible = true;
     this.cdr.detectChanges();
     if (this.configEntityCommands.length == 0)
@@ -209,5 +214,15 @@ export class CommandEditorComponent {
     this.backupCommand = JSON.parse(JSON.stringify(this.command));
     this.initSelection();
     this.updateSelection();
+  }
+
+  checkGridHeight($event: number) {
+    if (!this.gridItem) return;
+    this.updateItemHeight.emit({gridItem: this.gridItem, height: $event});
+  }
+
+  checkGridWidth($event: number) {
+    if (!this.gridItem) return;
+    this.updateItemWidth.emit({gridItem: this.gridItem, width: $event});
   }
 }

@@ -20,7 +20,7 @@
   </ng-template>
 </p-overlayPanel>
 <p-toast key="activity"></p-toast>
-<app-command-editor #commandeditor></app-command-editor>
+<app-command-editor #commandeditor (updateItemHeight)="updateGridItemHeight($event)" (updateItemWidth)="updateGridItemWidth($event)"></app-command-editor>
 <!--<p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">-->
 <div class="flex align-content-center flex-wrap gap-3">
   <div class="flex align-items-center justify-content-center" *ngIf="!editMode">

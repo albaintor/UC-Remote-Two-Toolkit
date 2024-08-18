@@ -249,6 +249,20 @@ export class Helper
     return false;
   }
 
+  static checkItem(item: ActivityPageCommand,list: (ActivityPageCommand | null)[], x: number, y: number, width: number, height: number): boolean
+  {
+    for (let existingItem of list)
+    {
+      if (!existingItem || item == existingItem) continue;
+      if (Helper.isIntersection({x: existingItem.location.x, y: existingItem.location.y, width: existingItem.size.width, height: existingItem.size.height},
+        {x, y, width, height}))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
   static getItemPosition(grid: (ActivityPageCommand | null)[], index: number, gridWidth: number, gridHeight: number): {x: number, y: number, width: number, height: number} | null
   {
     const matrix: boolean[][] = new Array(gridHeight)

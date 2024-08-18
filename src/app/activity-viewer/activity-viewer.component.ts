@@ -155,6 +155,37 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
+  updateGridItemHeight(data: {gridItem: GridItem, height: number}) {
+    if (!data.gridItem) return;
+    const position = Helper.getItemPosition(this.grid, data.gridItem.index, this.currentPage!.grid.width,
+      this.currentPage!.grid.height);
+    if (!position) return;
+    if (position.y + data.height <= this.currentPage!.grid.height && !Helper.checkItem(data.gridItem.item,  this.grid,
+      data.gridItem.item.location.x, data.gridItem.item.location.y, data.gridItem.item.size.width, data.height))
+    {
+      if (!data.gridItem.item.size)
+        data.gridItem.item.size = {height: 1, width: 1};
+      data.gridItem.item.size.height = data.height;
+      this.updateButtonsGrid();
+    }
+  }
+
+  updateGridItemWidth(data: {gridItem: GridItem, width: number}) {
+    if (!data.gridItem) return;
+    const position = Helper.getItemPosition(this.grid, data.gridItem.index, this.currentPage!.grid.width,
+      this.currentPage!.grid.height);
+    if (!position) return;
+    if (position.x + data.width <= this.currentPage!.grid.width && !Helper.checkItem(data.gridItem.item,  this.grid,
+      data.gridItem.item.location.x, data.gridItem.item.location.y, data.width, data.gridItem.item.size.height))
+    {
+      Helper.findItem(this.grid, 1, 1);
+      if (!data.gridItem.item.size)
+        data.gridItem.item.size = {height: 1, width: 1};
+      data.gridItem.item.size.width = data.width;
+      this.updateButtonsGrid();
+    }
+  }
+
   remoteLoaded(image: any, svg: SVGElement){
     console.log("Loaded", svg);
     this.svg = svg;
@@ -290,7 +321,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     {
       //$event.item = {size: {width: 1, height: 1}, text: "", location: $event.};
     }
-    this.commandeditor?.show(this.remote!, this.activity!, $event.item);
+    this.commandeditor?.show(this.remote!, this.activity!, $event);
     this.cdr.detectChanges();
   }
 

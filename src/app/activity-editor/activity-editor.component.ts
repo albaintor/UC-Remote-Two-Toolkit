@@ -49,6 +49,7 @@ import {InputTextModule} from "primeng/inputtext";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {BlockUIModule} from "primeng/blockui";
 import {DividerModule} from "primeng/divider";
+import {TagModule} from "primeng/tag";
 
 export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
 
@@ -85,7 +86,8 @@ enum OperationMode {
     InputTextModule,
     ConfirmDialogModule,
     BlockUIModule,
-    DividerModule
+    DividerModule,
+    TagModule
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',

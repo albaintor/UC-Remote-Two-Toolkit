@@ -31,12 +31,19 @@
       {{updatedActivity?.entity_id}}
     </div>
     <div class="flex align-items-center justify-content-center" *ngIf="existingActivity">
-      Activity already exists on the target remote
+      <p-tag value="Activity exists on the target remote" severity="info" />
     </div>
   </div>
 </ng-container>
 <ng-container *ngIf="mode == 2">
-  <h2>Create or clone activity : {{Helper.getEntityName(updatedActivity)}}</h2>
+  <div class="flex align-content-center flex-wrap gap-3">
+    <div class="flex align-items-center justify-content-center">
+      <h2>Create or clone activity : {{Helper.getEntityName(updatedActivity)}}</h2>
+    </div>
+    <div class="flex align-items-center justify-content-center" *ngIf="existingActivity">
+      <p-tag value="Activity exists on the target remote" severity="info" />
+    </div>
+  </div>
 </ng-container>
 <ng-container *ngIf="updatedActivity">
   <div class="flex align-content-center flex-wrap gap-3">
@@ -44,10 +51,7 @@
       Activity name :
     </div>
     <div class="flex align-items-center justify-content-center">
-    <input type="text" pInputText [(ngModel)]="updatedActivity.name" />
-    </div>
-    <div class="flex align-items-center justify-content-center" *ngIf="existingActivity">
-      Activity already exists on the target remote
+      <input type="text" pInputText [(ngModel)]="updatedActivity.name" />
     </div>
   </div>
 </ng-container>
@@ -105,7 +109,7 @@
       </p-autoComplete>
     </div>
   </div>
-  <p-button label="Submit" (onClick)="submitOrphans()" size="small"></p-button>
+  <p-button label="Apply" (onClick)="submitOrphans()" size="small"></p-button>
 </ng-container>
 <p-divider />
 <h3>Apply a predefined mapping from a given entity</h3>

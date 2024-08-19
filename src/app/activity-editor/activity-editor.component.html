@@ -51,14 +51,6 @@
     </div>
   </div>
 </ng-container>
-<p-messages severity="info">
-  <ng-template pTemplate>
-    <div class="ml-2">Here you can edit an activity : you can see the original mapping with the option above. In the new mapping you can only move UI icons.<br>
-    You can edit buttons and UI mapping (incomplete), or you can also apply automatic mapping from a given media player or remote entity to the buttons and UI.<br>
-    You can also replace an entity by another within the activity.<br>
-    Once done, click on <b>Save activity to remote</b> to update the remote with the pending operations.</div>
-  </ng-template>
-</p-messages>
 <div class="flex align-content-center flex-wrap gap-3">
   <div class="flex align-items-center justify-content-center">
     <p-button label="Save this activity to file" (onClick)="saveActivity()" severity="success" icon="pi pi-save" size="small"></p-button>
@@ -86,6 +78,15 @@
   </p-dropdown>
   </div>
 </div>
+<p-messages severity="info">
+  <ng-template pTemplate>
+    <div class="ml-2">You can edit (create, replace or clone) an activity. In the new mapping you can only move UI icons or edit commands.<br>
+      You can also edit buttons below, or you can also apply automatic mapping from a given media player or remote entity to the buttons and UI.<br>
+      You can also replace an entity by another within the activity.<br>
+      Once done, click on <b>Save activity to remote</b> to update the remote with the pending operations.<br>
+      Note that the additional command parameters (delay, repeat...) are not covered yet.</div>
+  </ng-template>
+</p-messages>
 <ng-container *ngIf="orphanEntities.length > 0">
   <h3>Some entities are orphans : replace them and click on apply</h3>
   <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px" *ngFor="let item of orphanEntities">

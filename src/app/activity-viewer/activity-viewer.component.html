@@ -66,6 +66,7 @@
 
 <ng-container *ngIf="currentPage">
   <br>
+  <p-paginator (onPageChange)="onPageChange($event)" [first]="firstRow" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
   <div class="grid-container" *ngIf="toggleGrid"
        [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width), 'width': gridWidth+'px', 'height': gridHeight+'px'}">
     <grid-button [editable]="editMode" *ngFor="let item of grid; let index=index" [index]="index" [source]="gridSource" [item]="item" [grid]="currentPage.grid" [style]="getGridItemSize(item)"
@@ -96,7 +97,6 @@
       {{getParams(item?.command)}}
     </grid-button>
   </div>
-  <p-paginator (onPageChange)="onPageChange($event)" [first]="firstRow" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
 </ng-container>
   <div style="text-align: center">
     <img src="assets/remote/remote.svg" id="remote" onload="SVGInject(this)">

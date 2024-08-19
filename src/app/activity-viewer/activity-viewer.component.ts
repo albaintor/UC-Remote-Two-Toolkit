@@ -3,7 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef, EventEmitter, Input, Output,
+  ElementRef, EventEmitter, HostListener, Input, Output,
   Pipe,
   PipeTransform, QueryList,
   ViewChild, ViewChildren, ViewEncapsulation
@@ -134,8 +134,17 @@ export class ActivityViewerComponent implements AfterViewInit {
     }
   }
 
+  @HostListener('window:resize', ['$event'])
+  onResize($event: any) {
+    this.gridWidth = Math.min(window.innerWidth*0.8, 4*185);
+    this.gridHeight = Math.min(window.innerHeight*1.2, 6*185);
+    this.updateButtonsGrid();
+  }
+
   ngAfterViewInit(): void {
     // this.remotePicture?.nativeElement.addListener()
+    this.gridWidth = Math.min(window.innerWidth*0.8, 4*185);
+    this.gridHeight = Math.min(window.innerHeight*1.2, 6*185);
     SVGInject.setOptions({
       makeIdsUnique: false, // do not make ids used within the SVG unique
       afterInject: (img: any, svg: any) => {
@@ -245,8 +254,9 @@ export class ActivityViewerComponent implements AfterViewInit {
         this.cdr.detectChanges();
       }
     })
+
     svg.addEventListener("click", (e) => {
-      if ((e.target as SVGImageElement).classList.contains('button'))
+      if (this.editMode && (e.target as SVGImageElement).classList.contains('button'))
       {
         const target = e.target as SVGImageElement;
         const buttonId = target.id;

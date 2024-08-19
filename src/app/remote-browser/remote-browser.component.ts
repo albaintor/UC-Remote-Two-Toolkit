@@ -480,4 +480,19 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       this.cdr.detectChanges();
     }
   }
+
+  removeEntity(entity: Entity) {
+    if (!this.selectedRemote || !entity?.entity_id) return;
+    this.server.deleteRemoteEntity(this.selectedRemote, entity.entity_id).subscribe({next: results => {
+        this.unusedEntities.splice(this.unusedEntities.indexOf(entity), 1);
+        this.unusedEntities = [...this.unusedEntities];
+        this.messageService.add({severity: "success", summary: `Entity ${Helper.getEntityName(entity)} (${entity.entity_id}) removed successfully`});
+        this.cdr.detectChanges();
+      }, error: err => {
+        console.error(err);
+        this.messageService.add({severity: "error", summary: `Error while removing entity ${Helper.getEntityName(entity)} (${entity.entity_id})`});
+        this.cdr.detectChanges();
+      }
+    })
+  }
 }

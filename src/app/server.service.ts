@@ -193,6 +193,13 @@ export class ServerService {
     }))
   }
 
+  deleteRemoteEntity(remote: Remote, entity_id: string): Observable<any>
+  {
+    return this.http.delete<any>(`/api/remote/${remote.address}/entities/${entity_id}`).pipe(map(results => {
+      return results;
+    }))
+  }
+
   getRemoteIntegrations(remote: Remote): Observable<Integration[]>
   {
     return this.http.get<Integration[]>(`/api/remote/${remote.address}/intg/instances`).pipe(map(results => {

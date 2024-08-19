@@ -119,9 +119,10 @@
                dataKey="entity_id" columnResizeMode="expand">
         <ng-template pTemplate="header">
           <tr>
-            <th pSortableColumn="title" pResizableColumn>Name<p-sortIcon field="name"></p-sortIcon></th>
+            <th pSortableColumn="title" pResizableColumn>Name</th>
             <th pSortableColumn="entity_id" pResizableColumn>Entity id<p-sortIcon field="entity_id"></p-sortIcon></th>
             <th pSortableColumn="entity_type" pResizableColumn>Type<p-sortIcon field="entity_type"></p-sortIcon></th>
+            <th>Actions</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-entity>
@@ -129,6 +130,8 @@
             <td>{{Helper.getEntityName(entity)}}</td>
             <td>{{entity.entity_id}}</td>
             <td><p-chip [label]="entity.entity_type" [style]="getStyle(entity.entity_type)"></p-chip></td>
+            <td><p-button [pTooltip]="'Remove configured entity '+Helper.getEntityName(entity)"
+                          (onClick)="removeEntity(entity)"  [rounded]="true" severity="danger" icon="pi pi-times" size="small"></p-button></td>
           </tr>
         </ng-template>
       </p-table>

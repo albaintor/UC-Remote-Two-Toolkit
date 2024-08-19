@@ -295,6 +295,16 @@ export class Remote
     return JSON.parse(res.body);
   }
 
+  async deleteEntity(entity_id)
+  {
+    const options = {
+      ...this.getOptions()
+    }
+    const url = this.getURL() + '/api/entities/'+entity_id;
+    let res = await got.delete(url, options);
+    return JSON.parse(res.body);
+  }
+
   async getProfiles()
   {
     const options = this.getOptions();

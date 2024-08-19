@@ -30,6 +30,9 @@
     <div class="flex align-items-center justify-content-center">
       {{updatedActivity?.entity_id}}
     </div>
+    <div class="flex align-items-center justify-content-center" *ngIf="existingActivity">
+      Activity already exists on the target remote
+    </div>
   </div>
 </ng-container>
 <ng-container *ngIf="mode == 2">
@@ -42,6 +45,9 @@
     </div>
     <div class="flex align-items-center justify-content-center">
     <input type="text" pInputText [(ngModel)]="updatedActivity.name" />
+    </div>
+    <div class="flex align-items-center justify-content-center" *ngIf="existingActivity">
+      Activity already exists on the target remote
     </div>
   </div>
 </ng-container>
@@ -100,6 +106,7 @@
   </div>
   <p-button label="Submit" (onClick)="submitOrphans()" size="small"></p-button>
 </ng-container>
+<p-divider />
 <h3>Apply a predefined mapping from a given entity</h3>
 <div *ngIf="selectedEntity"><b>{{selectedEntity.name}}</b> ({{selectedEntity.entity_id}})</div>
 <div class="formgroup-inline">
@@ -135,6 +142,7 @@
     <p-button label="Apply mapping" (onClick)="applyTemplate()"></p-button><br>
   </div>
 </div>
+<p-divider />
 <h3>Replace an entity by another</h3>
 <div class="flex overflow-hidden">
   <div class="flex-none flex align-items-center justify-content-left px-1 py-1">
@@ -159,9 +167,10 @@
     <p-button label="Replace" icon="pi pi-copy" size="small" (onClick)="replaceEntity(entity?.entity_id!, newEntity?.entity_id!)"></p-button>&nbsp;
   </div>
 </div>
+<p-divider />
 <br>
 <p-dialog [header]="'Activity '+activity?.name" [(visible)]="viewerVisible" [style]="{width: '50vw'}">
-  <app-activity-viewer #viewer [remote]="selectedRemote" [editMode]="false" [activity]="activity"></app-activity-viewer>
+  <app-activity-viewer *ngIf="viewerVisible" [remote]="selectedRemote" [editMode]="false" [activity]="activity"></app-activity-viewer>
 </p-dialog>
 <app-activity-viewer #editor [remote]="targetRemote" [editMode]="true" [activity]="updatedActivity" (onChange)="activityChanged()"></app-activity-viewer>
 <ng-container *ngIf="dump">

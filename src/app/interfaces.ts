@@ -291,13 +291,6 @@ export interface ActivityButtonUsage
   short_press: boolean;
 }
 
-export interface Button
-{
-  button: string;
-  entity_id: string;
-  short_press: boolean;
-}
-
 export interface ButtonMapping
 {
   button: string;

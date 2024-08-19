@@ -48,6 +48,7 @@ import {ChipModule} from "primeng/chip";
 import {InputTextModule} from "primeng/inputtext";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {BlockUIModule} from "primeng/blockui";
+import {DividerModule} from "primeng/divider";
 
 export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
 
@@ -83,7 +84,8 @@ enum OperationMode {
     ChipModule,
     InputTextModule,
     ConfirmDialogModule,
-    BlockUIModule
+    BlockUIModule,
+    DividerModule
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',
@@ -138,6 +140,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   suggestions2: Entity[] = [];
   suggestions3: Entity[] = [];
   targetRemote: Remote | undefined;
+  existingActivity = false;
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
@@ -221,8 +224,6 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
     })
   }
-
-
 
   initMenu()
   {
@@ -434,6 +435,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     let resultField: RemoteOperationResultField | undefined = undefined;
     if (activity)
     {
+      this.existingActivity = true;
       console.log("Activity to import exists, we will update it", body);
       activity.options?.button_mapping?.forEach(button => {
         remoteOperations.push({name: `Delete button ${button.button} ${this.updatedActivity!.name}`,
@@ -450,6 +452,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     }
     else
     {
+      this.existingActivity = false;
       console.log("Activity to import does not exist, we will create it", body);
       let createOperation: RemoteOperation = {name: `Create activity ${this.updatedActivity!.name}`, method: "POST", api: `/api/activities`,
         body, status: OperationStatus.Todo};

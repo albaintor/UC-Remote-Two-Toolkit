@@ -157,6 +157,7 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
         this.messageService.add({
           severity: "error", summary: "Error during remote extraction"
         });
+        this.progress = false;
         this.cdr.detectChanges();
       },
       complete: () => {

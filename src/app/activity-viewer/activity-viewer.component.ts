@@ -95,8 +95,9 @@ export class ActivityViewerComponent implements AfterViewInit {
   @ViewChild(ButtonEditorComponent) buttonEditor:ButtonEditorComponent | undefined;
 
 
-  selectedButton: string = "";
-  selectedButtonMapping: ButtonMapping | undefined;
+  mouseOverButtonName: string = "";
+  mouseoverButton: ButtonMapping | undefined;
+  selectedButton: ButtonMapping | undefined;
   buttonPanelStyle: any = { width: '450px' };
   svg: SVGElement | undefined;
   protected readonly JSON = JSON;
@@ -160,10 +161,8 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.updateButtonsGrid();
   }
 
-  updateButtonsGrid()
+  updateButtons()
   {
-    this.grid = this.getGridItems();
-
     const buttons = this.svg?.getElementsByClassName("button");
     if (buttons) {
       for (let i = 0; i < buttons.length; i++) {
@@ -184,6 +183,12 @@ export class ActivityViewerComponent implements AfterViewInit {
           }
         }
     }
+  }
+
+  updateButtonsGrid()
+  {
+    this.grid = this.getGridItems();
+    this.updateButtons();
     this.cdr.detectChanges();
   }
 
@@ -226,8 +231,8 @@ export class ActivityViewerComponent implements AfterViewInit {
       {
         const target = e.target as SVGImageElement;
         const buttonId = target.id;
-        this.selectedButton = this.buttonsMap[buttonId];
-        this.selectedButtonMapping = this.activity?.options?.button_mapping?.find(button => button.button === this.selectedButton);
+        this.mouseOverButtonName = this.buttonsMap[buttonId];
+        this.mouseoverButton = this.activity?.options?.button_mapping?.find(button => button.button === this.mouseOverButtonName);
         this.buttonpanel?.show(e, svg);
         // @ts-ignore
         this.buttonPanelStyle = { width: '450px',
@@ -236,6 +241,7 @@ export class ActivityViewerComponent implements AfterViewInit {
           'margin-left': '5px',
           'margin-top': '5px',
         };
+        e.stopPropagation();
         this.cdr.detectChanges();
       }
     })
@@ -244,9 +250,9 @@ export class ActivityViewerComponent implements AfterViewInit {
       {
         const target = e.target as SVGImageElement;
         const buttonId = target.id;
-        this.selectedButton = this.buttonsMap[buttonId];
-        this.selectedButtonMapping = this.activity?.options?.button_mapping?.find(button => button.button === this.selectedButton);
-
+        this.selectedButton = undefined;
+        this.selectedButton = this.activity?.options?.button_mapping?.find(button => button.button === this.buttonsMap[buttonId]);
+        this.cdr.detectChanges();
         this.buttonEditor?.show();
         this.cdr.detectChanges();
       }
@@ -530,5 +536,10 @@ export class ActivityViewerComponent implements AfterViewInit {
     const index = this.currentPage?.items.indexOf($event.item as ActivityPageCommand);
     if (index) this.currentPage?.items.splice(index, 1);
     this.updateButtonsGrid();
+  }
+
+  buttonChanged($event: ButtonMapping) {
+    this.updateButtons();
+    this.cdr.detectChanges();
   }
 }

@@ -163,6 +163,11 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       if (profiles) this.profiles = JSON.parse(profiles);
       if (context) this.context = JSON.parse(context);
       if (configCommands) this.configCommands = JSON.parse(configCommands);
+      if (!this.checkCache())
+      {
+        this.clearCache();
+        return;
+      }
       this.server.setEntities(this.entities);
       this.server.setActivities(this.activities);
       this.server.setProfiles(this.profiles);
@@ -175,6 +180,14 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     }
     else
       this.init();
+  }
+
+  checkCache(): boolean
+  {
+    if (!this.selectedRemote || !this.context) return true;
+    if (this.context.remote_ip && this.context.remote_ip !== this.selectedRemote.address)
+      return false;
+    return true;
   }
 
   clearCache()
@@ -227,6 +240,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
 
   setRemote(remote: Remote): void
   {
+    this.selectedRemote = remote;
     Helper.setRemote(remote);
     this.server.remote$.next(remote);
     this.cdr.detectChanges();

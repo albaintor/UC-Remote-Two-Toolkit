@@ -1,12 +1,11 @@
 import {
-  AfterViewInit,
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
-  ElementRef,
-  EventEmitter, HostListener,
+  EventEmitter,
   Input,
   Output,
-  ViewChild
+  ViewEncapsulation
 } from '@angular/core';
 import {
   Activity,
@@ -30,7 +29,6 @@ import {SelectButtonModule} from "primeng/selectbutton";
 import {MessageService, SharedModule} from "primeng/api";
 import {ToastModule} from "primeng/toast";
 import {ServerService} from "../../server.service";
-import {GridItem} from "../../activity-viewer/activity-grid/activity-grid.component";
 import {Helper} from "../../helper";
 
 @Component({
@@ -51,15 +49,16 @@ import {Helper} from "../../helper";
   ],
   templateUrl: './button-editor.component.html',
   styleUrl: './button-editor.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class ButtonEditorComponent {
   // @Input() items: HTMLElement[];
-  @Input() item: ButtonMapping | undefined;
+  @Input() button: ButtonMapping | undefined;
   @Input() remote: Remote | undefined;
   @Input() activity: Activity | undefined;
+  @Output() buttonChanged = new EventEmitter<ButtonMapping>();
   visible = false;
-  currentCommand: ActivityPageCommand | undefined;
   entities: Entity[] = [];
   activityEntities: Entity[] = [];
   selectedEntity: Entity | undefined;
@@ -94,11 +93,11 @@ export class ButtonEditorComponent {
   }
 
   show(): void {
-    console.debug("Editing command", this.activity, this.item);
+    console.debug("Editing command", this.button);
     this.activityEntities = this.activity?.options?.included_entities?.sort((a, b) =>
       Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!))!;
-    if (this.item)
-      this.backupCommand = JSON.parse(JSON.stringify(this.item));
+    if (this.button)
+      this.backupCommand = JSON.parse(JSON.stringify(this.button));
     this.visible = true;
     this.cdr.detectChanges();
     if (this.configEntityCommands.length == 0)
@@ -114,26 +113,34 @@ export class ButtonEditorComponent {
 
   initSelection()
   {
-    if (this.item?.short_press)
+    this.selectedEntity = undefined;
+    this.selectedEntityLong = undefined;
+    this.selectedCommand = undefined;
+    this.selectedCommandLong = undefined;
+    if (this.button?.short_press)
     {
-      const command = this.item?.short_press;
+      const command = this.button?.short_press;
       this.selectedEntity = this.activity?.options?.included_entities?.find(entity => entity.entity_id === command?.entity_id);
       if (command.cmd_id && this.selectedEntity)
       {
         this.selectedCommand = this.configEntityCommands.find(entityCommand =>
           entityCommand.id.startsWith(this.selectedEntity?.entity_type!) &&
           command.cmd_id.endsWith(entityCommand.cmd_id));
+        /*if (!this.selectedCommand)
+          this.selectedCommand = {id: command?.cmd_id, cmd_id: command?.cmd_id, name: {en: command?.cmd_id}} as any;*/
       }
     }
-    if (this.item?.long_press)
+    if (this.button?.long_press)
     {
-      const command = this.item?.long_press;
+      const command = this.button?.long_press;
       this.selectedEntityLong = this.activity?.options?.included_entities?.find(entity => entity.entity_id === command?.entity_id);
       if (command.cmd_id && this.selectedEntityLong)
       {
         this.selectedCommandLong = this.configEntityCommands.find(entityCommand =>
           entityCommand.id.startsWith(this.selectedEntityLong?.entity_type!) &&
           command.cmd_id.endsWith(entityCommand.cmd_id));
+        /*if (!this.selectedCommandLong)
+          this.selectedCommandLong = {id: command?.cmd_id, cmd_id: command?.cmd_id, name: {en: command?.cmd_id}} as any;*/
       }
     }
   }
@@ -173,7 +180,7 @@ export class ButtonEditorComponent {
       if (!this.selectedCommand || !this.entityCommands.find(command =>
         this.selectedCommand?.id === command.id))
       {
-        this.selectedCommand = this.entityCommands.length > 0 ? this.entityCommands[0] : undefined;
+        //this.selectedCommand = this.entityCommands.length > 0 ? this.entityCommands[0] : undefined;
       }
 
     }
@@ -199,7 +206,7 @@ export class ButtonEditorComponent {
       if (!this.selectedCommandLong || !this.entityCommandsLong.find(command =>
         this.selectedCommandLong?.id === command.id))
       {
-        this.selectedCommandLong = this.entityCommandsLong.length > 0 ? this.entityCommandsLong[0] : undefined;
+        //this.selectedCommandLong = this.entityCommandsLong.length > 0 ? this.entityCommandsLong[0] : undefined;
       }
 
     }
@@ -210,27 +217,30 @@ export class ButtonEditorComponent {
     this.updateSelection();
   }
 
+  commandChanged(command: Command | undefined, selectedEntity: Entity | undefined,
+                 selectedCommand: EntityCommand | undefined): boolean
+  {
+    return command?.entity_id != selectedEntity?.entity_id || command?.cmd_id != selectedCommand?.cmd_id;
+  }
+
   commandSelected($event: any) {
-    if (!this.item)
-    {
-      //this.addItem.emit(this.gridItem);
-      return;
-    }
+    if (!this.button) return;
     if (!this.selectedCommand) return;
-    this.item.short_press = {entity_id: this.selectedEntity?.entity_id!, cmd_id: this.selectedCommand.id};
+    if (!this.commandChanged(this.button.short_press, this.selectedEntity, this.selectedCommand)) return;
+    //TODO : handle parameters
+    this.buttonChanged.emit(this.button);
+    this.button.short_press = {entity_id: this.selectedEntity?.entity_id!, cmd_id: this.selectedCommand.id};
     this.messageService.add({severity: "info", summary: `Entity ${Helper.getEntityName(this.selectedEntity)}`,
       detail: `Entity id : ${this.selectedEntity?.entity_id}, command ${this.selectedCommand.cmd_id} assigned`});
     this.cdr.detectChanges();
   }
 
   commandSelectedLong($event: any) {
-    if (!this.item)
-    {
-      //this.addItem.emit(this.gridItem);
-      return;
-    }
+    if (!this.button) return;
     if (!this.selectedCommandLong) return;
-    this.item.long_press = {entity_id: this.selectedEntityLong?.entity_id!, cmd_id: this.selectedCommandLong.id};
+    if (!this.commandChanged(this.button.long_press, this.selectedEntityLong, this.selectedCommandLong)) return;
+    this.buttonChanged.emit(this.button);
+    this.button.long_press = {entity_id: this.selectedEntityLong?.entity_id!, cmd_id: this.selectedCommandLong.id};
     this.messageService.add({severity: "info", summary: `Entity ${Helper.getEntityName(this.selectedEntity)}`,
       detail: `Entity id : ${this.selectedEntityLong?.entity_id}, command ${this.selectedCommandLong.cmd_id} assigned`});
     this.cdr.detectChanges();
@@ -238,35 +248,38 @@ export class ButtonEditorComponent {
 
   undoChanges($event: MouseEvent) {
     if (!this.backupCommand) return;
-    this.item = this.backupCommand;
-    this.backupCommand = JSON.parse(JSON.stringify(this.item));
+    this.button = this.backupCommand;
+    this.backupCommand = JSON.parse(JSON.stringify(this.button));
     this.initSelection();
     this.updateSelection();
-  }
-
-  addCommand() {
-
+    this.buttonChanged.emit(this.button);
   }
 
   deleteCommand()
   {
-
+    delete this.button?.long_press;
+    delete this.button?.short_press;
+    this.cdr.detectChanges();
+    this.buttonChanged.emit(this.button);
   }
 
   protected readonly Helper = Helper;
 
   assignShortPress() {
-    this.item!.short_press = {} as any;
+    this.button!.short_press = {} as any;
     this.cdr.detectChanges();
+    this.buttonChanged.emit(this.button);
   }
 
   assignLongPress() {
-    this.item!.long_press = {} as any;
+    this.button!.long_press = {} as any;
     this.cdr.detectChanges();
+    this.buttonChanged.emit(this.button);
   }
 
   removeElement(object: any, element: string) {
     delete object[element];
     this.cdr.detectChanges();
+    this.buttonChanged.emit(this.button);
   }
 }

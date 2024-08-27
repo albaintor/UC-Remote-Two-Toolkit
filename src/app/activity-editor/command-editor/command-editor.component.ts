@@ -29,7 +29,7 @@ import {DialogModule} from "primeng/dialog";
 import {IconSelectorComponent} from "../../icon-selector/icon-selector.component";
 import {DropdownModule} from "primeng/dropdown";
 import {ButtonModule} from "primeng/button";
-import {GridItem} from "../../activity-viewer/activity-grid/activity-grid.component";
+import {ActivityGridComponent, GridItem} from "../../activity-viewer/activity-grid/activity-grid.component";
 
 @Component({
   selector: 'app-command-editor',
@@ -54,12 +54,13 @@ import {GridItem} from "../../activity-viewer/activity-grid/activity-grid.compon
 })
 export class CommandEditorComponent {
   @Input() remote: Remote | undefined;
-  @Input() gridItem: GridItem | undefined;
+  @Input() gridItem: ActivityGridComponent | undefined;
   @Input() activity: Activity | undefined;
-  @Output() updateItemWidth: EventEmitter<{gridItem: GridItem, width: number}> = new EventEmitter();
-  @Output() updateItemHeight: EventEmitter<{gridItem: GridItem, height: number}> = new EventEmitter();
-  @Output() addItem: EventEmitter<GridItem> = new EventEmitter();
-  @Output() deleteItem: EventEmitter<GridItem> = new EventEmitter();
+  @Input() gridCommands: ActivityPageCommand[] | undefined;
+  @Input() grid : { width: number; height: number} | undefined;
+  @Output() updateItem: EventEmitter<ActivityGridComponent> = new EventEmitter();
+  @Output() addItem: EventEmitter<ActivityGridComponent> = new EventEmitter();
+  @Output() deleteItem: EventEmitter<ActivityGridComponent> = new EventEmitter();
   templates: RemoteMap[] | undefined;
   stateOptions: any[] = [
     { label: 'Text', value: 'text' },
@@ -78,8 +79,8 @@ export class CommandEditorComponent {
   selectedCommand: EntityCommand | undefined;
   featuresMap: EntityFeature[] = [];
   backupCommand : ActivityPageCommand | undefined;
-  grid: (ActivityPageCommand | null)[] = [];
   mediaPlayers: Entity[] = [];
+  gridItemSize =  {width: 4, height: 6};
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
     this.server.getTemplateRemoteMap().subscribe(templates => {
@@ -102,13 +103,13 @@ export class CommandEditorComponent {
   }
 
 
-  getCommands(entity: Entity)
-  {
-    return this.configEntityCommands.filter(command => {command.id.startsWith(entity.entity_id!)});
-  }
-
   show(): void {
     console.debug("Editing command", this.activity, this.gridItem);
+    if (this.gridItem?.item?.size)
+      this.gridItemSize = {width: this.gridItem?.item.size.width, height: this.gridItem?.item.size.height};
+    else
+      this.gridItemSize = {width: 4, height: 6};
+
     this.activityEntities = this.activity?.options?.included_entities?.sort((a, b) =>
       Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!))!;
     this.mediaPlayers = this.activityEntities.filter(entity => entity.entity_type === 'media_player');
@@ -129,6 +130,7 @@ export class CommandEditorComponent {
 
   initSelection()
   {
+    this.selectedCommand = undefined;
     if (this.gridItem?.item?.command)
       if (this.gridItem?.item?.media_player_id)
       {
@@ -229,21 +231,39 @@ export class CommandEditorComponent {
   }
 
   undoChanges($event: MouseEvent) {
-    if (!this.gridItem) return;
+    if (!this.gridItem || !this.backupCommand) return;
     this.gridItem.item = this.backupCommand;
     this.backupCommand = JSON.parse(JSON.stringify(this.gridItem.item));
     this.initSelection();
     this.updateSelection();
   }
 
-  checkGridHeight($event: number) {
-    if (!this.gridItem) return;
-    this.updateItemHeight.emit({gridItem: this.gridItem, height: $event});
+  checkGridOverflow(): boolean
+  {
+    if (!this.gridItem?.item || !this.grid) return false;
+    if (this.gridItem.item.location.x + this.gridItemSize.width > this.grid.width) return false;
+    if (this.gridItem.item.location.y + this.gridItemSize.height > this.grid.height) return false;
+
+    return true;
   }
 
-  checkGridWidth($event: number) {
-    if (!this.gridItem) return;
-    this.updateItemWidth.emit({gridItem: this.gridItem, width: $event});
+  checkGridSize($event: number) {
+    if (!this.gridItem?.item || !this.gridCommands) return;
+    if (!this.checkGridOverflow() || !Helper.checkItem(this.gridItem.item, this.gridCommands,
+      this.gridItem.item.location.x, this.gridItem.item.location.y,
+       this.gridItemSize.width, this.gridItemSize.height))
+    {
+      console.debug("Changed item size overflow", this.gridItem, this.gridItemSize);
+      this.messageService.add({severity: "warn",
+        summary: `This item cannot be resized to ${this.gridItemSize.width} rows, ${this.gridItemSize.height} columns`});
+      this.gridItemSize = {width: this.gridItem.item.size.width, height: this.gridItem.item.size.height};
+      this.cdr.detectChanges();
+      return;
+    }
+    this.gridItem.item.size = {width: this.gridItemSize.width, height: this.gridItemSize.height};
+    console.debug("Changed item size", this.gridItem);
+    this.updateItem.emit(this.gridItem);
+    this.cdr.detectChanges();
   }
 
   addCommand() {
@@ -261,5 +281,15 @@ export class CommandEditorComponent {
       this.visible = false;
       this.cdr.detectChanges();
     }
+  }
+
+  createCommand() {
+    if (!this.gridItem?.item) return;
+    if (!this.selectedEntity)
+    {
+      this.selectedEntity = this.entities[0];
+    }
+    (this.gridItem.item.command as Command) = {entity_id: this.selectedEntity!.entity_id!, cmd_id: ""};
+    this.cdr.detectChanges();
   }
 }

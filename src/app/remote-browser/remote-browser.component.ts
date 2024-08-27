@@ -50,6 +50,7 @@ import {MultiSelectModule} from "primeng/multiselect";
 import {AccordionModule} from "primeng/accordion";
 import {RemoteData, RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 import {BlockUIModule} from "primeng/blockui";
+import { saveAs } from 'file-saver-es';
 
 interface FileProgress
 {
@@ -128,6 +129,11 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     {label: 'Import activity', icon: 'pi pi-file-import', items: [
         {label: 'Import activity from file', routerLink:'/activity/edit', queryParams: {'source': 'file'}, icon: 'pi pi-file-import'},
         {label: 'Import activity from clipboard', routerLink:'/activity/edit', queryParams: {'source': 'clipboard'}, icon: 'pi pi-clipboard'},
+      ]
+    },
+    {label: 'Backup & restore', icon: 'pi pi-save', items: [
+        {label: 'Backup this remote',  command: () => this.saveRemote(), icon: 'pi pi pi-save'},
+        {label: 'Restore backup to this remote', command: () => this.restoreRemote(), icon: 'pi pi-upload'},
       ]
     },
   ]
@@ -405,6 +411,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   downloadFile(url: string)
   {
     this.server.getBackup(url).subscribe(results => {
+      console.debug("Download backup", results);
       this.downloadFileResponse(results, url);
     })
   }
@@ -494,5 +501,16 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
       }
     })
+  }
+
+  private saveRemote() {
+    if (!this.selectedRemote) return;
+    return this.server.getRemoteBackup(this.selectedRemote).subscribe(blob => {
+      saveAs(blob, "backup.zip");
+    });
+  }
+
+  private restoreRemote() {
+    return undefined;
   }
 }

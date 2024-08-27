@@ -559,6 +559,24 @@ app.get('/api/remote/:address/profiles/:profileid/groups', async (req, res, next
   }
 })
 
+app.get('/api/remote/:address/system/backup/export', async (req, res, next) => {
+  const address = req.params.address;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getBackup(res));
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
 
 app.get('/api/remote/:address/cfg/entity/commands', async (req, res, next) => {
   const address = req.params.address;

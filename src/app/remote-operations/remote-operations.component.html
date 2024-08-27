@@ -15,7 +15,7 @@
       <p-button label="Reset errors only" (onClick)="resetErrors()" severity="secondary" icon="pi pi-minus" size="small" [rounded]="true"></p-button>
     </div>
   </div>
-  <p-table [value]="operations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+  <p-table [value]="_operations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
            [scrollable]="true" [scrollHeight]="'calc(70vh - 50px)'" [(selection)]="selectedOperations" >
     <ng-template pTemplate="header">
       <tr>

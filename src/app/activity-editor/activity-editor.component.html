@@ -81,6 +81,10 @@
     </ng-template>
   </p-dropdown>
   </div>
+  <div class="flex align-items-center justify-content-center">
+    <p-toggleButton [(ngModel)]="resetMapping" onLabel="Erase buttons mapping" offLabel="Keep buttons mapping"
+                    onIcon="pi pi-eraser" offIcon="pi pi-lock"/>
+  </div>
 </div>
 <p-messages severity="info">
   <ng-template pTemplate>

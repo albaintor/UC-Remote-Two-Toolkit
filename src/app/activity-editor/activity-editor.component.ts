@@ -50,6 +50,7 @@ import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {BlockUIModule} from "primeng/blockui";
 import {DividerModule} from "primeng/divider";
 import {TagModule} from "primeng/tag";
+import {ToggleButtonModule} from "primeng/togglebutton";
 
 export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
 
@@ -87,7 +88,8 @@ enum OperationMode {
     ConfirmDialogModule,
     BlockUIModule,
     DividerModule,
-    TagModule
+    TagModule,
+    ToggleButtonModule
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',
@@ -143,6 +145,8 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   suggestions3: Entity[] = [];
   targetRemote: Remote | undefined;
   existingActivity = false;
+  resetMapping = true;
+  lockOperations = false;
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
@@ -165,7 +169,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     })
     this.server.getTemplateRemoteMap().subscribe(templates => {
       this.templates = templates;
-      this.remoteOperations = this.buildData();
+      if (!this.lockOperations) this.remoteOperations = this.buildData();
       this.cdr.detectChanges();
     })
     const entities = localStorage.getItem("entities");
@@ -342,6 +346,13 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   {
     if (activity.options?.included_entities?.find(entity => entity.entity_id === entityId)) return;
     let entity = this.entities.find(entity => entity.entity_id === entityId);
+    if (!entity)
+    {
+      if (!this.orphanEntities.find(item => item.oldEntity?.entity_id === entityId))
+      {
+        this.orphanEntities.push({oldEntity: {entity_id:entityId, entity_type: "", name: ""}, newEntity: undefined});
+      }
+    }
     if (!entity) entity = {entity_id: entityId} as any;
     if (!activity.options) activity.options = {included_entities: []}
     if (!activity.options.included_entities) activity.options.included_entities = [];
@@ -350,7 +361,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
   buildDataAndShowOperations()
   {
-    this.remoteOperations = this.buildData();
+    if (!this.lockOperations) this.remoteOperations = this.buildData();
     this.showOperations = true;
     this.cdr.detectChanges();
   }
@@ -384,23 +395,6 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     }
 
     if (!this.updatedActivity || !this.targetRemote) return remoteOperations;
-    const body: any = {
-      name: {
-        en: Helper.getEntityName(this.updatedActivity),
-      },
-      options: {}
-    }
-    if (this.updatedActivity.icon)
-      body.icon = this.updatedActivity.icon;
-    if (this.updatedActivity.description)
-      body.description = this.updatedActivity.description;
-    if (this.updatedActivity.options?.prevent_sleep)
-      body.options.prevent_sleep = this.updatedActivity.options.prevent_sleep;
-    if (this.updatedActivity.options?.included_entities)
-      body.options.entity_ids = this.updatedActivity!.options!.included_entities!.map((entity) => entity.entity_id);
-    if (this.updatedActivity.options?.sequences)
-      body.sequences = {...this.updatedActivity.options.sequences};
-
 
     // Add missing included entities
     for (let sequenceName in this.updatedActivity!.options?.sequences)
@@ -423,10 +417,13 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     });
 
     if (this.updatedActivity?.options?.included_entities) {
-      this.orphanEntities = this.updatedActivity.options.included_entities.filter(included_entity => {
-        return !this.entities.find(entity => entity.entity_id === included_entity.entity_id)}).map(entity => { return {
-        oldEntity: entity, newEntity: undefined
-      }});
+      this.updatedActivity.options.included_entities.forEach(included_entity => {
+        if (!this.entities.find(entity => entity.entity_id === included_entity.entity_id) &&
+        !this.orphanEntities.find(item => item.oldEntity.entity_id === included_entity.entity_id))
+        {
+          this.orphanEntities.push({oldEntity:included_entity, newEntity: undefined});
+        }
+      })
     }
 
     // Create or update
@@ -435,15 +432,34 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     const activity = this.activities.find(activity => activity.entity_id === this.updatedActivity?.entity_id);
 
     let resultField: RemoteOperationResultField | undefined = undefined;
+    const body: any = {
+      name: {
+        en: Helper.getEntityName(this.updatedActivity),
+      },
+      options: {}
+    }
+    if (this.updatedActivity.icon)
+      body.icon = this.updatedActivity.icon;
+    if (this.updatedActivity.description)
+      body.description = this.updatedActivity.description;
+    if (this.updatedActivity.options?.prevent_sleep)
+      body.options.prevent_sleep = this.updatedActivity.options.prevent_sleep;
+    if (this.updatedActivity.options?.included_entities)
+      body.options.entity_ids = this.updatedActivity!.options!.included_entities!.map((entity) => entity.entity_id);
+    if (this.updatedActivity.options?.sequences)
+      body.sequences = {...this.updatedActivity.options.sequences};
     if (activity)
     {
       this.existingActivity = true;
       console.log("Activity to import exists, we will update it", body);
-      activity.options?.button_mapping?.forEach(button => {
-        remoteOperations.push({name: `Delete button ${button.button} ${this.updatedActivity!.name}`,
-          method: "DELETE", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
-          body: {}, status: OperationStatus.Todo});
-      })
+      if (this.resetMapping)
+      {
+        activity.options?.button_mapping?.forEach(button => {
+          remoteOperations.push({name: `Delete button ${button.button} ${this.updatedActivity!.name}`,
+            method: "DELETE", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
+            body: {}, status: OperationStatus.Todo});
+        })
+      }
       activity.options?.user_interface?.pages?.forEach(page => {
         remoteOperations.push({name: `Delete page ${page.name} ${this.updatedActivity!.name}`,
           method: "DELETE", api: `/api/activities/${activity.entity_id}/ui/pages/${page.page_id}`,
@@ -524,8 +540,10 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
   applyTemplate()
   {
+    this.resetMapping = false;
     this.applyTemplateOnActivity(this.updatedActivity!);
     this.remoteOperations = this.buildData();
+    this.lockOperations = false;
     this.cdr.detectChanges();
     // this.viewer.view(updatedActivity!, true)
   }
@@ -577,7 +595,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       else
         targetButton!.short_press = {entity_id: this.selectedEntity?.entity_id!, cmd_id: button.cmd_id, params: button.params};
     })
-    console.log("BUTTONS", this.updatedActivity?.options?.button_mapping)
+    // console.log("BUTTONS", this.updatedActivity?.options?.button_mapping)
 
     template.user_interface?.pages?.forEach(page => {
       if (!updatedActivity?.options) updatedActivity!.options = {};
@@ -728,12 +746,12 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   remoteLoaded($event: RemoteData | undefined) {
     if ($event)
     {
-      this.reset();
+      if (!this.lockOperations) this.reset();
       this.activities = $event.activities;
       this.entities = $event.entities;
       this.activities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
       this.entities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
-      this.remoteOperations = this.buildData();
+      if (!this.lockOperations) this.remoteOperations = this.buildData();
       this.cdr.detectChanges();
     }
   }
@@ -909,15 +927,16 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   }
 
   activityChanged() {
-    this.remoteOperations = this.buildData();
+    if (!this.lockOperations) this.remoteOperations = this.buildData();
     this.cdr.detectChanges();
   }
 
   operationsDone($event: RemoteOperation[]) {
     console.log("Operations executed", $event);
     this.progress = false;
+    this.lockOperations = true;
     this.cdr.detectChanges();
-    return this.remoteLoader!.loadRemoteData().subscribe(data => {
+    this.remoteLoader!.loadRemoteData().subscribe(data => {
       if (!data || !this.updatedActivity || !this.targetRemote) return;
       this.activities = data.activities;
       this.entities = data.entities;

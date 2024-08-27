@@ -314,6 +314,7 @@ export interface ActivityPageCommand
     height: number;
   }
 }
+
 export interface UIPage
 {
   page_id?: string;

@@ -1,3 +1,3 @@
-<div #griditem [class]="editable ? 'grid-item' : 'grid-item-static'" [draggable]="editable" [attr.aria-rowIndex]="index">
+<div #griditem [class]="editable ? 'grid-item' : 'grid-item-static'" [draggable]="editable" [attr.aria-rowIndex]="getIndex()">
 <ng-content></ng-content>
 </div>

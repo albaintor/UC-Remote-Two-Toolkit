@@ -58,7 +58,15 @@
       </div>
     </div>
   </div>
-  <div class="flex flex-wrap gap-3" *ngIf="gridItem?.item">
+  <div class="flex flex-wrap gap-3" *ngIf="!gridItem?.item?.command">
+    <div class="flex align-items-center">
+      <label for="command">No command set</label>
+    </div>
+    <div class="flex align-items-center">
+      <p-button label="Create command" (onClick)="createCommand()"></p-button>
+    </div>
+  </div>
+  <div class="flex flex-wrap gap-3" *ngIf="gridItem?.item?.command">
     <div class="flex align-items-center">
       <label for="entity">Entity</label>
     </div>
@@ -94,17 +102,17 @@
       <label for="width">Width</label>
     </div>
     <div class="flex-shrink-0 align-items-center">
-      <p-inputNumber id="width" [ngModel]="gridItem!.item!.size.width" [showButtons]="true" buttonLayout="horizontal" inputId="width" spinnerMode="horizontal" [step]="1"
-          decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus"
-          decrementButtonIcon="pi pi-minus" [min]="1" [max]="4" styleClass="input-number" (ngModelChange)="checkGridWidth($event)"></p-inputNumber>
+      <p-inputNumber id="width" [(ngModel)]="gridItemSize.width" [showButtons]="true" buttonLayout="horizontal" inputId="width" spinnerMode="horizontal" [step]="1"
+                     decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus"
+                     decrementButtonIcon="pi pi-minus" [min]="1" [max]="grid?.width" styleClass="input-number" (ngModelChange)="checkGridSize($event)"></p-inputNumber>
     </div>
     <div class="flex align-items-center">
       <label for="height">Height</label>
     </div>
     <div class="flex-shrink-0 align-items-center">
-      <p-inputNumber id="height" [ngModel]="gridItem!.item!.size.height" [showButtons]="true" buttonLayout="horizontal" inputId="width" spinnerMode="horizontal" [step]="1"
+      <p-inputNumber id="height" [(ngModel)]="gridItemSize.height" [showButtons]="true" buttonLayout="horizontal" inputId="width" spinnerMode="horizontal" [step]="1"
                      decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus"
-                     decrementButtonIcon="pi pi-minus" [min]="1" [max]="6" styleClass="input-number" (ngModelChange)="checkGridHeight($event)"></p-inputNumber>
+                     decrementButtonIcon="pi pi-minus" [min]="1" [max]="grid?.height" styleClass="input-number" (ngModelChange)="checkGridSize($event)"></p-inputNumber>
     </div>
   </div>
 </p-dialog>

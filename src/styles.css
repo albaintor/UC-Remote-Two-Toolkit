@@ -33,7 +33,15 @@ a.p-menuitem-link:active {
   text-decoration: none;
 }
 
-/* mouse over link */
+a.p-accordion-header-link:hover {
+  text-decoration: none;
+}
+
+a.p-accordion-header-link:active {
+  text-decoration: none;
+}
+
+  /* mouse over link */
 a:hover {
   /*font-weight: bold;*/
   color: white;

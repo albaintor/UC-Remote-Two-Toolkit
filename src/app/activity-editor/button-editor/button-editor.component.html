@@ -21,7 +21,7 @@
         <label for="entity">Entity</label>
       </div>
       <div class="flex align-items-center">
-        <p-dropdown id="entity" [ngModel]="selectedEntity" [options]="activityEntities" (ngModelChange)="entitySelected($event)">
+        <p-dropdown id="entity" [(ngModel)]="selectedEntity" [options]="activityEntities" (ngModelChange)="entitySelected($event)">
           <ng-template pTemplate="selectedItem">
             {{Helper.getEntityName(selectedEntity)}}
           </ng-template>
@@ -34,7 +34,7 @@
         <label for="command">Command</label>
       </div>
       <div class="flex align-items-center">
-        <p-dropdown id="command" [ngModel]="selectedCommand" [options]="entityCommands" (ngModelChange)="commandSelected($event)">
+        <p-dropdown id="command" [(ngModel)]="selectedCommand" [options]="entityCommands" (ngModelChange)="commandSelected($event)">
           <ng-template pTemplate="selectedItem">
             {{Helper.getEntityName(selectedCommand)}}
           </ng-template>
@@ -60,7 +60,7 @@
         <label for="entity">Entity</label>
       </div>
       <div class="flex align-items-center">
-        <p-dropdown id="entitylong" [ngModel]="selectedEntityLong" [options]="activityEntities" (ngModelChange)="entitySelected($event)">
+        <p-dropdown id="entitylong" [(ngModel)]="selectedEntityLong" [options]="activityEntities" (ngModelChange)="entitySelected($event)">
           <ng-template pTemplate="selectedItem">
             {{Helper.getEntityName(selectedEntityLong)}}
           </ng-template>
@@ -73,7 +73,7 @@
         <label for="commandlong">Command</label>
       </div>
       <div class="flex align-items-center">
-        <p-dropdown id="commandlong" [ngModel]="selectedCommandLong" [options]="entityCommandsLong" (ngModelChange)="commandSelectedLong($event)">
+        <p-dropdown id="commandlong" [(ngModel)]="selectedCommandLong" [options]="entityCommandsLong" (ngModelChange)="commandSelectedLong($event)">
           <ng-template pTemplate="selectedItem">
             {{Helper.getEntityName(selectedCommandLong)}}
           </ng-template>

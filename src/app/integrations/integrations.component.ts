@@ -34,6 +34,7 @@ import {MessagesModule} from "primeng/messages";
 import {TableModule} from "primeng/table";
 import {ChipModule} from "primeng/chip";
 import {FileBeforeUploadEvent, FileUploadEvent, FileUploadModule} from "primeng/fileupload";
+import {BlockUIModule} from "primeng/blockui";
 
 type DriverIntegration = Driver | Integration;
 
@@ -52,7 +53,8 @@ type DriverIntegration = Driver | Integration;
     TableModule,
     ChipModule,
     FileUploadModule,
-    DecimalPipe
+    DecimalPipe,
+    BlockUIModule
   ],
   templateUrl: './integrations.component.html',
   styleUrl: './integrations.component.css',
@@ -196,8 +198,9 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
       },
         error: (error) => {
-          this.messageService.add({severity: "error", summary: `Error during deletion of integration ${integration.name}`});
+          this.messageService.add({severity: "warning", summary: `An error may have occurred during deletion of integration ${integration.name}`});
           console.error("Error while deleting integration", error);
+          this.loadRemoteData();
           this.cdr.detectChanges();
         }});
     }
@@ -211,7 +214,8 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
           },
           error: (error) => {
-            this.messageService.add({severity: "error", summary: `Error during deletion of driver ${integration.name}`});
+            this.messageService.add({severity: "warning", summary: `An error may have occurred during deletion during deletion of driver ${integration.name}`});
+            this.loadRemoteData();
             console.error("Error while deleting driver", error);
             this.cdr.detectChanges();
           }});

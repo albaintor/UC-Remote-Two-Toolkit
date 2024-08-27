@@ -101,15 +101,15 @@ export class ActivityViewerComponent implements AfterViewInit {
   buttonPanelStyle: any = { width: '450px' };
   svg: SVGElement | undefined;
   protected readonly JSON = JSON;
-  gridSource: GridItem | undefined;
-  grid: (ActivityPageCommand | null)[] = [];
+  gridItemSource: ActivityGridComponent | undefined;
+  gridCommands: ActivityPageCommand[] = [];
   showDump: boolean = false;
   firstRow = 0;
-  gridWidth = 4*185;
-  gridHeight = 6*185;
+  gridPixelWidth = 4*185;
+  gridPixelHeight = 6*185;
   protected readonly Helper = Helper;
   toggleGrid = true;
-  gridItem: GridItem | undefined;
+  gridItem: ActivityGridComponent | undefined;
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
@@ -136,15 +136,15 @@ export class ActivityViewerComponent implements AfterViewInit {
 
   @HostListener('window:resize', ['$event'])
   onResize($event: any) {
-    this.gridWidth = Math.min(window.innerWidth*0.8, 4*185);
-    this.gridHeight = Math.min(window.innerHeight*1.2, 6*185);
+    this.gridPixelWidth = Math.min(window.innerWidth*0.8, 4*185);
+    this.gridPixelHeight = Math.min(window.innerHeight*1.2, 6*185);
     this.updateButtonsGrid();
   }
 
   ngAfterViewInit(): void {
     // this.remotePicture?.nativeElement.addListener()
-    this.gridWidth = Math.min(window.innerWidth*0.8, 4*185);
-    this.gridHeight = Math.min(window.innerHeight*1.2, 6*185);
+    this.gridPixelWidth = Math.min(window.innerWidth*0.8, 4*185);
+    this.gridPixelHeight = Math.min(window.innerHeight*1.2, 6*185);
     SVGInject.setOptions({
       makeIdsUnique: false, // do not make ids used within the SVG unique
       afterInject: (img: any, svg: any) => {
@@ -196,40 +196,18 @@ export class ActivityViewerComponent implements AfterViewInit {
 
   updateButtonsGrid()
   {
-    this.grid = this.getGridItems();
+    // let item: ActivityPageCommand | undefined;
+    // if (this.commandeditor?.visible)
+    //   item = this.gridItem?.item;
+    this.gridCommands = this.getGridItems();
     this.updateButtons();
+    // if (item) this.gridItem = this.gridButtons?.find(gridItem => gridItem.item == item);
     this.cdr.detectChanges();
   }
 
-  updateGridItemHeight(data: {gridItem: GridItem, height: number}) {
-    if (!data.gridItem?.item) return;
-    const position = Helper.getItemPosition(this.grid, data.gridItem.index, this.currentPage!.grid.width,
-      this.currentPage!.grid.height);
-    if (!position) return;
-    if (position.y + data.height <= this.currentPage!.grid.height && !Helper.checkItem(data.gridItem.item,  this.grid,
-      data.gridItem.item.location.x, data.gridItem.item.location.y, data.gridItem.item.size.width, data.height))
-    {
-      if (!data.gridItem.item.size)
-        data.gridItem.item.size = {height: 1, width: 1};
-      data.gridItem.item.size.height = data.height;
-      this.updateButtonsGrid();
-    }
-  }
-
-  updateGridItemWidth(data: {gridItem: GridItem, width: number}) {
-    if (!data.gridItem?.item) return;
-    const position = Helper.getItemPosition(this.grid, data.gridItem.index, this.currentPage!.grid.width,
-      this.currentPage!.grid.height);
-    if (!position) return;
-    if (position.x + data.width <= this.currentPage!.grid.width && !Helper.checkItem(data.gridItem.item,  this.grid,
-      data.gridItem.item.location.x, data.gridItem.item.location.y, data.width, data.gridItem.item.size.height))
-    {
-      Helper.findItem(this.grid, 1, 1);
-      if (!data.gridItem.item.size)
-        data.gridItem.item.size = {height: 1, width: 1};
-      data.gridItem.item.size.width = data.width;
-      this.updateButtonsGrid();
-    }
+  updateGridItem(gridItem: ActivityGridComponent) {
+    if (!gridItem?.item) return;
+    this.updateButtonsGrid();
   }
 
   remoteLoaded(image: any, svg: SVGElement){
@@ -277,7 +255,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     return "";
   }
 
-  getGridItems(): (ActivityPageCommand | null)[]
+  getGridItems(): ActivityPageCommand[]
   {
     const width = this.currentPage?.grid?.width ? this.currentPage.grid.width : 4;
     const height = this.currentPage?.grid?.height ? this.currentPage.grid.height : 6;
@@ -286,7 +264,7 @@ export class ActivityViewerComponent implements AfterViewInit {
       .map(() =>
         new Array(width).fill(false)
       );
-    const list: (ActivityPageCommand | null)[] = [];
+    const list: ActivityPageCommand[] = [];
     for (let y=0; y<this.currentPage?.grid.height!;y++)
     {
       for (let x=0; x<this.currentPage?.grid.width!;x++)
@@ -294,7 +272,7 @@ export class ActivityViewerComponent implements AfterViewInit {
         const item = this.currentPage?.items.find(item => item.location.x == x && item.location.y == y);
         if (item == null)
         {
-          if (!Helper.findItem(list, x, y)) list.push(null);
+          if (!Helper.findItem(list, x, y)) list.push({type: "text", location:{x, y}, size: {width: 1, height: 1}});
         }
         else {
           list.push(item);
@@ -311,7 +289,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.toggleGrid = true;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[$event.page!];
     this.updateButtonsGrid();
-    console.log("Page changed", this.grid);
+    console.log("Page changed", this.gridCommands);
     this.cdr.detectChanges();
   }
 
@@ -342,15 +320,15 @@ export class ActivityViewerComponent implements AfterViewInit {
     return `hsl(${stringUniqueHash % 360}, 95%, 40%)`;
   }
 
-  gridSourceSelected($event: GridItem) {
-    this.gridSource = $event;
+  gridSourceSelected($event: ActivityGridComponent) {
+    this.gridItemSource = $event;
     this.cdr.detectChanges();
   }
 
-  gridDestinationSelected($event: GridItem) {
-    let sourceLocation = Helper.getItemPosition(this.grid, this.gridSource?.index!,
+  gridDestinationSelected($event: ActivityGridComponent) {
+    let sourceLocation = Helper.getItemPosition(this.gridCommands, this.gridItemSource?.getIndex()!,
       this.currentPage!.grid.width, this.currentPage!.grid.height);
-    let destinationLocation = Helper.getItemPosition(this.grid, $event.index,
+    let destinationLocation = Helper.getItemPosition(this.gridCommands, $event.getIndex(),
       this.currentPage!.grid.width, this.currentPage!.grid.height);
     /*let sourceX = this.gridSource?.index! % this.currentPage?.grid.width!;
     let sourceY = Math.floor(this.gridSource?.index! / this.currentPage?.grid.width!);
@@ -358,13 +336,13 @@ export class ActivityViewerComponent implements AfterViewInit {
     let destinationY = Math.floor($event.index! / this.currentPage?.grid.width!);*/
     if (!destinationLocation)
     {
-      console.error("Cannot move item", this.gridSource, $event);
+      console.error("Cannot move item", this.gridItemSource, $event);
       return;
     }
-    if (this.gridSource?.item?.location)
+    if (this.gridItemSource?.item?.location)
     {
-      console.log(`Source ${this.gridSource.item.location.x},${this.gridSource.item.location.y} => ${destinationLocation?.x},${destinationLocation?.y}`, this.currentPage?.items)
-      this.gridSource.item.location = {x: destinationLocation?.x, y: destinationLocation?.y};
+      console.log(`Source ${this.gridItemSource.item.location.x},${this.gridItemSource.item.location.y} => ${destinationLocation?.x},${destinationLocation?.y}`, this.currentPage?.items)
+      this.gridItemSource.item.location = {x: destinationLocation?.x, y: destinationLocation?.y};
     }
     if ($event.item?.location)
     {
@@ -372,11 +350,13 @@ export class ActivityViewerComponent implements AfterViewInit {
       $event.item.location = {x: sourceLocation?.x!, y: sourceLocation?.y!};
     }
     // this.messageService.add({severity:'info', summary: `${this.gridSource?.index} (${sourceX},${sourceY}) moved to ${$event.index} (${destinationX},${destinationY})`, key: 'activity'});
+     this.updateButtonsGrid();
     this.cdr.detectChanges();
   }
 
-  gridItemClicked($event: GridItem) {
+  gridItemClicked($event: ActivityGridComponent) {
     this.gridItem = $event;
+    this.cdr.detectChanges();
     this.commandeditor?.show();
     this.cdr.detectChanges();
   }
@@ -418,7 +398,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     const itemWidth = item?.size?.width ? item!.size.width : 1;
     const itemHeight = item?.size?.height ? item!.size.height : 1;
     if (!width || !height) return {};
-    const style: any = {width: (itemWidth*this.gridWidth/width)+'px', height: (itemHeight!*this.gridHeight/height)+'px'};
+    const style: any = {width: (itemWidth*this.gridPixelWidth/width)+'px', height: (itemHeight!*this.gridPixelHeight/height)+'px'};
     if (item?.size?.width! > 1)
     {
       style['grid-column-end'] = `span ${item!.size.width}`;
@@ -511,8 +491,8 @@ export class ActivityViewerComponent implements AfterViewInit {
     });
   }
 
-  addGridItem($event: GridItem) {
-    const position = Helper.getItemPosition(this.grid, $event.index, this.currentPage!.grid.width,
+  addGridItem($event: ActivityGridComponent) {
+    const position = Helper.getItemPosition(this.gridCommands, $event.getIndex(), this.currentPage!.grid.width,
       this.currentPage!.grid.height);
     if (!position || !this.activity?.options?.included_entities || this.activity.options.included_entities.length == 0 ||
       !this.configEntityCommands) return;
@@ -535,13 +515,13 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.cdr.detectChanges();
     const targetGridItem = this.gridButtons?.find(gridButton =>
       gridButton.item?.location.x == position.x && gridButton.item?.location.y == position.y)
-    this.gridItem = targetGridItem?.getGridItem();
-    console.log("New command", targetGridItem?.getGridItem(), this.gridButtons, position);
+    this.gridItem = targetGridItem;
+    console.log("New command", targetGridItem, this.gridButtons, position);
     this.commandeditor?.show();
     this.cdr.detectChanges();
   }
 
-  deleteGridItem($event: GridItem) {
+  deleteGridItem($event: ActivityGridComponent) {
     if (!$event.item) return;
     const index = this.currentPage?.items.indexOf($event.item as ActivityPageCommand);
     if (index) this.currentPage?.items.splice(index, 1);

@@ -306,6 +306,12 @@ export class ServerService {
     }))
   }
 
+  getRemoteBackup(remote:Remote)
+  {
+    return this.http.get<any>(`/api/remote/${remote.address}/system/backup/export`,
+      {responseType: 'blob' as 'json'});//, {responseType: "application/octet-stream" });
+  }
+
   remoteGet(remote: Remote, url: string,
             params?:{[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}): Observable<any>
   {
@@ -370,9 +376,7 @@ export class ServerService {
 
   getBackup(url: string): Observable<any>
   {
-    return this.http.get<any>('/download/'+url, {responseType: 'blob' as 'json'}).pipe(map(results => {
-      return results;
-    }))
+    return this.http.get<any>('/download/'+url, {responseType: 'blob' as 'json'})
   }
 
   getActivitiesFromBackup(): Observable<Activity[]>

@@ -10,11 +10,12 @@ import {
   ViewChild
 } from '@angular/core';
 import {ActivityPageCommand} from "../../interfaces";
+import {Helper} from "../../helper";
 
 export interface GridItem
 {
   item: ActivityPageCommand | undefined;
-  gridItem: ElementRef;
+  gridComponent: ActivityGridComponent;
   index: number;
 }
 
@@ -29,16 +30,23 @@ export interface GridItem
 export class ActivityGridComponent  implements AfterViewInit{
   // @Input() items: HTMLElement[];
   @Input() editable: boolean = true;
-  @Input({required: true}) source: GridItem | undefined;
-  @Input() item!: ActivityPageCommand | null;
-  @Input() index!: number;
-  @Output() sourceSelected = new EventEmitter<GridItem>();
-  @Output() destinationSelected = new EventEmitter<GridItem>();
-  @Output() itemClicked = new EventEmitter<GridItem>();
+  @Input({required: true}) source: ActivityGridComponent | undefined;
+  @Input() item!: ActivityPageCommand;
+  // @Input() index!: number;
+  @Input() gridCommands: ActivityPageCommand[] = [];
+  @Output() sourceSelected = new EventEmitter<ActivityGridComponent>();
+  @Output() destinationSelected = new EventEmitter<ActivityGridComponent>();
+  @Output() itemClicked = new EventEmitter<ActivityGridComponent>();
   @ViewChild("griditem", {static: false}) gridItem: ElementRef | undefined;
   @Input() grid!: { width: number; height: number };
 
   constructor(private cdr:ChangeDetectorRef) {
+  }
+
+  getIndex(): number
+  {
+    if (!this.gridCommands) return 0;
+    return this.gridCommands.indexOf(this.item);
   }
 
   ngAfterViewInit(): void {
@@ -50,48 +58,50 @@ export class ActivityGridComponent  implements AfterViewInit{
     this.cdr.detectChanges();
   }
 
-  getGridItem()
-  {
-    return {gridItem: this.gridItem!, item: this.item!, index: this.index};
-  }
-
   @HostListener('click', ['$event']) onClick(event: any) {
     if (!this.editable) return;
-    this.itemClicked.emit(this.getGridItem())
+    this.itemClicked.emit(this)
     this.cdr.detectChanges();
   }
 
   @HostListener('dragstart', ['$event']) handleDragStart(event: any){
-    if (!this.editable) return;
+    if (!this.editable || Helper.isEmptyItem(this.item)) return;
     this.gridItem!.nativeElement.style.opacity = '0.4';
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('text/html', this.gridItem!.nativeElement.innerHTML);
-    this.sourceSelected.emit({gridItem: this.gridItem!,
-      item: this.item!, index: this.index});
+    this.sourceSelected.emit(this);
     this.cdr.detectChanges();
   }
 
+
+  checkDraggableDestination(): boolean
+  {
+    if (!this.source) return false;
+    if (Helper.isSameSize(this.source.item, this.item)) return true;
+    if (!Helper.isEmptyItem(this.item)) return false;
+    return Helper.checkItem(this.source.item, this.gridCommands, this.item.location.x, this.item.location.y,
+      this.source.item.size.width, this.source.item.size.height);
+  }
+
+
   @HostListener('dragover', ['$event']) handleDragOver(event: any){
+    if (!this.source) return false;
+    if (!this.checkDraggableDestination()) return;
     if (event.preventDefault) {
       event.preventDefault();
     }
-    if (this.source?.item != this.item && this.source?.item?.size)
-    {
-      //TODO calculate x,y position of griditem
-      /*let sourceX = this.gridSource?.index! % this.currentPage?.grid.width!;
-      let sourceY = Math.floor(this.gridSource?.index! / this.currentPage?.grid.width!);
-      let destinationX = $event.index! % this.currentPage?.grid.width!;
-      let destinationY = Math.floor($event.index! / this.currentPage?.grid.width!);*/
-      //pointer-events: none;
-    }
     event.dataTransfer.dropEffect = 'move';
     this.cdr.detectChanges();
-    return false;
+    return;
   }
 
   @HostListener('dragenter', ['$event']) handleDragEnter(event: any) {
-    if (!this.editable) return;
+    if (!this.editable || !this.source || this.source == this) return;
+    console.error("dragenter", event);
+    if (!this.checkDraggableDestination()) return;
+    this.cdr.detectChanges();
     this.gridItem!.nativeElement.classList.add('over');
+    event.preventDefault();
     this.cdr.detectChanges();
   }
 
@@ -106,13 +116,17 @@ export class ActivityGridComponent  implements AfterViewInit{
       event.stopPropagation(); // stops the browser from redirecting.
     }
     if (!this.editable) return;
-    if (this.source && this.source.gridItem != this.gridItem) {
-      this.source.gridItem.nativeElement.innerHTML = this.gridItem!.nativeElement.innerHTML;
-      this.gridItem!.nativeElement.innerHTML = event.dataTransfer.getData('text/html');
+    if (this.source?.gridItem && this.source.gridItem != this.gridItem) {
+      /*this.source.gridItem.nativeElement.innerHTML = this.gridItem!.nativeElement.innerHTML;
+      this.gridItem!.nativeElement.innerHTML = event.dataTransfer.getData('text/html');*/
       this.gridItem!.nativeElement.classList.remove('over');
-      console.log("DROP", event);
-      this.destinationSelected.emit({gridItem: this.gridItem!.nativeElement,
-        item: this.item!, index: this.index});
+      console.log(`DROP ${this.source.item.location} => ${this.item.location}`, event);
+      const x = this.item.location.x;
+      const y = this.item.location.y;
+
+      this.item.location = {x: this.source.item.location.x, y: this.source.item.location.y};
+      this.source.item.location = {x, y};
+      this.destinationSelected.emit(this);
       this.cdr.detectChanges();
     }
     return false;

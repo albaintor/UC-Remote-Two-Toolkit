@@ -7,7 +7,7 @@ import {
   ButtonMapping,
   UIPage,
   Remote,
-  ActivityPageCommand, OrphanEntity, Profiles, Config
+  ActivityPageCommand, OrphanEntity
 } from "./interfaces";
 
 export class Helper
@@ -185,6 +185,12 @@ export class Helper
     return null;
   }
 
+  static swapElements(array:any[], index1: number, index2: number) {
+    let temp = array[index1];
+    array[index1] = array[index2];
+    array[index2] = temp;
+  }
+
   static isStandardIcon(icon: string | undefined): boolean {
     if (!icon) return false;
     return icon?.startsWith("uc:");
@@ -235,7 +241,7 @@ export class Helper
     }
   }
 
-  static findItem(list: (ActivityPageCommand | null)[], x: number, y: number): boolean
+  static findItem(list: ActivityPageCommand[], x: number, y: number): boolean
   {
     for (let item of list)
     {
@@ -249,18 +255,30 @@ export class Helper
     return false;
   }
 
-  static checkItem(item: ActivityPageCommand,list: (ActivityPageCommand | null)[], x: number, y: number, width: number, height: number): boolean
+  static isSameSize(item1: ActivityPageCommand, item2: ActivityPageCommand)
+  {
+    return item1.size.width == item2.size.width && item1.size.height == item2.size.height;
+  }
+
+  static isEmptyItem(item: ActivityPageCommand)
+  {
+    return item.media_player_id == undefined && item.icon == undefined && item.text == undefined &&
+      (item.command == undefined || (item.command as Command)?.entity_id == undefined);
+  }
+
+  static checkItem(item: ActivityPageCommand,list: ActivityPageCommand[], x: number, y: number, width: number, height: number): boolean
   {
     for (let existingItem of list)
     {
-      if (!existingItem || item == existingItem) continue;
+      if (!existingItem || Helper.isEmptyItem(existingItem) || item == existingItem) continue;
       if (Helper.isIntersection({x: existingItem.location.x, y: existingItem.location.y, width: existingItem.size.width, height: existingItem.size.height},
         {x, y, width, height}))
       {
-        return true;
+        console.log("Intersection", item, existingItem);
+        return false;
       }
     }
-    return false;
+    return true;
   }
 
   static getItemPosition(grid: (ActivityPageCommand | null)[], index: number, gridWidth: number, gridHeight: number): {x: number, y: number, width: number, height: number} | null

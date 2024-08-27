@@ -4,6 +4,7 @@ import { readdir } from 'node:fs/promises';
 import path from "path";
 import {pipeline as streamPipeline} from 'node:stream/promises';
 import * as url from "node:url";
+import * as stream from "node:stream";
 
 export class Remote
 {
@@ -431,5 +432,47 @@ export class Remote
     const url = this.getURL() + "/api/pub/status";
     let res = await got.get(url, options);
     return JSON.parse(res.body);
+  }
+
+  async getBackup(response)
+  {
+    const options = { headers: this.getHeaders(), throwHttpErrors: false};
+    const url = this.getURL() + `/api/system/backup/export`;
+
+    const downloadStream = got.stream(url, options);
+    await streamPipeline(
+      downloadStream,
+      response,
+    );
+
+    response.end();
+
+    /*downloadStream
+      .on("response", async res => {
+        console.log("response");
+        downloadStream.off('error', onError);
+        try {
+          await streamPipeline(
+            downloadStream,
+            new stream.PassThrough(),
+            response,
+          );
+
+          console.log('Success');
+        } catch (error) {
+          onError(error);
+        }
+      })
+      .on("downloadProgress", ({ transferred, total, percent }) => {
+        const percentage = Math.round(percent * 100);
+        console.log(`progress: ${transferred}/${total} (${percentage}%)`);
+      })
+      .on("finish", () => {
+        console.log("Download backup finished");
+        response.end();
+      })
+      .on("error", (error) => {
+        console.error(`Download failed: ${error.message}`);
+      });*/
   }
 }

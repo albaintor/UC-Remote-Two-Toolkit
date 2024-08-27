@@ -20,9 +20,9 @@
   </ng-template>
 </p-overlayPanel>
 <p-toast key="activity"></p-toast>
-<app-command-editor #commandeditor (updateItemHeight)="updateGridItemHeight($event)" (updateItemWidth)="updateGridItemWidth($event)"
+<app-command-editor #commandeditor (updateItem)="updateGridItem($event)"
   (addItem)="addGridItem($event)" (deleteItem)="deleteGridItem($event)"
-  [remote]="remote" [activity]="activity" [gridItem]="gridItem"></app-command-editor>
+  [remote]="remote" [activity]="activity" [gridItem]="gridItem" [gridCommands]="gridCommands" [grid]="currentPage?.grid"></app-command-editor>
 <!--<p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">-->
 <div class="flex align-content-center flex-wrap gap-3" *ngIf="!editMode">
   <div class="flex align-items-center justify-content-center">
@@ -68,10 +68,10 @@
   <br>
   <p-paginator (onPageChange)="onPageChange($event)" [first]="firstRow" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
   <div class="grid-container" *ngIf="toggleGrid"
-       [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width), 'width': gridWidth+'px', 'height': gridHeight+'px'}">
-    <grid-button [editable]="editMode" *ngFor="let item of grid; let index=index" [index]="index" [source]="gridSource" [item]="item" [grid]="currentPage.grid" [style]="getGridItemSize(item)"
-         (sourceSelected)="gridSourceSelected($event)" (destinationSelected)="gridDestinationSelected($event)"
-        (itemClicked)="gridItemClicked($event)">
+       [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width), 'width': gridPixelWidth+'px', 'height': gridPixelHeight+'px'}">
+    <grid-button [editable]="editMode" *ngFor="let item of gridCommands; let index=index" [source]="gridItemSource" [item]="item" [grid]="currentPage.grid" [style]="getGridItemSize(item)"
+                 (sourceSelected)="gridSourceSelected($event)" (destinationSelected)="gridDestinationSelected($event)" [gridCommands]="gridCommands"
+                 (itemClicked)="gridItemClicked($event)">
       <ng-container *ngIf="Helper.isStandardIcon(item?.icon)">
         <span [class]="Helper.getIconClass(item?.icon)"></span>
       </ng-container>

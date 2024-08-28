@@ -181,7 +181,7 @@
 <p-dialog [header]="'Activity '+activity?.name" [(visible)]="viewerVisible" [style]="{width: '50vw'}">
   <app-activity-viewer *ngIf="viewerVisible" [remote]="selectedRemote" [editMode]="false" [activity]="activity"></app-activity-viewer>
 </p-dialog>
-<app-activity-viewer #editor [remote]="targetRemote" [editMode]="true" [activity]="updatedActivity" (onChange)="activityChanged()"></app-activity-viewer>
+<app-activity-viewer #editor [remote]="targetRemote" [editMode]="true" [activity]="updatedActivity" (onChange)="activityChanged()" (reload)="reloadActivity()"></app-activity-viewer>
 <ng-container *ngIf="dump">
   <p>Generated mapping :</p>
   <ngx-json-viewer [json]="dump"></ngx-json-viewer>

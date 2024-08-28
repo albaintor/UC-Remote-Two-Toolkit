@@ -108,6 +108,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   progressDetail = "";
   availableItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
+    {label: 'Reload remote data', command: () => this.reloadAndBuildData(false), icon: 'pi pi-refresh'},
     {label: 'View original activity', command: () => this.viewerVisible = true, icon: 'pi pi-folder-open'},
     {label: 'Reset mapping to original', command: () => this.resetActivity(), icon: 'pi pi-times'},
     {label: 'Clear mapping', command: () => this.clearMapping(), icon: 'pi pi-times'},
@@ -280,14 +281,14 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     this.cdr.detectChanges();
   }*/
 
-  reloadAndBuildData()
+  reloadAndBuildData(showOperations = true)
   {
-    this.reloadRemoteAndbuildData().subscribe({next: results => {
+    this.reloadRemoteAndbuildData(showOperations).subscribe({next: results => {
         this.messageService.add({severity: "success", summary: "Activity imported successfully"});
         console.log("Pending operations", this.remoteOperations);
         this.dump = this.remoteOperations;
         if (results) this.remoteOperations = results;
-        if (!this.orphanEntities.find(entity => entity.newEntity == undefined))
+        if (showOperations && !this.orphanEntities.find(entity => entity.newEntity == undefined))
           this.showOperations = true;
         this.cdr.detectChanges();
       }, error: error => {
@@ -296,7 +297,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       }})
   }
 
-  reloadRemoteAndbuildData(): Observable<RemoteOperation[] | undefined>
+  reloadRemoteAndbuildData(showOperations = true): Observable<RemoteOperation[] | undefined>
   {
     this.messageService.add({severity: "info", summary: "Loading target remote data..."});
     this.cdr.detectChanges();
@@ -306,7 +307,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       this.entities = data.entities;
       this.cdr.detectChanges();
       const remoteOperations = this.buildData();
-      this.checkExistingActivity();
+      if (showOperations) this.checkExistingActivity();
       return remoteOperations;
     }))
   }
@@ -461,9 +462,10 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
         })
       }
       activity.options?.user_interface?.pages?.forEach(page => {
-        remoteOperations.push({name: `Delete page ${page.name} ${this.updatedActivity!.name}`,
-          method: "DELETE", api: `/api/activities/${activity.entity_id}/ui/pages/${page.page_id}`,
-          body: {}, status: OperationStatus.Todo});
+        if (page.page_id)
+          remoteOperations.push({name: `Delete page ${page.name} ${this.updatedActivity!.name}`,
+            method: "DELETE", api: `/api/activities/${activity.entity_id}/ui/pages/${page.page_id}`,
+            body: {}, status: OperationStatus.Todo});
       });
       remoteOperations.push({name: `Update activity ${this.updatedActivity!.name}`, method: "PATCH",
         api: `/api/activities/${activity.entity_id}`, body, status: OperationStatus.Todo});
@@ -951,5 +953,16 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     this.activityEditor?.updateButtonsGrid();
     this.remoteOperations = this.buildData();
     this.cdr.detectChanges();
+  }
+
+  reloadActivity() {
+    if (!this.updatedActivity?.entity_id) return;
+    this.remoteLoader?.reloadActivity(this.updatedActivity.entity_id).subscribe(activity => {
+      if (!activity || !this.updatedActivity?.options?.user_interface) return;
+      this.updatedActivity.options.user_interface = JSON.parse(JSON.stringify(activity.options?.user_interface));
+      this.cdr.detectChanges();
+      this.activityEditor?.updateButtonsGrid();
+      this.cdr.detectChanges();
+    })
   }
 }

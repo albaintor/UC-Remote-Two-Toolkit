@@ -23,7 +23,6 @@
 <app-command-editor #commandeditor (updateItem)="updateGridItem($event)"
   (addItem)="addGridItem($event)" (deleteItem)="deleteGridItem($event)"
   [remote]="remote" [activity]="activity" [gridItem]="gridItem" [gridCommands]="gridCommands" [grid]="currentPage?.grid"></app-command-editor>
-<!--<p-dialog [header]="'Activity '+activity?.name" [(visible)]="visible" [style]="{width: '50vw'}">-->
 <div class="flex align-content-center flex-wrap gap-3" *ngIf="!editMode">
   <div class="flex align-items-center justify-content-center">
     <h3>Activity</h3>
@@ -62,11 +61,17 @@
       <input #input_file_page type="file" style="display:none" (change)="loadInputFilePage($event)">
     </p-button>
   </div>
+  <div class="flex align-items-center justify-content-center" *ngIf="editMode">
+    <p-button label="Add a new page" (onClick)="addPage($event)" severity="success" icon="pi pi-file-plus" size="small"></p-button>
+  </div>
+  <div class="flex align-items-center justify-content-center" *ngIf="editMode">
+    <p-button label="Delete current page" (onClick)="deletePage($event)" severity="danger" icon="pi pi-trash" size="small"></p-button>
+  </div>
 </div>
 
 <ng-container *ngIf="currentPage">
   <br>
-  <p-paginator (onPageChange)="onPageChange($event)" [first]="firstRow" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
+  <p-paginator (onPageChange)="onPageChange($event)" [first]="firstPage" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
   <div class="grid-container" *ngIf="toggleGrid"
        [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width), 'width': gridPixelWidth+'px', 'height': gridPixelHeight+'px'}">
     <grid-button [editable]="editMode" *ngFor="let item of gridCommands; let index=index" [source]="gridItemSource" [item]="item" [grid]="currentPage.grid" [style]="getGridItemSize(item)"
@@ -87,7 +92,6 @@
                 [style]="getStyle(getEntityName((item.command | as : Command)?.entity_id!))"></p-chip><br><br>
         <p-chip [label]="(item.command | as : Command)?.cmd_id" styleClass="chip-command"
                 [style]="getStyle((item.command | as : Command)?.cmd_id!)"></p-chip>
-<!--        {{(item.command | as : Command)?.entity_id}} {{(item.command | as : Command)?.cmd_id}}-->
       </ng-container>
       <span *ngIf="item?.media_player_id != null" style="text-align: center">
         <p-chip [label]="getEntityName(item?.media_player_id!)"
@@ -106,5 +110,4 @@
     <p-button *ngIf="showDump"  label="Copy data to clipboard" (onClick)="copyToClipboard(activity)"></p-button>
     <ngx-json-viewer *ngIf="showDump" [json]="activity"></ngx-json-viewer>
   </ng-container>
-<!--</p-dialog>-->
 <p-confirmDialog key="activityViewerDialog" rejectButtonStyleClass="p-button-outlined" />

@@ -79,6 +79,9 @@ export class ActivityGridComponent  implements AfterViewInit{
     if (!this.source) return false;
     if (Helper.isSameSize(this.source.item, this.item)) return true;
     if (!Helper.isEmptyItem(this.item)) return false;
+    if (!Helper.checkItemOverflow(this.item.location.x, this.item.location.y,
+      this.source.item.size.width, this.source.item.size.height, this.grid.width, this.grid.height)) return false;
+
     return Helper.checkItem(this.source.item, this.gridCommands, this.item.location.x, this.item.location.y,
       this.source.item.size.width, this.source.item.size.height);
   }
@@ -120,7 +123,7 @@ export class ActivityGridComponent  implements AfterViewInit{
       /*this.source.gridItem.nativeElement.innerHTML = this.gridItem!.nativeElement.innerHTML;
       this.gridItem!.nativeElement.innerHTML = event.dataTransfer.getData('text/html');*/
       this.gridItem!.nativeElement.classList.remove('over');
-      console.log(`DROP ${this.source.item.location} => ${this.item.location}`, event);
+      console.log(`Drop ${this.source.item.location.x} ${this.source.item.location.y} => ${this.item.location.x} ${this.item.location.y}`, event);
       const x = this.item.location.x;
       const y = this.item.location.y;
 
@@ -136,11 +139,5 @@ export class ActivityGridComponent  implements AfterViewInit{
     this.gridItem!.nativeElement.style.opacity = '1';
     this.gridItem!.nativeElement.classList.remove('over');
     this.cdr.detectChanges();
-    // this.source?.classList.remove('over');
-    // this.items.forEach(item => {
-    //   item.classList.remove('over');
-    // });
   }
 }
-
-// customElements.define('grid-button', ActivityGridComponent, { extends: 'div' });

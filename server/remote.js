@@ -296,6 +296,16 @@ export class Remote
     return JSON.parse(res.body);
   }
 
+  async deleteActivityPage(activity_id, page_id)
+  {
+    const options = {
+      ...this.getOptions()
+    }
+    const url = this.getURL() + '/api/activities/'+activity_id+'/ui/pages/'+page_id;
+    let res = await got.delete(url, options);
+    return JSON.parse(res.body);
+  }
+
   async deleteEntity(entity_id)
   {
     const options = {

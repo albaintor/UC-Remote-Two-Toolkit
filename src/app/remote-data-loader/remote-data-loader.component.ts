@@ -92,72 +92,72 @@ export class RemoteDataLoaderComponent {
         throw error;
       }),
       map((entities) => {
-      console.debug("Get remote entities", remote, entities);
-      this.entities = entities;
-      this.cdr.detectChanges();
-      return entities;
-    })));
+        console.debug("Get remote entities", remote, entities);
+        this.entities = entities;
+        this.cdr.detectChanges();
+        return entities;
+      })));
     tasks.push(this.server.getRemoteActivities(remote).pipe(
       catchError(error => {
         console.error("Error activities", error);
         throw error;
       }),
       mergeMap((entities) => {
-      console.debug("Get remote activities", remote, entities);
-      this.activities = entities;
-      this.messageService.add({key: "remote-loader", severity: "success", summary: `Remote data ${remote.address}`,
-        detail: `${this.activities.length} activities extracted. Extracting details now...`});
-      this.cdr.detectChanges();
-      return from(this.activities).pipe(mergeMap(activity => {
-        return this.server.getRemoteActivity(remote, activity.entity_id!).pipe(
-          catchError(error => {
-            console.error("Error activity", error);
-            throw error;
-          }),
-          map(activityDetails => {
-          // console.debug("Get remote activity details", remote, activityDetails);
-          this.progressDetail = Helper.getEntityName(activity);
-          const name = activity.name;
-          Object.assign(activity, activityDetails);
-          activity.name = name;
-          if ((activityDetails as any).options?.included_entities)
-            (activity as any).entities = (activityDetails as any).options.included_entities;
-          this.remoteProgress += 100/this.activities.length;
-          this.cdr.detectChanges();
-          return activity;
-        }))
-      }, 2))
-    })));
+        console.debug("Get remote activities", remote, entities);
+        this.activities = entities;
+        this.messageService.add({key: "remote-loader", severity: "success", summary: `Remote data ${remote.address}`,
+          detail: `${this.activities.length} activities extracted. Extracting details now...`});
+        this.cdr.detectChanges();
+        return from(this.activities).pipe(mergeMap(activity => {
+          return this.server.getRemoteActivity(remote, activity.entity_id!).pipe(
+            catchError(error => {
+              console.error("Error activity", error);
+              throw error;
+            }),
+            map(activityDetails => {
+              // console.debug("Get remote activity details", remote, activityDetails);
+              this.progressDetail = Helper.getEntityName(activity);
+              const name = activity.name;
+              Object.assign(activity, activityDetails);
+              activity.name = name;
+              if ((activityDetails as any).options?.included_entities)
+                (activity as any).entities = (activityDetails as any).options.included_entities;
+              this.remoteProgress += 100/this.activities.length;
+              this.cdr.detectChanges();
+              return activity;
+            }))
+        }, 2))
+      })));
     tasks.push(this.server.getRemoteMacros(remote).pipe(
       catchError(error => {
         console.error("Error macros", error);
         throw error;
       }),
       map(macros => {
-      console.debug("Get remote macros", remote, macros);
-      this.macros = macros;
-      this.cdr.detectChanges();
-      return macros;
-    })));
+        console.debug("Get remote macros", remote, macros);
+        this.macros = macros;
+        this.cdr.detectChanges();
+        return macros;
+      })));
     tasks.push(this.server.getRemoteProfiles(remote).pipe(
       catchError(error => {
         console.error("Error profiles", error);
         throw error;
       }),
       map(profiles => {
-      console.debug("Get remote profiles", remote, profiles);
-      this.profiles = profiles;
-      return profiles;
-    })))
+        console.debug("Get remote profiles", remote, profiles);
+        this.profiles = profiles;
+        return profiles;
+      })))
     tasks.push(this.server.getConfigEntityCommands(remote).pipe(
       catchError(error => {
         console.error("Error commands", error);
         throw error;
       }),
       map(commands => {
-      console.debug("Get remote config entity commands", remote, commands);
-      this.configCommands = commands;
-    })))
+        console.debug("Get remote config entity commands", remote, commands);
+        this.configCommands = commands;
+      })))
     console.debug("Refresh tasks", tasks);
     return forkJoin(tasks).pipe(
       catchError(error => {
@@ -186,9 +186,67 @@ export class RemoteDataLoaderComponent {
         this.progress = false;
         this.cdr.detectChanges();
         const data: RemoteData = {context: this.context, activities: this.activities, configCommands: this.configCommands, entities: this.entities,
-        profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities, macros: this.macros};
+          profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities, macros: this.macros};
         this.loaded.emit(data);
         return data;
+      }))
+  }
+
+
+  reloadActivity(activity_id: string): Observable<Activity | undefined>
+  {
+    if (!this.remote)
+    {
+      this.messageService.add({key: "remote-loader", severity:'error', summary:'No remote selected'});
+      this.cdr.detectChanges();
+      this.loaded.emit(undefined);
+      return of(undefined);
+    }
+    const remote = this.remote!;
+    this.progress = true;
+    this.remoteProgress = 0;
+    this.cdr.detectChanges();
+    const tasks: Observable<any>[] = [];
+
+    tasks.push(this.server.getRemoteActivity(remote, activity_id).pipe(
+    catchError(error => {
+      console.error("Error activity", error);
+      throw error;
+    }),
+    map(activityDetails => {
+      // console.debug("Get remote activity details", remote, activityDetails);
+      const activity = this.activities.find(activity => activity.entity_id === activity_id);
+      if (activity) this.activities.splice(this.activities.indexOf(activity), 1);
+      this.activities.push(activityDetails);
+      activityDetails.name = Helper.getEntityName(activityDetails);
+      this.cdr.detectChanges();
+      return activityDetails;
+    })));
+
+    return forkJoin(tasks).pipe(
+      catchError(error => {
+        console.error("Error during extraction", remote, error);
+        this.progress = false;
+        this.cdr.detectChanges();
+        throw error;
+      }),
+      map(results => {
+        console.log("Get remote data over", remote, results);
+        this.unusedEntities = Helper.getUnusedEntities(this.activities, this.profiles, this.entities);
+        this.orphanEntities = Helper.getOrphans(this.activities, this.entities);
+        this.messageService.add({
+          key: "remote-loader",
+          severity: "success", summary: "Remote data loaded",
+          detail: `Activity reloaded`
+        });
+        localStorage.setItem("activities", JSON.stringify(this.activities));
+        this.localMode = true;
+        this.progress = false;
+        this.cdr.detectChanges();
+        const data: RemoteData = {context: this.context, activities: this.activities, configCommands: this.configCommands, entities: this.entities,
+          profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities, macros: this.macros};
+        this.loaded.emit(data);
+        return this.activities.find(activity => activity.entity_id === activity_id);
       }))
   }
 }

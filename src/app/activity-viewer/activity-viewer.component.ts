@@ -85,6 +85,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   @Input() remote: Remote | undefined;
   @Input() editMode = true;
   @Output() onChange: EventEmitter<void> = new EventEmitter();
+  @Output() reload = new EventEmitter<void>();
   buttonsMap:{ [id: string]: string } = {};
   reversedButtonMap:{ [id: string]: string } = {};
   public Command!: Command;
@@ -104,7 +105,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   gridItemSource: ActivityGridComponent | undefined;
   gridCommands: ActivityPageCommand[] = [];
   showDump: boolean = false;
-  firstRow = 0;
+  firstPage = 0;
   gridPixelWidth = 4*185;
   gridPixelHeight = 6*185;
   protected readonly Helper = Helper;
@@ -165,7 +166,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   {
     this.showDump = false;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[0];
-    this.firstRow = 0;
+    this.firstPage = 0;
     console.log("View activity", this.activity);
     this.updateButtonsGrid();
   }
@@ -257,6 +258,19 @@ export class ActivityViewerComponent implements AfterViewInit {
 
   getGridItems(): ActivityPageCommand[]
   {
+
+    if (this.currentPage && this.activity?.options?.user_interface?.pages?.indexOf(this.currentPage) == -1)
+    {
+      if (this.firstPage >= this.activity.options.user_interface.pages.length)
+        this.firstPage = this.activity.options.user_interface.pages.length -1;
+      if (this.activity.options.user_interface.pages.length > 0)
+      {
+        this.currentPage = this.activity.options.user_interface.pages[this.firstPage];
+      }
+      this.toggleGrid = false;
+      this.cdr.detectChanges();
+      this.toggleGrid = true;
+    }
     const width = this.currentPage?.grid?.width ? this.currentPage.grid.width : 4;
     const height = this.currentPage?.grid?.height ? this.currentPage.grid.height : 6;
     const matrix: boolean[][] = new Array(height)
@@ -287,6 +301,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.toggleGrid = false;
     this.cdr.detectChanges();
     this.toggleGrid = true;
+    this.firstPage = $event.page as number;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[$event.page!];
     this.updateButtonsGrid();
     console.log("Page changed", this.gridCommands);
@@ -326,30 +341,6 @@ export class ActivityViewerComponent implements AfterViewInit {
   }
 
   gridDestinationSelected($event: ActivityGridComponent) {
-    let sourceLocation = Helper.getItemPosition(this.gridCommands, this.gridItemSource?.getIndex()!,
-      this.currentPage!.grid.width, this.currentPage!.grid.height);
-    let destinationLocation = Helper.getItemPosition(this.gridCommands, $event.getIndex(),
-      this.currentPage!.grid.width, this.currentPage!.grid.height);
-    /*let sourceX = this.gridSource?.index! % this.currentPage?.grid.width!;
-    let sourceY = Math.floor(this.gridSource?.index! / this.currentPage?.grid.width!);
-    let destinationX = $event.index! % this.currentPage?.grid.width!;
-    let destinationY = Math.floor($event.index! / this.currentPage?.grid.width!);*/
-    if (!destinationLocation)
-    {
-      console.error("Cannot move item", this.gridItemSource, $event);
-      return;
-    }
-    if (this.gridItemSource?.item?.location)
-    {
-      console.log(`Source ${this.gridItemSource.item.location.x},${this.gridItemSource.item.location.y} => ${destinationLocation?.x},${destinationLocation?.y}`, this.currentPage?.items)
-      this.gridItemSource.item.location = {x: destinationLocation?.x, y: destinationLocation?.y};
-    }
-    if ($event.item?.location)
-    {
-      console.log(`Destination ${$event.item.location.x},${$event.item.location.y} => ${sourceLocation?.x},${sourceLocation?.y}`, this.currentPage?.items)
-      $event.item.location = {x: sourceLocation?.x!, y: sourceLocation?.y!};
-    }
-    // this.messageService.add({severity:'info', summary: `${this.gridSource?.index} (${sourceX},${sourceY}) moved to ${$event.index} (${destinationX},${destinationY})`, key: 'activity'});
      this.updateButtonsGrid();
     this.cdr.detectChanges();
   }
@@ -368,6 +359,45 @@ export class ActivityViewerComponent implements AfterViewInit {
       else
         this.messageService.add({severity:'success', summary: "Activity data copied to clipboard", key: 'activity'});
       this.cdr.detectChanges();
+    });
+  }
+
+  deletePage($event: any)
+  {
+    if (!this.currentPage || !this.activity?.entity_id) return;
+    this.confirmationService.confirm({
+      target: $event.target as EventTarget,
+      key: "activityViewerDialog",
+      message: `Are you sure that you want to delete this page "${this.currentPage.name}" ?`,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon:"none",
+      rejectIcon:"none",
+      rejectButtonStyleClass:"p-button-text",
+      accept: () => {
+        if (!this.activity?.entity_id || !this.remote) return;
+        this.server.deleteRemoteActivityPage(this.remote, this.activity.entity_id, this.currentPage!.page_id!)
+          .subscribe({next: results =>
+          {
+            this.messageService.add({
+              severity: 'success',
+              summary: `Page "${this.currentPage?.name}" successfully deleted`
+            });
+            this.reload.emit();
+            this.cdr.detectChanges();
+          },
+          error: (error) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: `Error while deleting page "${this.currentPage?.name}"`
+            });
+            this.cdr.detectChanges();
+          }
+        });
+
+      },
+      reject: () => {
+      }
     });
   }
 
@@ -531,5 +561,13 @@ export class ActivityViewerComponent implements AfterViewInit {
   buttonChanged($event: ButtonMapping) {
     this.updateButtons();
     this.cdr.detectChanges();
+  }
+
+  addPage($event: MouseEvent) {
+    if (!this.activity) return;
+    if (!this.activity.options) this.activity.options = {};
+    if (!this.activity.options.user_interface) this.activity.options.user_interface = { pages: []};
+    this.activity.options.user_interface.pages?.push({name: "New page", items: [], grid: {width: 4, height: 6}});
+    this.updateButtonsGrid();
   }
 }

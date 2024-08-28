@@ -267,11 +267,14 @@ export class CommandEditorComponent {
   }
 
   addCommand() {
-    if (!this.gridItem?.item)
+    if (!this.gridItem?.item) return;
+    if (!this.selectedEntity)
     {
-      this.addItem.emit(this.gridItem);
-      this.cdr.detectChanges();
+      this.selectedEntity = this.entities[0];
     }
+    (this.gridItem.item.command as Command) = {entity_id: this.selectedEntity!.entity_id!, cmd_id: ""};
+    this.addItem.emit(this.gridItem);
+    this.cdr.detectChanges();
   }
 
   deleteCommand() {
@@ -281,15 +284,5 @@ export class CommandEditorComponent {
       this.visible = false;
       this.cdr.detectChanges();
     }
-  }
-
-  createCommand() {
-    if (!this.gridItem?.item) return;
-    if (!this.selectedEntity)
-    {
-      this.selectedEntity = this.entities[0];
-    }
-    (this.gridItem.item.command as Command) = {entity_id: this.selectedEntity!.entity_id!, cmd_id: ""};
-    this.cdr.detectChanges();
   }
 }

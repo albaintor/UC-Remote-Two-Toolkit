@@ -260,10 +260,17 @@ export class Helper
     return item1.size.width == item2.size.width && item1.size.height == item2.size.height;
   }
 
-  static isEmptyItem(item: ActivityPageCommand)
+  static isEmptyItem(item: ActivityPageCommand | undefined)
   {
+    if (!item) return true;
     return item.media_player_id == undefined && item.icon == undefined && item.text == undefined &&
       (item.command == undefined || (item.command as Command)?.entity_id == undefined);
+  }
+
+  static checkItemOverflow(x: number, y: number, width: number, height: number,
+                           gridWidth: number, gridHeight: number): boolean
+  {
+    return !(x + width > gridWidth || y + height > gridHeight);
   }
 
   static checkItem(item: ActivityPageCommand,list: ActivityPageCommand[], x: number, y: number, width: number, height: number): boolean

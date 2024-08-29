@@ -160,6 +160,9 @@ export class CommandEditorComponent {
       this.selectedEntity = this.activity!.options!.included_entities[0];
     }
     if (this.selectedEntity?.entity_id) {
+      const selectedEntity = this.entities.find(entity => entity.entity_id == this.selectedEntity?.entity_id);
+
+
       this.entityCommands = this.configEntityCommands.filter(command =>
         command.id.startsWith(this.selectedEntity?.entity_type!)).sort((a, b) =>
          Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!));
@@ -178,12 +181,25 @@ export class CommandEditorComponent {
           this.entityCommands = this.entityCommands.filter(command => commands.includes(command.id));
         }
       }
-      if (!this.selectedCommand || !this.entityCommands.find(command =>
+      if (selectedEntity?.options?.simple_commands)
+      {
+        this.entityCommands.push(...selectedEntity.options.simple_commands.map(command => { return {
+          id: command, cmd_id: command, name: {en: command}
+        }})
+        );
+      }
+
+      const command = this.gridItem?.item?.command as Command;
+      if (!this.selectedCommand && this.entityCommands.find(entityCommand =>
+        command.cmd_id === entityCommand.cmd_id))
+      {
+        this.selectedCommand = this.entityCommands.find(entityCommand =>
+          command.cmd_id === entityCommand.cmd_id);
+      } else if (!this.selectedCommand || !this.entityCommands.find(command =>
         this.selectedCommand?.id === command.id))
       {
         this.selectedCommand = this.entityCommands.length > 0 ? this.entityCommands[0] : undefined;
       }
-
     }
     this.cdr.detectChanges();
   }

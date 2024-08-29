@@ -18,7 +18,7 @@ export interface EntityCommand
     fr?: string;
     de?: string
   }
-  params: [
+  params?: [
     {
       items?:{
         field: string;

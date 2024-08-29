@@ -1,110 +1,49 @@
-<p-toast id="remoteCommand"></p-toast>
-<app-icon-selector (iconSelected)="iconSelected($event)"></app-icon-selector>
-<p-dialog header="Edit command" [(visible)]="visible" [style]="{width: '50vw', height: '40vw'}" appendTo="body"
-  [dismissableMask]="true">
-  <div class="flex flex-wrap gap-3">
-    <div class="flex align-items-center" *ngIf="!Helper.isEmptyItem(gridItem?.item)">
-      <p-button icon="pi pi-undo" (onClick)="undoChanges($event)" label="Revert changes"></p-button><br>
-    </div>
-    <div class="flex align-items-center" *ngIf="Helper.isEmptyItem(gridItem?.item)">
-      <p-button severity="warning" icon="pi pi-file-plus" (onClick)="addCommand()" label="Create a command"></p-button><br>
-    </div>
-    <div class="flex align-items-center" *ngIf="!Helper.isEmptyItem(gridItem?.item)">
-      <p-button severity="danger" icon="pi pi-trash" (onClick)="deleteCommand()" label="Delete this command"></p-button><br>
-    </div>
+<p-toast id="commandEditor"></p-toast>
+<div class="flex flex-wrap gap-3">
+<ng-container *ngIf="uiCommand?.type === 'media_player'">
+  <div class="flex align-items-center">
+    <label for="media_player">Media player</label>
   </div>
-  <div class="flex flex-wrap gap-3" *ngIf="!Helper.isEmptyItem(gridItem?.item)">
-    <div class="flex align-items-center">
-      <label for="mode">Toggle text / icon / Media Player</label>
-    </div>
-    <div class="flex align-items-center">
-      <p-selectButton id="mode" [options]="stateOptions" [(ngModel)]="gridItem!.item!.type"
-                      optionLabel="label" optionValue="value" (ngModelChange)="commandSelected($event)"></p-selectButton>
-    </div>
-    <ng-container *ngIf="gridItem?.item && gridItem!.item!.type !== 'media_player'">
-      <div class="flex align-items-center" *ngIf="gridItem!.item!.type === 'text'">
-        <label for="text">Display text</label>
-      </div>
-      <div class="flex align-items-center"  *ngIf="gridItem!.item!.type === 'text'">
-        <input pInputText id="text" type="text" placeholder="Normal" [(ngModel)]="gridItem!.item!.text" />
-      </div>
-      <div class="flex align-items-center" *ngIf="gridItem!.item!.type === 'icon'">
-        <span id="icon" (click)="selectIcon(gridItem!.item!)" class="icon-selected">
-          <ng-container *ngIf="gridItem!.item!.icon && Helper.isStandardIcon(gridItem!.item!.icon)">
-            <span [class]="Helper.getIconClass(gridItem!.item!.icon)"></span>
-          </ng-container>
-          <ng-container *ngIf="gridItem!.item!.icon && Helper.isCustomIcon(gridItem!.item!.icon)">
-            <img [src]="Helper.getIconURL(remote!, gridItem!.item!.icon)" [alt]="gridItem!.item!.icon" width="70" height="70">
-          </ng-container>
-        </span>
-      </div>
-    </ng-container>
-    <div class="flex align-items-center" *ngIf="gridItem?.item?.type === 'media_player'">
-      <div class="flex align-items-center">
-        <label for="media_player">Media player</label>
-      </div>
-      <div class="flex align-items-center">
-        <p-dropdown id="media_player" [(ngModel)]="selectedEntity" [options]="mediaPlayers" (ngModelChange)="mediaPlayerSelected($event)">
-          <ng-template pTemplate="selectedItem">
-            {{Helper.getEntityName(selectedEntity)}}
-          </ng-template>
-          <ng-template let-item pTemplate="item">
-            {{Helper.getEntityName(item)}} ({{item.entity_id}})
-          </ng-template>
-        </p-dropdown>
-      </div>
-      <div class="flex align-items-center">
-        {{gridItem!.item!.media_player_id}}
-      </div>
-    </div>
+  <div class="flex align-items-center">
+    <p-dropdown id="media_player" [(ngModel)]="selectedEntity" [options]="mediaPlayers" (ngModelChange)="mediaPlayerSelected($event)">
+      <ng-template pTemplate="selectedItem">
+        {{Helper.getEntityName(selectedEntity)}}
+      </ng-template>
+      <ng-template let-item pTemplate="item">
+        {{Helper.getEntityName(item)}} ({{item.entity_id}})
+      </ng-template>
+    </p-dropdown>
   </div>
-  <div class="flex flex-wrap gap-3" *ngIf="gridItem?.item?.command">
-    <div class="flex align-items-center">
-      <label for="entity">Entity</label>
-    </div>
-    <div class="flex align-items-center">
-      <p-dropdown id="entity" [(ngModel)]="selectedEntity" [options]="activityEntities" (ngModelChange)="entitySelected($event)">
-        <ng-template pTemplate="selectedItem">
-          {{Helper.getEntityName(selectedEntity)}}
-        </ng-template>
-        <ng-template let-item pTemplate="item">
-          {{Helper.getEntityName(item)}} ({{item.entity_id}})
-        </ng-template>
-      </p-dropdown>
-    </div>
-    <div class="flex align-items-center">
-      <label for="command">Command</label>
-    </div>
-    <ng-container *ngIf="gridItem?.item?.type !== 'media_player'">
-      <div class="flex align-items-center">
-      <p-dropdown id="command" [(ngModel)]="selectedCommand" [options]="entityCommands" (ngModelChange)="commandSelected($event)">
-        <ng-template pTemplate="selectedItem">
-          {{Helper.getEntityName(selectedCommand)}}
-        </ng-template>
-        <ng-template let-item pTemplate="item">
-          {{Helper.getEntityName(item)}}
-        </ng-template>
-      </p-dropdown>
-      </div>
-    </ng-container>
+  <div class="flex align-items-center">
+    {{uiCommand!.media_player_id}}
   </div>
-<br>
-  <div class="flex flex-wrap gap-3" *ngIf="!Helper.isEmptyItem(gridItem?.item)">
-    <div class="flex  align-items-center">
-      <label for="width">Width</label>
-    </div>
-    <div class="flex-shrink-0 align-items-center">
-      <p-inputNumber id="width" [(ngModel)]="gridItemSize.width" [showButtons]="true" buttonLayout="horizontal" inputId="width" spinnerMode="horizontal" [step]="1"
-                     decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus"
-                     decrementButtonIcon="pi pi-minus" [min]="1" [max]="grid?.width" styleClass="input-number" (ngModelChange)="checkGridSize($event)"></p-inputNumber>
-    </div>
-    <div class="flex align-items-center">
-      <label for="height">Height</label>
-    </div>
-    <div class="flex-shrink-0 align-items-center">
-      <p-inputNumber id="height" [(ngModel)]="gridItemSize.height" [showButtons]="true" buttonLayout="horizontal" inputId="width" spinnerMode="horizontal" [step]="1"
-                     decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus"
-                     decrementButtonIcon="pi pi-minus" [min]="1" [max]="grid?.height" styleClass="input-number" (ngModelChange)="checkGridSize($event)"></p-inputNumber>
-    </div>
+</ng-container>
+<ng-container *ngIf="uiCommand?.type !== 'media_player'">
+  <div class="flex align-items-center">
+    <label for="entity">Entity</label>
   </div>
-</p-dialog>
+  <div class="flex align-items-center">
+    <p-dropdown id="entity" [(ngModel)]="selectedEntity" [options]="activityEntities" (ngModelChange)="entitySelected($event)">
+      <ng-template pTemplate="selectedItem">
+        {{Helper.getEntityName(selectedEntity)}}
+      </ng-template>
+      <ng-template let-item pTemplate="item">
+        {{Helper.getEntityName(item)}} ({{item.entity_id}})
+      </ng-template>
+    </p-dropdown>
+  </div>
+  <div class="flex align-items-center">
+    <label for="command">Command</label>
+  </div>
+  <div class="flex align-items-center">
+    <p-dropdown id="command" [(ngModel)]="selectedCommand" [options]="entityCommands" (ngModelChange)="commandSelected($event)">
+      <ng-template pTemplate="selectedItem">
+        {{Helper.getEntityName(selectedCommand)}}
+      </ng-template>
+      <ng-template let-item pTemplate="item">
+        {{Helper.getEntityName(item)}}
+      </ng-template>
+    </p-dropdown>
+  </div>
+</ng-container>
+</div>

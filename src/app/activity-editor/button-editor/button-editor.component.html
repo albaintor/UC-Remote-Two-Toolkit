@@ -17,32 +17,7 @@
       <p-button icon="pi pi-plus" (onClick)="assignShortPress()" label="Assign short press"></p-button><br>
     </div>
     <ng-container *ngIf="button.short_press">
-      <div class="flex align-items-center">
-        <label for="entity">Entity</label>
-      </div>
-      <div class="flex align-items-center">
-        <p-dropdown id="entity" [(ngModel)]="selectedEntity" [options]="activityEntities" (ngModelChange)="entitySelected($event)">
-          <ng-template pTemplate="selectedItem">
-            {{Helper.getEntityName(selectedEntity)}}
-          </ng-template>
-          <ng-template let-item pTemplate="item">
-            {{Helper.getEntityName(item)}} ({{item.entity_id}})
-          </ng-template>
-        </p-dropdown>
-      </div>
-      <div class="flex align-items-center">
-        <label for="command">Command</label>
-      </div>
-      <div class="flex align-items-center">
-        <p-dropdown id="command" [(ngModel)]="selectedCommand" [options]="entityCommands" (ngModelChange)="commandSelected($event)">
-          <ng-template pTemplate="selectedItem">
-            {{Helper.getEntityName(selectedCommand)}}
-          </ng-template>
-          <ng-template let-item pTemplate="item">
-            {{Helper.getEntityName(item)}}
-          </ng-template>
-        </p-dropdown>
-      </div>
+      <app-command-editor [remote]="remote" [activity]="activity" [command]="button.short_press" (updateItem)="updateCommand()"></app-command-editor>
       <div class="flex align-items-center" *ngIf="button.short_press">
         <p-button icon="pi pi-trash" (onClick)="removeElement(button, 'short_press')" label="Remove short press"></p-button><br>
       </div>
@@ -56,32 +31,7 @@
       <p-button icon="pi pi-plus" (onClick)="assignLongPress()" label="Assign long press"></p-button><br>
     </div>
     <ng-container *ngIf="button.long_press">
-      <div class="flex align-items-center">
-        <label for="entity">Entity</label>
-      </div>
-      <div class="flex align-items-center">
-        <p-dropdown id="entitylong" [(ngModel)]="selectedEntityLong" [options]="activityEntities" (ngModelChange)="entitySelected($event)">
-          <ng-template pTemplate="selectedItem">
-            {{Helper.getEntityName(selectedEntityLong)}}
-          </ng-template>
-          <ng-template let-item pTemplate="item">
-            {{Helper.getEntityName(item)}} ({{item.entity_id}})
-          </ng-template>
-        </p-dropdown>
-      </div>
-      <div class="flex align-items-center">
-        <label for="commandlong">Command</label>
-      </div>
-      <div class="flex align-items-center">
-        <p-dropdown id="commandlong" [(ngModel)]="selectedCommandLong" [options]="entityCommandsLong" (ngModelChange)="commandSelectedLong($event)">
-          <ng-template pTemplate="selectedItem">
-            {{Helper.getEntityName(selectedCommandLong)}}
-          </ng-template>
-          <ng-template let-item pTemplate="item">
-            {{Helper.getEntityName(item)}}
-          </ng-template>
-        </p-dropdown>
-      </div>
+      <app-command-editor [remote]="remote" [activity]="activity" [command]="button.long_press" (updateItem)="updateCommand()"></app-command-editor>
       <div class="flex align-items-center" *ngIf="button.long_press">
         <p-button icon="pi pi-trash" (onClick)="removeElement(button, 'long_press')" label="Remove long press"></p-button><br>
       </div>

@@ -20,9 +20,9 @@
   </ng-template>
 </p-overlayPanel>
 <p-toast key="activity"></p-toast>
-<app-command-editor #commandeditor (updateItem)="updateGridItem($event)"
+<app-ui-command-editor #commandeditor (updateItem)="updateGridItem($event)"
   (addItem)="addGridItem($event)" (deleteItem)="deleteGridItem($event)"
-  [remote]="remote" [activity]="activity" [gridItem]="gridItem" [gridCommands]="gridCommands" [grid]="currentPage?.grid"></app-command-editor>
+  [remote]="remote" [activity]="activity" [gridItem]="gridItem" [gridCommands]="gridCommands" [grid]="currentPage?.grid"></app-ui-command-editor>
 <div class="flex align-content-center flex-wrap gap-3" *ngIf="!editMode">
   <div class="flex align-items-center justify-content-center">
     <h3>Activity</h3>

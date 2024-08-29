@@ -33,7 +33,7 @@ import {ActivityGridComponent, GridItem} from "./activity-grid/activity-grid.com
 import {ButtonModule} from "primeng/button";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {Helper} from "../helper";
-import {CommandEditorComponent} from "../activity-editor/command-editor/command-editor.component";
+import {UiCommandEditorComponent} from "../activity-editor/ui-command-editor/ui-command-editor.component";
 import { saveAs } from 'file-saver-es';
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {ButtonEditorComponent} from "../activity-editor/button-editor/button-editor.component";
@@ -60,7 +60,7 @@ export class AsPipe implements PipeTransform {
     ActivityGridComponent,
     ButtonModule,
     NgxJsonViewerModule,
-    CommandEditorComponent,
+    UiCommandEditorComponent,
     ConfirmDialogModule,
     ButtonEditorComponent
   ],
@@ -90,7 +90,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   reversedButtonMap:{ [id: string]: string } = {};
   public Command!: Command;
   @ViewChild("buttonpanel", {static: false}) buttonpanel: OverlayPanel | undefined;
-  @ViewChild("commandeditor", {static: false}) commandeditor: CommandEditorComponent | undefined;
+  @ViewChild("commandeditor", {static: false}) commandeditor: UiCommandEditorComponent | undefined;
   @ViewChild("input_file_page", {static: false}) input_file_page: ElementRef | undefined;
   @ViewChildren(ActivityGridComponent) gridButtons:QueryList<ActivityGridComponent> | undefined;
   @ViewChild(ButtonEditorComponent) buttonEditor:ButtonEditorComponent | undefined;

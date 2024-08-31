@@ -126,9 +126,9 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.server.configCommands$.subscribe(entityCommands => {
       this.configEntityCommands = entityCommands;
     })
-    if (!this.configEntityCommands || this.configEntityCommands.length == 0)
+    if (this.remote && (!this.configEntityCommands || this.configEntityCommands.length == 0))
     {
-      this.server.getConfigEntityCommands(this.remote!).subscribe(entityCommands => {
+      this.server.getConfigEntityCommands(this.remote).subscribe(entityCommands => {
         this.configEntityCommands = entityCommands;
         this.cdr.detectChanges();
       })

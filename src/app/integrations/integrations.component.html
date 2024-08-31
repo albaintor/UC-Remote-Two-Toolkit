@@ -51,6 +51,7 @@
   accept=".gz,.tgz" maxFileSize="100000000"
   (onUpload)="onUploadIntegration($event)"
   (onBeforeUpload)="onUploadingIntegration($event)"
+  (onError)="onUploadIntegrationError($event)"
   [auto]="true"
   chooseLabel="Select integration driver to upload..." /><br>
 <p-table [value]="driverIntegrations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"

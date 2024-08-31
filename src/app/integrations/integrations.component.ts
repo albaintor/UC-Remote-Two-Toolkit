@@ -33,7 +33,7 @@ import {FormsModule} from "@angular/forms";
 import {MessagesModule} from "primeng/messages";
 import {TableModule} from "primeng/table";
 import {ChipModule} from "primeng/chip";
-import {FileBeforeUploadEvent, FileUploadEvent, FileUploadModule} from "primeng/fileupload";
+import {FileBeforeUploadEvent, FileUploadErrorEvent, FileUploadEvent, FileUploadModule} from "primeng/fileupload";
 import {BlockUIModule} from "primeng/blockui";
 
 type DriverIntegration = Driver | Integration;
@@ -249,5 +249,13 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
       this.updateTask.unsubscribe();
       this.updateTask = undefined;
     }
+  }
+
+  onUploadIntegrationError($event: FileUploadErrorEvent) {
+    console.log("Integration upload failed", $event);
+    this.messageService.add({severity: "error", summary: `Failed to upload diver to the remote ${this.selectedRemote?.remote_name}`,
+      detail: $event.error?.error.body, sticky: true});
+    this.progress = false;
+    this.cdr.detectChanges();
   }
 }

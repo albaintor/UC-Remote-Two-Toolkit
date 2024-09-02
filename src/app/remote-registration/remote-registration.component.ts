@@ -92,6 +92,17 @@ export class RemoteRegistrationComponent {
       }})
   }
 
+  restartRemote(remote: Remote | undefined)
+  {
+    if (remote == undefined) return;
+    this.server.powerRemote(remote, "REBOOT").subscribe(results => {
+      console.debug("Restart remote", results);
+      this.messageService.add({severity: "success", summary: "Remote restarted",
+        key: "remote"});
+      this.cdr.detectChanges();
+    });
+  }
+
   selectRemote(remote: Remote) {
     if (remote == undefined) { return; }
     this.selectedRemote = remote;

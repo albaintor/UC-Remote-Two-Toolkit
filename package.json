@@ -1,6 +1,6 @@
 {
   "name": "r2-tool",
-  "version": "0.0.5",
+  "version": "1.0.1",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

@@ -6,6 +6,15 @@ import {pipeline as streamPipeline} from 'node:stream/promises';
 import * as url from "node:url";
 import * as stream from "node:stream";
 
+const SystemCommand = {
+  STANDBY: 'STANDBY',
+  REBOOT: 'REBOOT',
+  POWER_OFF: 'POWER_OFF',
+  RESTART: 'RESTART',
+  RESTART_UI: 'RESTART_UI',
+  RESTART_CORE: 'RESTART_CORE',
+};
+
 export class Remote
 {
   address;
@@ -18,6 +27,7 @@ export class Remote
   remote_name;
   protocol = 'http://';
   resources_path = '';
+
 
   constructor(address, port, user, token, api_key) {
     this.address = address;
@@ -432,6 +442,21 @@ export class Remote
     const options = this.getOptions();
     const url = this.getURL() + `/api/intg/instances/${integrationId}`;
     let res = await got.delete(url, options);
+    return JSON.parse(res.body);
+  }
+
+  
+  async powerRemote(value)
+  {
+    const options = {
+      headers: this.getHeaders(),
+      searchParams: {
+        cmd: value
+      }
+    };
+
+    const url = this.getURL() + `/api/system`;
+    let res = await got.post(url, options);
     return JSON.parse(res.body);
   }
 

@@ -143,6 +143,8 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   viewerVisible = false;
   orphanEntities: OrphanEntity[] = [];
   unusedEntities: Entity[] = [];
+  remoteProgress = 0;
+  progressDetail = "";
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
   }
@@ -347,6 +349,48 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       colour += value.toString(16).padStart(2, '0')
     }
     return colour
+  }
+
+  removeEntities(entities: Entity[])
+  {
+    if (!this.selectedRemote) return;
+    const remote = this.selectedRemote;
+    this.progress = true;
+    const total = entities.length;
+    this.remoteProgress = 0;
+    let errors = 0;
+    this.cdr.detectChanges();
+    const tasks = from(entities).pipe(mergeMap(entity => {
+      this.remoteProgress += 100/total;
+      let entityName = Helper.getEntityName(entity);
+      if (!entityName) entityName = entity.entity_id!;
+      this.progressDetail = `Removing ${entityName}`;
+      if (errors > 0) this.progressDetail += ` (${errors} errors)`
+      this.progressDetail += "...";
+      this.cdr.detectChanges();
+      return this.server.deleteRemoteEntity(remote, entity.entity_id!).pipe(
+        catchError(error => {
+          console.error("Error activity", error);
+          errors++;
+          this.cdr.detectChanges();
+          return of(entity);
+        }),
+        map(
+        results => {
+          return entity;
+      }))
+    },1))
+
+    forkJoin([tasks]).subscribe(results => {
+      if (errors > 0)
+        this.messageService.add({severity: 'warning', summary: `${errors} errors during the deletion on ${entities.length} entities`,
+          sticky: true});
+      else
+        this.messageService.add({severity: 'success', summary: `${entities.length} entities removed`, sticky: true});
+      this.progress = false;
+      this.remoteProgress = 0;
+      this.cdr.detectChanges();
+    })
   }
 
   uploadSelectedFile(file: FileProgress)

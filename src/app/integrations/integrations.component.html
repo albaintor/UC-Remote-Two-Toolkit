@@ -1,7 +1,4 @@
-<div class="progress-spinner" *ngIf="progress">
-  <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
-</div>
-<p-toast></p-toast>
+<p-toast key="integrationComponent"></p-toast>
 <h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Remote Two configuration toolkit</h2>
 <p-blockUI [blocked]="progress"></p-blockUI>
 <p-menubar [model]="menuItems">
@@ -38,6 +35,9 @@
     </div>
   </ng-template>
 </p-menubar>
+<div class="progress-spinner" *ngIf="progress">
+  <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+</div>
 <p-messages severity="info">
   <ng-template pTemplate>
     <div class="ml-2">Here you can review and upload custom integrations</div>

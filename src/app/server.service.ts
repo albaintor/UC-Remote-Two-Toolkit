@@ -319,6 +319,14 @@ export class ServerService {
       {responseType: 'blob' as 'json'});//, {responseType: "application/octet-stream" });
   }
 
+  powerRemote(remote: Remote, value: "STANDBY"|"REBOOT"|"POWER_OFF"|"RESTART"|"RESTART_UI"|"RESTART_CORE"): Observable<any>
+  {
+    const httpOptions = {params: new HttpParams({fromObject: {"cmd": value}})};
+    return this.http.post<any>(`/api/remote/${remote.address}/system`, {}, httpOptions).pipe(map(results => {
+      return results;
+    }))
+  }
+
   remoteGet(remote: Remote, url: string,
             params?:{[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}): Observable<any>
   {
@@ -373,6 +381,7 @@ export class ServerService {
       return results;
     }))
   }
+
 
   getContext(): Observable<Context>
   {

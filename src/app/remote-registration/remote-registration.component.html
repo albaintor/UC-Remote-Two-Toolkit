@@ -33,7 +33,8 @@
           <p-button icon="pi pi-play" pTooltip="Select this remote" [rounded]="true" (click)="selectRemote(remote)"></p-button>&nbsp;&nbsp;
           <p-button icon="pi pi-trash" pTooltip="Unregister this remote" [rounded]="true" (click)="deleteRemote(remote)" severity="danger"></p-button>&nbsp;
           <p-button icon="pi pi-barcode" pTooltip="Get registrations" [rounded]="true" (click)="getRemote(remote)"></p-button>&nbsp;
-          <p-button icon="pi pi-wifi" pTooltip="Test connection" [rounded]="true" (click)="testRemote(remote)"></p-button>
+          <p-button icon="pi pi-wifi" pTooltip="Test connection" [rounded]="true" (click)="testRemote(remote)"></p-button>&nbsp;
+          <p-button icon="pi pi-replay" severity="warning" pTooltip="Reboot remote" [rounded]="true" (click)="restartRemote(remote)"></p-button>
         </td>
         <td><ng-container *ngIf="selectedRemote == remote"><b>{{remote.remote_name}}</b> (selected)</ng-container>
           <ng-container *ngIf="selectedRemote != remote">{{remote.remote_name}}</ng-container>

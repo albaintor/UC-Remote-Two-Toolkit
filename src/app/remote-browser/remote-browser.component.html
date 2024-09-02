@@ -18,6 +18,10 @@
   </ng-template>
 </p-menubar>
 <app-remote-data-loader #loader [remote]="selectedRemote" (loaded)="remoteLoaded($event)"></app-remote-data-loader>
+<ng-container *ngIf="progress && remoteProgress > 0">
+  {{progressDetail}}<br>
+  <p-progressBar [value]="Math.round(remoteProgress)"></p-progressBar>
+</ng-container>
 <p-messages severity="info">
   <ng-template pTemplate>
     <div class="ml-2">Here you can review your activities and entities. When you click on an activity you can edit it (buttons and UI mapping, replace an entity by another...).<br>
@@ -115,6 +119,9 @@
   </ng-container>
   <ng-container *ngIf="unusedEntities.length > 0">
     <p-accordionTab header="Unused entities">
+      <p-button [pTooltip]="'Remove these '+unusedEntities.length+' unused entities'" label="Remove unused entities"
+                (onClick)="removeEntities(unusedEntities)" severity="danger" icon="pi pi-times" size="small"></p-button>
+
       <p-table [value]="unusedEntities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
                dataKey="entity_id" columnResizeMode="expand">
         <ng-template pTemplate="header">

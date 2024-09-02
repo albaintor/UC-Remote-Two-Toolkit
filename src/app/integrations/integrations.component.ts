@@ -38,6 +38,11 @@ import {BlockUIModule} from "primeng/blockui";
 
 type DriverIntegration = Driver | Integration;
 
+interface IntegrationsDrivers {
+  drivers?: Driver[];
+  integrations?: Integration[];
+}
+
 @Component({
   selector: 'app-integrations',
   standalone: true,
@@ -117,18 +122,11 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
     this.updateTask = this.getRemoteStatus()?.subscribe();
   }
 
-
-  loadRemoteData():void
+  updateIntegrations(): Observable<IntegrationsDrivers>
   {
-    if (!this.selectedRemote)
-    {
-      this.messageService.add({severity:'error', summary:'No remote selected'});
-      this.cdr.detectChanges();
-      return;
-    }
-    this.progress = true;
-    this.cdr.detectChanges();
-    const tasks: Observable<any>[] = [];
+    if (!this.selectedRemote) return of({});
+
+    const tasks: Observable<IntegrationsDrivers>[] = [];
     tasks.push(this.server.getRemoteIntegrations(this.selectedRemote).pipe(map(integrations => {
       this.integrations = integrations;
       console.log("Integrations", integrations);
@@ -136,7 +134,7 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
       // this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
       //   detail: `${this.entity_list.length} entities extracted`});
       this.cdr.detectChanges();
-      return integrations;
+      return { integrations };
     })));
 
     tasks.push(this.server.getRemoteDrivers(this.selectedRemote).pipe(map(drivers => {
@@ -144,19 +142,42 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
       console.log("Drivers", drivers);
       this.drivers.forEach(driver => (driver.name as any) = Helper.getEntityName(driver))
       this.cdr.detectChanges();
-      return drivers;
+      return { drivers };
     })));
 
-    forkJoin(tasks).subscribe({next: (results) => {
+    return forkJoin(tasks).pipe(map(results => {
+      const data: IntegrationsDrivers = {drivers: [], integrations: []};
+
+      for (let result of results) {
+        if (result.drivers) data.drivers?.push(...result.drivers);
+        if (result.integrations) data.integrations?.push(...result.integrations);
+      }
+      return data;
+    }));
+  }
+
+
+  loadRemoteData():void
+  {
+    if (!this.selectedRemote)
+    {
+      this.messageService.add({key: "integrationComponent", severity:'error', summary:'No remote selected'});
+      this.cdr.detectChanges();
+      return;
+    }
+    this.progress = true;
+    this.cdr.detectChanges();
+    this.updateIntegrations().subscribe(({next: (results) => {
+      if (!results.drivers && !results.integrations) return;
         //this.driverIntegrations = [...this.integrations, ...this.drivers];
         this.driverIntegrations = [...this.drivers];
-        this.messageService.add({
+        this.messageService.add({key: "integrationComponent",
           severity: "success", summary: "Remote drivers and integrations loaded",
         });
         this.cdr.detectChanges();
       },
       error: (error) => {
-        this.messageService.add({
+        this.messageService.add({key: "integrationComponent",
           severity: "error", summary: "Error during remote extraction"
         });
         this.progress = false;
@@ -166,7 +187,7 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
         // this.items.filter(item => (item as any).block == true).forEach(item => item.disabled = false);
         this.progress = false;
         this.cdr.detectChanges();
-      }})
+      }}));
   }
 
 
@@ -174,7 +195,7 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
 
   onUploadIntegration($event: FileUploadEvent) {
     console.log("Integration uploaded", $event);
-    this.messageService.add({severity: "info", summary: `Driver uploaded to the remote ${this.selectedRemote?.remote_name}`});
+    this.messageService.add({key: "integrationComponent", severity: "info", summary: `Driver uploaded to the remote ${this.selectedRemote?.remote_name}`});
     this.progress = false;
     this.loadRemoteData();
     this.cdr.detectChanges();
@@ -182,6 +203,7 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
 
   onUploadingIntegration($event: FileBeforeUploadEvent) {
     console.log("Integration uploading", $event);
+    this.messageService.add({key: "integrationComponent", severity: "info", summary: `Please wait while integration is uploading...`});
     this.progress = true;
     this.cdr.detectChanges();
   }
@@ -192,13 +214,13 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
     {
       this.server.deleteRemoteIntegration(this.selectedRemote, (integration as Integration).integration_id).subscribe(
         {next: results => {
-            this.messageService.add({severity: "success", summary: `Integration ${integration.name} successfully deleted`});
+            this.messageService.add({key: "integrationComponent", severity: "success", summary: `Integration ${integration.name} successfully deleted`});
             console.debug("Deleted integration", integration, results);
             this.loadRemoteData();
             this.cdr.detectChanges();
       },
         error: (error) => {
-          this.messageService.add({severity: "warning", summary: `An error may have occurred during deletion of integration ${integration.name}`});
+          this.messageService.add({key: "integrationComponent", severity: "warn", summary: `An error may have occurred during deletion of integration ${integration.name}`});
           console.error("Error while deleting integration", error);
           this.loadRemoteData();
           this.cdr.detectChanges();
@@ -208,13 +230,13 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
     {
       this.server.deleteRemoteDriver(this.selectedRemote, (integration as Driver).driver_id).subscribe(
         {next: results => {
-            this.messageService.add({severity: "success", summary: `Driver ${integration.name} successfully deleted`});
+            this.messageService.add({key: "integrationComponent", severity: "success", summary: `Driver ${integration.name} successfully deleted`});
             console.debug("Deleted driver", integration, results);
             this.loadRemoteData();
             this.cdr.detectChanges();
           },
           error: (error) => {
-            this.messageService.add({severity: "warning", summary: `An error may have occurred during deletion during deletion of driver ${integration.name}`});
+            this.messageService.add({key: "integrationComponent", severity: "warning", summary: `An error may have occurred during deletion during deletion of driver ${integration.name}`});
             this.loadRemoteData();
             console.error("Error while deleting driver", error);
             this.cdr.detectChanges();
@@ -222,22 +244,68 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
     }
   }
 
-  getRemoteStatus(): Observable<RemoteStatus> | undefined
+  getRemoteStatus(): Observable<RemoteStatus | undefined> | undefined
   {
     if (!this.selectedRemote) return undefined;
     const remote = this.selectedRemote;
+    interface RemoteData {
+      remoteStatus?: RemoteStatus;
+      integrationDrivers?: IntegrationsDrivers;
+    }
+    const tasks: Observable<RemoteData>[] = [
+      of(true).pipe(mergeMap(value => {
+        if (!this.selectedRemote) return of({} as RemoteData);
+        return this.server.getRemoteStatus(this.selectedRemote).pipe(map(results => {
+          return {remoteStatus: results};
+        }))
+      })),
+      this.updateIntegrations().pipe(map(results => {
+        return {integrationDrivers: results};
+      }))
+    ];
 
-   return timer(0, 5000).pipe(mergeMap(() => {
-     if (!this.selectedRemote) return of({} as RemoteStatus);
-     return this.server.getRemoteStatus(this.selectedRemote)
-   }),
-     takeWhile(results=> {
-       console.debug("Updated remote status", results);
-       if (results) this.remoteStatus = results;
-       this.cdr.detectChanges();
-       return this.selectedRemote != undefined
-     }),
-     finalize(()=>console.log("Finished update status")))
+
+    // const tasks2: Observable<any>[] = [of(true).pipe(mergeMap(() => {
+    //     if (!this.selectedRemote) return of({} as RemoteStatus);
+    //     return this.server.getRemoteStatus(this.selectedRemote)
+    //   }),
+    //     takeWhile(results=> {
+    //       console.debug("Updated remote status", results);
+    //       if (results) this.remoteStatus = results;
+    //       this.cdr.detectChanges();
+    //       return this.selectedRemote != undefined
+    //     }),
+    //     finalize(()=>console.log("Finished update status"))),
+    //   this.updateIntegrations()
+    // ];
+
+    return timer(0, 5000).pipe(mergeMap(() =>
+        forkJoin(tasks).pipe(map(results => {
+          for (let result of results)
+          {
+            if (result.remoteStatus) return result.remoteStatus;
+          }
+          return undefined;
+      }),
+      takeWhile(results => {
+        console.debug("Updated remote status", results);
+        if (results) this.remoteStatus = results;
+        this.cdr.detectChanges();
+        return this.selectedRemote != undefined
+      }),
+      finalize(()=>console.log("Finished update status")))));
+
+    // return timer(0, 5000).pipe(mergeMap(() => {
+    //  if (!this.selectedRemote) return of({} as RemoteStatus);
+    //  return this.server.getRemoteStatus(this.selectedRemote)
+    //  }),
+    //    takeWhile(results=> {
+    //      console.debug("Updated remote status", results);
+    //      if (results) this.remoteStatus = results;
+    //      this.cdr.detectChanges();
+    //      return this.selectedRemote != undefined
+    //    }),
+    //    finalize(()=>console.log("Finished update status")))
   }
 
   protected readonly Math = Math;
@@ -253,7 +321,7 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
 
   onUploadIntegrationError($event: FileUploadErrorEvent) {
     console.log("Integration upload failed", $event);
-    this.messageService.add({severity: "error", summary: `Failed to upload diver to the remote ${this.selectedRemote?.remote_name}`,
+    this.messageService.add({key: "integrationComponent", severity: "error", summary: `Failed to upload diver to the remote ${this.selectedRemote?.remote_name}`,
       detail: $event.error?.error.body, sticky: true});
     this.progress = false;
     this.cdr.detectChanges();

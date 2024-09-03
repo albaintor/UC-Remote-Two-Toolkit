@@ -6,7 +6,7 @@ import {
   OnInit,
   ViewEncapsulation
 } from '@angular/core';
-import {MenuItem, MessageService, SharedModule} from "primeng/api";
+import {ConfirmationService, MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
 import {Config, Driver, Integration, Remote, RemoteStatus} from "../interfaces";
 import {
@@ -35,6 +35,7 @@ import {TableModule} from "primeng/table";
 import {ChipModule} from "primeng/chip";
 import {FileBeforeUploadEvent, FileUploadErrorEvent, FileUploadEvent, FileUploadModule} from "primeng/fileupload";
 import {BlockUIModule} from "primeng/blockui";
+import {ConfirmDialogModule} from "primeng/confirmdialog";
 
 type DriverIntegration = Driver | Integration;
 
@@ -46,24 +47,25 @@ interface IntegrationsDrivers {
 @Component({
   selector: 'app-integrations',
   standalone: true,
-  imports: [
-    DropdownModule,
-    MenubarModule,
-    NgIf,
-    ProgressSpinnerModule,
-    SharedModule,
-    ToastModule,
-    FormsModule,
-    MessagesModule,
-    TableModule,
-    ChipModule,
-    FileUploadModule,
-    DecimalPipe,
-    BlockUIModule
-  ],
+    imports: [
+        DropdownModule,
+        MenubarModule,
+        NgIf,
+        ProgressSpinnerModule,
+        SharedModule,
+        ToastModule,
+        FormsModule,
+        MessagesModule,
+        TableModule,
+        ChipModule,
+        FileUploadModule,
+        DecimalPipe,
+        BlockUIModule,
+        ConfirmDialogModule
+    ],
   templateUrl: './integrations.component.html',
   styleUrl: './integrations.component.css',
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
@@ -81,7 +83,8 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
   remoteStatus: RemoteStatus | undefined;
   updateTask: Subscription | undefined;
 
-  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {}
+  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
+              private confirmationService: ConfirmationService) {}
 
 
   ngOnInit(): void {
@@ -210,38 +213,54 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
 
   deleteDriver(integration: Driver | Integration) {
     if (!this.selectedRemote) return;
-    if ((integration as Integration).integration_id && (integration as Integration).integration_id.length > 0)
-    {
-      this.server.deleteRemoteIntegration(this.selectedRemote, (integration as Integration).integration_id).subscribe(
-        {next: results => {
-            this.messageService.add({key: "integrationComponent", severity: "success", summary: `Integration ${integration.name} successfully deleted`});
-            console.debug("Deleted integration", integration, results);
-            this.loadRemoteData();
-            this.cdr.detectChanges();
+
+    const name = Helper.getEntityName(integration);
+    const remote = this.selectedRemote;
+
+    this.confirmationService.confirm({key: "confirmIntegrations",
+      header: `Do you really want to remove driver & integrations of "${name}" ?`,
+      acceptIcon: 'pi pi-check mr-2',
+      rejectIcon: 'pi pi-times mr-2',
+      rejectButtonStyleClass: 'p-button-sm',
+      acceptButtonStyleClass: 'p-button-outlined p-button-sm',
+      reject: () => {
+        this.cdr.detectChanges();
       },
-        error: (error) => {
-          this.messageService.add({key: "integrationComponent", severity: "warn", summary: `An error may have occurred during deletion of integration ${integration.name}`});
-          console.error("Error while deleting integration", error);
-          this.loadRemoteData();
-          this.cdr.detectChanges();
-        }});
-    }
-    else
-    {
-      this.server.deleteRemoteDriver(this.selectedRemote, (integration as Driver).driver_id).subscribe(
-        {next: results => {
-            this.messageService.add({key: "integrationComponent", severity: "success", summary: `Driver ${integration.name} successfully deleted`});
-            console.debug("Deleted driver", integration, results);
-            this.loadRemoteData();
-            this.cdr.detectChanges();
-          },
-          error: (error) => {
-            this.messageService.add({key: "integrationComponent", severity: "warning", summary: `An error may have occurred during deletion during deletion of driver ${integration.name}`});
-            this.loadRemoteData();
-            console.error("Error while deleting driver", error);
-            this.cdr.detectChanges();
-          }});
-    }
+      accept: () => {
+        if ((integration as Integration).integration_id && (integration as Integration).integration_id.length > 0)
+        {
+          this.server.deleteRemoteIntegration(remote, (integration as Integration).integration_id).subscribe(
+            {next: results => {
+                this.messageService.add({key: "integrationComponent", severity: "success", summary: `Integration ${integration.name} successfully deleted`});
+                console.debug("Deleted integration", integration, results);
+                this.loadRemoteData();
+                this.cdr.detectChanges();
+              },
+              error: (error) => {
+                this.messageService.add({key: "integrationComponent", severity: "warn", summary: `An error may have occurred during deletion of integration ${integration.name}`});
+                console.error("Error while deleting integration", error);
+                this.loadRemoteData();
+                this.cdr.detectChanges();
+              }});
+        }
+        else
+        {
+          this.server.deleteRemoteDriver(remote, (integration as Driver).driver_id).subscribe(
+            {next: results => {
+                this.messageService.add({key: "integrationComponent", severity: "success", summary: `Driver ${integration.name} successfully deleted`});
+                console.debug("Deleted driver", integration, results);
+                this.loadRemoteData();
+                this.cdr.detectChanges();
+              },
+              error: (error) => {
+                this.messageService.add({key: "integrationComponent", severity: "warning", summary: `An error may have occurred during deletion during deletion of driver ${integration.name}`});
+                this.loadRemoteData();
+                console.error("Error while deleting driver", error);
+                this.cdr.detectChanges();
+              }});
+        }
+      }
+    });
   }
 
   getRemoteStatus(): Observable<RemoteStatus | undefined> | undefined

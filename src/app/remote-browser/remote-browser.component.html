@@ -119,13 +119,14 @@
   </ng-container>
   <ng-container *ngIf="unusedEntities.length > 0">
     <p-accordionTab header="Unused entities">
-      <p-button [pTooltip]="'Remove these '+unusedEntities.length+' unused entities'" label="Remove unused entities"
-                (onClick)="removeEntities(unusedEntities)" severity="danger" icon="pi pi-times" size="small"></p-button>
+      <p-button *ngIf="selectedUnusedEntities.length > 0" [pTooltip]="'Remove the '+unusedEntities.length+' selected unused entities'" label="Remove unused entities"
+                (onClick)="removeEntities(selectedUnusedEntities)" severity="danger" icon="pi pi-times" size="small"></p-button>
 
-      <p-table [value]="unusedEntities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+      <p-table [value]="unusedEntities" [(selection)]="selectedUnusedEntities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
                dataKey="entity_id" columnResizeMode="expand">
         <ng-template pTemplate="header">
           <tr>
+            <th style="width: 4rem"><p-tableHeaderCheckbox pTooltip="Select all unused entities to be removed" /></th>
             <th pSortableColumn="title" pResizableColumn>Name</th>
             <th pSortableColumn="entity_id" pResizableColumn>Entity id<p-sortIcon field="entity_id"></p-sortIcon></th>
             <th pSortableColumn="entity_type" pResizableColumn>Type<p-sortIcon field="entity_type"></p-sortIcon></th>
@@ -134,6 +135,7 @@
         </ng-template>
         <ng-template pTemplate="body" let-entity>
           <tr>
+            <td><p-tableCheckbox [value]="entity" pTooltip="Select this entity to be removed"/></td>
             <td>{{Helper.getEntityName(entity)}}</td>
             <td>{{entity.entity_id}}</td>
             <td><p-chip [label]="entity.entity_type" [style]="getStyle(entity.entity_type)"></p-chip></td>
@@ -198,8 +200,8 @@
         <tr>
           <th pSortableColumn="name" pResizableColumn>Name<p-sortIcon field="name"></p-sortIcon></th>
           <th pSortableColumn="entity_id" pResizableColumn>Entity ID<p-sortIcon field="entity_id"></p-sortIcon></th>
-          <th pSortableColumn="integration_id" pResizableColumn>Integration<p-sortIcon field="integration_id"></p-sortIcon></th>
           <th pSortableColumn="entity_type" pResizableColumn>Entity type<p-sortIcon field="entity_type"></p-sortIcon></th>
+          <th pSortableColumn="integration_id" pResizableColumn>Integration<p-sortIcon field="integration_id"></p-sortIcon></th>
           <th pResizableColumn>Features</th>
         </tr>
         <tr>
@@ -258,3 +260,4 @@
 <ng-container *ngIf="outputObject"><br><p-button label="Clear" (onClick)="outputObject = null"></p-button>
   <ngx-json-viewer  [json]="outputObject"></ngx-json-viewer>
 </ng-container>
+<p-confirmDialog key="confirmBrowser"/>

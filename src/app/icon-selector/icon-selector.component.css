@@ -2,3 +2,11 @@
 {
   cursor: pointer;
 }
+
+.icon-select:hover
+{
+  border-radius: 15px;
+  border: 2px solid rgba(92, 92, 92, 0.63);
+  background-color: rgba(200, 198, 198, 0.8);
+  transition-duration: 0.5s;
+}

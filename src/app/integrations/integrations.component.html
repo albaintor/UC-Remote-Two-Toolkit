@@ -22,6 +22,13 @@
             <span>{{remoteStatus!.filesystem!.user_data!.available/1000000 | number:'1.0-0'}} Mb</span>
           </ng-template>
         </p-progressBar>
+        <span>CPU</span>
+        <p-progressBar *ngIf="remoteStatus?.load_avg" [value]="remoteStatus!.load_avg!.one!*100" [style]="{width: '100px'}"
+                       [pTooltip]="'CPU : '+Math.floor(remoteStatus!.load_avg!.one!*100).toLocaleString()+' %'">
+          <ng-template pTemplate="content" let-value>
+            <span>{{remoteStatus!.load_avg!.one! | number:'1.0-0'}} %</span>
+          </ng-template>
+        </p-progressBar>
       </ng-container>
       <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
         <ng-template pTemplate="selectedItem">
@@ -79,3 +86,4 @@
     </tr>
   </ng-template>
 </p-table>
+<p-confirmDialog key="confirmIntegrations"/>

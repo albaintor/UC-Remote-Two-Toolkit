@@ -51,6 +51,7 @@ import {BlockUIModule} from "primeng/blockui";
 import {DividerModule} from "primeng/divider";
 import {TagModule} from "primeng/tag";
 import {ToggleButtonModule} from "primeng/togglebutton";
+import {IconSelectorComponent} from "../icon-selector/icon-selector.component";
 
 export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
 
@@ -89,7 +90,8 @@ enum OperationMode {
     BlockUIModule,
     DividerModule,
     TagModule,
-    ToggleButtonModule
+    ToggleButtonModule,
+    IconSelectorComponent
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',
@@ -316,7 +318,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   {
     if (this.mode != OperationMode.Undefined) return;
     if (this.activities.find(activity => activity.entity_id === this.updatedActivity?.entity_id)) {
-      this.confirmationService.confirm({
+      this.confirmationService.confirm({key: "confirmEditor",
         header: `Activity "${this.updatedActivity?.name}" to import already exists`,
         message: 'Do you want to replace it ?',
         acceptIcon: 'pi pi-check mr-2',
@@ -965,4 +967,11 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       this.cdr.detectChanges();
     })
   }
+
+  iconSelected($event: string) {
+    if (!this.updatedActivity) return;
+    this.updatedActivity.icon = $event;
+    this.cdr.detectChanges();
+  }
+
 }

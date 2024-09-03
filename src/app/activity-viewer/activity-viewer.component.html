@@ -23,7 +23,17 @@
 <app-ui-command-editor #commandeditor (updateItem)="updateGridItem($event)"
   (addItem)="addGridItem($event)" (deleteItem)="deleteGridItem($event)"
   [remote]="remote" [activity]="activity" [gridItem]="gridItem" [gridCommands]="gridCommands" [grid]="currentPage?.grid"></app-ui-command-editor>
-<div class="flex align-content-center flex-wrap gap-3" *ngIf="!editMode">
+<div class="flex align-content-left flex-wrap gap-3" *ngIf="!editMode">
+  <div class="flex align-items-center justify-content-center" *ngIf="!editMode && remote && activity?.icon">
+    <span id="icon" class="icon-selected">
+      <ng-container *ngIf="Helper.isStandardIcon(activity!.icon!)">
+        <span [class]="Helper.getIconClass(activity!.icon!)"></span>
+      </ng-container>
+      <ng-container *ngIf="Helper.isCustomIcon(activity!.icon!)">
+        <img [src]="Helper.getIconURL(remote!, activity!.icon!)" [alt]="activity!.icon!" width="70" height="70">
+      </ng-container>
+    </span>
+  </div>
   <div class="flex align-items-center justify-content-center">
     <h3>Activity</h3>
   </div>

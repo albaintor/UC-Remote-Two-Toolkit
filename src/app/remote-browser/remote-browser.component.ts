@@ -17,7 +17,7 @@ import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {OverlayPanelModule} from "primeng/overlaypanel";
 import {ProgressBarModule} from "primeng/progressbar";
 import {RemoteRegistrationComponent} from "../remote-registration/remote-registration.component";
-import {MenuItem, MessageService} from "primeng/api";
+import {ConfirmationService, MenuItem, MessageService} from "primeng/api";
 import {TableModule} from "primeng/table";
 import {UploadedFilesComponent} from "../uploaded-files/uploaded-files.component";
 import {
@@ -51,6 +51,7 @@ import {AccordionModule} from "primeng/accordion";
 import {RemoteData, RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 import {BlockUIModule} from "primeng/blockui";
 import { saveAs } from 'file-saver-es';
+import {ConfirmDialogModule} from "primeng/confirmdialog";
 
 interface FileProgress
 {
@@ -62,36 +63,37 @@ interface FileProgress
 @Component({
   selector: 'app-remote-browser',
   standalone: true,
-    imports: [
-        TableModule,
-        CommonModule,
-        ChipModule,
-        OverlayPanelModule,
-        AutoCompleteModule,
-        FormsModule,
-        NgxJsonViewerModule,
-        InputTextModule,
-        ButtonModule,
-        TooltipModule,
-        MenubarModule,
-        ToastModule,
-        ProgressBarModule,
-        UploadedFilesComponent,
-        RemoteRegistrationComponent,
-        DropdownModule,
-        ProgressSpinnerModule,
-        ActivityViewerComponent,
-        EntityViewerComponent,
-        MessagesModule,
-        DialogModule,
-        MultiSelectModule,
-        AccordionModule,
-        RemoteDataLoaderComponent,
-        BlockUIModule
-    ],
+  imports: [
+    TableModule,
+    CommonModule,
+    ChipModule,
+    OverlayPanelModule,
+    AutoCompleteModule,
+    FormsModule,
+    NgxJsonViewerModule,
+    InputTextModule,
+    ButtonModule,
+    TooltipModule,
+    MenubarModule,
+    ToastModule,
+    ProgressBarModule,
+    UploadedFilesComponent,
+    RemoteRegistrationComponent,
+    DropdownModule,
+    ProgressSpinnerModule,
+    ActivityViewerComponent,
+    EntityViewerComponent,
+    MessagesModule,
+    DialogModule,
+    MultiSelectModule,
+    AccordionModule,
+    RemoteDataLoaderComponent,
+    BlockUIModule,
+    ConfirmDialogModule
+  ],
   templateUrl: './remote-browser.component.html',
   styleUrl: './remote-browser.component.css',
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
@@ -143,10 +145,12 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   viewerVisible = false;
   orphanEntities: OrphanEntity[] = [];
   unusedEntities: Entity[] = [];
+  selectedUnusedEntities: Entity[] = [];
   remoteProgress = 0;
   progressDetail = "";
 
-  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
+  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
+              private confirmationService: ConfirmationService) {
   }
 
   ngOnInit(): void {

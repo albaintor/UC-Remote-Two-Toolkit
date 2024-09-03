@@ -2,6 +2,7 @@
   <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
 </div>
 <p-toast></p-toast>
+<app-icon-selector #iconSelector (iconSelected)="iconSelected($event)"></app-icon-selector>
 <h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Remote Two configuration toolkit</h2>
 <p-menubar [model]="items">
   <ng-template pTemplate="end">
@@ -47,6 +48,17 @@
 </ng-container>
 <ng-container *ngIf="updatedActivity">
   <div class="flex align-content-center flex-wrap gap-3">
+    <div class="flex align-items-center justify-content-center" *ngIf="targetRemote && updatedActivity">
+    <span id="icon" class="icon-selected" (click)="iconSelector.show(targetRemote)">
+      <ng-container *ngIf="updatedActivity!.icon && Helper.isStandardIcon(updatedActivity!.icon!)">
+        <span [class]="Helper.getIconClass(updatedActivity!.icon!)"></span>
+      </ng-container>
+      <ng-container *ngIf="updatedActivity!.icon && Helper.isCustomIcon(updatedActivity!.icon!)">
+        <img [src]="Helper.getIconURL(targetRemote!, updatedActivity!.icon!)" [alt]="updatedActivity!.icon!" width="70" height="70">
+      </ng-container>
+      <ng-container *ngIf="!updatedActivity!.icon">No icon</ng-container>
+    </span>
+    </div>
     <div class="flex align-items-center justify-content-center">
       Activity name :
     </div>
@@ -189,4 +201,4 @@
 <app-remote-operations #operations [operations]="remoteOperations" [remote]="targetRemote"
                        [(visible)]="showOperations" (operationsDone)="operationsDone($event)"></app-remote-operations>
 
-<p-confirmDialog/>
+<p-confirmDialog key="confirmEditor"/>

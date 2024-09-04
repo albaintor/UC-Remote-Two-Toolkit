@@ -8,7 +8,7 @@
         <span class="pi pi-chart-line"></span>
         <p-progressBar *ngIf="remoteStatus?.memory" [value]="remoteStatus!.memory!.available_memory!/remoteStatus!.memory!.total_memory!*100" [style]="{width: '100px'}"
             [pTooltip]="'Memory : '+Math.floor(remoteStatus!.memory!.available_memory!/1000000).toLocaleString()+' megabytes available on '
-                +Math.floor(remoteStatus!.memory!.total_memory!/1000000).toLocaleString()">
+                +Math.floor(remoteStatus!.memory!.total_memory!/1000000).toLocaleString()+' megabytes'">
           <ng-template pTemplate="content" let-value>
             <span>{{remoteStatus!.memory!.available_memory!/1000000 | number:'1.0-0'}} Mb</span>
           </ng-template>
@@ -23,10 +23,10 @@
           </ng-template>
         </p-progressBar>
         <span>CPU</span>
-        <p-progressBar *ngIf="remoteStatus?.load_avg" [value]="remoteStatus!.load_avg!.one!*100" [style]="{width: '100px'}"
-                       [pTooltip]="'CPU : '+Math.floor(remoteStatus!.load_avg!.one!*100).toLocaleString()+' %'">
+        <p-progressBar *ngIf="remoteStatus?.load_avg" [value]="remoteStatus!.load_avg!.one!" [style]="{width: '100px'}"
+                       [pTooltip]="'CPU : '+Math.floor(remoteStatus!.load_avg!.one!).toLocaleString()+' %'">
           <ng-template pTemplate="content" let-value>
-            <span>{{remoteStatus!.load_avg!.one! | number:'1.0-0'}} %</span>
+            <span>{{remoteStatus!.load_avg!.one! | number:'1.0-1'}} %</span>
           </ng-template>
         </p-progressBar>
       </ng-container>

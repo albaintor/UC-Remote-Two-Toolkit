@@ -416,3 +416,14 @@ export interface Driver
   driver_state: "NOT_CONFIGURED"| "IDLE"| "CONNECTING"| "CONNECTED"| "DISCONNECTED"| "RECONNECTING"| "ACTIVE"| "ERROR"
   enabled: boolean
 }
+
+export interface RemoteData {
+    activities: Activity[]
+    entities: Entity[]
+    profiles: Profile[]
+    macros: Macro[]
+    configCommands: EntityCommand[]
+    orphanEntities: OrphanEntity[]
+    unusedEntities: Entity[]
+    context: Context | undefined;
+}

@@ -21,16 +21,16 @@ import {ConfirmationService, MenuItem, MessageService} from "primeng/api";
 import {TableModule} from "primeng/table";
 import {UploadedFilesComponent} from "../uploaded-files/uploaded-files.component";
 import {
-  Activity,
-  Config,
-  Context,
-  Entity,
-  EntityCommand,
-  EntityUsage,
-  OrphanEntity,
-  Profile,
-  Profiles,
-  Remote
+    Activity,
+    Config,
+    Context,
+    Entity,
+    EntityCommand,
+    EntityUsage,
+    OrphanEntity,
+    Profile,
+    Profiles,
+    Remote, RemoteData
 } from "../interfaces";
 import {ServerService} from "../server.service";
 import {catchError, forkJoin, from, map, mergeMap, Observable, of} from "rxjs";
@@ -48,7 +48,7 @@ import {MessagesModule} from "primeng/messages";
 import {DialogModule} from "primeng/dialog";
 import {MultiSelectModule} from "primeng/multiselect";
 import {AccordionModule} from "primeng/accordion";
-import {RemoteData, RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
+import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 import {BlockUIModule} from "primeng/blockui";
 import { saveAs } from 'file-saver-es';
 import {ConfirmDialogModule} from "primeng/confirmdialog";

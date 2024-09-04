@@ -25,7 +25,7 @@ import {
   Config,
   Entity,
   OperationStatus,
-  Remote,
+  Remote, RemoteData,
   RemoteMap,
   RemoteOperation,
   RemoteOperationResultField,
@@ -43,7 +43,7 @@ import {MessagesModule} from "primeng/messages";
 import {DialogModule} from "primeng/dialog";
 import {saveAs} from "file-saver-es";
 import {map, Observable} from "rxjs";
-import {RemoteData, RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
+import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 import {ChipModule} from "primeng/chip";
 import {InputTextModule} from "primeng/inputtext";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
@@ -532,6 +532,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
             ...button
           }, status: OperationStatus.Todo})
     });
+    console.log("Updated activity", this.updatedActivity);
     return remoteOperations;
   }
 
@@ -820,14 +821,16 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     if (!$event.query || $event.query.length == 0)
     {
       console.log("Search entity : whole list");
-      const filteredEntities = this.entities.filter(entity => this.entity?.entity_id !== entity.entity_id);
+      const filteredEntities = this.entities.filter(entity => this.entity?.entity_id !== entity.entity_id &&
+        this.entity?.entity_type == entity.entity_type);
       this.suggestions2 = [...filteredEntities.sort((a, b) => {
         return (a.name ? Helper.getEntityName(a)! : "").localeCompare(b.name ? Helper.getEntityName(b)! : "");
       })];
       this.cdr.detectChanges();
       return;
     }
-    this.suggestions2 = Helper.queryEntity($event.query, this.entities).filter(entity => this.entity?.entity_id !== entity.entity_id);
+    this.suggestions2 = Helper.queryEntity($event.query, this.entities).filter(entity => this.entity?.entity_id !== entity.entity_id
+      && this.entity?.entity_type == entity.entity_type);
     this.cdr.detectChanges();
   }
 

@@ -14,19 +14,18 @@ import {ProgressBarModule} from "primeng/progressbar";
 import {catchError, forkJoin, from, map, mergeMap, Observable, of} from "rxjs";
 import {ServerService} from "../server.service";
 import {MessageService} from "primeng/api";
-import {Activity, Context, Entity, EntityCommand, Macro, OrphanEntity, Profile, Remote} from "../interfaces";
+import {
+  Activity,
+  Context,
+  Entity,
+  EntityCommand,
+  Macro,
+  OrphanEntity,
+  Profile,
+  Remote,
+  RemoteData
+} from "../interfaces";
 import {Helper} from "../helper";
-
-export interface RemoteData {
-  activities: Activity[]
-  entities: Entity[]
-  profiles: Profile[]
-  macros: Macro[]
-  configCommands: EntityCommand[]
-  orphanEntities: OrphanEntity[]
-  unusedEntities: Entity[]
-  context: Context | undefined;
-}
 
 @Component({
   selector: 'app-remote-data-loader',

@@ -109,7 +109,8 @@
             <td>{{entity.entity_id}}</td>
             <td><ng-container *ngIf="entity.activities">
               <ng-container *ngFor="let activity of entity.activities">
-                <p-chip [label]="activity.name" [style]="getStyle(activity.name)" [pTooltip]="activity.entity_id"></p-chip>
+                <p-chip [label]="activity.name" [style]="getStyle(activity.name)" [pTooltip]="activity.entity_id"
+                  (click)="viewActivity(activityeditor, activity)" class="link-element"></p-chip>
               </ng-container>
             </ng-container></td>
           </tr>
@@ -172,12 +173,26 @@
       </ng-template>
       <ng-template pTemplate="body" let-activity>
         <tr>
-          <td><a [routerLink]="[]" (click)="viewActivity(activityeditor, activity)">{{ Helper.getEntityName(activity) }}</a></td>
+          <td>
+            <div class="flex">
+            <div *ngIf="selectedRemote && activity?.icon" style="width: 40px; height: 40px" class="flex-initial flex align-items-center justify-content-center link-element">
+              <span *ngIf="Helper.isStandardIcon(activity!.icon!)" [class]="Helper.getIconClass(activity!.icon!)"
+                    (click)="viewActivity(activityeditor, activity)"></span>
+              <img style="max-height:100%; max-width:100%;" *ngIf="Helper.isCustomIcon(activity!.icon!)"
+                   [src]="Helper.getIconURL(selectedRemote!, activity!.icon!)" [alt]="activity!.icon!" width="70" height="70"
+                   (click)="viewActivity(activityeditor, activity)">
+              &nbsp; &nbsp;
+            </div>
+              <div class="flex-initial flex align-items-center justify-content-center">
+                <a [routerLink]="[]" (click)="viewActivity(activityeditor, activity)">{{ Helper.getEntityName(activity) }}</a>
+              </div>
+            </div>
+          </td>
           <td><a [routerLink]="[]" (click)="viewActivity(activityeditor, activity)">{{ activity.entity_id }}</a></td>
           <td><ng-container *ngFor="let activity_entity of activity['entities']">
             <p-chip [label]="getEntityName(activity_entity.entity_id)" (mouseover)="showEntity(activity_entity.entity_id);oventity.show($event)"
                     (mouseleave)="oventity.hide()" (click)="selectEntity(activity_entity.entity_id)"
-                    [style]="getStyle(getEntityName(activity_entity.entity_id))"></p-chip> </ng-container></td>
+                    [style]="getStyle(getEntityName(activity_entity.entity_id))" class="link-element"></p-chip> </ng-container></td>
         </tr>
       </ng-template>
     </p-table>
@@ -234,7 +249,21 @@
       </ng-template>
       <ng-template pTemplate="body" let-entity>
         <tr>
-          <td><p-chip [label]="entity.name" [style]="getStyle(entity.name)" (click)="entityviewer.view(entity)"></p-chip></td>
+          <td>
+            <div class="flex">
+              <div *ngIf="selectedRemote && entity?.icon" style="width: 40px; height: 40px" class="flex-initial flex align-items-center justify-content-center">
+                <span *ngIf="Helper.isStandardIcon(entity!.icon!)" [class]="Helper.getIconClass(entity!.icon!)"></span>
+                <img style="max-height:100%; max-width:100%;" *ngIf="Helper.isCustomIcon(entity!.icon!)" [src]="Helper.getIconURL(selectedRemote!, entity!.icon!)" [alt]="entity!.icon!" width="70" height="70">
+                &nbsp; &nbsp;
+              </div>
+              <div *ngIf="!selectedRemote || !entity?.icon" style="width: 40px; height: 40px">
+
+              </div>
+              <div class="flex-initial flex align-items-center justify-content-center">
+                &nbsp;<p-chip [label]="entity.name" [style]="getStyle(entity.name)" (click)="entityviewer.view(entity)" class="link-element"></p-chip>
+              </div>
+            </div>
+            </td>
           <td><a [routerLink]="[]" (click)="entityviewer.view(entity)">{{entity.entity_id}}</a></td>
           <td><p-chip [label]="entity.entity_type" [style]="getStyle(entity.entity_type)"></p-chip></td>
           <td><p-chip [label]="entity.integration_id" [style]="getStyle(entity.integration_id)"></p-chip></td>

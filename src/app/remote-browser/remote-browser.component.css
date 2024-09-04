@@ -43,6 +43,10 @@ h2 {
   /*background-color: rgba(0,0,0,0.53);*/
 }
 
+.link-element:hover {
+  cursor: pointer;
+}
+
 /*.p-accordion-header-link	{
   background: none;
 }*/

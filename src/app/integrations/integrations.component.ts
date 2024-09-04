@@ -253,7 +253,7 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
                 this.cdr.detectChanges();
               },
               error: (error) => {
-                this.messageService.add({key: "integrationComponent", severity: "warning", summary: `An error may have occurred during deletion during deletion of driver ${integration.name}`});
+                this.messageService.add({key: "integrationComponent", severity: "warn", summary: `An error may have occurred during deletion during deletion of driver ${integration.name}`});
                 this.loadRemoteData();
                 console.error("Error while deleting driver", error);
                 this.cdr.detectChanges();

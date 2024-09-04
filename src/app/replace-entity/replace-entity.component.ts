@@ -7,18 +7,18 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {
-  Activity,
-  Command,
-  CommandSequence,
-  Config,
-  Context,
-  Entity,
-  Macro,
-  OperationStatus,
-  OrphanEntity,
-  Profile,
-  Remote,
-  RemoteOperation
+    Activity,
+    Command,
+    CommandSequence,
+    Config,
+    Context,
+    Entity,
+    Macro,
+    OperationStatus,
+    OrphanEntity,
+    Profile,
+    Remote, RemoteData,
+    RemoteOperation
 } from "../interfaces";
 import {MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
@@ -41,7 +41,7 @@ import {MultiSelectModule} from "primeng/multiselect";
 import {Helper} from "../helper";
 import {AutoCompleteModule} from "primeng/autocomplete";
 import {CheckboxModule} from "primeng/checkbox";
-import {RemoteData, RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
+import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 
 class Message {
   title: string = "";

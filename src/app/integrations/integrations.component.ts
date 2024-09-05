@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import {ConfirmationService, MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
-import {Config, Driver, Integration, Remote, RemoteStatus} from "../interfaces";
+import {Config, Driver, Entity, Integration, Remote, RemoteStatus} from "../interfaces";
 import {
   config,
   filter, finalize,
@@ -26,16 +26,24 @@ import {
 import {Helper} from "../helper";
 import {DropdownModule} from "primeng/dropdown";
 import {MenubarModule} from "primeng/menubar";
-import {DecimalPipe, NgIf} from "@angular/common";
+import {DecimalPipe, NgForOf, NgIf} from "@angular/common";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
 import {MessagesModule} from "primeng/messages";
 import {TableModule} from "primeng/table";
 import {ChipModule} from "primeng/chip";
-import {FileBeforeUploadEvent, FileUploadErrorEvent, FileUploadEvent, FileUploadModule} from "primeng/fileupload";
+import {
+  FileBeforeUploadEvent,
+  FileUpload,
+  FileUploadErrorEvent,
+  FileUploadEvent,
+  FileUploadModule
+} from "primeng/fileupload";
 import {BlockUIModule} from "primeng/blockui";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
+import {InputTextModule} from "primeng/inputtext";
+import {MultiSelectModule} from "primeng/multiselect";
 
 type DriverIntegration = Driver | Integration;
 
@@ -47,22 +55,25 @@ interface IntegrationsDrivers {
 @Component({
   selector: 'app-integrations',
   standalone: true,
-    imports: [
-        DropdownModule,
-        MenubarModule,
-        NgIf,
-        ProgressSpinnerModule,
-        SharedModule,
-        ToastModule,
-        FormsModule,
-        MessagesModule,
-        TableModule,
-        ChipModule,
-        FileUploadModule,
-        DecimalPipe,
-        BlockUIModule,
-        ConfirmDialogModule
-    ],
+  imports: [
+    DropdownModule,
+    MenubarModule,
+    NgIf,
+    ProgressSpinnerModule,
+    SharedModule,
+    ToastModule,
+    FormsModule,
+    MessagesModule,
+    TableModule,
+    ChipModule,
+    FileUploadModule,
+    DecimalPipe,
+    BlockUIModule,
+    ConfirmDialogModule,
+    InputTextModule,
+    MultiSelectModule,
+    NgForOf
+  ],
   templateUrl: './integrations.component.html',
   styleUrl: './integrations.component.css',
   providers: [MessageService, ConfirmationService],
@@ -82,6 +93,7 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
   driverIntegrations: DriverIntegration[] = [];
   remoteStatus: RemoteStatus | undefined;
   updateTask: Subscription | undefined;
+  entities: Entity[] | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private confirmationService: ConfirmationService) {}
@@ -196,10 +208,11 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
 
   protected readonly Helper = Helper;
 
-  onUploadIntegration($event: FileUploadEvent) {
+  onUploadIntegration($event: FileUploadEvent, integrationUpload: FileUpload) {
     console.log("Integration uploaded", $event);
     this.messageService.add({key: "integrationComponent", severity: "info", summary: `Driver uploaded to the remote ${this.selectedRemote?.remote_name}`});
     this.progress = false;
+    integrationUpload.clear();
     this.loadRemoteData();
     this.cdr.detectChanges();
   }
@@ -283,28 +296,22 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
       }))
     ];
 
-
-    // const tasks2: Observable<any>[] = [of(true).pipe(mergeMap(() => {
-    //     if (!this.selectedRemote) return of({} as RemoteStatus);
-    //     return this.server.getRemoteStatus(this.selectedRemote)
-    //   }),
-    //     takeWhile(results=> {
-    //       console.debug("Updated remote status", results);
-    //       if (results) this.remoteStatus = results;
-    //       this.cdr.detectChanges();
-    //       return this.selectedRemote != undefined
-    //     }),
-    //     finalize(()=>console.log("Finished update status"))),
-    //   this.updateIntegrations()
-    // ];
-
     return timer(0, 5000).pipe(mergeMap(() =>
         forkJoin(tasks).pipe(map(results => {
+          let remoteStatus: RemoteStatus | undefined = undefined
           for (let result of results)
           {
-            if (result.remoteStatus) return result.remoteStatus;
+            if (result.remoteStatus) remoteStatus = result.remoteStatus;
+            if (result.integrationDrivers) {
+              if (result.integrationDrivers.integrations)
+                this.integrations = result.integrationDrivers.integrations;
+              if (result.integrationDrivers.drivers)
+                this.drivers = result.integrationDrivers.drivers;
+              this.driverIntegrations = [...this.drivers];
+              this.cdr.detectChanges();
+            }
           }
-          return undefined;
+          return remoteStatus;
       }),
       takeWhile(results => {
         console.debug("Updated remote status", results);
@@ -344,5 +351,17 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
       detail: $event.error?.error.body, sticky: true});
     this.progress = false;
     this.cdr.detectChanges();
+  }
+
+  getIntegrationEntities(integrationDriver: Driver | Integration) {
+    if (!this.selectedRemote) return;
+    const driverId = integrationDriver.driver_id;
+    const integration = this.integrations.find(integration => integration.driver_id === driverId);
+    if (!integration) return;
+    this.server.getRemoteIntegrationEntities(this.selectedRemote, integration.integration_id, "ALL").subscribe(entities => {
+      console.debug("Entities for integration", integrationDriver, entities);
+      this.entities = entities;
+      this.cdr.detectChanges();
+    })
   }
 }

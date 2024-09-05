@@ -730,6 +730,30 @@ app.get('/api/remote/:address/intg/instances', async (req, res, next) => {
   }
 })
 
+app.get('/api/remote/:address/intg/instances/:intgid/entities', async (req, res, next) => {
+  const address = req.params.address;
+  const intgId = req.params.intgid;
+  let filter = req.query.filter;
+  if (filter === undefined) filter = "NEW";
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getIntegrationEntities(intgId, filter));
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
 app.post('/api/remote/:address/intg/install', upload.single('file'),async (req, res, next) => {
   const address = req.params.address;
   let user = REMOTE_USER

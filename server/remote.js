@@ -411,6 +411,19 @@ export class Remote
     return JSON.parse(res.body);
   }
 
+  async getIntegrationEntities(intgId, filter)
+  {
+    const options = {
+      ...this.getOptions(),
+      searchParams: {
+        filter
+      }
+    }
+    const url = this.getURL() + `/api/intg/instances/${intgId}/entities`;
+    let res = await got.get(url, options);
+    return JSON.parse(res.body);
+  }
+
   async deleteDriver(driverId)
   {
     const options = this.getOptions();
@@ -445,7 +458,7 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-  
+
   async powerRemote(value)
   {
     const options = {

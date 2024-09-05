@@ -157,6 +157,18 @@ export class ServerService {
     return object.name['en'];
   }
 
+  getRemoteIntegrationEntities(remote: Remote, integrationId: string, filter : "NEW"|"CONFIGURED"|"ALL" = "NEW"): Observable<Entity[]>
+  {
+    const httpOptions = {params: new HttpParams({fromObject: {filter}})};
+    return this.http.get<Entity[]>(`/api/remote/${remote.address}/intg/instances/${integrationId}/entities`, httpOptions).pipe(map(entities => {
+      entities.forEach(entity => {
+        entity.name = this.getObjectName(entity);
+      })
+      this.entities = entities;
+      return entities;
+    }))
+  }
+
   getRemoteEntities(remote: Remote): Observable<Entity[]>
   {
     return this.http.get<Entity[]>(`/api/remote/${remote.address}/entities`).pipe(map(entities => {

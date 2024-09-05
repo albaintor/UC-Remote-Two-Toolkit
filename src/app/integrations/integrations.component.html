@@ -6,28 +6,19 @@
     <div class="flex align-items-center gap-2">
       <ng-container *ngIf="selectedRemote">
         <span class="pi pi-chart-line"></span>
-        <p-progressBar *ngIf="remoteStatus?.memory" [value]="remoteStatus!.memory!.available_memory!/remoteStatus!.memory!.total_memory!*100" [style]="{width: '100px'}"
+        <p-progressBar *ngIf="remoteStatus?.memory" [value]="(remoteStatus!.memory!.total_memory!-remoteStatus!.memory!.available_memory!)/remoteStatus!.memory!.total_memory!*100" [style]="{width: '100px'}"
             [pTooltip]="'Memory : '+Math.floor(remoteStatus!.memory!.available_memory!/1000000).toLocaleString()+' megabytes available on '
-                +Math.floor(remoteStatus!.memory!.total_memory!/1000000).toLocaleString()+' megabytes'">
-          <ng-template pTemplate="content" let-value>
-            <span>{{remoteStatus!.memory!.available_memory!/1000000 | number:'1.0-0'}} Mb</span>
-          </ng-template>
+                +Math.floor(remoteStatus!.memory!.total_memory!/1000000).toLocaleString()+' megabytes'" unit="Mb">
         </p-progressBar>
         <span class="pi pi-database"></span>
-        <p-progressBar *ngIf="remoteStatus?.filesystem?.user_data" [value]="remoteStatus!.filesystem!.user_data!.available!/
+        <p-progressBar *ngIf="remoteStatus?.filesystem?.user_data" [value]="remoteStatus!.filesystem!.user_data!.used!/
         (remoteStatus!.filesystem!.user_data!.available!+remoteStatus!.filesystem!.user_data!.used!)*100" [style]="{width: '100px'}"
                        [pTooltip]="'Storage : '+Math.floor(remoteStatus!.filesystem!.user_data!.available!/1000000).toLocaleString()+' megabytes available on '+
-                        Math.floor((remoteStatus!.filesystem!.user_data!.available!+remoteStatus!.filesystem!.user_data!.used!)/1000000).toLocaleString()">
-          <ng-template pTemplate="content" let-value>
-            <span>{{remoteStatus!.filesystem!.user_data!.available/1000000 | number:'1.0-0'}} Mb</span>
-          </ng-template>
+                        Math.floor((remoteStatus!.filesystem!.user_data!.available!+remoteStatus!.filesystem!.user_data!.used!)/1000000).toLocaleString()" unit="Mb">
         </p-progressBar>
         <span>CPU</span>
         <p-progressBar *ngIf="remoteStatus?.load_avg" [value]="remoteStatus!.load_avg!.one!" [style]="{width: '100px'}"
                        [pTooltip]="'CPU : '+Math.floor(remoteStatus!.load_avg!.one!).toLocaleString()+' %'">
-          <ng-template pTemplate="content" let-value>
-            <span>{{remoteStatus!.load_avg!.one! | number:'1.0-1'}} %</span>
-          </ng-template>
         </p-progressBar>
       </ng-container>
       <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
@@ -51,16 +42,86 @@
   </ng-template>
 </p-messages>
 <p-fileUpload
+  #integrationUpload
   mode="basic"
   name="file"
   chooseIcon="pi pi-upload"
   [url]="'/api/remote/'+selectedRemote?.address+'/intg/install'"
   accept=".gz,.tgz" maxFileSize="100000000"
-  (onUpload)="onUploadIntegration($event)"
+  (onUpload)="onUploadIntegration($event, integrationUpload)"
   (onBeforeUpload)="onUploadingIntegration($event)"
   (onError)="onUploadIntegrationError($event)"
   [auto]="true"
-  chooseLabel="Select integration driver to upload..." /><br>
+  chooseLabel="Select integration driver to upload..." />
+<ng-container *ngIf="entities">
+  <br>
+  <p-table  [value]="entities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+           dataKey="entity_id" columnResizeMode="expand"
+           [globalFilterFields]="['entity_id','name','entity_type','integration_id']"
+           [scrollable]="true" [scrollHeight]="'calc(100vh - 50px)'">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="name" pResizableColumn>Entity name<p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="entity_id" pResizableColumn>Entity ID<p-sortIcon field="entity_id"></p-sortIcon></th>
+        <th pSortableColumn="entity_type" pResizableColumn>Entity type<p-sortIcon field="entity_type"></p-sortIcon></th>
+        <th pSortableColumn="integration_id" pResizableColumn>Integration<p-sortIcon field="integration_id"></p-sortIcon></th>
+        <th pResizableColumn>Features</th>
+      </tr>
+      <tr>
+        <th><p-columnFilter type="text" field="name" [matchMode]="'contains'"></p-columnFilter></th>
+        <th><p-columnFilter type="text" field="entity_id" [matchMode]="'contains'"></p-columnFilter></th>
+        <th><p-columnFilter field="entity_type" matchMode="in" [showMenu]="false">
+          <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+            <p-multiSelect
+              [ngModel]="value"
+              [options]="Helper.getItems(entities, 'entity_type')"
+              placeholder="Entity type"
+              (onChange)="filter($event.value)"
+              optionLabel="name" optionValue="value" appendTo="body">
+            </p-multiSelect>
+          </ng-template>
+        </p-columnFilter></th>
+        <th><p-columnFilter field="integration_id" matchMode="in" [showMenu]="false">
+          <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+            <p-multiSelect
+              [ngModel]="value"
+              [options]="Helper.getItems(entities, 'integration_id')"
+              placeholder="Integration ID"
+              (onChange)="filter($event.value)"
+              optionLabel="name" optionValue="value" appendTo="body">
+            </p-multiSelect>
+          </ng-template>
+        </p-columnFilter></th>
+        <th>&nbsp;</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-entity>
+      <tr>
+        <td>
+          <div class="flex">
+            <div *ngIf="selectedRemote && entity?.icon" style="width: 40px; height: 40px" class="flex-initial flex align-items-center justify-content-center">
+              <span *ngIf="Helper.isStandardIcon(entity!.icon!)" [class]="Helper.getIconClass(entity!.icon!)"></span>
+              <img style="max-height:100%; max-width:100%;" *ngIf="Helper.isCustomIcon(entity!.icon!)" [src]="Helper.getIconURL(selectedRemote!, entity!.icon!)" [alt]="entity!.icon!" width="70" height="70">
+              &nbsp; &nbsp;
+            </div>
+            <div *ngIf="!selectedRemote || !entity?.icon" style="width: 40px; height: 40px">
+
+            </div>
+            <div class="flex-initial flex align-items-center justify-content-center">
+              &nbsp;<p-chip [label]="entity.name" [style]="Helper.getStyle(entity.name)" class="link-element"></p-chip>
+            </div>
+          </div>
+        </td>
+        <td>{{entity.entity_id}}</td>
+        <td><p-chip [label]="entity.entity_type" [style]="Helper.getStyle(entity.entity_type)"></p-chip></td>
+        <td><p-chip [label]="entity.integration_id" [style]="Helper.getStyle(entity.integration_id)"></p-chip></td>
+        <td><ng-container *ngFor="let feature of entity['features']">
+          <p-chip [label]="feature" [style]="Helper.getStyle(feature)"></p-chip> </ng-container></td>
+      </tr>
+    </ng-template>
+  </p-table>
+</ng-container>
+<br>
 <p-table [value]="driverIntegrations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
          dataKey="message" columnResizeMode="expand">
   <ng-template pTemplate="header">
@@ -76,8 +137,8 @@
   </ng-template>
   <ng-template pTemplate="body" let-integration>
     <tr>
-      <td>{{Helper.getEntityName(integration)}}</td>
-      <td>{{integration.driver_id}}{{integration.integration_id}}</td>
+      <td><a [routerLink]="[]" (click)="getIntegrationEntities(integration)">{{Helper.getEntityName(integration)}}</a></td>
+      <td><a [routerLink]="[]" (click)="getIntegrationEntities(integration)">{{integration.driver_id}}{{integration.integration_id}}</a></td>
       <td><p-chip [label]="integration.driver_type" [style]="Helper.getStyle(integration.driver_type)"></p-chip></td>
       <td><p-chip [label]="integration.driver_state" [style]="Helper.getStyle(integration.driver_state)"></p-chip></td>
       <td>{{integration.version}}</td>

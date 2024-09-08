@@ -52,6 +52,7 @@ import {DividerModule} from "primeng/divider";
 import {TagModule} from "primeng/tag";
 import {ToggleButtonModule} from "primeng/togglebutton";
 import {IconSelectorComponent} from "../icon-selector/icon-selector.component";
+import {IconComponent} from "../icon/icon.component";
 
 export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
 
@@ -91,7 +92,8 @@ enum OperationMode {
     DividerModule,
     TagModule,
     ToggleButtonModule,
-    IconSelectorComponent
+    IconSelectorComponent,
+    IconComponent
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',

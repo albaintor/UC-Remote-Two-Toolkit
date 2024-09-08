@@ -91,7 +91,7 @@
 
   </div>
 </ng-container>
-<p-accordion [multiple]="true" [activeIndex]="[2,3]">
+<p-accordion [multiple]="true" [activeIndex]="accordionActiveIndexes">
   <ng-container *ngIf="orphanEntities.length > 0">
     <p-accordionTab header="Orphan entities">
       <p-table [value]="orphanEntities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
@@ -176,11 +176,7 @@
           <td>
             <div class="flex">
             <div *ngIf="selectedRemote && activity?.icon" style="width: 40px; height: 40px" class="flex-initial flex align-items-center justify-content-center link-element">
-              <span *ngIf="Helper.isStandardIcon(activity!.icon!)" [class]="Helper.getIconClass(activity!.icon!)"
-                    (click)="viewActivity(activityeditor, activity)"></span>
-              <img style="max-height:100%; max-width:100%;" *ngIf="Helper.isCustomIcon(activity!.icon!)"
-                   [src]="Helper.getIconURL(selectedRemote!, activity!.icon!)" [alt]="activity!.icon!" width="70" height="70"
-                   (click)="viewActivity(activityeditor, activity)">
+              <app-icon [remote]="selectedRemote" [icon]="activity?.icon" [size]="50" [fontSize]="55" (click)="viewActivity(activityeditor, activity)"/>
               &nbsp; &nbsp;
             </div>
               <div class="flex-initial flex align-items-center justify-content-center">
@@ -250,15 +246,9 @@
       <ng-template pTemplate="body" let-entity>
         <tr>
           <td>
-            <div class="flex">
-              <div *ngIf="selectedRemote && entity?.icon" style="width: 40px; height: 40px" class="flex-initial flex align-items-center justify-content-center">
-                <span *ngIf="Helper.isStandardIcon(entity!.icon!)" [class]="Helper.getIconClass(entity!.icon!)"></span>
-                <img style="max-height:100%; max-width:100%;" *ngIf="Helper.isCustomIcon(entity!.icon!)" [src]="Helper.getIconURL(selectedRemote!, entity!.icon!)" [alt]="entity!.icon!" width="70" height="70">
-                &nbsp; &nbsp;
-              </div>
-              <div *ngIf="!selectedRemote || !entity?.icon" style="width: 40px; height: 40px">
-
-              </div>
+            <div class="flex link-element">
+              <app-icon [remote]="selectedRemote" [icon]="entity?.icon" [size]="40" [fontSize]="55" (click)="entityviewer.view(entity)"/>
+              &nbsp;&nbsp;
               <div class="flex-initial flex align-items-center justify-content-center">
                 &nbsp;<p-chip [label]="entity.name" [style]="getStyle(entity.name)" (click)="entityviewer.view(entity)" class="link-element"></p-chip>
               </div>

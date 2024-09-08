@@ -139,8 +139,31 @@
 <!--        <ng-template pTemplate="selectedItem">-->
 <!--          {{selectedEntity?.name}} ({{selectedEntity?.entity_id}})-->
 <!--        </ng-template>-->
+        <ng-template let-item pTemplate="selectedItem">
+          <div class="flex align-content-center" >
+            <div class="inline-block p-1">
+              <app-icon [remote]="targetRemote" [icon]="item?.icon" [size]="30"/>
+              <div class="inline-block p-1">
+                <b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})
+              </div>
+            </div>
+          </div>
+        </ng-template>
         <ng-template let-item pTemplate="item">
-          <div>{{item.name}} ({{item.entity_id}})</div>
+          <div class="flex align-content-center" >
+            <div class="inline-block p-1">
+              <ng-container *ngIf="item!.icon && Helper.isStandardIcon(item!.icon!)">
+                <span [class]="Helper.getIconClass(item!.icon!)" style="font-size: 35px"></span>
+              </ng-container>
+              <ng-container *ngIf="item!.icon && Helper.isCustomIcon(item!.icon!)">
+                <img [src]="Helper.getIconURL(targetRemote!, item!.icon!)" [alt]="item!.icon!" width="30" height="30">
+              </ng-container>
+              <div *ngIf="!targetRemote || !item?.icon" style="width: 30px; height: 30px"></div>
+            </div>
+            <div class="inline-block p-1">
+              {{item.name}} ({{item.entity_id}})
+            </div>
+          </div>
         </ng-template>
       </p-dropdown>
     </div>
@@ -172,15 +195,49 @@
     <div style="width: 50%;">
       <p-autoComplete [(ngModel)]="entity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchActivityEntity($event)" appendTo="body"
                       field="entity_id" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
+        <ng-template let-item pTemplate="selectedItem">
+          <div class="flex align-content-center" >
+            <div class="inline-block p-1">
+              <app-icon [remote]="targetRemote" [icon]="item?.icon" [size]="30"/>
+              <div class="inline-block p-1">
+                <b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})
+              </div>
+            </div>
+          </div>
+        </ng-template>
         <ng-template let-item pTemplate="item">
-          <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
+          <div class="flex align-content-center" >
+            <div class="inline-block p-1">
+              <app-icon [remote]="targetRemote" [icon]="item?.icon" [size]="30"/>
+            </div>
+            <div class="inline-block p-1">
+              <b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})
+            </div>
+          </div>
         </ng-template>
       </p-autoComplete></div><div style="width: 60px">&nbsp;with :&nbsp;</div>
     <div style="width: 50%;">
       <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions2" (completeMethod)="searchEntity($event)" appendTo="body"
                       field="entity_id" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
+        <ng-template let-item pTemplate="selectedItem">
+          <div class="flex align-content-center" >
+            <div class="inline-block p-1">
+              <app-icon [remote]="targetRemote" [icon]="item?.icon" [size]="30"/>
+              <div class="inline-block p-1">
+                <b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})
+              </div>
+            </div>
+          </div>
+        </ng-template>
         <ng-template let-item pTemplate="item">
-          <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
+          <div class="flex align-content-center" >
+            <div class="inline-block p-1">
+              <app-icon [remote]="targetRemote" [icon]="item?.icon" [size]="30"/>
+            <div class="inline-block p-1">
+              <b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})
+            </div>
+          </div>
+          </div>
         </ng-template>
       </p-autoComplete></div>
   </div>

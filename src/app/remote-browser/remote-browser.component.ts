@@ -52,6 +52,7 @@ import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loade
 import {BlockUIModule} from "primeng/blockui";
 import { saveAs } from 'file-saver-es';
 import {ConfirmDialogModule} from "primeng/confirmdialog";
+import {IconComponent} from "../icon/icon.component";
 
 interface FileProgress
 {
@@ -89,7 +90,8 @@ interface FileProgress
     AccordionModule,
     RemoteDataLoaderComponent,
     BlockUIModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    IconComponent
   ],
   templateUrl: './remote-browser.component.html',
   styleUrl: './remote-browser.component.css',
@@ -148,6 +150,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   selectedUnusedEntities: Entity[] = [];
   remoteProgress = 0;
   progressDetail = "";
+  accordionActiveIndexes = [2, 3];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private confirmationService: ConfirmationService) {
@@ -188,6 +191,10 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       // this.server.setContext(this.context);
       this.messageService.add({severity: "info", summary: `Remote data loaded from cache`});
       this.localMode = true;
+      let offset = 0;
+      if (this.unusedEntities.length > 0) offset ++;
+      if (this.orphanEntities.length > 0) offset ++;
+      this.accordionActiveIndexes = [offset, offset+1];
       this.cdr.detectChanges();
     }
     else

@@ -1,3 +1,4 @@
+<p-toast key="activity"></p-toast>
 <p-overlayPanel id="buttonpanel" #buttonpanel [style]="buttonPanelStyle" [showCloseIcon]="true">
   <ng-template pTemplate="content">
     <h3>{{mouseOverButtonName!}}</h3>
@@ -19,7 +20,6 @@
     </ng-container>
   </ng-template>
 </p-overlayPanel>
-<p-toast key="activity"></p-toast>
 <app-ui-command-editor #commandeditor (updateItem)="updateGridItem($event)"
   (addItem)="addGridItem($event)" (deleteItem)="deleteGridItem($event)"
   [remote]="remote" [activity]="activity" [gridItem]="gridItem" [gridCommands]="gridCommands" [grid]="currentPage?.grid"></app-ui-command-editor>
@@ -60,8 +60,8 @@
   <div class="flex align-items-center justify-content-center">
     <p-button label="Save to file" (onClick)="savePage()" icon="pi pi-save" size="small" severity="success"></p-button>
   </div>
-  <div class="flex align-items-center justify-content-center" *ngIf="!editMode && currentPage">
-    <p-button label="Copy to clipboard" (onClick)="copyToClipboard(currentPage, 'Page '+currentPage.name+' copied to clipboard')" icon="pi pi-copy" size="small"></p-button>
+  <div class="flex align-items-center justify-content-center" *ngIf="currentPage">
+    <p-button label="Copy page to clipboard" (onClick)="copyToClipboard(currentPage, 'Page '+currentPage.name+' copied to clipboard')" icon="pi pi-copy" size="small"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center" *ngIf="editMode">
     <p-button label="Paste from clipboard" (onClick)="pastePage()" severity="warning" icon="pi pi-clipboard" size="small"></p-button>
@@ -77,6 +77,16 @@
   <div class="flex align-items-center justify-content-center" *ngIf="editMode">
     <p-button label="Delete current page" (onClick)="deletePage($event)" severity="danger" icon="pi pi-trash" size="small"></p-button>
   </div>
+  <div class="flex align-items-center justify-content-center">
+    <p-button *ngIf="!selectionMode" severity="secondary" label="Selection mode" (onClick)="toggleSelectionMode()" icon="pi pi-pen-to-square" size="small"></p-button>
+    <p-button *ngIf="selectionMode" severity="secondary" label="Normal mode" (onClick)="toggleSelectionMode()" icon="pi pi-pen-to-square" size="small"></p-button>
+  </div>
+  <div class="flex align-items-center justify-content-center" *ngIf="selection.length > 0">
+    <p-button [label]="'Copy '+selection.length+' commands'" (onClick)="copySelectionToClipboard()" icon="pi pi-copy" size="small"></p-button>
+  </div>
+  <div class="flex align-items-center justify-content-center">
+    <p-button [label]="'Paste commands'" (onClick)="pasteSelectionFomClipboard()" icon="pi pi-clipboard" size="small"></p-button>
+  </div>
 </div>
 
 <ng-container *ngIf="currentPage">
@@ -86,7 +96,7 @@
        [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width), 'width': gridPixelWidth+'px', 'height': gridPixelHeight+'px'}">
     <grid-button [editable]="editMode" *ngFor="let item of gridCommands; let index=index" [source]="gridItemSource" [item]="item" [grid]="currentPage.grid" [style]="getGridItemSize(item)"
                  (sourceSelected)="gridSourceSelected($event)" (destinationSelected)="gridDestinationSelected($event)" [gridCommands]="gridCommands"
-                 (itemClicked)="gridItemClicked($event)">
+                 (itemClicked)="gridItemClicked($event)" [selectionMode]="selectionMode">
       <ng-container *ngIf="Helper.isStandardIcon(item?.icon)">
         <span [class]="Helper.getIconClass(item?.icon)"></span>
       </ng-container>

@@ -37,6 +37,14 @@ import {UiCommandEditorComponent} from "../activity-editor/ui-command-editor/ui-
 import { saveAs } from 'file-saver-es';
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {ButtonEditorComponent} from "../activity-editor/button-editor/button-editor.component";
+import {from, map, Observable} from "rxjs";
+
+enum DataFormat {
+  None,
+  Page,
+  UICommands,
+  Activity
+}
 
 @Pipe({name: 'as', standalone: true, pure: true})
 export class AsPipe implements PipeTransform {
@@ -111,6 +119,8 @@ export class ActivityViewerComponent implements AfterViewInit {
   protected readonly Helper = Helper;
   toggleGrid = true;
   gridItem: ActivityGridComponent | undefined;
+  selectionMode = false;
+  selection: ActivityGridComponent[] = [];
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
@@ -345,11 +355,64 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
+  toggleSelectionMode()
+  {
+    this.selectionMode = !this.selectionMode;
+    this.selection = [];
+    this.cdr.detectChanges();
+  }
+
   gridItemClicked($event: ActivityGridComponent) {
     this.gridItem = $event;
+    if (this.selectionMode)
+    {
+      if (this.selection.includes($event))
+      {
+        this.selection.splice(this.selection.indexOf($event), 1);
+      }
+      else {
+        this.selection.push($event);
+      }
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.cdr.detectChanges();
     this.commandeditor?.show();
     this.cdr.detectChanges();
+  }
+
+  copySelectionToClipboard() {
+    this.copyToClipboard(this.selection.map(item => item.item), "Selected commands copied to clipboard");
+  }
+
+  pasteSelectionFomClipboard()
+  {
+    this.getClipboardFormat().subscribe(data => {
+      if (data.format != DataFormat.UICommands) {
+        this.messageService.add({severity:'error', summary: "Clipboard format is not a selection of commands", key: 'activity'});
+        this.cdr.detectChanges();
+        return;
+      }
+      if (!this.activity || !this.currentPage) return;
+      const commands: ActivityPageCommand[] = data.object;
+      for (let command of commands)
+      {
+        if (!Helper.checkItem(command, this.currentPage.items, command.location.x, command.location.y, command.size.width, command.size.height))
+        {
+          this.messageService.add({severity:'error', summary: "Cannot paste commands in this page, there is some overlap", key: 'activity'});
+          this.cdr.detectChanges();
+          return;
+        }
+      }
+      for (let command of commands)
+      {
+        this.currentPage.items.push(command);
+      }
+      this.updateButtonsGrid();
+      this.messageService.add({severity:'success', summary: `Pasted ${commands.length} commands into current page`, key: 'activity'});
+      this.cdr.detectChanges();
+    })
   }
 
   copyToClipboard(data: any, title: string | undefined = undefined) {
@@ -399,6 +462,23 @@ export class ActivityViewerComponent implements AfterViewInit {
       reject: () => {
       }
     });
+  }
+
+  getClipboardFormat(): Observable<{format: DataFormat, object:any | undefined}>
+  {
+    return from(navigator.clipboard.readText()).pipe(map(text => {
+      if (!text || text == "") return {format: DataFormat.None, object: undefined};
+      const data: any = JSON.parse(text);
+      if (Array.isArray(data) && data.length > 0)
+      {
+        const item = data[0];
+        if (item.hasOwnProperty("size") || item.hasOwnProperty("location"))
+          return {format: DataFormat.UICommands, object: data};
+      }
+      else if (data.hasOwnProperty("entity_type") && data.entity_type == 'activity')
+        return {format: DataFormat.Activity, object: data};
+      return {format: DataFormat.None, object: undefined};
+    }))
   }
 
   pastePage() {

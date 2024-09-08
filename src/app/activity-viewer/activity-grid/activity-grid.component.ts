@@ -9,7 +9,7 @@ import {
   Output,
   ViewChild
 } from '@angular/core';
-import {ActivityPageCommand} from "../../interfaces";
+import {Activity, ActivityPageCommand} from "../../interfaces";
 import {Helper} from "../../helper";
 
 export interface GridItem
@@ -34,6 +34,12 @@ export class ActivityGridComponent  implements AfterViewInit{
   @Input() item!: ActivityPageCommand;
   // @Input() index!: number;
   @Input() gridCommands: ActivityPageCommand[] = [];
+  @Input() selectionMode: boolean = false;
+  selected = false;
+  @Input('selected') set _selected(value: boolean | undefined) {
+    if (value === undefined) return;
+    this.selected = value;
+  }
   @Output() sourceSelected = new EventEmitter<ActivityGridComponent>();
   @Output() destinationSelected = new EventEmitter<ActivityGridComponent>();
   @Output() itemClicked = new EventEmitter<ActivityGridComponent>();
@@ -50,7 +56,7 @@ export class ActivityGridComponent  implements AfterViewInit{
   }
 
   ngAfterViewInit(): void {
-    if (!this.editable) return;
+    if (!this.editable && !this.selectionMode) return;
     for (let i = 0; i < this.gridItem?.nativeElement.children?.length; i++) {
       let child = this.gridItem?.nativeElement.children[i];
       child.style['pointer-events'] = 'none';
@@ -58,8 +64,21 @@ export class ActivityGridComponent  implements AfterViewInit{
     this.cdr.detectChanges();
   }
 
+  getClass(): string {
+    if (this.selectionMode && !this.selected) return 'grid-item-selection';
+    if (this.selectionMode && this.selected) return 'grid-item-selected';
+    if (!this.editable) return 'grid-item-static';
+    return 'grid-item';
+  }
+
   @HostListener('click', ['$event']) onClick(event: any) {
-    if (!this.editable) return;
+    if (this.selectionMode) {
+      if (Helper.isEmptyItem(this.item)) return;
+      this.selected = !this.selected;
+      this.itemClicked.emit(this)
+      this.cdr.detectChanges();
+      return;
+    } else if (!this.editable) return;
     this.itemClicked.emit(this)
     this.cdr.detectChanges();
   }

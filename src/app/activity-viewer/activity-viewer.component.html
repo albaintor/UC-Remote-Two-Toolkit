@@ -1,13 +1,4 @@
 <p-toast key="activity"></p-toast>
-<div class="flex align-content-left flex-wrap gap-3">
-  <div class="flex align-items-center justify-content-center">
-    <h3>Startup sequence</h3>
-    <app-activity-sequence [remote]="remote" [activity]="activity" [editable]="editMode" sequenceName="on"></app-activity-sequence>
-  </div>
-  <div class="flex align-items-center justify-content-center">
-    <h3>Shutdown sequence</h3>
-    <app-activity-sequence [remote]="remote" [activity]="activity" [editable]="editMode" sequenceName="off"></app-activity-sequence>
-</div>
 <p-overlayPanel id="buttonpanel" #buttonpanel [style]="buttonPanelStyle" [showCloseIcon]="true">
   <ng-template pTemplate="content">
     <h3>{{mouseOverButtonName!}}</h3>
@@ -60,6 +51,14 @@
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-button label="Delete" (onClick)="deleteActivity($event)" icon="pi pi-trash" size="small" severity="danger"></p-button>
+  </div>
+</div>
+<div class="flex align-content-left flex-wrap gap-3">
+  <div class="flex align-items-start justify-content-center">
+    <app-activity-sequence [remote]="remote" [activity]="activity" [editable]="editMode" sequenceName="on" (onUpdate)="onChange.emit()"></app-activity-sequence>
+  </div>
+  <div class="flex align-items-start justify-content-center">
+    <app-activity-sequence [remote]="remote" [activity]="activity" [editable]="editMode" sequenceName="off" (onUpdate)="onChange.emit()"></app-activity-sequence>
   </div>
 </div>
 <div class="flex align-content-center justify-content-center flex-wrap gap-3">

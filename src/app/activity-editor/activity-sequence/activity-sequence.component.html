@@ -1,33 +1,35 @@
+<p-button [rounded]="true" (onClick)="addCommand($event)" severity="info" icon="pi pi-plus" size="small"
+          [pTooltip]="'Add a command to the '+sequenceName+' sequence'" *ngIf="editable"></p-button>
 <ng-container *ngIf="activity?.options?.sequences && sequenceName">
-  <p-orderList [disabled]="!editable"
+  <p-orderList
     [value]="activity!.options!.sequences![sequenceName]"
     [listStyle]="{ 'max-height': '30rem' }"
-    [header]="'Sequence '+sequenceName"
-    [dragdrop]="true">
+    [header]="'Sequences '+sequenceName"
+    [dragdrop]="editable" [stripedRows]="true" (onReorder)="updateSequence($event)">
     <ng-template let-command pTemplate="item">
       <div class="flex flex-wrap p-2 align-items-center gap-3" (click)="editCommand(command)">
+        <i *ngIf="editable" class="pi pi-bars"></i>
         <app-icon *ngIf="getCommandEntity(command)" [remote]="remote" [icon]="getCommandEntity(command)?.icon"
                   [size]="50" [fontSize]="55" />
         <div class="flex-1 flex flex-column gap-2">
           <span class="font-bold">{{ getCommandEntity(command)?.name }}</span>
           <div class="flex align-items-center gap-2">
-            <i class="pi pi-tag text-sm"></i>
             <span>
-                {{ command?.["cmd_id"] }} {{ command?.["params"] }}
+                {{ command?.command?.["cmd_id"] }}
             </span>
           </div>
         </div>
-        <span class="text-900">
+        <span class="text-500">
             {{ getCommandParams(command) }}
         </span>
+        <div (click)="deleteCommand(command)" class="list-item-delete" pTooltip="Remove this command"><i class="pi pi-times" style="font-size: 20px; font-weight: bold; color: red"></i></div>
       </div>
     </ng-template>
   </p-orderList>
 </ng-container>
 <p-toast key="sequence"></p-toast>
-<!--
-
-<ng-container *ngFor="let command of activity?.options?.sequences">
-  <app-command-editor [remote]="remote" [activity]="activity" [command]="command" (updateItem)="updateCommand()"></app-command-editor>
-</ng-container>
--->
+<p-dialog header="Edit command sequence" [(visible)]="commandVisible" [style]="{width: '50vw', height: '40vw'}" appendTo="body"
+          [dismissableMask]="true" [modal]="true" [closeOnEscape]="true" [closable]="true" [responsive]="true">
+  <app-command-editor *ngIf="selectedCommandSequence" [remote]="remote" [activity]="activity" [command]="selectedCommandSequence.command"
+                      (updateItem)="updateSequence($event)"></app-command-editor>
+</p-dialog>

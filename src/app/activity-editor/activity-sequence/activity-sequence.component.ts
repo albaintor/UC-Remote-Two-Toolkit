@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, ViewEncapsulation} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewEncapsulation
+} from '@angular/core';
 import {MessageService} from "primeng/api";
 import {ServerService} from "../../server.service";
 import {Activity, CommandSequence, Entity, Remote, RemoteMap} from "../../interfaces";
@@ -7,7 +15,9 @@ import {NgIf} from "@angular/common";
 import {OrderListModule} from "primeng/orderlist";
 import {IconComponent} from "../../icon/icon.component";
 import {ToastModule} from "primeng/toast";
-import {DragDropModule} from "primeng/dragdrop";
+import {Button} from "primeng/button";
+import {DialogModule} from "primeng/dialog";
+import {DockModule} from "primeng/dock";
 
 @Component({
   selector: 'app-activity-sequence',
@@ -17,7 +27,10 @@ import {DragDropModule} from "primeng/dragdrop";
     OrderListModule,
     IconComponent,
     ToastModule,
-    NgIf
+    NgIf,
+    Button,
+    DialogModule,
+    DockModule
   ],
   templateUrl: './activity-sequence.component.html',
   styleUrl: './activity-sequence.component.css',
@@ -30,6 +43,9 @@ export class ActivitySequenceComponent {
   @Input() activity: Activity | undefined;
   @Input() sequenceName: string | undefined;
   @Input() editable = true;
+  @Output() onUpdate = new EventEmitter<{activity:Activity, sequenceName:string}>();
+  selectedCommandSequence: CommandSequence | undefined;
+  commandVisible = false;
 
   templates: RemoteMap[] = [];
   entities: Entity[] | undefined;
@@ -63,10 +79,37 @@ export class ActivitySequenceComponent {
   }
 
   editCommand(commandSequence: CommandSequence) {
-    this.messageService.add({
-      key: "sequence",
-      severity: "info", summary: `Not implemented yet editing command ${commandSequence?.command?.cmd_id}`,
-    });
+    if (!commandSequence) return;
+    this.selectedCommandSequence = commandSequence;
+    this.commandVisible = true;
+    this.cdr.detectChanges();
+  }
+
+  updateSequence($event: any) {
+    if (!this.activity || !this.sequenceName) return;
+    this.onUpdate.emit({activity: this.activity, sequenceName: this.sequenceName});
+  }
+
+  deleteCommand(commandSequence: CommandSequence) {
+    if (!this.sequenceName) return;
+    const index = this.activity?.options?.sequences?.[this.sequenceName]?.indexOf(commandSequence);
+    if (index && index != -1) {
+      this.activity?.options?.sequences?.[this.sequenceName]?.splice(index, 1);
+      this.updateSequence(null);
+      this.cdr.detectChanges();
+    }
+  }
+
+  addCommand($event: MouseEvent) {
+    if (!this.sequenceName) return;
+    const sequences = this.activity?.options?.sequences?.[this.sequenceName];
+    let entity_id = "";
+    if (sequences && sequences?.length > 0 && sequences[0].command?.entity_id) entity_id = sequences[0].command.entity_id;
+    this.activity?.options?.sequences?.[this.sequenceName]?.push({type: "command", command: {entity_id, cmd_id: ""}});
+    const sequenceName = this.sequenceName;
+    this.sequenceName = undefined;
+    this.cdr.detectChanges();
+    this.sequenceName = sequenceName;
     this.cdr.detectChanges();
   }
 }

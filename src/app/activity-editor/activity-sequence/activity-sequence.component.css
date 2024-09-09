@@ -1,0 +1,19 @@
+div[class="p-orderlist-controls"] {
+  display: none !important;
+}
+
+.list-item-delete {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  padding-right: 30px;
+  padding-left: 60px;
+  opacity:0;
+  transition: visibility 0.1s linear,opacity 0.1s linear;
+}
+
+.list-item-delete:hover {
+  visibility: visible;
+  opacity:1;
+  cursor: pointer;
+}

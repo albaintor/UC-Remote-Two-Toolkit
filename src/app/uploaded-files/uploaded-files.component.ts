@@ -8,7 +8,7 @@ import {TableModule} from "primeng/table";
 import {ButtonModule} from "primeng/button";
 import {TooltipModule} from "primeng/tooltip";
 import {ToastModule} from "primeng/toast";
-import {HttpErrorResponse} from "@angular/common/http";
+import { HttpErrorResponse } from "@angular/common/http";
 
 @Component({
   selector: 'app-uploaded-files',

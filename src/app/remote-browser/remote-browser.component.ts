@@ -34,7 +34,7 @@ import {
 } from "../interfaces";
 import {ServerService} from "../server.service";
 import {catchError, forkJoin, from, map, mergeMap, Observable, of} from "rxjs";
-import {HttpErrorResponse, HttpEventType} from "@angular/common/http";
+import { HttpErrorResponse, HttpEventType } from "@angular/common/http";
 import {FormsModule} from "@angular/forms";
 import {InputTextModule} from "primeng/inputtext";
 import {TooltipModule} from "primeng/tooltip";

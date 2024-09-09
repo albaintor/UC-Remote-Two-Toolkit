@@ -38,6 +38,7 @@ import { saveAs } from 'file-saver-es';
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {ButtonEditorComponent} from "../activity-editor/button-editor/button-editor.component";
 import {from, map, Observable} from "rxjs";
+import {ActivitySequenceComponent} from "../activity-editor/activity-sequence/activity-sequence.component";
 
 enum DataFormat {
   None,
@@ -70,7 +71,8 @@ export class AsPipe implements PipeTransform {
     NgxJsonViewerModule,
     UiCommandEditorComponent,
     ConfirmDialogModule,
-    ButtonEditorComponent
+    ButtonEditorComponent,
+    ActivitySequenceComponent
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',

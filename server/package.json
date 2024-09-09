@@ -19,7 +19,7 @@
     "morgan": "~1.9.1",
     "multer": "^1.4.5-lts.1",
     "nodemon": "^3.1.4",
-    "rimraf": "^5.0.5"
+    "rimraf": "^6.0.1"
   },
   "devDependencies": {
     "esbuild": "^0.23.0"

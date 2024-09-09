@@ -201,6 +201,7 @@ export interface Context
 export interface Entity
 {
   name?: string | {'en': string, 'fr': string};
+  icon?: string;
   entity_id?: string;
   entity_type: string;
   integration?: string;

@@ -181,6 +181,10 @@ export class RemoteDataLoaderComponent {
         localStorage.setItem("profiles", JSON.stringify(this.profiles));
         localStorage.setItem("configCommands", JSON.stringify(this.configCommands));
         localStorage.setItem("context", JSON.stringify(this.context));
+        this.server.setActivities(this.activities);
+        this.server.setEntities(this.entities);
+        this.server.setProfiles(this.profiles);
+        this.server.setConfigCommands(this.configCommands);
         this.localMode = true;
         this.progress = false;
         this.cdr.detectChanges();

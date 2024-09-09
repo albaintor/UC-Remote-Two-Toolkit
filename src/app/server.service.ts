@@ -25,6 +25,7 @@ export class ServerService {
   private entities: Entity[] = [];
   private activities: Activity[] = [];
   private profiles: Profile[] = [];
+  private configCommands: EntityCommand[] = [];
   entities$ = new Subject<Entity[]>();
   activities$ = new Subject<Activity[]>();
   profiles$: Subject<Profile[]> = new Subject<Profile[]>();
@@ -75,6 +76,11 @@ export class ServerService {
   setActivities(activities: Activity[]) : void {
     this.activities = activities;
     this.activities$.next(activities);
+  }
+
+  setConfigCommands(configCommands: EntityCommand[]) {
+    this.configCommands = configCommands;
+    this.configCommands$.next(configCommands);
   }
 
   setProfiles(profiles: Profile[]) : void {

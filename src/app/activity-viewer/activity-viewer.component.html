@@ -1,4 +1,13 @@
 <p-toast key="activity"></p-toast>
+<div class="flex align-content-left flex-wrap gap-3">
+  <div class="flex align-items-center justify-content-center">
+    <h3>Startup sequence</h3>
+    <app-activity-sequence [remote]="remote" [activity]="activity" [editable]="editMode" sequenceName="on"></app-activity-sequence>
+  </div>
+  <div class="flex align-items-center justify-content-center">
+    <h3>Shutdown sequence</h3>
+    <app-activity-sequence [remote]="remote" [activity]="activity" [editable]="editMode" sequenceName="off"></app-activity-sequence>
+</div>
 <p-overlayPanel id="buttonpanel" #buttonpanel [style]="buttonPanelStyle" [showCloseIcon]="true">
   <ng-template pTemplate="content">
     <h3>{{mouseOverButtonName!}}</h3>

@@ -84,12 +84,17 @@ export class ActivityGridComponent  implements AfterViewInit{
   }
 
   @HostListener('dragstart', ['$event']) handleDragStart(event: any){
-    if (!this.editable || Helper.isEmptyItem(this.item)) return;
+    if (!this.editable || Helper.isEmptyItem(this.item)) {
+      event.stopPropagation();
+      this.cdr.detectChanges();
+      return false;
+    }
     this.gridItem!.nativeElement.style.opacity = '0.4';
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('text/html', this.gridItem!.nativeElement.innerHTML);
     this.sourceSelected.emit(this);
     this.cdr.detectChanges();
+    return true;
   }
 
 
@@ -119,7 +124,6 @@ export class ActivityGridComponent  implements AfterViewInit{
 
   @HostListener('dragenter', ['$event']) handleDragEnter(event: any) {
     if (!this.editable || !this.source || this.source == this) return;
-    console.error("dragenter", event);
     if (!this.checkDraggableDestination()) return;
     this.cdr.detectChanges();
     this.gridItem!.nativeElement.classList.add('over');

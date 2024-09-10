@@ -44,8 +44,14 @@
 
 .grid-item.over {
   border: 3px dotted #666;
+  background-color: rgba(191, 191, 191, 0.8);
+  animation: pulse  2s infinite;
 }
 
+@keyframes pulse  {
+  0%, 100% {background-color: rgba(191, 191, 191, 0.8);}
+  50% {background-color: rgba(76, 76, 76, 0.8);}
+}
 /*[draggable] {
   user-select: none;
 }*/

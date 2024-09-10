@@ -2,12 +2,18 @@ div[class="p-orderlist-controls"] {
   display: none !important;
 }
 
+.list-item-add {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+
 .list-item-delete {
   position: absolute;
-  right: 0;
-  top: 50%;
-  padding-right: 30px;
-  padding-left: 60px;
+  right: 20px;
+  top: 40%;
+  padding-right: 10px;
+  padding-left: 80px;
   opacity:0;
   transition: visibility 0.1s linear,opacity 0.1s linear;
 }

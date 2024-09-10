@@ -104,6 +104,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   @ViewChild("input_file_page", {static: false}) input_file_page: ElementRef | undefined;
   @ViewChildren(ActivityGridComponent) gridButtons:QueryList<ActivityGridComponent> | undefined;
   @ViewChild(ButtonEditorComponent) buttonEditor:ButtonEditorComponent | undefined;
+  @ViewChild("remoteMap", {static: false}) remoteMap: ElementRef | undefined;
 
 
   mouseOverButtonName: string = "";
@@ -165,6 +166,19 @@ export class ActivityViewerComponent implements AfterViewInit {
         this.updateButtonsGrid();
       }
     });
+    let map:HTMLMapElement = this.remoteMap?.nativeElement;
+
+    console.log("Remote map", map);
+    map?.childNodes.forEach(node => {
+      if (node instanceof HTMLAreaElement)
+      {
+        (node as HTMLAreaElement).addEventListener("mouseover", (event: any) => {
+          (node as HTMLAreaElement).classList.add('button-assigned');
+          console.log("mouseover", node, event);
+        });
+      }
+
+    })
   }
 
   view(activity: Activity, editable: boolean): void {

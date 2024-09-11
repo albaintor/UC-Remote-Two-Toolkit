@@ -79,7 +79,7 @@ export class ActivitySequenceComponent {
   }
 
   editCommand(commandSequence: CommandSequence) {
-    if (!commandSequence) return;
+    if (!commandSequence || !this.editable) return;
     this.selectedCommandSequence = commandSequence;
     this.commandVisible = true;
     this.cdr.detectChanges();

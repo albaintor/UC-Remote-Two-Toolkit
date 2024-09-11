@@ -23,7 +23,7 @@
           <span class="text-500">
               {{ getCommandParams(command) }}
           </span>
-          <div (click)="deleteCommand(command)" class="list-item-delete" pTooltip="Remove this command"><i class="pi pi-times" style="font-size: 30px; font-weight: bold; color: red"></i></div>
+          <div *ngIf="editable" (click)="deleteCommand(command)" class="list-item-delete" pTooltip="Remove this command"><i class="pi pi-times" style="font-size: 30px; font-weight: bold; color: red"></i></div>
         </div>
       </ng-template>
     </p-orderList>

@@ -53,6 +53,7 @@ import {TagModule} from "primeng/tag";
 import {ToggleButtonModule} from "primeng/togglebutton";
 import {IconSelectorComponent} from "../icon-selector/icon-selector.component";
 import {IconComponent} from "../icon/icon.component";
+import {ToolbarModule} from "primeng/toolbar";
 
 export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
 
@@ -93,7 +94,8 @@ enum OperationMode {
     TagModule,
     ToggleButtonModule,
     IconSelectorComponent,
-    IconComponent
+    IconComponent,
+    ToolbarModule
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',

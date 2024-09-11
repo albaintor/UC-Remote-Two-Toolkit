@@ -38,6 +38,8 @@ import {ButtonEditorComponent} from "../activity-editor/button-editor/button-edi
 import {from, map, Observable} from "rxjs";
 import {ActivitySequenceComponent} from "../activity-editor/activity-sequence/activity-sequence.component";
 import {ImageMapComponent, MapElement} from "../image-map/image-map.component";
+import {DividerModule} from "primeng/divider";
+import {ToolbarModule} from "primeng/toolbar";
 
 enum DataFormat {
   None,
@@ -72,7 +74,9 @@ export class AsPipe implements PipeTransform {
     ConfirmDialogModule,
     ButtonEditorComponent,
     ActivitySequenceComponent,
-    ImageMapComponent
+    ImageMapComponent,
+    DividerModule,
+    ToolbarModule
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',

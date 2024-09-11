@@ -46,18 +46,19 @@
     </div>
   </div>
 </ng-container>
-<ng-container *ngIf="updatedActivity">
+<p-toolbar>
   <div class="flex align-content-center flex-wrap gap-3">
+  <ng-container *ngIf="updatedActivity">
     <div class="flex align-items-center justify-content-center" *ngIf="targetRemote && updatedActivity">
-    <span id="icon" class="icon-selected" (click)="iconSelector.show(targetRemote)">
-      <ng-container *ngIf="updatedActivity!.icon && Helper.isStandardIcon(updatedActivity!.icon!)">
-        <span [class]="Helper.getIconClass(updatedActivity!.icon!)"></span>
-      </ng-container>
-      <ng-container *ngIf="updatedActivity!.icon && Helper.isCustomIcon(updatedActivity!.icon!)">
-        <img [src]="Helper.getIconURL(targetRemote!, updatedActivity!.icon!)" [alt]="updatedActivity!.icon!" width="70" height="70">
-      </ng-container>
-      <ng-container *ngIf="!updatedActivity!.icon">No icon</ng-container>
-    </span>
+      <span id="icon" class="icon-selected" (click)="iconSelector.show(targetRemote)">
+        <ng-container *ngIf="updatedActivity!.icon && Helper.isStandardIcon(updatedActivity!.icon!)">
+          <span [class]="Helper.getIconClass(updatedActivity!.icon!)"></span>
+        </ng-container>
+        <ng-container *ngIf="updatedActivity!.icon && Helper.isCustomIcon(updatedActivity!.icon!)">
+          <img [src]="Helper.getIconURL(targetRemote!, updatedActivity!.icon!)" [alt]="updatedActivity!.icon!" width="70" height="70">
+        </ng-container>
+        <ng-container *ngIf="!updatedActivity!.icon">No icon</ng-container>
+      </span>
     </div>
     <div class="flex align-items-center justify-content-center">
       Activity name :
@@ -65,9 +66,7 @@
     <div class="flex align-items-center justify-content-center">
       <input type="text" pInputText [(ngModel)]="updatedActivity.name" />
     </div>
-  </div>
-</ng-container>
-<div class="flex align-content-center flex-wrap gap-3">
+  </ng-container>
   <div class="flex align-items-center justify-content-center">
     <p-button label="Save this activity to file" (onClick)="saveActivity()" severity="success" icon="pi pi-save" size="small"></p-button>
   </div>
@@ -98,6 +97,7 @@
                     onIcon="pi pi-eraser" offIcon="pi pi-lock"/>
   </div>
 </div>
+</p-toolbar>
 <p-messages severity="info">
   <ng-template pTemplate>
     <div class="ml-2">You can edit (create, replace or clone) an activity. In the new mapping you can only move UI icons or edit commands.<br>

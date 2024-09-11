@@ -31,7 +31,6 @@
               "node_modules/primeflex/primeflex.css"
             ],
             "scripts": [
-              "node_modules/@iconfu/svg-inject/dist/svg-inject.min.js"
             ]
           },
           "configurations": {

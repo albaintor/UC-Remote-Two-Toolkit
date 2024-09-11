@@ -1,1 +1,13 @@
-<canvas id='remote-canvas'></canvas>
+<div #imageContainer class="map-container">
+  <canvas *ngIf="useCanvas" #canvas id='canvas'></canvas>
+  <div #mapSelected class="map-selected">
+  </div>
+  <div *ngIf="!useCanvas" #mapSelector class="map-selector">
+    <div class="map-selector-text">{{imageMapText}}</div>
+  </div>
+  <img [src]="image" usemap="#image-map" #imageElement [alt]="description" [width]="imageSize?.width" [height]="imageSize?.height"/>
+  <map name="image-map" #imageMap>
+    <ng-container *ngIf="areas" [ngTemplateOutlet]="areas"/>
+  </map>
+</div>
+

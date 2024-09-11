@@ -1,0 +1,73 @@
+canvas
+{
+  pointer-events: none;
+  position: absolute;
+  z-index: 40;
+  transition: all 2s;
+}
+
+.map-selected {
+  position: absolute;
+  left:0;top:0;right:0;bottom:0;
+  pointer-events: none;
+  z-index: 40;
+}
+
+.map-selected-item {
+  position: absolute;
+  display: block;
+  left:0;top:0;right:0;bottom:0;
+  background: content-box radial-gradient(rgba(251, 183, 36, 0.8),
+    rgba(76, 75, 75, 0.09));
+  /*border: rgba(0, 0, 0, 0.56) 1px solid;*/
+  pointer-events: none;
+}
+
+.map-selector {
+  z-index: 50;
+  display: none;
+  position: absolute;
+  left:0;top:0;right:0;bottom:0;
+  background-color: rgba(113, 163, 236, 0.6);
+  border: #3b82f6 1px solid;
+  transition-duration: .2s;
+  transition-timing-function: ease-out;
+  transition-property: top, left, right, bottom, background-color;
+  pointer-events: none;
+  cursor: pointer;
+  animation: pulse 2s infinite;
+}
+
+
+
+.map-selector:hover {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse  {
+  0%, 100% {background-color: rgba(14, 120, 250, 0.8); border: #3b82f6 2px solid;}
+  50% {background-color: rgba(3, 43, 246, 0.75); border: #003bff 2px solid;}
+}
+
+.map-selector-text {
+  position: absolute;
+  display: flex;
+  color: rgb(126, 184, 255);
+  justify-content: center;
+  text-align: center;
+  font-weight: bold;
+  white-space: nowrap;
+  left: 0;
+  top: -30px;
+  right: 0;
+  bottom: 0;
+}
+
+.map-container
+{
+  position: relative;
+  left: 0;
+  top:0;
+  right: 0;
+  bottom: 0;
+}

@@ -25,11 +25,9 @@ import {ToastModule} from "primeng/toast";
 import {NgForOf, NgIf} from "@angular/common";
 import {PaginatorModule, PaginatorState} from "primeng/paginator";
 import {ChipModule} from "primeng/chip";
-// @ts-ignore
-import SVGInject from "@iconfu/svg-inject";
 import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
 import {RouterLink} from "@angular/router";
-import {ActivityGridComponent, GridItem} from "./activity-grid/activity-grid.component";
+import {ActivityGridComponent} from "./activity-grid/activity-grid.component";
 import {ButtonModule} from "primeng/button";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {Helper} from "../helper";
@@ -39,6 +37,7 @@ import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {ButtonEditorComponent} from "../activity-editor/button-editor/button-editor.component";
 import {from, map, Observable} from "rxjs";
 import {ActivitySequenceComponent} from "../activity-editor/activity-sequence/activity-sequence.component";
+import {ImageMapComponent, MapElement} from "../image-map/image-map.component";
 
 enum DataFormat {
   None,
@@ -72,7 +71,8 @@ export class AsPipe implements PipeTransform {
     UiCommandEditorComponent,
     ConfirmDialogModule,
     ButtonEditorComponent,
-    ActivitySequenceComponent
+    ActivitySequenceComponent,
+    ImageMapComponent
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',
@@ -83,6 +83,7 @@ export class AsPipe implements PipeTransform {
 export class ActivityViewerComponent implements AfterViewInit {
   currentPage: UIPage | undefined;
   configEntityCommands: EntityCommand[] | undefined;
+  mappedButtons: string[] | undefined;
   @Input('activity') set _activity(value: Activity | undefined) {
     this.activity = value;
     if (value) {
@@ -104,14 +105,12 @@ export class ActivityViewerComponent implements AfterViewInit {
   @ViewChild("input_file_page", {static: false}) input_file_page: ElementRef | undefined;
   @ViewChildren(ActivityGridComponent) gridButtons:QueryList<ActivityGridComponent> | undefined;
   @ViewChild(ButtonEditorComponent) buttonEditor:ButtonEditorComponent | undefined;
-  @ViewChild("remoteMap", {static: false}) remoteMap: ElementRef | undefined;
 
 
   mouseOverButtonName: string = "";
   mouseoverButton: ButtonMapping | undefined;
   selectedButton: ButtonMapping | undefined;
   buttonPanelStyle: any = { width: '450px' };
-  svg: SVGElement | undefined;
   protected readonly JSON = JSON;
   gridItemSource: ActivityGridComponent | undefined;
   gridCommands: ActivityPageCommand[] = [];
@@ -131,6 +130,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.server.getPictureRemoteMap().subscribe(buttonsMap => {
       this.buttonsMap = buttonsMap;
       this.reversedButtonMap = Object.fromEntries(Object.entries(buttonsMap).map(([key, value]) => [value, key]));
+      this.updateButtons();
     })
     const configCommands = localStorage.getItem("configCommands");
     if (configCommands)
@@ -159,26 +159,6 @@ export class ActivityViewerComponent implements AfterViewInit {
     // this.remotePicture?.nativeElement.addListener()
     this.gridPixelWidth = Math.min(window.innerWidth*0.8, 4*185);
     this.gridPixelHeight = Math.min(window.innerHeight*1.2, 6*185);
-    SVGInject.setOptions({
-      makeIdsUnique: false, // do not make ids used within the SVG unique
-      afterInject: (img: any, svg: any) => {
-        this.remoteLoaded(img, svg);
-        this.updateButtonsGrid();
-      }
-    });
-    let map:HTMLMapElement = this.remoteMap?.nativeElement;
-
-    console.log("Remote map", map);
-    map?.childNodes.forEach(node => {
-      if (node instanceof HTMLAreaElement)
-      {
-        (node as HTMLAreaElement).addEventListener("mouseover", (event: any) => {
-          (node as HTMLAreaElement).classList.add('button-assigned');
-          console.log("mouseover", node, event);
-        });
-      }
-
-    })
   }
 
   view(activity: Activity, editable: boolean): void {
@@ -199,79 +179,23 @@ export class ActivityViewerComponent implements AfterViewInit {
 
   updateButtons()
   {
-    const buttons = this.svg?.getElementsByClassName("button");
-    if (buttons) {
-      for (let i = 0; i < buttons.length; i++) {
-        const svgButton = buttons.item(i);
-        svgButton?.classList.remove('button-assigned');
-      }
-      if (this.activity?.options?.button_mapping)
-        for (let button of this.activity?.options?.button_mapping) {
-          const buttonId = this.reversedButtonMap[button.button];
-          if (!buttonId) continue;
-          for (let i = 0; i < buttons.length; i++) {
-            const svgButton = buttons.item(i);
-            if (svgButton?.id == buttonId) {
-              if (button.long_press || button.short_press)
-                svgButton.classList.add('button-assigned');
-              break;
-            }
-          }
-        }
-    }
+    if (Object.keys(this.reversedButtonMap).length === 0|| !this.activity?.options?.button_mapping) return;
+    const selectedButtons = this.activity.options.button_mapping.filter(item => item.long_press || item.short_press)
+      .map(item => item.button);
+    this.mappedButtons = selectedButtons?.map(button => this.reversedButtonMap[button])?.filter(item => item !== undefined);
+    this.cdr.detectChanges();
   }
 
   updateButtonsGrid()
   {
-    // let item: ActivityPageCommand | undefined;
-    // if (this.commandeditor?.visible)
-    //   item = this.gridItem?.item;
     this.gridCommands = this.getGridItems();
     this.updateButtons();
-    // if (item) this.gridItem = this.gridButtons?.find(gridItem => gridItem.item == item);
     this.cdr.detectChanges();
   }
 
   updateGridItem(gridItem: ActivityGridComponent) {
     if (!gridItem?.item) return;
     this.updateButtonsGrid();
-  }
-
-  remoteLoaded(image: any, svg: SVGElement){
-    console.log("Loaded", svg);
-    this.svg = svg;
-    svg.addEventListener("mouseover", (e) => {
-      if ((e.target as SVGImageElement).classList.contains('button'))
-      {
-        const target = e.target as SVGImageElement;
-        const buttonId = target.id;
-        this.mouseOverButtonName = this.buttonsMap[buttonId];
-        this.mouseoverButton = this.activity?.options?.button_mapping?.find(button => button.button === this.mouseOverButtonName);
-        this.buttonpanel?.show(e, svg);
-        // @ts-ignore
-        this.buttonPanelStyle = { width: '450px',
-          'left': e.pageX+'px',
-          'top': e.pageY+'px',
-          'margin-left': '5px',
-          'margin-top': '5px',
-        };
-        e.stopPropagation();
-        this.cdr.detectChanges();
-      }
-    })
-
-    svg.addEventListener("click", (e) => {
-      if (this.editMode && (e.target as SVGImageElement).classList.contains('button'))
-      {
-        const target = e.target as SVGImageElement;
-        const buttonId = target.id;
-        this.selectedButton = undefined;
-        this.selectedButton = this.activity?.options?.button_mapping?.find(button => button.button === this.buttonsMap[buttonId]);
-        this.cdr.detectChanges();
-        this.buttonEditor?.show();
-        this.cdr.detectChanges();
-      }
-    })
   }
 
   getParams(command: Command | undefined | string): string
@@ -665,5 +589,31 @@ export class ActivityViewerComponent implements AfterViewInit {
     if (!this.activity.options.user_interface) this.activity.options.user_interface = { pages: []};
     this.activity.options.user_interface.pages?.push({name: "New page", items: [], grid: {width: 4, height: 6}});
     this.updateButtonsGrid();
+  }
+
+  buttonOver($event: MapElement) {
+    const buttonId = $event.tag;
+    if (!buttonId) return;
+    this.mouseOverButtonName = this.buttonsMap[buttonId];
+    this.mouseoverButton = this.activity?.options?.button_mapping?.find(button => button.button === this.mouseOverButtonName);
+    this.buttonpanel?.show($event.event, $event.event.target);
+    // @ts-ignore
+    this.buttonPanelStyle = { width: '450px',
+      'left': $event.event.pageX +'px',
+      'top': $event.event.pageY +'px',
+      'margin-left': '5px',
+      'margin-top': '5px',
+    };
+    $event.event.stopPropagation();
+    this.cdr.detectChanges();
+  }
+
+  selectButton($event: MapElement) {
+    if (!$event.tag) return;
+    const buttonId = $event.tag;
+    this.selectedButton = this.activity?.options?.button_mapping?.find(button => button.button === this.buttonsMap[buttonId]);
+    this.cdr.detectChanges();
+    this.buttonEditor?.show();
+    this.cdr.detectChanges();
   }
 }

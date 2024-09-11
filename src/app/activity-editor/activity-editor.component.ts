@@ -141,7 +141,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   showOperations = false;
   orphanEntities : {oldEntity:Entity, newEntity:Entity | undefined}[] = [];
 
-  @ViewChild("editor") activityEditor: ActivityViewerComponent | undefined;
+  @ViewChild("editor") activityViewer: ActivityViewerComponent | undefined;
   @ViewChild(RemoteOperationsComponent) operations: RemoteOperationsComponent | undefined;
   @ViewChild("input_file", {static: false}) input_file: ElementRef | undefined;
   @ViewChild(RemoteDataLoaderComponent) remoteLoader: RemoteDataLoaderComponent | undefined;
@@ -398,7 +398,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
         this.updatedActivity!.options!.button_mapping! = JSON.parse(JSON.stringify(this.activity.options.button_mapping));
       if (this.activity.options?.user_interface?.pages)
         this.updatedActivity!.options!.user_interface!.pages = JSON.parse(JSON.stringify(this.activity.options.user_interface.pages));
-      this.activityEditor?.updateButtonsGrid();
+      this.activityViewer?.updateButtonsGrid();
     }
 
     if (!this.updatedActivity || !this.targetRemote) return remoteOperations;
@@ -665,7 +665,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     })
     this.showOperations = true;
     this.dump = updatedActivity as any;//JSON.stringify(updatedActivity, null, 2);
-    this.activityEditor?.updateButtonsGrid();
+    this.activityViewer?.updateButtonsGrid();
     this.cdr.detectChanges();
   }
 
@@ -816,7 +816,12 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       this.messageService.add({severity: "success", summary: "Entity replaced"});
 
     this.dump = this.updatedActivity as any;//JSON.stringify(updatedActivity, null, 2);
-    this.activityEditor?.updateButtonsGrid();
+    this.activityViewer?.updateButtonsGrid();
+    this.buildData();
+    const activity = this.updatedActivity;
+    this.updatedActivity = undefined;
+    this.cdr.detectChanges();
+    this.updatedActivity = activity;
     this.cdr.detectChanges();
   }
 
@@ -883,7 +888,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     navigator.clipboard.readText().then(data => {
       this.reset();
       this.updatedActivity = JSON.parse(data);
-      this.activityEditor?.updateButtonsGrid();
+      this.activityViewer?.updateButtonsGrid();
       console.log("Loaded activity from clipboard", this.updatedActivity);
       if (!this.updatedActivity || !this.updatedActivity.entity_id || !this.updatedActivity.options) {
         this.messageService.add({
@@ -911,7 +916,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       if (fileReader.result){
         this.reset();
         this.updatedActivity = JSON.parse(fileReader.result.toString());
-        this.activityEditor?.updateButtonsGrid();
+        this.activityViewer?.updateButtonsGrid();
         console.log("Loaded activity from file", fileReader.result);
         this.reloadRemoteAndbuildData().subscribe(results => {
           if (results) {
@@ -959,7 +964,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     if (!this.activity) return;
     this.reset();
     this.updatedActivity = {...this.activity};
-    this.activityEditor?.updateButtonsGrid();
+    this.activityViewer?.updateButtonsGrid();
     this.remoteOperations = this.buildData();
     this.cdr.detectChanges();
   }
@@ -970,7 +975,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       if (!activity || !this.updatedActivity?.options?.user_interface) return;
       this.updatedActivity.options.user_interface = JSON.parse(JSON.stringify(activity.options?.user_interface));
       this.cdr.detectChanges();
-      this.activityEditor?.updateButtonsGrid();
+      this.activityViewer?.updateButtonsGrid();
       this.cdr.detectChanges();
     })
   }

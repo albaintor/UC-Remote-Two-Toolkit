@@ -71,10 +71,12 @@ export class Helper
       }
       activity.options?.button_mapping?.filter(button =>
         button.long_press?.entity_id === entity.entity_id ||
-        button.short_press?.entity_id === entity.entity_id).forEach(button => {
+        button.short_press?.entity_id === entity.entity_id ||
+        button.double_press?.entity_id === entity.entity_id).forEach(button => {
           if (button.short_press?.entity_id === entity.entity_id)
             entityUsage.activity_buttons.push({activity_id: activity.entity_id!, name: Helper.getEntityName(activity),
-            button: button.button, short_press: (button.short_press?.entity_id === entity.entity_id)});
+            button: button.button, short_press: (button.short_press?.entity_id === entity.entity_id),
+            double_press: button.double_press?.entity_id === entity.entity_id});
       });
       activity.options?.user_interface?.pages?.forEach(page => {
         page.items.forEach(item => {
@@ -103,10 +105,15 @@ export class Helper
     if (button1.long_press && !button2.long_press) return false;
     if (button2.short_press && !button1.short_press) return false;
     if (button2.long_press && !button1.long_press) return false;
+    if (button2.double_press && !button1.double_press) return false;
+    if (button2.double_press && !button1.double_press) return false;
     if (button1.short_press?.cmd_id != button2.short_press?.cmd_id ||
       button1.short_press?.entity_id != button2.short_press?.entity_id) return false;
-    return !(button1.long_press?.cmd_id != button2.long_press?.cmd_id ||
-      button1.long_press?.entity_id != button2.long_press?.entity_id);
+    if (button1.long_press?.cmd_id != button2.long_press?.cmd_id ||
+      button1.long_press?.entity_id != button2.long_press?.entity_id) return false;
+    if (button1.double_press?.cmd_id != button2.double_press?.cmd_id ||
+      button1.double_press?.entity_id != button2.double_press?.entity_id) return false;
+    return true;
   }
 
   static comparePages(page1: UIPage, page2: UIPage): boolean

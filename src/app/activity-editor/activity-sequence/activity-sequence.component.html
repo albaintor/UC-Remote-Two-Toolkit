@@ -1,4 +1,6 @@
 <div style="position: relative">
+  <p-button class="list-item-delay" [rounded]="true" (onClick)="addDelay($event)" severity="info" icon="pi pi-clock" size="small"
+            [pTooltip]="'Add a delay to the '+sequenceName+' sequence'" *ngIf="editable"></p-button>
   <p-button class="list-item-add" [rounded]="true" (onClick)="addCommand($event)" severity="info" icon="pi pi-plus" size="small"
             [pTooltip]="'Add a command to the '+sequenceName+' sequence'" *ngIf="editable"></p-button>
   <ng-container *ngIf="activity?.options?.sequences && sequenceName">
@@ -8,22 +10,32 @@
       [header]="'Sequences '+sequenceName"
       [dragdrop]="editable" [stripedRows]="true" (onReorder)="updateSequence($event)">
       <ng-template let-command pTemplate="item">
-        <div class="flex flex-wrap p-2 align-items-center gap-3" (click)="editCommand(command)">
+        <div class="flex flex-wrap p-2 align-items-center gap-3">
           <i *ngIf="editable" class="pi pi-bars"></i>
-          <app-icon *ngIf="getCommandEntity(command)" [remote]="remote" [icon]="getCommandEntity(command)?.icon"
+          <app-icon *ngIf="findCommandEntity(command)" [remote]="remote" [icon]="findCommandEntity(command)?.icon"  (click)="editCommand(command)"
                     [size]="50" [fontSize]="55" />
-          <div class="flex-1 flex flex-column gap-2">
-            <span class="font-bold">{{ getCommandEntity(command)?.name }}</span>
+          <div class="flex-1 flex flex-column gap-2" *ngIf="command?.type == 'command'" (click)="editCommand(command)">
+            <span class="font-bold">{{ Helper.getEntityName(findCommandEntity(command)) }}</span>
             <div class="flex align-items-center gap-2">
               <span>
                   {{ command?.command?.["cmd_id"] }}
               </span>
             </div>
-          </div>
-          <span class="text-500">
+            <span class="text-200">
               {{ getCommandParams(command) }}
           </span>
-          <div *ngIf="editable" (click)="deleteCommand(command)" class="list-item-delete" pTooltip="Remove this command"><i class="pi pi-times" style="font-size: 30px; font-weight: bold; color: red"></i></div>
+          </div>
+          <div class="flex-1 flex flex-column gap-2" *ngIf="command?.type == 'delay'">
+            <span class="font-bold">Delay</span>
+            <p-inputNumber [(ngModel)]="command.delay" [min]="0" suffix=" ms"/>
+          </div>
+          <div *ngIf="editable" class="list-item-delete">
+            <p-button [rounded]="true" (click)="deleteCommand(command)" severity="danger" icon="pi pi-times" size="small"
+                      pTooltip="Remove this command"></p-button>
+          </div>
+          <div *ngIf="command?.command?.type == 'command' && !getCommandEntity(command)" class="list-item-orphan" [pTooltip]="'Sequence entity \''+command?.command?.entity_id+'\' is orphaned'">
+            <i class="pi pi-exclamation-triangle" style="font-size: 30px; font-weight: bold; color: red"></i>
+          </div>
         </div>
       </ng-template>
     </p-orderList>

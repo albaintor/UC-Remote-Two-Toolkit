@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "R2Tool": {
+    "UCRTool": {
       "projectType": "application",
       "schematics": {},
       "root": "",

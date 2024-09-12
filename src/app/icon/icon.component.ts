@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {Helper} from "../helper";
 import {NgIf} from "@angular/common";
-import {Remote} from "../interfaces";
+import {Entity, EntityIntegration, Remote} from "../interfaces";
 
 @Component({
   selector: 'app-icon',
@@ -27,6 +27,7 @@ export class IconComponent {
   @Input() icon: string | undefined;
   @Input() size: number = 30;
   @Input() fontSize: number = 35;
+  @Input() entity: Entity | undefined;
   @Output() click: EventEmitter<any> = new EventEmitter();
 
   protected readonly Helper = Helper;
@@ -34,5 +35,20 @@ export class IconComponent {
 
   onClick($event: any) {
     this.click.emit($event);
+  }
+
+  hasEntityIcon() : boolean
+  {
+    return !!(this.entity?.icon && this.entity.icon.length > 0);
+  }
+
+  getIntegrationIcon(): string | undefined
+  {
+    if (this.entity?.integration && typeof this.entity.integration !== "string")
+    {
+      const integration = this.entity.integration as EntityIntegration;
+      if (integration.icon) return integration.icon;
+    }
+    return undefined;
   }
 }

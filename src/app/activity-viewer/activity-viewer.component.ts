@@ -18,7 +18,7 @@ import {
   Command,
   Remote,
   Entity,
-  EntityCommand
+  EntityCommand, RemoteVersion, RemoteModels, RemoteModel
 } from "../interfaces";
 import {DialogModule} from "primeng/dialog";
 import {ToastModule} from "primeng/toast";
@@ -97,7 +97,15 @@ export class ActivityViewerComponent implements AfterViewInit {
   }
   activity: Activity | undefined;
   currentEntity: Entity | undefined;
-  @Input() remote: Remote | undefined;
+  remote: Remote | undefined;
+  @Input("remote") set _remote(value: Remote | undefined) {
+    this.remote = value;
+    if (value)
+      this.server.getRemoteVersion(value).subscribe(version => {
+        this.version = version;
+        this.cdr.detectChanges();
+      })
+  }
   @Input() editMode = true;
   @Output() onChange: EventEmitter<void> = new EventEmitter();
   @Output() reload = new EventEmitter<void>();
@@ -109,7 +117,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   @ViewChild("input_file_page", {static: false}) input_file_page: ElementRef | undefined;
   @ViewChildren(ActivityGridComponent) gridButtons:QueryList<ActivityGridComponent> | undefined;
   @ViewChild(ButtonEditorComponent) buttonEditor:ButtonEditorComponent | undefined;
-
+  version: RemoteVersion | undefined;
 
   mouseOverButtonName: string = "";
   mouseoverButton: ButtonMapping | undefined;
@@ -127,6 +135,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   gridItem: ActivityGridComponent | undefined;
   selectionMode = false;
   selection: ActivityGridComponent[] = [];
+  remoteModels: RemoteModels | undefined;
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
@@ -150,6 +159,10 @@ export class ActivityViewerComponent implements AfterViewInit {
         this.cdr.detectChanges();
       })
     }
+    this.server.getRemoteModels().subscribe(remoteModels => {
+      this.remoteModels = remoteModels;
+      this.cdr.detectChanges();
+    })
   }
 
   @HostListener('window:resize', ['$event'])
@@ -163,6 +176,12 @@ export class ActivityViewerComponent implements AfterViewInit {
     // this.remotePicture?.nativeElement.addListener()
     this.gridPixelWidth = Math.min(window.innerWidth*0.8, 4*185);
     this.gridPixelHeight = Math.min(window.innerHeight*1.2, 6*185);
+  }
+
+  getRemoteModel(): RemoteModel | undefined
+  {
+    if (!this.remoteModels || !this.version) return undefined;
+    return this.remoteModels.models.find(model => model.model === this.version?.model);
   }
 
   view(activity: Activity, editable: boolean): void {
@@ -184,7 +203,8 @@ export class ActivityViewerComponent implements AfterViewInit {
   updateButtons()
   {
     if (Object.keys(this.reversedButtonMap).length === 0|| !this.activity?.options?.button_mapping) return;
-    const selectedButtons = this.activity.options.button_mapping.filter(item => item.long_press || item.short_press)
+    const selectedButtons = this.activity.options.button_mapping.filter(item => item.long_press
+      || item.short_press || item.double_press)
       .map(item => item.button);
     this.mappedButtons = selectedButtons?.map(button => this.reversedButtonMap[button])?.filter(item => item !== undefined);
     this.cdr.detectChanges();

@@ -395,6 +395,14 @@ export class ReplaceEntityComponent implements OnInit{
                 long_press: {...button.long_press}
               }, status: OperationStatus.Todo})
           }
+          item = replaceEntities.find(entity => entity.oldEntity!.entity_id === button.double_press?.entity_id);
+          if (item) {
+            button.double_press!.entity_id = item.newEntity!.entity_id!;
+            this.remoteOperations.push({name: `${activity.name} (buttons)`, method: "PATCH", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
+              body: {
+                double_press: {...button.double_press}
+              }, status: OperationStatus.Todo})
+          }
         })
 
         activity.options?.user_interface?.pages?.forEach(page => {

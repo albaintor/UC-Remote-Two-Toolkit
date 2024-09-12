@@ -1,6 +1,6 @@
 {
-  "name": "r2-tool",
-  "version": "1.1.1",
+  "name": "ucr-tool",
+  "version": "1.2.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

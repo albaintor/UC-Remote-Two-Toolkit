@@ -18,6 +18,9 @@ import {ToastModule} from "primeng/toast";
 import {Button} from "primeng/button";
 import {DialogModule} from "primeng/dialog";
 import {DockModule} from "primeng/dock";
+import {Helper} from "../../helper";
+import {InputNumberModule} from "primeng/inputnumber";
+import {FormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-activity-sequence',
@@ -30,7 +33,9 @@ import {DockModule} from "primeng/dock";
     NgIf,
     Button,
     DialogModule,
-    DockModule
+    DockModule,
+    InputNumberModule,
+    FormsModule
   ],
   templateUrl: './activity-sequence.component.html',
   styleUrl: './activity-sequence.component.css',
@@ -63,7 +68,13 @@ export class ActivitySequenceComponent {
   getCommandEntity(commandSequence: CommandSequence): Entity | undefined
   {
     return this.entities?.find(entity => commandSequence.command?.entity_id === entity.entity_id);
+  }
 
+  findCommandEntity(commandSequence: CommandSequence): Entity | undefined {
+    let entity = this.getCommandEntity(commandSequence);
+    if (!entity)
+      entity = this.activity?.options?.included_entities?.find(entity => commandSequence.command?.entity_id === entity.entity_id);
+    return entity;
   }
 
   getCommandParams(commandSequence: CommandSequence): string
@@ -79,7 +90,7 @@ export class ActivitySequenceComponent {
   }
 
   editCommand(commandSequence: CommandSequence) {
-    if (!commandSequence || !this.editable) return;
+    if (!commandSequence || !this.editable || commandSequence.type !== 'command') return;
     this.selectedCommandSequence = commandSequence;
     this.commandVisible = true;
     this.cdr.detectChanges();
@@ -93,11 +104,22 @@ export class ActivitySequenceComponent {
   deleteCommand(commandSequence: CommandSequence) {
     if (!this.sequenceName) return;
     const index = this.activity?.options?.sequences?.[this.sequenceName]?.indexOf(commandSequence);
-    if (index && index != -1) {
+    if (index != undefined && index != -1) {
       this.activity?.options?.sequences?.[this.sequenceName]?.splice(index, 1);
       this.updateSequence(null);
       this.cdr.detectChanges();
     }
+  }
+
+  addDelay($event: MouseEvent) {
+    if (!this.sequenceName) return;
+    const sequences = this.activity?.options?.sequences?.[this.sequenceName];
+    this.activity?.options?.sequences?.[this.sequenceName]?.push({type: "delay", delay: 1000});
+    const sequenceName = this.sequenceName;
+    this.sequenceName = undefined;
+    this.cdr.detectChanges();
+    this.sequenceName = sequenceName;
+    this.cdr.detectChanges();
   }
 
   addCommand($event: MouseEvent) {
@@ -112,4 +134,6 @@ export class ActivitySequenceComponent {
     this.sequenceName = sequenceName;
     this.cdr.detectChanges();
   }
+
+  protected readonly Helper = Helper;
 }

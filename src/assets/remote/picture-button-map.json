@@ -19,5 +19,8 @@
   "next": "NEXT",
   "previous": "PREV",
   "playpause": "PLAY",
-  "power": "POWER"
+  "power": "POWER",
+  "stop": "STOP",
+  "record": "RECORD",
+  "context": "CONTEXT"
 }

@@ -9,7 +9,7 @@ import {
   Entity, EntityCommand, EntityFeature,
   EntityUsage, Integration, Macro, Page, Profile, ProfileGroup,
   Profiles,
-  Remote, RemoteMap, RemoteRegistration, RemoteStatus, RemoteVersion
+  Remote, RemoteMap, RemoteModels, RemoteRegistration, RemoteStatus, RemoteVersion
 } from "./interfaces";
 import {compileResults} from "@angular/compiler-cli/src/ngtsc/annotations/common";
 
@@ -26,6 +26,8 @@ export class ServerService {
   private activities: Activity[] = [];
   private profiles: Profile[] = [];
   private configCommands: EntityCommand[] = [];
+  private version: RemoteVersion | undefined;
+  version$ = new Subject<RemoteVersion | undefined>();
   entities$ = new Subject<Entity[]>();
   activities$ = new Subject<Activity[]>();
   profiles$: Subject<Profile[]> = new Subject<Profile[]>();
@@ -88,9 +90,21 @@ export class ServerService {
     this.profiles$.next(profiles);
   }
 
+  setVersion(version: RemoteVersion | undefined) {
+    this.version = version;
+    this.version$.next(version);
+  }
+
   getPictureRemoteMap(): Observable<{ [id: string]: string }>
   {
     return this.http.get<{ [id: string]: string }>('/assets/remote/picture-button-map.json').pipe(map(results => {
+      return results;
+    }))
+  }
+
+  getRemoteModels(): Observable<RemoteModels>
+  {
+    return this.http.get<RemoteModels>('/assets/remote/remote-models.json').pipe(map(results => {
       return results;
     }))
   }

@@ -2,13 +2,12 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
-  ContentChild, ElementRef, EventEmitter,
+  ElementRef, EventEmitter,
   Input, Output, Renderer2,
   TemplateRef, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import {NgIf, NgOptimizedImage, NgTemplateOutlet} from "@angular/common";
-import {DomSanitizer} from "@angular/platform-browser";
 
 export interface MapElement
 {
@@ -27,13 +26,14 @@ export interface MapElement
   templateUrl: './image-map.component.html',
   styleUrl: './image-map.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.ShadowDom
 })
 export class ImageMapComponent implements AfterViewInit {
   @Input() image: string  = "";
   @Input() description: string = "";
   @Input() useCanvas = false;
   @Input() imageSize: {width: number; height: number} | undefined;
+  @Input() imageTemplate : TemplateRef<HTMLAreaElement> | undefined;
   selectedTags: string[] | undefined;
   @Input('selectedTags') set _selectedTags(value: string[] | undefined) {
     this.selectedTags = value;
@@ -43,7 +43,6 @@ export class ImageMapComponent implements AfterViewInit {
   @Output() leaveElement = new EventEmitter<MapElement>();
   @Output() clickElement = new EventEmitter<MapElement>();
   @ViewChild('imageElement', {static: false}) imageElement: ElementRef<HTMLImageElement> | undefined;
-  @ContentChild('areas') areas: TemplateRef<HTMLAreaElement> | undefined;
   @ViewChild("imageMap", {static: false}) imageMap: ElementRef<HTMLMapElement> | undefined;
   @ViewChild("canvas", {static: false}) canvas: ElementRef<HTMLCanvasElement> | undefined;
   @ViewChild("mapSelector", {static: false}) mapSelector: ElementRef<HTMLDivElement> | undefined;
@@ -53,7 +52,7 @@ export class ImageMapComponent implements AfterViewInit {
   imageMapText: string | undefined;
   private selectedItems:  HTMLDivElement[] = [];
 
-  constructor(private cdr:ChangeDetectorRef, private eRef: ElementRef, private renderer: Renderer2, private sanitizer: DomSanitizer) {
+  constructor(private cdr:ChangeDetectorRef, private renderer: Renderer2) {
   }
 
   ngAfterViewInit(): void {

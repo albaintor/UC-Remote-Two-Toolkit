@@ -20,15 +20,15 @@ import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
 import {
   Activity,
-  ActivityPageCommand,
+  ActivityPageCommand, ButtonMapping,
   Command,
   Config,
   Entity,
   OperationStatus,
   Remote, RemoteData,
-  RemoteMap,
+  RemoteMap, RemoteModel, RemoteModels,
   RemoteOperation,
-  RemoteOperationResultField,
+  RemoteOperationResultField, RemoteVersion,
   UIPage
 } from "../interfaces";
 import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
@@ -42,7 +42,7 @@ import {RemoteOperationsComponent} from "../remote-operations/remote-operations.
 import {MessagesModule} from "primeng/messages";
 import {DialogModule} from "primeng/dialog";
 import {saveAs} from "file-saver-es";
-import {map, Observable} from "rxjs";
+import {map, Observable, of} from "rxjs";
 import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 import {ChipModule} from "primeng/chip";
 import {InputTextModule} from "primeng/inputtext";
@@ -140,6 +140,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   mode: OperationMode = OperationMode.Undefined;
   showOperations = false;
   orphanEntities : {oldEntity:Entity, newEntity:Entity | undefined}[] = [];
+  uncompatibleCommands: ButtonMapping[] = [];
 
   @ViewChild("editor") activityViewer: ActivityViewerComponent | undefined;
   @ViewChild(RemoteOperationsComponent) operations: RemoteOperationsComponent | undefined;
@@ -154,7 +155,8 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   existingActivity = false;
   resetMapping = true;
   lockOperations = false;
-
+  version: RemoteVersion | undefined;
+  remoteModels: RemoteModels | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private activatedRoute: ActivatedRoute, private confirmationService: ConfirmationService) {
@@ -169,9 +171,9 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     })
 
     this.server.getConfig().subscribe(config => {
-      this.updateRemote(config);
+      this.updateRemote(config).subscribe();
       this.server.config$.subscribe(config => {
-        this.updateRemote(config);
+        this.updateRemote(config).subscribe(config => this.buildData());
       })
     })
     this.server.getTemplateRemoteMap().subscribe(templates => {
@@ -190,6 +192,11 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       this.remoteOperations = this.buildData();
       this.cdr.detectChanges();
     }
+    this.server.getRemoteModels().subscribe(remoteModels => {
+      this.remoteModels = remoteModels;
+      this.buildData();
+      this.cdr.detectChanges();
+    })
   }
 
   ngAfterViewInit(): void {
@@ -200,13 +207,13 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
         if (!this.targetRemote)
         {
           this.server.getConfig().subscribe(config => {
-            this.updateRemote(config);
-            this.targetRemote = this.selectedRemote;
-            if (source === 'file')
-              this.importActivity();
-            else if (source === 'clipboard')
-              this.importActivityFromClipboard();
-            this.cdr.detectChanges();
+            this.updateRemote(config).subscribe(results => {
+              if (source === 'file')
+                this.importActivity();
+              else if (source === 'clipboard')
+                this.importActivityFromClipboard();
+              this.cdr.detectChanges();
+            })
           })
         }
         else
@@ -227,15 +234,21 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       if (this.activatedRoute.snapshot.url.find(url => url.path === 'clone')) {
         this.mode = OperationMode.CreateMode;
         this.server.getConfig().subscribe(config => {
-          this.updateRemote(config);
+          this.updateRemote(config).subscribe(results => {this.buildData()});
           this.targetRemote = this.selectedRemote;
           this.reloadAndBuildData();
         });
-      } else
+      } else {
         this.remoteOperations = this.buildData();
+      }
       this.cdr.detectChanges();
 
     })
+  }
+
+  initFromId()
+  {
+
   }
 
   initMenu()
@@ -243,6 +256,12 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     // if (this.updatedActivity)
     this.items = [...this.availableItems];
     //this.items = [...this.availableItems.filter(item => item.label !== 'Save activity to remote')];
+  }
+
+  getRemoteModel(): RemoteModel | undefined
+  {
+    if (!this.remoteModels || !this.version) return undefined;
+    return this.remoteModels.models.find(model => model.model === this.version?.model);
   }
 
   //TODO delta mode
@@ -311,6 +330,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       if (!data || !this.updatedActivity || !this.targetRemote) return [];
       this.activities = data.activities;
       this.entities = data.entities;
+      this.version = data.version;
       this.cdr.detectChanges();
       const remoteOperations = this.buildData();
       if (showOperations) this.checkExistingActivity();
@@ -379,6 +399,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     if (!this.activities) return remoteOperations;
     this.orphanEntities = [];
     if (this.activity_id) this.activity = this.activities.find(activity => activity.entity_id === this.activity_id);
+    const remoteModel = this.getRemoteModel();
     if (!this.updatedActivity && this.activity)
     {
       this.updatedActivity = {
@@ -403,6 +424,12 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
     if (!this.updatedActivity || !this.targetRemote) return remoteOperations;
 
+    if (this.uncompatibleCommands.length > 0)
+    {
+      this.updatedActivity.options?.button_mapping?.push(...this.uncompatibleCommands);
+      this.uncompatibleCommands = [];
+    }
+
     // Add missing included entities
     for (let sequenceName in this.updatedActivity!.options?.sequences)
     {
@@ -411,11 +438,24 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
         if (sequence.command?.entity_id) this.checkIncludedEntity(sequence.command!.entity_id, this.updatedActivity!);
       })
     }
+    if (!remoteModel) console.debug("Sync : remote model is not available available yet")
+    else {
+      console.debug("Checking remote compatibility", remoteModel);
+    }
     this.updatedActivity!.options?.button_mapping?.forEach(button => {
-      if (!button.long_press && !button.short_press) return;
+      if (!button.long_press && !button.short_press && !button.double_press) return;
       if (button.long_press) this.checkIncludedEntity(button.long_press.entity_id, this.updatedActivity!);
       if (button.short_press) this.checkIncludedEntity(button.short_press.entity_id, this.updatedActivity!);
+      if (button.double_press) this.checkIncludedEntity(button.double_press.entity_id, this.updatedActivity!);
+      if (remoteModel && !remoteModel?.buttons?.includes(button.button)) {
+        this.uncompatibleCommands.push(button);
+      }
     });
+    // Remove buttons not compatible with this remote model
+    this.uncompatibleCommands.forEach(button => {
+      const index = this.updatedActivity!.options?.button_mapping?.indexOf(button);
+      if (index != undefined && index !== -1) this.updatedActivity!.options!.button_mapping!.splice(index, 1);
+    })
     this.updatedActivity!.options?.user_interface?.pages?.forEach(page => {
       page.items.forEach(item => {
         if (item.media_player_id) this.checkIncludedEntity(item.media_player_id, this.updatedActivity!);
@@ -521,7 +561,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     })
 
     this.updatedActivity!.options?.button_mapping?.forEach(button => {
-      if (!button.long_press && !button.short_press) return;
+      if (!button.long_press && !button.short_press && !button.double_press) return;
       if (resultField)
         remoteOperations.push({name: `Button ${button.button}`,method: "PATCH",
           api: `/api/activities/${NEW_ACTIVITY_ID_KEY}/buttons/${button.button}`,
@@ -536,6 +576,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
             ...button
           }, status: OperationStatus.Todo})
     });
+    if (this.uncompatibleCommands.length > 0) this.activityViewer?.updateButtons();
     console.log("Updated activity", this.updatedActivity);
     return remoteOperations;
   }
@@ -574,7 +615,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     console.log("Selected features to map : ", selectedFeatures);
     template.buttons?.forEach(button => {
       const existing_assignment = updatedActivity?.options?.button_mapping?.find(existing_button =>
-        existing_button.button === button.button && (existing_button.long_press || existing_button.short_press)
+        existing_button.button === button.button && (existing_button.long_press || existing_button.short_press || existing_button.double_press)
         && ((existing_button.long_press && button.long_press === true) || existing_button.short_press));
       if (button.feature && !selectedFeatures.includes(button.feature)) return;
       if (button.simple_command === true && !this.selectedEntity?.options?.simple_commands?.includes(button.cmd_id)) {
@@ -737,13 +778,17 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  updateRemote(config: Config): void
+  updateRemote(config: Config): Observable<any>
   {
     this.config = config;
     this.remotes = config.remotes!;
     this.selectedRemote  = Helper.getSelectedRemote(this.remotes);
     this.targetRemote = this.selectedRemote;
-    this.cdr.detectChanges();
+    return this.server.getRemoteVersion(this.targetRemote!).pipe(map(version => {
+        this.version = version;
+        this.buildData();
+        this.cdr.detectChanges();
+      }));
   }
 
   setRemote(remote: Remote): void
@@ -756,6 +801,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     if ($event)
     {
       if (!this.lockOperations) this.reset();
+      this.version = $event.version;
       this.activities = $event.activities;
       this.entities = $event.entities;
       this.activities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
@@ -795,6 +841,8 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
         button.long_press.entity_id = new_entity_id;
       if (button.short_press?.entity_id === entity_id)
         button.short_press.entity_id = new_entity_id;
+      if (button.double_press?.entity_id === entity_id)
+        button.double_press.entity_id = new_entity_id;
     })
     this.updatedActivity?.options?.user_interface?.pages?.forEach(page => {
       page?.items?.forEach(item => {
@@ -858,6 +906,11 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       this.suggestions = activityEntities.sort((a, b) => {
         return (a.name ? Helper.getEntityName(a)! : "").localeCompare(b.name ? Helper.getEntityName(b)! : "");
       });
+      this.suggestions.forEach(entity => {
+        const included_entity = this.updatedActivity?.options?.included_entities?.find(activityEntity => activityEntity.entity_id === entity.entity_id);
+        if (included_entity?.integration) entity.integration = included_entity.integration;
+      });
+
       this.cdr.detectChanges();
       return;
     }

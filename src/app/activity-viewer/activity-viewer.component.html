@@ -18,6 +18,14 @@
               [style]="getStyle(mouseoverButton.long_press.cmd_id)"></p-chip>
       <ng-container *ngIf="mouseoverButton.long_press.params">{{getParams(mouseoverButton.long_press)}}</ng-container>
     </ng-container>
+    <ng-container *ngIf="mouseoverButton && mouseoverButton.double_press">
+      <br>Double press :
+      <p-chip [label]="getEntityName(mouseoverButton.double_press.entity_id)"
+              [style]="getStyle(getEntityName(mouseoverButton.double_press.entity_id))"></p-chip>&nbsp;
+      <p-chip [label]="mouseoverButton.double_press.cmd_id" styleClass="chip-command"
+              [style]="getStyle(mouseoverButton.double_press.cmd_id)"></p-chip>
+      <ng-container *ngIf="mouseoverButton.double_press.params">{{getParams(mouseoverButton.double_press)}}</ng-container>
+    </ng-container>
   </ng-template>
 </p-overlayPanel>
 <app-ui-command-editor #commandeditor (updateItem)="updateGridItem($event)"
@@ -59,34 +67,61 @@
 <div class="flex justify-content-center flex-wrap gap-6">
   <div class="flex-grow-1 flex-column">
     <div class="flex align-items-start justify-content-center">
-      <h3>Buttons mapping</h3>
+      <h3>Buttons mapping for {{getRemoteModel()?.name}}</h3>
     </div>
-    <div class="flex align-items-start justify-content-center">
-
+    <div class="flex align-items-start justify-content-center" *ngIf="getRemoteModel()?.model == 'UCR2'">
       <app-image-map image="assets/remote/remote-two.png" [imageSize]="{width: 400, height: 400}" (overElement)="buttonOver($event)"
-                     (clickElement)="selectButton($event)" [selectedTags]="mappedButtons">
-        <ng-template #areas>
-          <area class="remotebutton" target="" alt="Volume +" title="Volume +" href="#" data-tag="volumeup" coords="5,87,83,163" shape="rect">
-          <area class="remotebutton" target="" alt="Volume -" title="Volume -" href="#" data-tag="volumedown" coords="5,243,81,312" shape="rect">
-          <area class="remotebutton" target="" alt="Mute" title="Mute" href="#" data-tag="mute" coords="5,321,76,390" shape="rect">
-          <area class="remotebutton" target="" alt="Previous chapter" title="Previous chapter" href="#" data-tag="previous" coords="89,320,158,390" shape="rect">
-          <area class="remotebutton" target="" alt="Play pause" title="Play pause" href="#" data-tag="playpause" coords="165,321,240,390" shape="rect">
-          <area class="remotebutton" target="" alt="Next chapter" title="Next chapter" href="#" data-tag="next" coords="243,321,316,389" shape="rect">
-          <area class="remotebutton" target="" alt="Back" title="Back" href="#" data-tag="back" coords="5,7,83,74" shape="rect">
-          <area class="remotebutton" target="" alt="Power" title="Power" href="#" data-tag="power" coords="321,321,394,390" shape="rect">
-          <area class="remotebutton" target="" alt="Home" title="Home" href="#" data-tag="home" coords="88,5,318,76" shape="rect">
-          <area class="remotebutton" target="" alt="Mic" title="Mic" href="#" data-tag="mic" coords="325,1,398,76" shape="rect">
-          <area class="remotebutton" target="" alt="Channel Up" title="Channel Up" href="#" data-tag="channelup" coords="325,85,394,161" shape="rect">
-          <area class="remotebutton" target="" alt="Channel Down" title="Channel Down" href="#" data-tag="channeldown" coords="323,245,392,314" shape="rect">
-          <area class="remotebutton" target="" alt="Cursor up" title="Cursor up" href="#" data-tag="cursorup" coords="163,87,241,149" shape="rect">
-          <area class="remotebutton" target="" alt="Cursor down" title="Cursor down" href="#" data-tag="cursordown" coords="163,260,241,316" shape="rect">
-          <area class="remotebutton" target="" alt="Cursor left" title="Cursor left" href="#" data-tag="cursorleft" coords="87,161,154,247" shape="rect">
-          <area class="remotebutton" target="" alt="Cursor right" title="Cursor right" href="#" data-tag="cursorright" coords="247,154,316,247" shape="rect">
-          <area class="remotebutton" target="" alt="Cursor enter" title="Cursor enter" href="#" data-tag="cursorenter" coords="161,158,241,245" shape="rect">
-          <area class="remotebutton" target="" alt="Green" title="Green" href="#" data-tag="green" coords="87,90,156,152" shape="rect">
-          <area class="remotebutton" target="" alt="Yellow" title="Yellow" href="#" data-tag="yellow" coords="249,90,314,147" shape="rect">
-          <area class="remotebutton" target="" alt="Red" title="Red" href="#" data-tag="red" coords="89,254,158,312" shape="rect">
-          <area class="remotebutton" target="" alt="Blue" title="Blue" href="#" data-tag="blue" coords="252,254,314,316" shape="rect">
+                     (clickElement)="selectButton($event)" [selectedTags]="mappedButtons" [imageTemplate]="r2Areas">
+        <ng-template #r2Areas>
+          <area target="" alt="Volume +" title="Volume +" href="#" data-tag="volumeup" coords="5,87,83,163" shape="rect">
+          <area target="" alt="Volume -" title="Volume -" href="#" data-tag="volumedown" coords="5,243,81,312" shape="rect">
+          <area target="" alt="Mute" title="Mute" href="#" data-tag="mute" coords="5,321,76,390" shape="rect">
+          <area target="" alt="Previous chapter" title="Previous chapter" href="#" data-tag="previous" coords="89,320,158,390" shape="rect">
+          <area target="" alt="Play pause" title="Play pause" href="#" data-tag="playpause" coords="165,321,240,390" shape="rect">
+          <area target="" alt="Next chapter" title="Next chapter" href="#" data-tag="next" coords="243,321,316,389" shape="rect">
+          <area target="" alt="Back" title="Back" href="#" data-tag="back" coords="5,7,83,74" shape="rect">
+          <area target="" alt="Power" title="Power" href="#" data-tag="power" coords="321,321,394,390" shape="rect">
+          <area target="" alt="Home" title="Home" href="#" data-tag="home" coords="88,5,318,76" shape="rect">
+          <area target="" alt="Mic" title="Mic" href="#" data-tag="mic" coords="325,1,398,76" shape="rect">
+          <area target="" alt="Channel Up" title="Channel Up" href="#" data-tag="channelup" coords="325,85,394,161" shape="rect">
+          <area target="" alt="Channel Down" title="Channel Down" href="#" data-tag="channeldown" coords="323,245,392,314" shape="rect">
+          <area target="" alt="Cursor up" title="Cursor up" href="#" data-tag="cursorup" coords="163,87,241,149" shape="rect">
+          <area target="" alt="Cursor down" title="Cursor down" href="#" data-tag="cursordown" coords="163,260,241,316" shape="rect">
+          <area target="" alt="Cursor left" title="Cursor left" href="#" data-tag="cursorleft" coords="87,161,154,247" shape="rect">
+          <area target="" alt="Cursor right" title="Cursor right" href="#" data-tag="cursorright" coords="247,154,316,247" shape="rect">
+          <area target="" alt="Cursor enter" title="Cursor enter" href="#" data-tag="cursorenter" coords="161,158,241,245" shape="rect">
+          <area target="" alt="Green" title="Green" href="#" data-tag="green" coords="87,90,156,152" shape="rect">
+          <area target="" alt="Yellow" title="Yellow" href="#" data-tag="yellow" coords="249,90,314,147" shape="rect">
+          <area target="" alt="Red" title="Red" href="#" data-tag="red" coords="89,254,158,312" shape="rect">
+          <area target="" alt="Blue" title="Blue" href="#" data-tag="blue" coords="252,254,314,316" shape="rect">
+        </ng-template>
+      </app-image-map>
+    </div>
+    <div class="flex align-items-start justify-content-center"  *ngIf="getRemoteModel()?.model == 'UCR3'">
+      <app-image-map image="assets/remote/remote-3.png" [imageSize]="{width: 400, height: 724}" (overElement)="buttonOver($event)"
+                     (clickElement)="selectButton($event)" [selectedTags]="mappedButtons" [imageTemplate]="r3Areas">
+        <ng-template #r3Areas>
+          <area target="" alt="Slider" title="Slider" href="#" data-tag="slider" coords="4,1,391,81" shape="rect">
+          <area target="" alt="Back" title="Back" href="#" data-tag="back" coords="6,85,98,154" shape="rect">
+          <area target="" alt="Home" title="Home" href="#" data-tag="home" coords="106,86,292,151" shape="rect">
+          <area target="" alt="Power" title="Power" href="#" data-tag="power" coords="299,87,392,153" shape="rect">
+          <area target="" alt="Volume Up" title="Volume Up" data-tag="volumeup" href="#" coords="2,168,88,268" shape="rect">
+          <area target="" alt="Volume Down" title="Volume Down" data-tag="volumedown" href="#" coords="1,465,97,561" shape="rect">
+          <area target="" alt="Channel Up" title="Channel Up" href="#" data-tag="channelup" coords="310,168,392,273" shape="rect">
+          <area target="" alt="Channel Down" title="Channel Down" href="#" data-tag="channeldown" coords="306,462,394,560" shape="rect">
+          <area target="" alt="Cursor Up" title="Cursor Up" href="#" data-tag="cursorup" coords="154,217,249,306" shape="rect">
+          <area target="" alt="Cursor Down" title="Cursor Down" href="#" data-tag="cursordown" coords="151,422,246,512" shape="rect">
+          <area target="" alt="Cursor Left" title="Cursor Left" href="#" data-tag="cursorleft" coords="38,323,134,411" shape="rect">
+          <area target="" alt="Cursor Right" title="Cursor Right" href="#" data-tag="cursorright" coords="269,323,361,415" shape="rect">
+          <area target="" alt="Cursor Enter" title="Cursor Enter" href="#" data-tag="cursorenter" coords="144,311,256,413" shape="rect">
+          <area target="" alt="Mute" title="Mute" href="#" data-tag="mute" coords="4,571,100,644" shape="rect">
+          <area target="" alt="Record" title="Record" href="#" data-tag="record" coords="104,573,198,643" shape="rect">
+          <area target="" alt="Context Menu" title="Context Menu" href="#" data-tag="contextmenu" coords="202,573,294,643" shape="rect">
+          <area target="" alt="Mic" title="Mic" href="#" data-tag="mic" coords="299,571,393,643" shape="rect">
+          <area target="" alt="Previous" title="Previous" href="#" data-tag="previous" coords="5,648,100,717" shape="rect">
+          <area target="" alt="Next" title="Next" href="#" data-tag="next" coords="297,647,392,717" shape="rect">
+          <area target="" alt="Stop" title="Stop" href="#" data-tag="stop" coords="104,648,196,717" shape="rect">
+          <area target="" alt="Play Pause" title="Play Pause" href="#" data-tag="playpause" coords="201,649,292,717" shape="rect">
         </ng-template>
       </app-image-map>
     </div>

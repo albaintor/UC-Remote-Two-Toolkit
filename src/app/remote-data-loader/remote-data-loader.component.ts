@@ -23,7 +23,7 @@ import {
   OrphanEntity,
   Profile,
   Remote,
-  RemoteData
+  RemoteData, RemoteVersion
 } from "../interfaces";
 import {Helper} from "../helper";
 
@@ -50,6 +50,7 @@ export class RemoteDataLoaderComponent {
   progressDetail = "";
   @Input() remote: Remote | undefined;
   @Output() loaded = new EventEmitter<RemoteData | undefined>();
+  version: RemoteVersion | undefined;
   activities: Activity[] = [];
   entities: Entity[] = [];
   profiles: Profile[] = [];
@@ -85,6 +86,17 @@ export class RemoteDataLoaderComponent {
     this.remoteProgress = 0;
     this.cdr.detectChanges();
     const tasks: Observable<any>[] = [];
+    tasks.push(this.server.getRemoteVersion(remote).pipe(
+      catchError(error => {
+        console.error("Error remote version", error);
+        throw error;
+      }),
+      map((version) => {
+        console.debug("Get remote version", remote, version);
+        this.version = version;
+        this.cdr.detectChanges();
+        return version;
+      })));
     tasks.push(this.server.getRemoteEntities(remote).pipe(
       catchError(error => {
         console.error("Error entities", error);
@@ -185,11 +197,13 @@ export class RemoteDataLoaderComponent {
         this.server.setEntities(this.entities);
         this.server.setProfiles(this.profiles);
         this.server.setConfigCommands(this.configCommands);
+        this.server.setVersion(this.version);
         this.localMode = true;
         this.progress = false;
         this.cdr.detectChanges();
         const data: RemoteData = {context: this.context, activities: this.activities, configCommands: this.configCommands, entities: this.entities,
-          profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities, macros: this.macros};
+          profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities, macros: this.macros,
+          version: this.version};
         this.loaded.emit(data);
         return data;
       }))
@@ -247,7 +261,7 @@ export class RemoteDataLoaderComponent {
         this.progress = false;
         this.cdr.detectChanges();
         const data: RemoteData = {context: this.context, activities: this.activities, configCommands: this.configCommands, entities: this.entities,
-          profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities, macros: this.macros};
+          profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities, macros: this.macros, version: this.version};
         this.loaded.emit(data);
         return this.activities.find(activity => activity.entity_id === activity_id);
       }))

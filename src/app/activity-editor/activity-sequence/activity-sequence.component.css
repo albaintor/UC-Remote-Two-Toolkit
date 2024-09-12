@@ -2,16 +2,33 @@ div[class="p-orderlist-controls"] {
   display: none !important;
 }
 
+.p-orderlist {
+  min-width: 350px;
+}
+
+.list-item-delay {
+  position: absolute;
+  right: 60px;
+  top: 5px;
+}
+
 .list-item-add {
   position: absolute;
   right: 5px;
   top: 5px;
 }
 
+
+.list-item-orphan {
+  position: absolute;
+  right: 15px;
+  top: 0;
+}
+
 .list-item-delete {
   position: absolute;
-  right: 20px;
-  top: 40%;
+  right: 10px;
+  top: 20%;
   padding-right: 10px;
   padding-left: 80px;
   opacity:0;

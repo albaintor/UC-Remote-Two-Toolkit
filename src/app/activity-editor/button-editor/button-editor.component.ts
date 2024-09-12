@@ -85,6 +85,7 @@ export class ButtonEditorComponent {
   {
     delete this.button?.long_press;
     delete this.button?.short_press;
+    delete this.button?.double_press;
     this.cdr.detectChanges();
     this.buttonChanged.emit(this.button);
   }
@@ -99,6 +100,12 @@ export class ButtonEditorComponent {
 
   assignLongPress() {
     this.button!.long_press = {} as any;
+    this.cdr.detectChanges();
+    this.buttonChanged.emit(this.button);
+  }
+
+  assignDoublePress() {
+    this.button!.double_press = {} as any;
     this.cdr.detectChanges();
     this.buttonChanged.emit(this.button);
   }

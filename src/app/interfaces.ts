@@ -198,13 +198,18 @@ export interface Context
   type?: string;
 }
 
+export interface EntityIntegration {
+  name?: string | LanguageName;
+  icon?: string;
+}
+
 export interface Entity
 {
-  name?: string | {'en': string, 'fr': string};
+  name?: string | LanguageName;
   icon?: string;
   entity_id?: string;
   entity_type: string;
-  integration?: string;
+  integration?: string | EntityIntegration;
   features?:string[];
   options?: {
     button_mapping?:ButtonMapping[];
@@ -290,6 +295,7 @@ export interface ActivityButtonUsage
   name: string;
   button: string;
   short_press: boolean;
+  double_press: boolean;
 }
 
 export interface ButtonMapping
@@ -297,6 +303,7 @@ export interface ButtonMapping
   button: string;
   short_press?: Command;
   long_press?: Command;
+  double_press?: Command;
 }
 
 export interface ActivityPageCommand
@@ -344,6 +351,7 @@ export interface Command
 export interface CommandSequence
 {
   type: string;
+  delay?: number;
   command?: Command;
 }
 
@@ -419,12 +427,34 @@ export interface Driver
 }
 
 export interface RemoteData {
-    activities: Activity[]
-    entities: Entity[]
-    profiles: Profile[]
-    macros: Macro[]
-    configCommands: EntityCommand[]
-    orphanEntities: OrphanEntity[]
-    unusedEntities: Entity[]
-    context: Context | undefined;
+  version: RemoteVersion | undefined;
+  activities: Activity[]
+  entities: Entity[]
+  profiles: Profile[]
+  macros: Macro[]
+  configCommands: EntityCommand[]
+  orphanEntities: OrphanEntity[]
+  unusedEntities: Entity[]
+  context: Context | undefined;
+}
+
+export interface RemoteVersion {
+  model: string;
+  device_name: string;
+  hostname: string;
+  address: string;
+  api: string;
+  core: string;
+  ui: string;
+  os: string;
+}
+
+export interface RemoteModel {
+  model: string;
+  name: string;
+  buttons: string[];
+}
+
+export interface RemoteModels {
+  models: RemoteModel[];
 }

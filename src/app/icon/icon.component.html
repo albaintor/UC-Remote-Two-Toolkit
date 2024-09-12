@@ -1,7 +1,21 @@
-<ng-container *ngIf="icon && Helper.isStandardIcon(icon)">
+<ng-container *ngIf="icon && icon.length > 0 && Helper.isStandardIcon(icon)">
   <span [class]="Helper.getIconClass(icon)" [style]="'font-size: '+fontSize+'px'" (click)="onClick($event)"></span>
 </ng-container>
-<ng-container *ngIf="remote && icon && Helper.isCustomIcon(icon)">
+<ng-container *ngIf="remote && icon && icon.length > 0 && Helper.isCustomIcon(icon)">
   <img [src]="Helper.getIconURL(remote, icon!)" [alt]="icon" [width]="size" [height]="size" (click)="onClick($event)">
 </ng-container>
-<div *ngIf="!remote || !icon" [style]="'width: '+size+'px; height: '+size+'px'" (click)="onClick($event)"></div>
+<ng-container *ngIf="(!icon || icon?.length == 0) && entity">
+  <ng-container *ngIf="hasEntityIcon() && Helper.isStandardIcon(entity?.icon)">
+    <span [class]="Helper.getIconClass(entity.icon!)" [style]="'font-size: '+fontSize+'px'" (click)="onClick($event)"></span>
+  </ng-container>
+  <ng-container *ngIf="remote && hasEntityIcon() && Helper.isCustomIcon(entity?.icon)">
+    <img [src]="Helper.getIconURL(remote, entity.icon!)" [alt]="entity.icon!" [width]="size" [height]="size" (click)="onClick($event)">
+  </ng-container>
+  <ng-container *ngIf="!hasEntityIcon() && getIntegrationIcon() && Helper.isStandardIcon(getIntegrationIcon())">
+    <span [class]="Helper.getIconClass(getIntegrationIcon())" [style]="'font-size: '+fontSize+'px'" (click)="onClick($event)"></span>
+  </ng-container>
+  <ng-container *ngIf="remote && !hasEntityIcon() && getIntegrationIcon() && Helper.isCustomIcon(getIntegrationIcon())">
+    <img [src]="Helper.getIconURL(remote, getIntegrationIcon())" [alt]="entity?.icon" [width]="size" [height]="size" (click)="onClick($event)">
+  </ng-container>
+</ng-container>
+<div *ngIf="!remote || (!icon && !hasEntityIcon() && !getIntegrationIcon())" [style]="'width: '+size+'px; height: '+size+'px'" (click)="onClick($event)"></div>

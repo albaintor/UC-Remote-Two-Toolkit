@@ -100,11 +100,17 @@
 </p-toolbar>
 <p-messages severity="info">
   <ng-template pTemplate>
-    <div class="ml-2">You can edit (create, replace or clone) an activity. In the new mapping you can only move UI icons or edit commands.<br>
-      You can also edit buttons below, or you can also apply automatic mapping from a given media player or remote entity to the buttons and UI.<br>
-      You can also replace an entity by another within the activity.<br>
-      Once done, click on <b>Save activity to remote</b> to update the remote with the pending operations.<br>
-      Note that the additional command parameters (delay, repeat...) are not covered yet.</div>
+    <div class="ml-2">
+      <b>Features</b> (note that additional command parameters - delay, repeat...- are not covered yet) :
+      <ul>
+        <li>Clone, copy, paste an activity or import from a file</li>
+        <li>Replace an entity by another within the activity.</li>
+        <li>Edit (create, replace or clone) an activity. In the new mapping you can move UI icons or edit commands.</li>
+        <li>Edit buttons, or apply an automatic mapping from a given media player or remote entity to the buttons and UI.</li>
+        <li>Copy/paste UI pages, copy/paste a selection of UI commands</li>
+      </ul>
+      Once done, click on <b>Save activity to remote</b> to update the remote with the pending operations
+    </div>
   </ng-template>
 </p-messages>
 <ng-container *ngIf="orphanEntities.length > 0">
@@ -126,6 +132,16 @@
     </div>
   </div>
   <p-button label="Apply" (onClick)="submitOrphans()" size="small"></p-button>
+</ng-container>
+<ng-container *ngIf="uncompatibleCommands.length > 0">
+  <h3>Some buttons are not compatible with the target remote ({{getRemoteModel()?.name}}), they are removed :</h3>
+  <ul>
+    <li *ngFor="let button of uncompatibleCommands">{{button.button}} :
+      <ng-container *ngIf="button.short_press">short press : {{button.short_press.entity_id}} {{button.short_press.cmd_id}}</ng-container>
+      <ng-container *ngIf="button.long_press"> long press : {{button.long_press.entity_id}} {{button.long_press.cmd_id}}</ng-container>
+      <ng-container *ngIf="button.double_press"> double press : {{button.double_press.entity_id}} {{button.double_press.cmd_id}}</ng-container>
+    </li>
+  </ul>
 </ng-container>
 <p-divider />
 <h3>Apply a predefined mapping from a given entity</h3>
@@ -195,20 +211,10 @@
     <div style="width: 50%;">
       <p-autoComplete [(ngModel)]="entity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchActivityEntity($event)" appendTo="body"
                       field="entity_id" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
-        <ng-template let-item pTemplate="selectedItem">
-          <div class="flex align-content-center" >
-            <div class="inline-block p-1">
-              <app-icon [remote]="targetRemote" [icon]="item?.icon" [size]="30"/>
-              <div class="inline-block p-1">
-                <b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})
-              </div>
-            </div>
-          </div>
-        </ng-template>
         <ng-template let-item pTemplate="item">
           <div class="flex align-content-center" >
             <div class="inline-block p-1">
-              <app-icon [remote]="targetRemote" [icon]="item?.icon" [size]="30"/>
+              <app-icon [remote]="targetRemote" [entity]="item" [size]="30"/>
             </div>
             <div class="inline-block p-1">
               <b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})
@@ -219,24 +225,14 @@
     <div style="width: 50%;">
       <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions2" (completeMethod)="searchEntity($event)" appendTo="body"
                       field="entity_id" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
-        <ng-template let-item pTemplate="selectedItem">
-          <div class="flex align-content-center" >
-            <div class="inline-block p-1">
-              <app-icon [remote]="targetRemote" [icon]="item?.icon" [size]="30"/>
-              <div class="inline-block p-1">
-                <b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})
-              </div>
-            </div>
-          </div>
-        </ng-template>
         <ng-template let-item pTemplate="item">
           <div class="flex align-content-center" >
             <div class="inline-block p-1">
               <app-icon [remote]="targetRemote" [icon]="item?.icon" [size]="30"/>
+            </div>
             <div class="inline-block p-1">
               <b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})
             </div>
-          </div>
           </div>
         </ng-template>
       </p-autoComplete></div>

@@ -1,0 +1,57 @@
+{
+  "models": [
+    {
+      "model": "UCR2",
+      "name": "Remote Two",
+      "buttons": [
+        "BACK",
+        "VOICE",
+        "HOME",
+        "VOLUME_UP",
+        "VOLUME_DOWN",
+        "MUTE",
+        "DPAD_UP",
+        "DPAD_DOWN",
+        "DPAD_LEFT",
+        "DPAD_RIGHT",
+        "DPAD_MIDDLE",
+        "GREEN",
+        "YELLOW",
+        "BLUE",
+        "RED",
+        "CHANNEL_UP",
+        "CHANNEL_DOWN",
+        "NEXT",
+        "PREV",
+        "PLAY",
+        "POWER"
+      ]
+    },
+    {
+      "model": "UCR3",
+      "name": "Remote 3",
+      "buttons": [
+        "BACK",
+        "VOICE",
+        "HOME",
+        "VOLUME_UP",
+        "VOLUME_DOWN",
+        "MUTE",
+        "DPAD_UP",
+        "DPAD_DOWN",
+        "DPAD_LEFT",
+        "DPAD_RIGHT",
+        "DPAD_MIDDLE",
+        "CHANNEL_UP",
+        "CHANNEL_DOWN",
+        "NEXT",
+        "PREV",
+        "PLAY",
+        "POWER",
+        "STOP",
+        "RECORD",
+        "CONTEXT"
+      ]
+    }
+  ]
+}

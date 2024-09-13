@@ -61,22 +61,22 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "R2Tool:build:production"
+              "buildTarget": "UCRTool:build:production"
             },
             "development": {
-              "buildTarget": "R2Tool:build:development"
+              "buildTarget": "UCRTool:build:development"
             }
           },
           "defaultConfiguration": "development",
           "options": {
-            "buildTarget": "R2Tool:build",
+            "buildTarget": "UCRTool:build",
             "proxyConfig": "src/proxy.conf.json"
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "R2Tool:build"
+            "buildTarget": "UCRTool:build"
           }
         },
         "test": {

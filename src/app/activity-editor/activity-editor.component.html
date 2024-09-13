@@ -3,7 +3,7 @@
 </div>
 <p-toast></p-toast>
 <app-icon-selector #iconSelector (iconSelected)="iconSelected($event)"></app-icon-selector>
-<h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Remote Two configuration toolkit</h2>
+<h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Unfolded Circle remote configuration toolkit</h2>
 <p-menubar [model]="items">
   <ng-template pTemplate="end">
     <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">

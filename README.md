@@ -2,7 +2,8 @@
 
 This project is aimed to bring further functionalities to [Remote Two Web Configurator](https://www.unfoldedcircle.com)
 It is developed in Angular for the front-end, and NodeJS for the back-end. This project is all-in-one with the front and the back-end, so no need to add any additional components.
-![image](https://github.com/albaintor/UC-Remote-Two-Toolkit/assets/118518828/7015272c-0fb6-4d9e-85bb-e6cbab632e64)
+![Capture d'écran 2024-09-13 080938](https://github.com/user-attachments/assets/1507a5de-7c9b-4e15-a85d-7f02be322644)
+
 
 ## Pre-requisites
 - NodeJS >= 21
@@ -14,8 +15,8 @@ The released are available for 2 systems :
 - Ubuntu
 
 Just download the package for your system and execute the binary :
-- r2tool-server.exe for Windows
-- r2tool-server for Linux
+- ucrtool-server.exe for Windows
+- ucrtool-server for Linux
 
 Then launch your browser to http://localhost:8000
 You can change the listening port by adding `--port <port number>` argument
@@ -24,20 +25,20 @@ You can change the listening port by adding `--port <port number>` argument
 
 ### First : register a remote
 
-- First register a Remote by clicking on `Manage Remotes` : type in the IP and 4 digits token of your remote. This is only needed once, a private key will be stored for further access.
-- Click on `Load remote entities` or `Load remote resources` to retrieve all entities and activities and resources (custom icons). This data will be stored in your browser and can be accessed again later without retrieving data again. Of course if you modify the remote configuration, you should retrieve data again.
+- First register a Remote by clicking on `Manage Remotes` : type in the hostname or IP and 4 digits token of your remote. This is only needed once, a private key will be stored for further access.
+- Click on `Load remote entities` or `Load remote resources` to retrieve all entities and activities and resources (custom icons). This data will be stored locally and can be accessed again later without retrieving data again.
 - You can add additional remotes and switch from one to another if necessary from the dropdown on the right side
 - Select a remote in the dropdown (a refresh may be necessary)
 
 ### Navigation
-![image](https://github.com/user-attachments/assets/f75dd2a3-175e-4fa9-a779-f8e7eb95e152)
+![image](https://github.com/user-attachments/assets/3bfa90af-401f-4c1e-89df-3cd9e9a31d31)
 
 - `Manage Remotes` : add (register) or remove a remote from registration
-- `Load Remote Data` : load entities, activities and profils (UI pages) from the selected remote (in the drop down list)
-- `Load Remote Resources` : load remote custom resources (pictures) from the selected remote
+- `Integrations` : review installed integrations, upload a custom driver or delete one. Review the subscribed entities per integration
+- `Load Remote` : load entities, activities and profiles (UI pages) from the selected remote (in the drop down list), load custom resources (icons & pictures)
 - `Replace Entities` : replace an entity by another in all activities and pages. Useful if an entity has changed of name/id, or the driver and you have orphan entities which are not usable anymore
-- `Load activity from file` : after saving an activity to a (json format) file from the ![image](https://github.com/user-attachments/assets/fe10c03b-7d98-4c70-a077-3878aa3281c9)
- button you can import it. If the activity already exists, it will replace it, otherwise it will create it. Useful if you want to restore an activity after unexpected changes, or if you want to clone an activity from one remote to another remote.
+- `Import activity` : import an activity from a file after saving it to a (json format) file or from clipboard. Activities can be imported in another remote as long as the used entities are available. If the activity already exists, it will replace it, otherwise it will create it
+- `Backup & restore` : backup the remote to a file or restore it from a saved backup. Same functionality as in the web configurator
 
 Main page :
 - You can check after all antities : orphan entities (defined in activities but not linked to any active integration), as well as unused entities
@@ -72,22 +73,26 @@ All done !
 ### Modification of an activity
 
 From the main page, if you click on an activity name or ID, a popup will show up with the configured buttons mapping and pages
-![image](https://github.com/albaintor/UC-Remote-Two-Toolkit/assets/118518828/b91e9b31-8a6d-4ed3-b937-0aad0b18e324)
-![image](https://github.com/albaintor/UC-Remote-Two-Toolkit/assets/118518828/477491a8-c13b-4a89-b0ab-b211ffd24e32)
 
 If you click on the button `Edit this activity`, it will brings you to another page where you can :
-- View the updated configuration (buttons and interface) by clicking on `View new activity`
-  - Reorder each item in each page like in the web configurator
-  - Modify each item [in progress]
-  - Modify each button [in progress]
+- Reorder each item in each page like in the web configurator
+- Modify each UI item, create new UI items, create new pages
+- (Re)assign each button
+- Copy / paste a page : to the same or to another activity, to the same or to another remote
+- Copy / paste a selection of items as well
 - Apply pre-defined mapping from a given entity : for example if you select a media player entity, it will assign buttons according to the media player features (volume up/down to volume up/down buttons if the media player supports volume control, cursor up/left/right/down/center to corresponding buttons if it supports direction pad...), as well as predefined interface buttons. This mapping is realized from a template defined in the front end in `src/assets/remote/remote-map.json`. For now I have predefined mapping for media player entities and IR remotes. Note that this mapping can be tuned by user on the fly : you can unselect features to prevent mapping of some buttons, and you can prevent to overwrite already assigned buttons or not. In that way you can repeat the process for the same activity for other entities.
 - Replace one entity by another in the activity : useful if you have duplicated an activity where you want the same mapping (buttons & interface) but with another device (e.g you have 2 Android TVs or 2 Apple TVs)
 - Save the activity to a file (before doing modifications and restore it later, or to import it to another remote)
 - Import an activity from a file to the same remote or another remote
-- Copy a UI page to clipboard
-- Paste a UI page from clipboard : note that with this feature you can copy a page from one activity to another or even to another remote
 
-Once you have applied all your modifications, they are in local : you just have to click on `Save activity to remote` : it will shows all the operations that will be applied to the remote. You can have a final check before clicking on `Update remote` to update the Remote Two.
+
+<img width="100%" alt="Activity menu" src="https://github.com/user-attachments/assets/c0a248f7-72e8-4bc5-aee4-407808616a00">
+
+![image](https://github.com/user-attachments/assets/803355d0-874f-42dc-bf7f-d3a8fdcd94b0)
+
+<img width="60%" alt="UI grid" src="https://github.com/albaintor/UC-Remote-Two-Toolkit/assets/118518828/b91e9b31-8a6d-4ed3-b937-0aad0b18e324">
+
+Once you have applied all your modifications, they are not stored yet in the remote : you just have to click on `Save activity to remote` : it will shows all the operations that will be applied to the remote. You can have a final check before clicking on `Update remote` to update the Remote Two.
 
 
 

@@ -17,7 +17,7 @@ import {
   Command,
   Entity,
   EntityCommand,
-  EntityFeature, Remote,
+  EntityFeature, Remote, RemoteData,
   RemoteMap
 } from "../../interfaces";
 import {NgIf} from "@angular/common";
@@ -101,9 +101,12 @@ export class CommandEditorComponent implements OnInit {
       this.featuresMap = featuresMap;
       this.cdr.detectChanges();
     })
-    const configCommands = localStorage.getItem("configCommands");
-    if (configCommands)
-      this.configEntityCommands = JSON.parse(configCommands);
+    const data = localStorage.getItem("remoteData");
+    if (data) {
+      const remoteData: RemoteData = JSON.parse(data);
+      if (remoteData.configCommands)
+        this.configEntityCommands = remoteData.configCommands;
+    }
 
     this.server.configCommands$.subscribe(entityCommands => {
       this.configEntityCommands = entityCommands;

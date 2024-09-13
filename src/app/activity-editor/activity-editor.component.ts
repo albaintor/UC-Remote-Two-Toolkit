@@ -179,12 +179,12 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       if (!this.lockOperations) this.remoteOperations = this.buildData();
       this.cdr.detectChanges();
     })
-    const entities = localStorage.getItem("entities");
-    const activities = localStorage.getItem("activities");
-    if (entities || activities)
+    const data = localStorage.getItem("remoteData");
+    if (data)
     {
-      if (activities) this.activities = JSON.parse(activities);
-      if (entities) this.entities = JSON.parse(entities);
+      const remoteData: RemoteData = JSON.parse(data);
+      if (remoteData.activities) this.activities = remoteData.activities;
+      if (remoteData.entities) this.entities = remoteData.entities;
       this.server.setEntities(this.entities);
       this.server.setActivities(this.activities);
       this.remoteOperations = this.buildData();

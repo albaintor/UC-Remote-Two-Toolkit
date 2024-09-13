@@ -18,7 +18,7 @@ import {
   Command,
   Remote,
   Entity,
-  EntityCommand, RemoteVersion, RemoteModels, RemoteModel
+  EntityCommand, RemoteVersion, RemoteModels, RemoteModel, RemoteData
 } from "../interfaces";
 import {DialogModule} from "primeng/dialog";
 import {ToastModule} from "primeng/toast";
@@ -145,10 +145,12 @@ export class ActivityViewerComponent implements AfterViewInit {
       this.reversedButtonMap = Object.fromEntries(Object.entries(buttonsMap).map(([key, value]) => [value, key]));
       this.updateButtons();
     })
-    const configCommands = localStorage.getItem("configCommands");
-    if (configCommands)
-      this.configEntityCommands = JSON.parse(configCommands);
-
+    const data = localStorage.getItem("remoteData");
+    if (data) {
+      const remoteData: RemoteData = JSON.parse(data);
+      if (remoteData.configCommands)
+        this.configEntityCommands = remoteData.configCommands;
+    }
     this.server.configCommands$.subscribe(entityCommands => {
       this.configEntityCommands = entityCommands;
     })

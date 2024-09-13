@@ -89,7 +89,7 @@ export class ReplaceEntityComponent implements OnInit{
   progress = false
   availableItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
-    {label: 'Load Remote data', command: () => this.loadRemoteData(), icon: 'pi pi-history', block: true},
+    {label: 'Load Remote data', command: () => this.remoteLoader?.load(), icon: 'pi pi-history', block: true},
   ]
   items: MenuItem[] = [];
   readonly Math = Math;
@@ -121,21 +121,17 @@ export class ReplaceEntityComponent implements OnInit{
         this.updateRemote(config);
       })
     })
-    const entities = localStorage.getItem("entities");
-    const activities = localStorage.getItem("activities");
-    const profiles = localStorage.getItem("profiles");
-    const macros = localStorage.getItem("macros");
-    const context = localStorage.getItem("context");
-    if (entities || activities)
-    {
-      if (activities) this.activities = JSON.parse(activities);
-      if (entities) {
-        this.entities = JSON.parse(entities);
+    const data = localStorage.getItem("remoteData");
+    if (data) {
+      const remoteData: RemoteData = JSON.parse(data);
+      if (remoteData.activities) this.activities = remoteData.activities;
+      if (remoteData.entities) {
+        this.entities = remoteData.entities;
         this.availableEntities = [...this.entities];
       }
-      if (profiles) this.profiles = JSON.parse(profiles);
-      if (macros) this.macros = JSON.parse(macros);
-      if (context) this.context = JSON.parse(context);
+      if (remoteData.profiles) this.profiles = remoteData.profiles;
+      if (remoteData.context) this.context = remoteData.context;
+      if (remoteData.macros) this.macros = remoteData.macros;
       this.server.setEntities(this.entities);
       this.orphanEntities = Helper.getOrphans(this.activities, this.entities)
       this.entities.push(...this.orphanEntities);
@@ -154,96 +150,6 @@ export class ReplaceEntityComponent implements OnInit{
     return this.activities.filter(activity => activity.options?.included_entities?.find(includedEntity =>
       includedEntity.entity_id == entity.entity_id
     ));
-  }
-
-  loadRemoteData():void
-  {
-    if (!this.selectedRemote)
-    {
-      this.messageService.add({severity:'error', summary:'No remote selected'});
-      this.cdr.detectChanges();
-      return;
-    }
-    this.progress = true;
-    this.remoteProgress = 0;
-    // this.items.filter(item => (item as any).block == true).forEach(item => item.disabled = true);
-    this.entities = [];
-    this.activities = [];
-    this.profiles = [];
-    this.orphanEntities = [];
-    this.cdr.detectChanges();
-    const tasks: Observable<any>[] = [];
-    tasks.push(this.server.getRemoteEntities(this.selectedRemote).pipe(map((entities) => {
-      this.entities = entities;
-      // this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
-      //   detail: `${this.entity_list.length} entities extracted`});
-      this.cdr.detectChanges();
-      return entities;
-    })));
-    tasks.push(this.server.getRemoteActivities(this.selectedRemote!).pipe(mergeMap((entities) => {
-      this.activities = entities;
-      this.messageService.add({severity: "success", summary: `Remote data ${this.selectedRemote?.address}`,
-        detail: `${this.activities.length} activities extracted. Extracting details now...`});
-      this.cdr.detectChanges();
-      return from(this.activities).pipe(mergeMap(activity => {
-        return this.server.getRemoteActivity(this.selectedRemote!, activity.entity_id!).pipe(map(activityDetails => {
-          this.progressDetail = Helper.getEntityName(activity);
-          const name = activity.name;
-          Object.assign(activity, activityDetails);
-          activity.name = name;
-          if ((activityDetails as any).options?.included_entities)
-            (activity as any).entities = (activityDetails as any).options.included_entities;
-          this.remoteProgress += 100/this.activities.length;
-          this.cdr.detectChanges();
-          console.log("Activity", activity);
-          return activity;
-        }))
-      }))
-    })));
-    tasks.push(this.server.getRemoteProfiles(this.selectedRemote).pipe(map(profiles => {
-      this.profiles = profiles;
-      console.log("Profiles", profiles);
-      return profiles;
-    })))
-    tasks.push(this.server.getRemoteMacros(this.selectedRemote!).pipe(map(macros => {
-      this.macros = macros;
-      return macros;
-    })));
-
-    forkJoin(tasks).subscribe({next: (results) => {
-      // Add orphan entities
-        this.orphanEntities = Helper.getOrphans(this.activities, this.entities)
-        this.entities.push(...this.orphanEntities);
-        this.availableEntities = [...this.entities];
-        this.messageService.add({
-          severity: "success", summary: "Remote data loaded",
-          detail: `${this.entities.length} entities, ${this.activities.length} activities, ${this.profiles?.length} profiles and ${this.macros.length} macros extracted.`
-        });
-        this.context = {source: `${this.selectedRemote?.remote_name} (${this.selectedRemote?.address})`,
-          date: new Date(), type: "Remote", remote_ip: this.selectedRemote?.address, remote_name: this.selectedRemote?.remote_name};
-        this.activities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
-        this.entities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
-        this.activities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
-        this.orphanEntities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
-        localStorage.setItem("entities", JSON.stringify(this.entities));
-        localStorage.setItem("activities", JSON.stringify(this.activities));
-        localStorage.setItem("profiles", JSON.stringify(this.profiles));
-        localStorage.setItem("macros", JSON.stringify(this.macros));
-        localStorage.setItem("context", JSON.stringify(this.context));
-        this.localMode = true;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: "error", summary: "Error during remote data extraction"
-        });
-        this.cdr.detectChanges();
-      },
-      complete: () => {
-        // this.items.filter(item => (item as any).block == true).forEach(item => item.disabled = false);
-        this.progress = false;
-        this.cdr.detectChanges();
-      }})
   }
 
   updateRemote(config: Config): void
@@ -584,6 +490,6 @@ export class ReplaceEntityComponent implements OnInit{
   protected readonly Helper = Helper;
 
   operationsDone($event: RemoteOperation[]) {
-    this.loadRemoteData();
+    this.remoteLoader?.load();
   }
 }

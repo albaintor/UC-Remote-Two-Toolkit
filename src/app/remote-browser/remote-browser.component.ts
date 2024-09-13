@@ -166,18 +166,14 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    const entities = localStorage.getItem("entities");
-    const activities = localStorage.getItem("activities");
-    const profiles = localStorage.getItem("profiles");
-    const context = localStorage.getItem("context");
-    const configCommands = localStorage.getItem("configCommands");
-    if (entities || activities)
-    {
-      if (activities) this.activities = JSON.parse(activities);
-      if (entities) this.entities = JSON.parse(entities);
-      if (profiles) this.profiles = JSON.parse(profiles);
-      if (context) this.context = JSON.parse(context);
-      if (configCommands) this.configCommands = JSON.parse(configCommands);
+    const data = localStorage.getItem("remoteData");
+    if (data) {
+      const remoteData: RemoteData = JSON.parse(data);
+      if (remoteData.activities) this.activities = remoteData.activities;
+      if (remoteData.entities) this.entities = remoteData.entities;
+      if (remoteData.profiles) this.profiles = remoteData.profiles;
+      if (remoteData.context) this.context = remoteData.context;
+      if (remoteData.configCommands) this.configCommands = remoteData.configCommands;
       if (!this.checkCache())
       {
         this.clearCache();
@@ -211,10 +207,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
 
   clearCache()
   {
-    localStorage.removeItem("entities");
-    localStorage.removeItem("activities");
-    localStorage.removeItem("profiles");
-    localStorage.removeItem("configCommands");
+    localStorage.removeItem("remoteData");
     this.entities = [];
     this.activities = [];
     this.profiles = [];

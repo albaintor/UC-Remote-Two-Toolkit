@@ -188,11 +188,10 @@ export class RemoteDataLoaderComponent {
         });
         this.context = {source: `${remote.remote_name} (${remote.address})`,
           date: new Date(), type: "Remote", remote_ip: remote.address, remote_name: remote.remote_name};
-        localStorage.setItem("entities", JSON.stringify(this.entities));
-        localStorage.setItem("activities", JSON.stringify(this.activities));
-        localStorage.setItem("profiles", JSON.stringify(this.profiles));
-        localStorage.setItem("configCommands", JSON.stringify(this.configCommands));
-        localStorage.setItem("context", JSON.stringify(this.context));
+        const data: RemoteData = {context: this.context, activities: this.activities, configCommands: this.configCommands, entities: this.entities,
+          profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities, macros: this.macros,
+          version: this.version};
+        localStorage.setItem("remoteData", JSON.stringify(data));
         this.server.setActivities(this.activities);
         this.server.setEntities(this.entities);
         this.server.setProfiles(this.profiles);
@@ -201,9 +200,6 @@ export class RemoteDataLoaderComponent {
         this.localMode = true;
         this.progress = false;
         this.cdr.detectChanges();
-        const data: RemoteData = {context: this.context, activities: this.activities, configCommands: this.configCommands, entities: this.entities,
-          profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities, macros: this.macros,
-          version: this.version};
         this.loaded.emit(data);
         return data;
       }))
@@ -234,6 +230,17 @@ export class RemoteDataLoaderComponent {
       // console.debug("Get remote activity details", remote, activityDetails);
       const activity = this.activities.find(activity => activity.entity_id === activity_id);
       if (activity) this.activities.splice(this.activities.indexOf(activity), 1);
+      const data = localStorage.getItem("remoteData");
+      if (data) {
+        const remoteData: RemoteData = JSON.parse(data);
+        const existingActivity = remoteData.activities?.find(activity => activity.entity_id === activityDetails.entity_id);
+        if (existingActivity)
+        {
+          const index = remoteData.activities.indexOf(existingActivity);
+          remoteData.activities[index] = activityDetails;
+          localStorage.setItem("remoteData", JSON.stringify(remoteData));
+        }
+      }
       this.activities.push(activityDetails);
       activityDetails.name = Helper.getEntityName(activityDetails);
       this.cdr.detectChanges();
@@ -256,6 +263,7 @@ export class RemoteDataLoaderComponent {
           severity: "success", summary: "Remote data loaded",
           detail: `Activity reloaded`
         });
+
         localStorage.setItem("activities", JSON.stringify(this.activities));
         this.localMode = true;
         this.progress = false;

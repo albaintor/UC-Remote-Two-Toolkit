@@ -6,10 +6,11 @@
 <h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Unfolded Circle remote configuration toolkit</h2>
 <p-menubar [model]="items">
   <ng-template pTemplate="end">
-    <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
+    Target remote :
+    <p-dropdown [(ngModel)]="targetRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(targetRemote!)">
       <ng-template pTemplate="selectedItem">
-        <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
-        <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
+        <ng-container *ngIf="targetRemote">{{targetRemote.remote_name}} ({{targetRemote.address}})</ng-container>
+        <ng-container *ngIf="!targetRemote">No remote selected</ng-container>
       </ng-template>
       <ng-template let-item pTemplate="item">
         {{item.remote_name}} ({{item.address}})
@@ -77,20 +78,6 @@
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-button label="Import activity from clipboard" (onClick)="importActivityFromClipboard()" severity="warning" icon="pi pi-clipboard" size="small"/>
-  </div>
-  <div class="flex align-items-center justify-content-center">
-    <label for="targetRemote">Target remote to save to :</label>
-  </div>
-  <div class="flex align-items-center justify-content-center">
-  <p-dropdown id="targetRemote" [(ngModel)]="targetRemote" [options]="remotes" placeholder="Target remote" (ngModelChange)="setTargetRemote($event)">
-    <ng-template pTemplate="selectedItem">
-      <ng-container *ngIf="targetRemote">{{targetRemote.remote_name}} ({{targetRemote.address}})</ng-container>
-      <ng-container *ngIf="!targetRemote">No target remote selected</ng-container>
-    </ng-template>
-    <ng-template let-item pTemplate="item">
-      {{item.remote_name}} ({{item.address}})
-    </ng-template>
-  </p-dropdown>
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-toggleButton [(ngModel)]="resetMapping" onLabel="Erase buttons mapping" offLabel="Keep buttons mapping"
@@ -243,9 +230,6 @@
 </div>
 <p-divider />
 <br>
-<p-dialog [header]="'Activity '+activity?.name" [(visible)]="viewerVisible" [style]="{width: '50vw'}">
-  <app-activity-viewer *ngIf="viewerVisible" [remote]="selectedRemote" [editMode]="false" [activity]="activity"></app-activity-viewer>
-</p-dialog>
 <app-activity-viewer #editor [remote]="targetRemote" [editMode]="true" [activity]="updatedActivity" (onChange)="activityChanged()" (reload)="reloadActivity()"></app-activity-viewer>
 <ng-container *ngIf="dump">
   <p>Generated mapping :</p>

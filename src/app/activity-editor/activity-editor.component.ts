@@ -108,14 +108,13 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   activity_id = "";
   config: Config | undefined;
   remotes: Remote[] = [];
-  selectedRemote: Remote | undefined;
   progress = false;
   remoteProgress = 0;
   progressDetail = "";
   availableItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
     {label: 'Reload remote data', command: () => this.reloadAndBuildData(false), icon: 'pi pi-refresh'},
-    {label: 'View original activity', command: () => this.viewerVisible = true, icon: 'pi pi-folder-open'},
+    // {label: 'View original activity', command: () => this.viewerVisible = true, icon: 'pi pi-folder-open'},
     {label: 'Reset mapping to original', command: () => this.resetActivity(), icon: 'pi pi-times'},
     {label: 'Clear mapping', command: () => this.clearMapping(), icon: 'pi pi-times'},
     {label: 'Save activity to remote', command: () => this.buildDataAndShowOperations(), icon: 'pi pi-cloud-upload'},
@@ -136,7 +135,6 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   entity: Entity | undefined;
   newEntity: Entity | undefined;
   protected readonly Helper = Helper;
-  viewerVisible = false;
   mode: OperationMode = OperationMode.Undefined;
   showOperations = false;
   orphanEntities : {oldEntity:Entity, newEntity:Entity | undefined}[] = [];
@@ -235,7 +233,6 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
         this.mode = OperationMode.CreateMode;
         this.server.getConfig().subscribe(config => {
           this.updateRemote(config).subscribe(results => {this.buildData()});
-          this.targetRemote = this.selectedRemote;
           this.reloadAndBuildData();
         });
       } else {
@@ -782,8 +779,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   {
     this.config = config;
     this.remotes = config.remotes!;
-    this.selectedRemote  = Helper.getSelectedRemote(this.remotes);
-    this.targetRemote = this.selectedRemote;
+    this.targetRemote  = Helper.getSelectedRemote(this.remotes);
     return this.server.getRemoteVersion(this.targetRemote!).pipe(map(version => {
         this.version = version;
         this.buildData();
@@ -795,6 +791,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   {
     Helper.setRemote(remote);
     this.server.remote$.next(remote);
+    this.reloadAndBuildData(false);
   }
 
   remoteLoaded($event: RemoteData | undefined) {

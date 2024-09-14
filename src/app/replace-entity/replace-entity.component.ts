@@ -127,14 +127,18 @@ export class ReplaceEntityComponent implements OnInit{
       if (remoteData.activities) this.activities = remoteData.activities;
       if (remoteData.entities) {
         this.entities = remoteData.entities;
-        this.availableEntities = [...this.entities];
       }
       if (remoteData.profiles) this.profiles = remoteData.profiles;
       if (remoteData.context) this.context = remoteData.context;
       if (remoteData.macros) this.macros = remoteData.macros;
       this.server.setEntities(this.entities);
       this.orphanEntities = Helper.getOrphans(this.activities, this.entities)
-      this.entities.push(...this.orphanEntities);
+      this.entities.push(...this.orphanEntities.map(entity => {
+        const item = {...entity};
+        item.name = Helper.getEntityName(entity);
+        return item;
+      }));
+      this.availableEntities = [...this.entities];
       this.cdr.detectChanges();
     }
   }
@@ -177,6 +181,11 @@ export class ReplaceEntityComponent implements OnInit{
       this.entities = $event.entities;
       this.profiles = $event.profiles;
       this.context = $event.context;
+      this.entities.push(...this.orphanEntities.map(entity => {
+        const item = {...entity};
+        item.name = Helper.getEntityName(entity);
+        return item;
+      }));
       this.activities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
       this.entities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
       this.profiles.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));

@@ -140,6 +140,21 @@
       "button": "CHANNEL_DOWN",
       "cmd_id": "media_player.channel_down",
       "feature": "channel_switcher"
+    },
+    {
+      "button": "CONTEXT",
+      "cmd_id": "media_player.context_menu",
+      "feature": "context_menu"
+    },
+    {
+      "button": "STOP",
+      "cmd_id": "media_player.stop",
+      "feature": "stop"
+    },
+    {
+      "button": "RECORD",
+      "cmd_id": "media_player.record",
+      "feature": "record"
     }
   ],
   "user_interface": {

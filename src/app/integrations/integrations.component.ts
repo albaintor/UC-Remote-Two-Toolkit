@@ -3,24 +3,19 @@ import {
   ChangeDetectorRef,
   Component,
   OnDestroy,
-  OnInit,
+  OnInit, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import {ConfirmationService, MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
 import {Config, Driver, Entity, Integration, Remote, RemoteStatus} from "../interfaces";
 import {
-  config,
-  filter, finalize,
+  finalize,
   forkJoin,
-  from,
-  interval,
   map,
   mergeMap,
   Observable, of,
-  repeat, skipWhile,
   Subscription,
-  take,
   takeWhile, timer
 } from "rxjs";
 import {Helper} from "../helper";
@@ -94,6 +89,7 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
   remoteStatus: RemoteStatus | undefined;
   updateTask: Subscription | undefined;
   entities: Entity[] | undefined;
+  @ViewChild(FileUpload) fileUpload: FileUpload | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private confirmationService: ConfirmationService) {}
@@ -347,9 +343,10 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
 
   onUploadIntegrationError($event: FileUploadErrorEvent) {
     console.log("Integration upload failed", $event);
-    this.messageService.add({key: "integrationComponent", severity: "error", summary: `Failed to upload diver to the remote ${this.selectedRemote?.remote_name}`,
+    this.messageService.add({key: "integrationComponent", severity: "error", summary: `Failed to upload diver to the remote ${this.selectedRemote?.remote_name}. The filename should not have any special characters (parenthesis...)`,
       detail: $event.error?.error.body, sticky: true});
     this.progress = false;
+    this.fileUpload?.clear();
     this.cdr.detectChanges();
   }
 

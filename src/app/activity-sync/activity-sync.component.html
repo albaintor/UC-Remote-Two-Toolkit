@@ -76,7 +76,8 @@
       <td>
         <ng-container *ngIf="diff.buttons">
           <ng-container *ngFor="let button of diff.buttons">
-            <p-chip [label]="button.button" [style]="Helper.getStyle(button.button)"></p-chip>
+            <p-chip [label]="button.button1 ? button.button1.button : button.button2.button" [style]="Helper.getStyle(button.button1 ? button.button1.button : button.button2.button)"
+                    (mouseover)="showButton(button, diffPanelButton, $event)"></p-chip>
           </ng-container>
         </ng-container>
       </td>
@@ -110,6 +111,76 @@
           <ng-container *ngIf="sequence && sequence.type === 'delay'">Delay {{sequence.delay}}</ng-container>
         </div>
       </div>
+    </ng-container>
+  </ng-template>
+</p-overlayPanel>
+<p-overlayPanel #diffPanelButton [style]="{ width: '850px' }" [showCloseIcon]="true" appendTo="body">
+  <ng-template pTemplate="content">
+    <ng-container *ngIf="selectedButton">
+      <div class="flex flex-column">
+        <b *ngIf="selectedButton.button1?.short_press || selectedButton.button2?.short_press">Short press</b>
+        <div class="flex align-content-center gap-3" style="min-height: 50px" *ngIf="selectedButton.button1?.short_press || selectedButton.button2?.short_press">
+          <div class="flex flex-column">
+            <div class="flex align-items-center justify-content-center">
+              <app-icon [remote]="selectedRemote1" [icon]="getEntityIcon(selectedButton.button1?.short_press?.entity_id)" [size]="40"/>&nbsp;
+              {{getEntityName(selectedButton.button1?.short_press?.entity_id)}} : {{selectedButton.button1?.short_press?.cmd_id}}
+            </div>
+            <span class="entity_id">{{selectedButton.button1?.short_press?.entity_id}}</span>
+          </div>
+          <div class="flex align-items-center justify-content-center">
+            <p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" [disabled]="true"/>
+          </div>
+          <div class="flex flex-column">
+            <div class="flex align-items-center justify-content-center">
+              <app-icon [remote]="selectedRemote2" [icon]="getEntityIcon(selectedButton.button2?.short_press?.entity_id)" [size]="40"/>&nbsp;
+              {{getEntityName(selectedButton.button2?.short_press?.entity_id)}} : {{selectedButton.button2?.short_press?.cmd_id}}
+            </div>
+            <span class="entity_id">{{selectedButton.button2?.short_press?.entity_id}}</span>
+          </div>
+        </div>
+
+        <b *ngIf="selectedButton.button1?.long_press || selectedButton.button2?.long_press">Long press</b>
+        <div class="flex align-content-center gap-3" style="min-height: 50px" *ngIf="selectedButton.button1?.long_press || selectedButton.button2?.long_press">
+          <div class="flex flex-column">
+            <div class="flex align-items-center justify-content-center" >
+              <app-icon [remote]="selectedRemote1" [icon]="getEntityIcon(selectedButton.button1?.long_press?.entity_id)" [size]="40"/>&nbsp;
+              {{getEntityName(selectedButton.button1?.long_press?.entity_id)}} : {{selectedButton.button1?.long_press?.cmd_id}}
+            </div>
+            <span class="entity_id">{{selectedButton.button1?.long_press?.entity_id}}</span>
+          </div>
+          <div class="flex align-items-center justify-content-center" >
+            <p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" [disabled]="true"/>
+          </div>
+          <div class="flex flex-column">
+            <div class="flex align-items-center justify-content-center" >
+              <app-icon [remote]="selectedRemote2" [icon]="getEntityIcon(selectedButton.button2?.long_press?.entity_id)" [size]="40"/>&nbsp;
+              {{getEntityName(selectedButton.button2?.long_press?.entity_id)}} : {{selectedButton.button2?.long_press?.cmd_id}}
+            </div>
+            <span class="entity_id">{{selectedButton.button2?.long_press?.entity_id}}</span>
+          </div>
+        </div>
+        <b *ngIf="selectedButton.button1?.double_press || selectedButton.button2?.double_press">Double press</b>
+        <div class="flex align-content-center gap-3" style="min-height: 50px" *ngIf="selectedButton.button1?.double_press || selectedButton.button2?.double_press">
+          <div class="flex flex-column">
+            <div class="flex align-items-center justify-content-center">
+              <app-icon [remote]="selectedRemote1" [icon]="getEntityIcon(selectedButton.button1?.double_press?.entity_id)" [size]="40"/>&nbsp;
+              {{getEntityName(selectedButton.button1?.double_press?.entity_id)}} : {{selectedButton.button1?.double_press?.cmd_id}}
+            </div>
+            <span class="entity_id">{{selectedButton.button1?.double_press?.entity_id}}</span>
+          </div>
+          <div class="flex align-items-center justify-content-center">
+            <p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" [disabled]="true"/>
+          </div>
+          <div class="flex flex-column">
+            <div class="flex align-items-center justify-content-center">
+              <app-icon [remote]="selectedRemote2" [icon]="getEntityIcon(selectedButton.button2?.double_press?.entity_id)" [size]="40"/>&nbsp;
+              {{getEntityName(selectedButton.button2?.double_press?.entity_id)}} : {{selectedButton.button2?.double_press?.cmd_id}}
+            </div>
+            <span class="entity_id">{{selectedButton.button2?.double_press?.entity_id}}</span>
+          </div>
+        </div>
+      </div>
+
     </ng-container>
   </ng-template>
 </p-overlayPanel>

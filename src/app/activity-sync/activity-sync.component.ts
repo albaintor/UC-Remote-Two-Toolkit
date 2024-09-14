@@ -38,11 +38,17 @@ interface UIpageIndexed extends UIPage
   index: number;
 }
 
+interface ButtonsMappingDiff
+{
+  button1?: ButtonMapping;
+  button2?: ButtonMapping;
+}
+
 interface ActivityDiff {
   activity1?: Activity;
   activity2?: Activity;
   status: ActivityStatus;
-  buttons?:ButtonMapping[];
+  buttons?:ButtonsMappingDiff[];
   pages?:UIpageIndexed[];
   sequences?: {[type: string]: CommandSequence[]};
 }
@@ -94,6 +100,7 @@ export class ActivitySyncComponent implements OnInit {
   @ViewChild("loader2") remoteLoader2: RemoteDataLoaderComponent | undefined;
   activitiesDiff: ActivityDiff[] = [];
   selectedSequences: CommandSequence[] | undefined;
+  selectedButton: ButtonsMappingDiff | undefined;
   selectedActivity1: Activity | undefined;
   selectedActivity2: Activity | undefined;
   protected readonly Helper = Helper;
@@ -172,7 +179,7 @@ export class ActivitySyncComponent implements OnInit {
           const button2 = activity2.options?.button_mapping?.find(button2 => button2.button === button1.button);
           if (!button2 || !Helper.compareButtons(button1, button2)){
             if (!diff.buttons) diff.buttons = [];
-            diff.buttons.push(button1);
+            diff.buttons.push({button1, button2});
           }
         }
         if (activity2.options?.button_mapping)
@@ -181,13 +188,13 @@ export class ActivitySyncComponent implements OnInit {
           const button1 = activity1.options?.button_mapping?.find(button1 => button2.button === button1.button);
           if (!button1){
             if (!diff.buttons) diff.buttons = [];
-            diff.buttons.push(button2);
+            diff.buttons.push({button2});
           }
         }
       }
       else if (activity2.options?.button_mapping)
       {
-        diff.buttons = activity2.options.button_mapping;
+        diff.buttons = activity2.options.button_mapping.map(button2 => {return {button2}});
       }
       if (activity1.options?.user_interface?.pages)
       {
@@ -328,6 +335,12 @@ export class ActivitySyncComponent implements OnInit {
       console.debug("Differences between activities", this.activitiesDiff);
       this.cdr.detectChanges();
     })
+  }
+
+  showButton(button : ButtonsMappingDiff, diffPanelButton: OverlayPanel, $event: MouseEvent) {
+    this.selectedButton = button;
+    diffPanelButton.show($event, $event.target);
+    this.cdr.detectChanges();
   }
 
   showSequence(sequences : CommandSequence[], diffPanelSequences: OverlayPanel, $event: MouseEvent) {

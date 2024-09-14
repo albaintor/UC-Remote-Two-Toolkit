@@ -140,6 +140,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
         {label: 'Restore backup to this remote', command: () => this.restoreRemote(), icon: 'pi pi-upload'},
       ]
     },
+    {label: 'Sync activities', routerLink:'/activities/sync', icon: 'pi pi-sync'},
   ]
   entityUsages: EntityUsage | null | undefined;
   localMode = true;

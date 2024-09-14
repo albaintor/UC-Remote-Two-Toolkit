@@ -64,6 +64,11 @@ export class RemoteDataLoaderComponent {
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
   }
 
+  loadRemote(remote: Remote | undefined) {
+    this.remote = remote;
+    this.load();
+  }
+
   load(): void
   {
     this.loadRemoteData().subscribe({next: results  => {
@@ -190,7 +195,7 @@ export class RemoteDataLoaderComponent {
           date: new Date(), type: "Remote", remote_ip: remote.address, remote_name: remote.remote_name};
         const data: RemoteData = {context: this.context, activities: this.activities, configCommands: this.configCommands, entities: this.entities,
           profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities, macros: this.macros,
-          version: this.version};
+          version: this.version, remote: remote};
         localStorage.setItem("remoteData", JSON.stringify(data));
         this.server.setActivities(this.activities);
         this.server.setEntities(this.entities);
@@ -269,7 +274,8 @@ export class RemoteDataLoaderComponent {
         this.progress = false;
         this.cdr.detectChanges();
         const data: RemoteData = {context: this.context, activities: this.activities, configCommands: this.configCommands, entities: this.entities,
-          profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities, macros: this.macros, version: this.version};
+          profiles: this.profiles, orphanEntities: this.orphanEntities, unusedEntities: this.unusedEntities, macros: this.macros, version: this.version,
+          remote};
         this.loaded.emit(data);
         return this.activities.find(activity => activity.entity_id === activity_id);
       }))

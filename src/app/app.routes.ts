@@ -3,6 +3,7 @@ import {ActivityEditorComponent} from "./activity-editor/activity-editor.compone
 import {RemoteBrowserComponent} from "./remote-browser/remote-browser.component";
 import {ReplaceEntityComponent} from "./replace-entity/replace-entity.component";
 import {IntegrationsComponent} from "./integrations/integrations.component";
+import {ActivitySyncComponent} from "./activity-sync/activity-sync.component";
 
 export const routes: Routes = [
   { path: 'home', component: RemoteBrowserComponent },
@@ -12,4 +13,5 @@ export const routes: Routes = [
   { path: 'activity/clone/:id', component: ActivityEditorComponent},
   { path: 'entity/rename', component: ReplaceEntityComponent},
   { path: 'integrations', component: IntegrationsComponent},
+  { path: 'activities/sync', component: ActivitySyncComponent},
 ];

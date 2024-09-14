@@ -1,0 +1,137 @@
+<p-toast></p-toast>
+<h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Unfolded Circle remote configuration toolkit</h2>
+<div class="progress-spinner" *ngIf="progress">
+  <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+</div>
+<p-blockUI [blocked]="blockedMenu"/>
+<p-menubar [model]="items">
+  <ng-template pTemplate="end">Source remote :
+    <p-dropdown [(ngModel)]="selectedRemote1" [options]="remotes" placeholder="Select source remote">
+      <ng-template pTemplate="selectedItem">
+        <ng-container *ngIf="selectedRemote1">{{selectedRemote1.remote_name}} ({{selectedRemote1.address}})</ng-container>
+        <ng-container *ngIf="!selectedRemote1">No remote selected</ng-container>
+      </ng-template>
+      <ng-template let-item pTemplate="item">
+        {{item.remote_name}} ({{item.address}}<ng-container *ngIf="item.port !== '80'">:{{item.port}}</ng-container>)
+      </ng-template>
+    </p-dropdown>&nbsp;&nbsp;<p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" [disabled]="true"/>&nbsp;&nbsp;
+    Target remote :
+    <p-dropdown [(ngModel)]="selectedRemote2" [options]="remotes" placeholder="Select target remote">
+      <ng-template pTemplate="selectedItem">
+        <ng-container *ngIf="selectedRemote2">{{selectedRemote2.remote_name}} ({{selectedRemote2.address}})</ng-container>
+        <ng-container *ngIf="!selectedRemote2">No remote selected</ng-container>
+      </ng-template>
+      <ng-template let-item pTemplate="item">
+        {{item.remote_name}} ({{item.address}}<ng-container *ngIf="item.port !== '80'">:{{item.port}}</ng-container>)
+      </ng-template>
+    </p-dropdown>
+  </ng-template>
+</p-menubar>
+<app-remote-data-loader #loader1 [remote]="selectedRemote1"></app-remote-data-loader>
+<app-remote-data-loader #loader2 [remote]="selectedRemote2"></app-remote-data-loader>
+<h3>Comparison of activities between the two remotes</h3>
+<ng-container *ngIf="selectedActivities.length > 0">
+  Selected activities : <ng-container *ngFor="let activity of selectedActivities; let last = last">
+  <ng-container *ngIf="activity.activity1">{{activity.activity1?.name}}<span *ngIf="!last">, </span></ng-container>
+</ng-container>
+</ng-container>
+<p-table [value]="activitiesDiff" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+         [scrollable]="true" [scrollHeight]="'calc(100vh - 50px)'" [(selection)]="selectedActivities">
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 4rem"><p-tableHeaderCheckbox pTooltip="Synchronize all the activities from remote {{selectedRemote1?.remote_name}} to {{selectedRemote2?.remote_name}}" /></th>
+      <th pResizableColumn>Name</th>
+      <th pResizableColumn>Activity {{selectedRemote1?.remote_name}}</th>
+      <th pResizableColumn>Activity {{selectedRemote2?.remote_name}}</th>
+      <th pResizableColumn>Status</th>
+      <th pResizableColumn>Buttons differences</th>
+      <th pResizableColumn>Pages differences</th>
+      <th pResizableColumn>Sequences differences</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-diff>
+    <tr>
+      <td><p-tableCheckbox [disabled]="!diff.activity1" [value]="diff" pTooltip="Synchronize this activity from remote {{selectedRemote1?.remote_name}} to {{selectedRemote2?.remote_name}}"/></td>
+      <td>
+        <div class="flex" *ngIf="diff.activity1">
+          <div *ngIf="diff.activity1.icon" style="width: 40px; height: 40px" class="flex-initial flex align-items-center justify-content-center link-element">
+            <app-icon [remote]="selectedRemote1" [icon]="diff.activity1.icon" [size]="50" [fontSize]="55"/>
+          </div>
+          <div class="flex-initial flex align-items-center justify-content-center">
+            &nbsp;{{ Helper.getEntityName(diff.activity1) }}
+          </div>
+        </div>
+        <div class="flex" *ngIf="!diff.activity1 && diff.activity2">
+          <div *ngIf="diff.activity2.icon" style="width: 40px; height: 40px" class="flex-initial flex align-items-center justify-content-center link-element">
+            <app-icon [remote]="selectedRemote2" [icon]="diff.activity2.icon" [size]="50" [fontSize]="55"/>
+          </div>
+          <div class="flex-initial flex align-items-center justify-content-center">
+            &nbsp;{{ Helper.getEntityName(diff.activity2) }}
+          </div>
+        </div>
+      </td>
+      <td><a [routerLink]="[]" (click)="viewActivities(diff,actvitiesViewer,$event)">{{ diff.activity1?.entity_id }}</a></td>
+      <td><a [routerLink]="[]" (click)="viewActivities(diff, actvitiesViewer, $event)">{{ diff.activity2?.entity_id }}</a></td>
+      <td><p-chip [label]="getStatusLabel(diff)" [style]="Helper.getStyle(getStatusLabel(diff))"></p-chip></td>
+      <td>
+        <ng-container *ngIf="diff.buttons">
+          <ng-container *ngFor="let button of diff.buttons">
+            <p-chip [label]="button.button" [style]="Helper.getStyle(button.button)"></p-chip>
+          </ng-container>
+        </ng-container>
+      </td>
+      <td>
+        <ng-container *ngIf="diff.pages">
+          <ng-container *ngFor="let page of diff.pages">
+            <p-chip [label]="page.name" [style]="Helper.getStyle(page.name)" [pTooltip]="'Page #'+(page.index+1)+' : '+page.page_id"></p-chip>
+          </ng-container>
+        </ng-container>
+      </td>
+      <td>
+        <ng-container *ngIf="diff.sequences">
+          <ng-container *ngFor="let item of diff.sequences | keyvalue">
+            <p-chip [label]="'Sequence '+item.key" [style]="Helper.getStyle($any(item).key)" (mouseover)="showSequence($any(item).value, diffPanelSequences, $event)"></p-chip>
+
+          </ng-container>
+        </ng-container>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+<p-overlayPanel #diffPanelSequences [style]="{ width: '450px' }" [showCloseIcon]="true" appendTo="body">
+  <ng-template pTemplate="content">
+    <ng-container *ngIf="selectedSequences">
+      <div class="flex align-content-center flex-wrap gap-3" style="min-height: 50px">
+        <div class="flex align-items-center justify-content-center" *ngFor="let sequence of selectedSequences">
+          <ng-container *ngIf="sequence && sequence.type === 'command'">
+            <app-icon [remote]="selectedRemote1" [icon]="getEntityIcon(sequence.command?.entity_id)" [size]="30"/>&nbsp;
+            {{getEntityName(sequence.command?.entity_id)}} : {{sequence.command?.cmd_id}}
+          </ng-container>
+          <ng-container *ngIf="sequence && sequence.type === 'delay'">Delay {{sequence.delay}}</ng-container>
+        </div>
+      </div>
+    </ng-container>
+  </ng-template>
+</p-overlayPanel>
+<p-overlayPanel #actvitiesViewer [showCloseIcon]="true" appendTo="body">
+  <ng-template pTemplate="content">
+    <div class="grid" *ngIf="selectedActivity1 && selectedActivity2">
+      <div class="col-6">
+        <h3>Activity {{selectedActivity1.name}} from remote {{selectedRemote1?.remote_name}}</h3>
+        <app-activity-viewer [remote]="selectedRemote1" [editMode]="false" [activity]="selectedActivity1"></app-activity-viewer>
+      </div>
+      <div class="col-6">
+        <h3>Activity {{selectedActivity2.name}} from remote {{selectedRemote2?.remote_name}}</h3>
+        <app-activity-viewer [remote]="selectedRemote2" [editMode]="false" [activity]="selectedActivity2"></app-activity-viewer>
+      </div>
+    </div>
+    <ng-container *ngIf="selectedActivity1 && !selectedActivity2">
+      <h3>Activity {{selectedActivity1.name}} from remote {{selectedRemote1?.remote_name}}</h3>
+      <app-activity-viewer [remote]="selectedRemote1" [editMode]="false" [activity]="selectedActivity1"></app-activity-viewer>
+    </ng-container>
+    <ng-container *ngIf="!selectedActivity1 && selectedActivity2">
+      <h3>Activity {{selectedActivity2.name}} from remote {{selectedRemote2?.remote_name}}</h3>
+      <app-activity-viewer [remote]="selectedRemote2" [editMode]="false" [activity]="selectedActivity2"></app-activity-viewer>
+    </ng-container>
+  </ng-template>
+</p-overlayPanel>

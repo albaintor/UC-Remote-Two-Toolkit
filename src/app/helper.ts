@@ -7,7 +7,7 @@ import {
   ButtonMapping,
   UIPage,
   Remote,
-  ActivityPageCommand, OrphanEntity
+  ActivityPageCommand, OrphanEntity, CommandSequence
 } from "./interfaces";
 
 export class Helper
@@ -103,9 +103,9 @@ export class Helper
     if (!button2) return false;
     if (button1.short_press && !button2.short_press) return false;
     if (button1.long_press && !button2.long_press) return false;
+    if (button1.double_press && !button2.double_press) return false;
     if (button2.short_press && !button1.short_press) return false;
     if (button2.long_press && !button1.long_press) return false;
-    if (button2.double_press && !button1.double_press) return false;
     if (button2.double_press && !button1.double_press) return false;
     if (button1.short_press?.cmd_id != button2.short_press?.cmd_id ||
       button1.short_press?.entity_id != button2.short_press?.entity_id) return false;
@@ -132,6 +132,26 @@ export class Helper
       if (item.media_player_id && item.media_player_id != item2.media_player_id) return false;
       if (item.command && (item.command as Command)?.entity_id != (item2.command as Command)?.entity_id &&
         (item.command as Command).cmd_id != (item2.command as Command)?.cmd_id) return false;
+    }
+    return true;
+  }
+
+  static compareSequences(sequence1: CommandSequence, sequence2: CommandSequence): boolean
+  {
+    if (sequence1.type !== sequence2.type) return false;
+    if (sequence1.delay && (!sequence2.delay || sequence2.delay !== sequence2.delay)) return false;
+    if (sequence1.command && !sequence2.command) return false;
+    if (sequence2.command && !sequence1.command) return false;
+    if (sequence2.command && sequence1.command)
+    {
+      if (sequence1.command.cmd_id != sequence2.command.cmd_id) return false;
+      if (sequence1.command?.entity_id != sequence2.command?.entity_id) return false;
+      if (sequence1.command.params && !sequence2.command.params) return false;
+      if (sequence2.command.params && !sequence1.command.params) return false;
+      if (sequence1.command.params && sequence2.command.params)
+      {
+        if (JSON.stringify(sequence1.command.params) !== JSON.stringify(sequence2.command.params)) return false;
+      }
     }
     return true;
   }

@@ -427,6 +427,7 @@ export interface Driver
 }
 
 export interface RemoteData {
+  remote: Remote;
   version: RemoteVersion | undefined;
   activities: Activity[]
   entities: Entity[]

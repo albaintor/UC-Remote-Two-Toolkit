@@ -130,19 +130,19 @@
       <th pResizableColumn>Features</th>
     </tr>
     <tr>
-      <th><p-columnFilter field="name" matchMode="in" [showMenu]="false">
-      <th><p-columnFilter type="text" field="entity_id" [matchMode]="'contains'"></p-columnFilter></th>
+      <th><p-columnFilter field="name" matchMode="contains" [showMenu]="false"></p-columnFilter></th>
+      <th><p-columnFilter field="entity_id" matchMode="contains" [showMenu]="false">
         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
           <p-multiSelect
             [ngModel]="value"
-            [options]="Helper.getItems(availableEntities, 'name')"
-            placeholder="Name"
+            [options]="Helper.getItems(availableEntities, 'entity_id')"
+            placeholder="Entity ID"
             (onChange)="filter($event.value)"
             optionLabel="name" optionValue="value" appendTo="body">
           </p-multiSelect>
         </ng-template>
       </p-columnFilter></th>
-      <th><p-columnFilter field="integration_id" matchMode="in" [showMenu]="false">
+      <th><p-columnFilter field="integration_id" matchMode="contains" [showMenu]="false">
         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
           <p-multiSelect
             [ngModel]="value"
@@ -153,7 +153,7 @@
           </p-multiSelect>
         </ng-template>
       </p-columnFilter></th>
-      <th><p-columnFilter field="entity_type" matchMode="in" [showMenu]="false">
+      <th><p-columnFilter field="entity_type" matchMode="contains" [showMenu]="false">
         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
           <p-multiSelect
             [ngModel]="value"

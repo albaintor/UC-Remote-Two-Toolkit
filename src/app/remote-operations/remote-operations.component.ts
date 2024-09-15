@@ -101,7 +101,7 @@ export class RemoteOperationsComponent {
     if (operations.find(operation => operation.status == OperationStatus.Todo))
       return OperationStatus.Todo;
     if (operations.find(operation => operation.status == OperationStatus.Done))
-      OperationStatus.Done;
+      return OperationStatus.Done;
     return OperationStatus.Cancelled;
   }
 

@@ -119,7 +119,7 @@ export class Helper
   static comparePages(page1: UIPage, page2: UIPage): boolean
   {
     if ((!page1 && page2) || (!page2 && page1)) return false;
-    if (page1.page_id != page2.page_id || page1.name != page2.name) return false;
+    if (page1.name != page2.name) return false;
     if ((!page1.grid && page2.grid) || (page1.grid && !page2.grid)) return false;
     if(page1.grid && page2.grid &&
       (page1.grid.width != page2.grid.width || page1.grid.height != page2.grid.height)) return false;

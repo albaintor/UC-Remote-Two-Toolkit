@@ -207,6 +207,8 @@ export class ActivitySyncComponent implements OnInit {
     this.syncActivities();
   }
 
+
+  // TODO : diff activity groups, missing icons
   buildData(targetRemoteData: RemoteData, orphanEntities:OrphanEntity[], activity1: Activity, activity2?: Activity): ActivityOperations | undefined
   {
     this.orphanEntities = [];

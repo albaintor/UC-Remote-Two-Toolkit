@@ -636,6 +636,10 @@ export class ActivitySyncComponent implements OnInit {
 
   searchOrphanEntity(item:{oldEntity:Entity, newEntity:Entity | undefined}, $event: AutoCompleteCompleteEvent) {
     if (!this.remoteData2) return;
+    if (!item.oldEntity.entity_type) {
+      this.entitiesSuggestions = this.remoteData2.entities.filter(entity =>
+        Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()));
+    } else
     this.entitiesSuggestions = this.remoteData2.entities.filter(entity => entity.entity_type === item.oldEntity.entity_type &&
       Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()));
   }

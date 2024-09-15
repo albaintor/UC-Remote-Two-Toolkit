@@ -821,42 +821,11 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       .sort((a,b) => Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!));
   }
 
-  replaceEntity(entity_id: string, new_entity_id: string, hideMessage = false): any
+  replaceEntity(entity_id: string, new_entity_id: string, hideMessage = false)
   {
     const newEntity = this.entities.find(entity => entity.entity_id === new_entity_id);
     if (!this.updatedActivity || !newEntity) return;
-    if (!this.updatedActivity.options?.included_entities?.find(entity => entity.entity_id === new_entity_id))
-      this.updatedActivity?.options!.included_entities!.push(newEntity);
-
-    if (this.updatedActivity.options?.included_entities?.find(entity => entity.entity_id === entity_id))
-      this.updatedActivity.options.included_entities?.splice(
-      this.updatedActivity.options.included_entities?.indexOf(
-        this.updatedActivity.options.included_entities.find(entity => entity.entity_id === entity_id)!),1);
-
-    this.updatedActivity?.options?.button_mapping?.forEach(button => {
-      if (button.long_press?.entity_id === entity_id)
-        button.long_press.entity_id = new_entity_id;
-      if (button.short_press?.entity_id === entity_id)
-        button.short_press.entity_id = new_entity_id;
-      if (button.double_press?.entity_id === entity_id)
-        button.double_press.entity_id = new_entity_id;
-    })
-    this.updatedActivity?.options?.user_interface?.pages?.forEach(page => {
-      page?.items?.forEach(item => {
-        if (item.command && typeof item.command === "string" && (item.command as string) === entity_id)
-          item.command = new_entity_id;
-        else if (item.command && (item.command as Command)?.entity_id === entity_id)
-          (item.command as Command).entity_id = new_entity_id;
-        if (item.media_player_id === entity_id)
-          item.media_player_id = new_entity_id;
-      })
-    });
-    ['on', 'off'].forEach(type => {
-      this.updatedActivity?.options?.sequences?.[type]?.forEach(sequence => {
-        if (sequence.command?.entity_id === entity_id)
-          sequence.command!.entity_id = new_entity_id;
-      })
-    })
+    Helper.replaceEntity(this.updatedActivity, this.entities, entity_id, new_entity_id);
     if (!hideMessage)
       this.messageService.add({severity: "success", summary: "Entity replaced"});
 

@@ -1,8 +1,10 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, EventEmitter,
-  Input, Output,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
   ViewEncapsulation
 } from '@angular/core';
 import {DialogModule} from "primeng/dialog";
@@ -13,10 +15,12 @@ import {ButtonModule} from "primeng/button";
 import {NgIf} from "@angular/common";
 import {TableModule} from "primeng/table";
 import {TooltipModule} from "primeng/tooltip";
-import {OperationStatus, Remote, RemoteOperation} from "../interfaces";
+import {Activity, OperationStatus, Remote, RemoteOperation} from "../interfaces";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {catchError, forkJoin, from, map, mergeMap, of} from "rxjs";
 import {ChipModule} from "primeng/chip";
+import {Helper} from "../helper";
+import {Ripple} from "primeng/ripple";
 
 @Component({
   selector: 'app-remote-operations',
@@ -29,7 +33,8 @@ import {ChipModule} from "primeng/chip";
     TableModule,
     TooltipModule,
     NgxJsonViewerModule,
-    ChipModule
+    ChipModule,
+    Ripple
   ],
   templateUrl: './remote-operations.component.html',
   styleUrl: './remote-operations.component.css',
@@ -39,6 +44,8 @@ import {ChipModule} from "primeng/chip";
 })
 export class RemoteOperationsComponent {
   _visible = false;
+  activities: Activity[] | undefined;
+
   @Input() get visible(): boolean {
     return this._visible;
   }
@@ -54,17 +61,51 @@ export class RemoteOperationsComponent {
   {
     this._operations = value;
     this.selectedOperations = [...this.operations];
+    if (this.groupByActivities) {
+      this.activities = Array.from(new Set(this.selectedOperations
+        .map(operation => operation.activity!)).values());
+    }
+    else this.activities = undefined;
   }
+  groupByActivities = false;
+  @Input("groupByActivities") set _groupByActivities(value: boolean)
+  {
+    this.groupByActivities = value;
+    if (this.groupByActivities) {
+      this.activities = Array.from(new Set(this.selectedOperations
+        .map(operation => operation.activity!)).values());
+    }
+    else this.activities = undefined;
+  }
+
   _operations: RemoteOperation[] = [];
   @Input({required: true}) remote: Remote | undefined;
   selectedOperations: RemoteOperation[] = [];
   @Output() visibleChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() operationsDone: EventEmitter<RemoteOperation[]> = new EventEmitter<RemoteOperation[]>();
+  expandedRows = {};
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService)
   {
 
   }
+
+  getFromActivity(activity: Activity | undefined): RemoteOperation[] {
+    return this.operations.filter(operation => operation.activity === activity);
+  }
+
+  getActivityStatus(activity: Activity | undefined): OperationStatus {
+    const operations = this.getFromActivity(activity);
+    if (operations.find(operation => operation.status == OperationStatus.Error))
+      return OperationStatus.Error;
+    if (operations.find(operation => operation.status == OperationStatus.Todo))
+      return OperationStatus.Todo;
+    if (operations.find(operation => operation.status == OperationStatus.Done))
+      OperationStatus.Done;
+    return OperationStatus.Cancelled;
+  }
+
+
 
   getStatusLabel(status: OperationStatus): string
   {
@@ -240,4 +281,14 @@ export class RemoteOperationsComponent {
   hasDone() {
     return this.operations.find(operation => operation.status !== OperationStatus.Todo);
   }
+
+  /*expandAll() {
+    if (!this.activities) return;
+    this.expandedRows = this.activities.reduce((acc, p) => (acc[p.name] = true) && acc, {});
+  }
+
+  collapseAll() {
+    this.expandedRows = {};
+  }*/
+  protected readonly Helper = Helper;
 }

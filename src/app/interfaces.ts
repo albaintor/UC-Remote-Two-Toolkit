@@ -103,6 +103,7 @@ export enum OperationStatus
 export interface RemoteOperation
 {
   method: "PUT" | "POST" | "DELETE" | "PATCH";
+  activity?: Activity;
   name?: string;
   api: string;
   body: any;

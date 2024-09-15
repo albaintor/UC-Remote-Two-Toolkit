@@ -78,7 +78,17 @@
       <th pResizableColumn>Name</th>
       <th pResizableColumn>Activity {{selectedRemote1?.remote_name}}</th>
       <th pResizableColumn>Activity {{selectedRemote2?.remote_name}}</th>
-      <th pResizableColumn>Status</th>
+      <th pResizableColumn><p-columnFilter field="status" matchMode="in" [showMenu]="false">
+        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+          <p-multiSelect
+            [ngModel]="value"
+            [options]="Helper.getItemsConverted(activitiesDiff, 'status', ActivitySyncComponent.getStatusLabel2)"
+            placeholder="Status"
+            (onChange)="filter($event.value)"
+            optionLabel="name" optionValue="value" appendTo="body">
+          </p-multiSelect>
+        </ng-template>
+      </p-columnFilter></th>
       <th pResizableColumn>Buttons differences</th>
       <th pResizableColumn>Pages differences</th>
       <th pResizableColumn>Sequences differences</th>
@@ -107,7 +117,7 @@
       </td>
       <td><a [routerLink]="[]" (click)="viewActivities(diff,actvitiesViewer,$event)">{{ diff.activity1?.entity_id }}</a></td>
       <td><a [routerLink]="[]" (click)="viewActivities(diff, actvitiesViewer, $event)">{{ diff.activity2?.entity_id }}</a></td>
-      <td><p-chip [label]="getStatusLabel(diff)" [style]="Helper.getStyle(getStatusLabel(diff))"></p-chip></td>
+      <td><p-chip [label]="ActivitySyncComponent.getStatusLabel(diff)" [style]="Helper.getStyle(ActivitySyncComponent.getStatusLabel(diff))"></p-chip></td>
       <td>
         <ng-container *ngIf="diff.buttons">
           <ng-container *ngFor="let button of diff.buttons">

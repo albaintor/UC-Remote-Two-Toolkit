@@ -464,6 +464,12 @@ export class Helper
     });
   }
 
+  static getItemsConverted(table: any[], field_name: string, callback: (value: any) => string) {
+    return Helper.getValues(table, field_name).map(value => {
+      return {name: callback(value), value}
+    });
+  }
+
   static getSelectedRemote(remotes: Remote[]): Remote | undefined
   {
     const selectedRemoteAddress = localStorage.getItem('remote');

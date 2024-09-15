@@ -41,11 +41,12 @@ import {DividerModule} from "primeng/divider";
 import {NEW_ACTIVITY_ID_KEY} from "../activity-editor/activity-editor.component";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
+import {MultiSelectModule} from "primeng/multiselect";
 
 enum ActivityStatus {
-  Equals,
-  Different,
-  Missing
+  Equals = 1,
+  Different = 2,
+  Missing = 3
 }
 
 interface UIpageIndexed extends UIPage
@@ -106,7 +107,8 @@ interface OrphanEntity
     AutoCompleteModule,
     DividerModule,
     ConfirmDialogModule,
-    RemoteOperationsComponent
+    RemoteOperationsComponent,
+    MultiSelectModule
   ],
   templateUrl: './activity-sync.component.html',
   styleUrl: './activity-sync.component.css',
@@ -137,6 +139,7 @@ export class ActivitySyncComponent implements OnInit {
   selectedActivity2: Activity | undefined;
   protected readonly Helper = Helper;
   protected readonly JSON = JSON;
+  protected readonly ActivitySyncComponent = ActivitySyncComponent;
   selectedActivities: ActivityDiff[] = [];
   orphanEntities : OrphanEntity[] = [];
   private remoteModels: RemoteModels | undefined;
@@ -163,7 +166,21 @@ export class ActivitySyncComponent implements OnInit {
     });
   }
 
-  getStatusLabel(diff: ActivityDiff): string
+  static getStatusLabel2(status : ActivityStatus): string
+  {
+    switch(status)
+    {
+      case ActivityStatus.Equals:
+        return "Identical";
+      case ActivityStatus.Different:
+        return "Different";
+      case ActivityStatus.Missing:
+        return "Missing";
+      default: return "Unknown";
+    }
+  }
+
+  static getStatusLabel(diff: ActivityDiff): string
   {
     switch(diff.status)
     {
@@ -299,7 +316,7 @@ export class ActivitySyncComponent implements OnInit {
     let resultField: RemoteOperationResultField | undefined = undefined;
     const body: any = {
       name: {
-        en: Helper.getEntityName(activity2),
+        en: updatedActivity.name,
       },
       options: {}
     }
@@ -592,6 +609,7 @@ export class ActivitySyncComponent implements OnInit {
       this.cdr.detectChanges();
       if (!this.remoteData1?.activities || !this.remoteData2?.activities) return;
       this.activitiesDiff = this.compareActivities(this.remoteData1.activities, this.remoteData2.activities);
+      // this.activitiesDiff.sort((a1, a2) => a1.status.com)
       console.debug("Differences between activities", this.activitiesDiff);
       this.cdr.detectChanges();
     })

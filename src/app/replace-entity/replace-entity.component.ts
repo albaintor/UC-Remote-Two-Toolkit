@@ -220,8 +220,10 @@ export class ReplaceEntityComponent implements OnInit{
       this.availableEntities = this.entities.filter(entity => entity.entity_type == selectedEntity.entity_type);
       this.availableEntities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
     }
-    else
+    else {
+      if (this.orphanEntities.includes(selectedEntity)) return;
       this.replaceEntities.at(-1)!.newEntity = selectedEntity;
+    }
     this.cdr.detectChanges();
   }
 

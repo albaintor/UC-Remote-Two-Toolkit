@@ -2,3 +2,7 @@
 {
   max-width: 500px;
 }
+
+.link-element:hover {
+  cursor: pointer;
+}

@@ -180,6 +180,18 @@ export class ActivitySyncComponent implements OnInit {
     }
   }
 
+  static getActivityName(entity: any): string
+  {
+    if (!entity) return "";
+    console.debug(entity);
+    if (entity?.['en']) return entity['en'];
+    if (typeof entity === "string") return entity;
+    if (typeof entity.name === "string") return entity.name;
+    if (entity.name?.['en']) return entity.name['en'];
+    if (entity.name?.['fr']) return entity.name['fr'];
+    return "";
+  }
+
   static getStatusLabel(diff: ActivityDiff): string
   {
     switch(diff.status)
@@ -409,6 +421,17 @@ export class ActivitySyncComponent implements OnInit {
     });
     console.log("Updated activity", updatedActivity);
     return activityOperations;
+  }
+
+  getStatusStyle(diff?: ActivityDiff) : string
+  {
+    if (!diff) return 'status_unknown';
+    switch(diff.status) {
+      case ActivityStatus.Missing: return 'status_missing';
+      case ActivityStatus.Equals: return 'status_identical';
+      case ActivityStatus.Different: return 'status_different';
+      default: return 'status_unknown';
+    }
   }
 
   getEntityName(entityId: string | undefined): string
@@ -687,5 +710,7 @@ export class ActivitySyncComponent implements OnInit {
       severity: "success",
       summary: `${this.remoteOperations.length} operations done`
     });
+    this.selectedActivities = [];
+    this.cdr.detectChanges();
   }
 }

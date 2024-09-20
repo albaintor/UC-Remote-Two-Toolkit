@@ -35,8 +35,11 @@
           <td>{{operation.name}}</td>
           <td>{{operation.method}}</td>
           <td>{{operation.api}}</td>
-          <td><p-chip [label]="getStatusLabel(operation.status)" [style]="getStatusLabelStyle(operation.status)"></p-chip>
-            <ng-container *ngIf="operation.message">{{operation.message}}</ng-container></td>
+          <td>
+            <p-chip *ngIf="!isOperationDone(operation.status)" [label]="getStatusLabel(operation.status)" [style]="getStatusLabelStyle(operation.status)"></p-chip>
+            <p-chip *ngIf="isOperationDone(operation.status)" (click)="showResults(operation, $event)" class="link-element" [label]="getStatusLabel(operation.status)" [style]="getStatusLabelStyle(operation.status)"></p-chip>
+            <ng-container *ngIf="operation.message">{{operation.message}}</ng-container>
+          </td>
           <td [style]="{width: '60%'}"><ngx-json-viewer [json]="operation.body" [depth]="1"></ngx-json-viewer></td>
           <td>
             <ng-container *ngIf="operation.status !== OperationStatus.Todo">
@@ -86,7 +89,9 @@
                     <td>{{operation.name}}</td>
                     <td>{{operation.method}}</td>
                     <td>{{operation.api}}</td>
-                    <td><p-chip [label]="getStatusLabel(operation.status)" [style]="getStatusLabelStyle(operation.status)"></p-chip>
+                    <td>
+                      <p-chip *ngIf="!isOperationDone(operation.status)" [label]="getStatusLabel(operation.status)" [style]="getStatusLabelStyle(operation.status)"></p-chip>
+                      <p-chip *ngIf="isOperationDone(operation.status)" (click)="showResults(operation, $event)" class="link-element" [label]="getStatusLabel(operation.status)" [style]="getStatusLabelStyle(operation.status)"></p-chip>
                       <ng-container *ngIf="operation.message">{{operation.message}}</ng-container></td>
                     <td [style]="{width: '60%'}"><ngx-json-viewer [json]="operation.body" [depth]="1"></ngx-json-viewer></td>
                     <td>
@@ -107,3 +112,11 @@
     </p-table>
   </ng-container>
 </p-dialog>
+<p-overlayPanel id="resultsPannel" #resultsPannel [style]="{ width: '80%' }" [showCloseIcon]="true">
+  <ng-template pTemplate="content">
+    <ng-container *ngIf="selectedOperation?.results">
+      <h3>Results of the operation {{selectedOperation!.method!}} {{selectedOperation!.api!}}</h3>
+      <ngx-json-viewer [json]="selectedOperation!.results!" [depth]="3"></ngx-json-viewer>
+    </ng-container>
+  </ng-template>
+</p-overlayPanel>

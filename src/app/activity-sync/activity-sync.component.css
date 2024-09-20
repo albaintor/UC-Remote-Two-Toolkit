@@ -2,3 +2,23 @@
   color: #aaafbd;
   font-style: italic;
 }
+
+.status_missing {
+  color: white;
+  background-color: #ff0012;
+}
+
+.status_different {
+  color: white;
+  background-color: #ff6a00;
+}
+
+.status_identical {
+  color: white;
+  background-color: #17bc5f;
+}
+
+.status_unknown {
+  color: white;
+  background-color: black;
+}

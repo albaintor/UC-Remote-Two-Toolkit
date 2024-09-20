@@ -4,7 +4,7 @@ import {
   Component,
   EventEmitter,
   Input,
-  Output,
+  Output, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import {DialogModule} from "primeng/dialog";
@@ -21,6 +21,7 @@ import {catchError, forkJoin, from, map, mergeMap, of} from "rxjs";
 import {ChipModule} from "primeng/chip";
 import {Helper} from "../helper";
 import {Ripple} from "primeng/ripple";
+import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
 
 @Component({
   selector: 'app-remote-operations',
@@ -34,7 +35,8 @@ import {Ripple} from "primeng/ripple";
     TooltipModule,
     NgxJsonViewerModule,
     ChipModule,
-    Ripple
+    Ripple,
+    OverlayPanelModule
   ],
   templateUrl: './remote-operations.component.html',
   styleUrl: './remote-operations.component.css',
@@ -83,7 +85,9 @@ export class RemoteOperationsComponent {
   selectedOperations: RemoteOperation[] = [];
   @Output() visibleChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() operationsDone: EventEmitter<RemoteOperation[]> = new EventEmitter<RemoteOperation[]>();
-  expandedRows = {};
+  @ViewChild("resultsPannel", {static: false}) resultsPannel: OverlayPanel | undefined;
+  selectedOperation: RemoteOperation | undefined = undefined;
+  protected readonly Helper = Helper;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService)
   {
@@ -105,7 +109,10 @@ export class RemoteOperationsComponent {
     return OperationStatus.Cancelled;
   }
 
+  isOperationDone(status: OperationStatus): boolean {
+    return status == OperationStatus.Done || status == OperationStatus.Error;
 
+  }
 
   getStatusLabel(status: OperationStatus): string
   {
@@ -282,13 +289,10 @@ export class RemoteOperationsComponent {
     return this.operations.find(operation => operation.status !== OperationStatus.Todo);
   }
 
-  /*expandAll() {
-    if (!this.activities) return;
-    this.expandedRows = this.activities.reduce((acc, p) => (acc[p.name] = true) && acc, {});
+  showResults(operation: RemoteOperation, event: any)
+  {
+    this.selectedOperation = operation;
+    this.resultsPannel?.show(event, event.target);
+    this.cdr.detectChanges();
   }
-
-  collapseAll() {
-    this.expandedRows = {};
-  }*/
-  protected readonly Helper = Helper;
 }

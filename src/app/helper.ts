@@ -282,6 +282,7 @@ export class Helper
   static getEntityName(entity: any): string
   {
     if (!entity) return "";
+    if (entity?.['en']) return entity['en'];
     if (typeof entity.name === "string") return entity.name;
     if (entity.name?.['en']) return entity.name['en'];
     if (entity.name?.['fr']) return entity.name['fr'];
@@ -448,11 +449,18 @@ export class Helper
     return unusedEntities;
   }
 
+  static resolve(stringPath: string, baseObject: any): any | null {
+    return stringPath.split('.').reduce((p, q) => {
+      return p ? p[q] : null;
+    }, baseObject|| self);
+  }
+
   static getValues(table: any[], field_name: string) {
     const values = new Set<any>();
     table.forEach(item => {
-      if (item?.[field_name]) {
-        values.add(item?.[field_name])
+      const value = Helper.resolve(field_name, item);
+      if (value) {
+        values.add(value)
       }
     });
     return Array.from(values).sort();

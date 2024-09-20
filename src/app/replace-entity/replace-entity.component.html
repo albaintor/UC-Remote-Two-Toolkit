@@ -106,8 +106,8 @@
     </ng-template>
     <ng-template pTemplate="body" let-entity>
       <tr>
-        <td>{{Helper.getEntityName(entity)}}</td>
-        <td>{{entity.entity_id}}</td>
+        <td><a (click)="selectEntity(entity)" [routerLink]="[]">{{Helper.getEntityName(entity)}}</a></td>
+        <td><a (click)="selectEntity(entity)" [routerLink]="[]">{{entity.entity_id}}</a></td>
         <td><ng-container *ngIf="entity.activities">
           <ng-container *ngFor="let activity of entity.activities">
             <p-chip [label]="activity.name" [style]="getStyle(activity.name)" [pTooltip]="activity.entity_id"></p-chip>

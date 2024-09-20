@@ -329,7 +329,7 @@ export class ActivitySyncComponent implements OnInit {
     if (updatedActivity.options?.included_entities)
       body.options.entity_ids = updatedActivity!.options!.included_entities!.map((entity) => entity.entity_id);
     if (updatedActivity.options?.sequences)
-      body.sequences = {...updatedActivity.options.sequences};
+      body.options.sequences = {...updatedActivity.options.sequences};
     if (activity2)
     {
       console.log("Activity to import exists, we will update it", body);

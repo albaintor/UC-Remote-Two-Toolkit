@@ -491,7 +491,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     if (this.updatedActivity.options?.included_entities)
       body.options.entity_ids = this.updatedActivity!.options!.included_entities!.map((entity) => entity.entity_id);
     if (this.updatedActivity.options?.sequences)
-      body.sequences = {...this.updatedActivity.options.sequences};
+      body.options.sequences = {...this.updatedActivity.options.sequences};
     if (activity)
     {
       this.existingActivity = true;

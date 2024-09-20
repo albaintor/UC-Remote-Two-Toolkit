@@ -42,9 +42,6 @@
             <ng-container *ngIf="operation.status !== OperationStatus.Todo">
               <p-button pTooltip="Replay this operation" icon="pi pi-replay" [rounded]="true" severity="warning" (onClick)="setStatus(operation, OperationStatus.Todo)"/>
             </ng-container>
-            <!--<ng-container *ngIf="operation.status == OperationStatus.Todo">
-              <p-button pTooltip="Cancel this operation" icon="pi pi-times" [rounded]="true" severity="danger" (onClick)="setStatus(operation, OperationStatus.Cancelled)"/>
-            </ng-container>-->
           </td>
         </tr>
       </ng-template>
@@ -53,12 +50,6 @@
   <ng-container *ngIf="groupByActivities && activities">
     <p-table dataKey="id" [value]="activities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
              [scrollable]="true" [scrollHeight]="'calc(70vh - 50px)'" >
-<!--      <ng-template pTemplate="caption">-->
-<!--        <div class="flex flex-wrap justify-content-end gap-2">-->
-<!--          <p-button label="Expand All" icon="pi pi-plus" text (onClick)="expandAll()" />-->
-<!--          <p-button label="Collapse All" icon="pi pi-minus" text (onClick)="collapseAll()" />-->
-<!--        </div>-->
-<!--      </ng-template>-->
       <ng-template pTemplate="header">
         <tr>
           <th style="width: 5rem"></th>

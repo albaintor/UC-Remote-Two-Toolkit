@@ -39,6 +39,7 @@ You can change the listening port by adding `--port <port number>` argument
 - `Replace Entities` : replace an entity by another in all activities and pages. Useful if an entity has changed of name/id, or the driver and you have orphan entities which are not usable anymore
 - `Import activity` : import an activity from a file after saving it to a (json format) file or from clipboard. Activities can be imported in another remote as long as the used entities are available. If the activity already exists, it will replace it, otherwise it will create it
 - `Backup & restore` : backup the remote to a file or restore it from a saved backup. Same functionality as in the web configurator
+- `Sync activities` : synchronize activties between 2 remotes
 
 Main page :
 - You can check after all antities : orphan entities (defined in activities but not linked to any active integration), as well as unused entities
@@ -94,6 +95,16 @@ If you click on the button `Edit this activity`, it will brings you to another p
 
 Once you have applied all your modifications, they are not stored yet in the remote : you just have to click on `Save activity to remote` : it will shows all the operations that will be applied to the remote. You can have a final check before clicking on `Update remote` to update the Remote Two.
 
+## Synchronization of activities
+
+This section lets you compare and synchronize activities between 2 remotes. First select one (source) remote and another (target) remote.
+Click on analyse : a table will display the identical, different or missing activities between the 2 remotes with the details on the differences (different buttons assignment, sequences, UI pages).
+You can click on an activity and it will display the details on the 2 remotes.
+
+Then select the activities you want to synchronize (from one remote to another).
+The integrations and entities must be configured first on the target remote, otherwise a warning will be displayed. In that case you can eventually replace orphan entities by other existing on the target remote.
+
+<img width="100%" alt="UI grid" src="https://github.com/user-attachments/assets/f40c524c-bc26-4ce3-b823-33fafdbb60f1">
 
 
 ## Compilation

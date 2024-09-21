@@ -22,3 +22,18 @@
   color: white;
   background-color: black;
 }
+
+
+.unassigned_button {
+  color: white;
+  background-color: red;
+}
+
+.diff_button .p-chip-text
+{
+  pointer-events: none;
+}
+
+.buttons_panel {
+  pointer-events: none;
+}

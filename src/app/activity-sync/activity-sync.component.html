@@ -37,8 +37,13 @@
   <ng-container *ngIf="orphanEntities.length > 0">
     <h3>Some entities are orphans : replace them and click on apply</h3>
     <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px" *ngFor="let item of orphanEntities">
-      <div class="flex align-items-center justify-content-center">
-        <p-chip [label]="''+Helper.getEntityName(item.oldEntity)+' ('+item.oldEntity.entity_id+')'" />&nbsp;
+      <div class="flex flex-column">
+        <div class="flex align-items-center justify-content-center">
+          <p-chip [label]="''+Helper.getEntityName(item.oldEntity)+' ('+item.oldEntity.entity_id+')'" />&nbsp;
+        </div>
+        <div class="flex align-items-center justify-content-center">
+          <i>{{getOrphanOriginLabel(item)}}</i>
+        </div>
       </div>
       <div class="flex align-items-center justify-content-center">
         <p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" [disabled]="true"/>
@@ -132,7 +137,7 @@
         <ng-container *ngIf="diff.buttons">
           <ng-container *ngFor="let button of diff.buttons">
             <p-chip [label]="button.button1 ? button.button1.button : button.button2.button" [style]="Helper.getStyle(button.button1 ? button.button1.button : button.button2.button)"
-                    (mouseover)="showButton(button, diffPanelButton, $event)"></p-chip>
+                    (mouseover)="showButton(button, diffPanelButton, $event)" styleClass="diff_button"></p-chip>
           </ng-container>
         </ng-container>
       </td>
@@ -169,28 +174,34 @@
     </ng-container>
   </ng-template>
 </p-overlayPanel>
-<p-overlayPanel #diffPanelButton [style]="{ width: '850px' }" [showCloseIcon]="true" appendTo="body">
+<p-overlayPanel #diffPanelButton [style]="{ width: '850px' }" [showCloseIcon]="true" appendTo="body" styleClass="buttons_panel">
   <ng-template pTemplate="content">
     <ng-container *ngIf="selectedButton">
       <div class="flex flex-column">
         <b *ngIf="selectedButton.button1?.short_press || selectedButton.button2?.short_press">Short press</b>
         <div class="flex align-content-center gap-3" style="min-height: 50px" *ngIf="selectedButton.button1?.short_press || selectedButton.button2?.short_press">
-          <div class="flex flex-column">
+          <div class="flex flex-column" *ngIf="selectedButton.button1?.short_press?.entity_id">
             <div class="flex align-items-center justify-content-center">
               <app-icon [remote]="selectedRemote1" [icon]="getEntityIcon(selectedButton.button1?.short_press?.entity_id)" [size]="40"/>&nbsp;
               {{getEntityName(selectedButton.button1?.short_press?.entity_id)}} : {{selectedButton.button1?.short_press?.cmd_id}}
             </div>
             <span class="entity_id">{{selectedButton.button1?.short_press?.entity_id}}</span>
           </div>
+          <div class="flex align-items-center justify-content-center" *ngIf="!selectedButton.button1?.short_press?.entity_id">
+            <p-chip label="Unassigned" styleClass="unassigned_button"/>&nbsp;
+          </div>
           <div class="flex align-items-center justify-content-center">
             <p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" [disabled]="true"/>
           </div>
-          <div class="flex flex-column">
+          <div class="flex flex-column" *ngIf="selectedButton.button2?.short_press?.entity_id">
             <div class="flex align-items-center justify-content-center">
               <app-icon [remote]="selectedRemote2" [icon]="getEntityIcon(selectedButton.button2?.short_press?.entity_id)" [size]="40"/>&nbsp;
               {{getEntityName(selectedButton.button2?.short_press?.entity_id)}} : {{selectedButton.button2?.short_press?.cmd_id}}
             </div>
             <span class="entity_id">{{selectedButton.button2?.short_press?.entity_id}}</span>
+          </div>
+          <div class="flex align-items-center justify-content-center" *ngIf="!selectedButton.button2?.short_press?.entity_id">
+            <p-chip label="Unassigned" styleClass="unassigned_button"/>&nbsp;
           </div>
         </div>
 

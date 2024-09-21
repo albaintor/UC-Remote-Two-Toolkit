@@ -63,6 +63,10 @@
   </div>
 </div>
 </p-toolbar>
+<p-toolbar><h3>Included entities</h3>
+  <p-chip *ngFor="let entity of activity?.options?.included_entities" [label]="Helper.getEntityName(entity)"
+          [style]="getStyle(Helper.getEntityName(entity))" [pTooltip]="entity.entity_id"></p-chip>&nbsp;
+</p-toolbar>
 <h3>Buttons mapping and startup/stop sequences</h3>
 <div class="flex justify-content-center flex-wrap gap-6">
   <div class="flex-grow-1 flex-column">

@@ -16,7 +16,7 @@ import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loade
 import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
 import {
-  Activity,
+  Activity, ActivityPageCommand,
   ButtonMapping, Command,
   CommandSequence,
   Config,
@@ -80,6 +80,8 @@ interface OrphanEntity
 {
   oldEntity: Entity;
   newEntity: Entity | undefined;
+  activity: Activity;
+  origin: ButtonMapping | UIPage | CommandSequence | string;
 }
 
 @Component({
@@ -206,7 +208,8 @@ export class ActivitySyncComponent implements OnInit {
     }
   }
 
-  checkIncludedEntity(orphanEntities: OrphanEntity[], remoteData: RemoteData, entityId: string, activity: Activity)
+  checkIncludedEntity(orphanEntities: OrphanEntity[], remoteData: RemoteData, entityId: string, activity: Activity,
+                      origin: ButtonMapping | UIPage | CommandSequence | string)
   {
     if (!remoteData) return;
     if (activity.options?.included_entities?.find(entity => entity.entity_id === entityId)) return;
@@ -215,7 +218,8 @@ export class ActivitySyncComponent implements OnInit {
     {
       if (!orphanEntities.find(item => item.oldEntity?.entity_id === entityId))
       {
-        orphanEntities.push({oldEntity: {entity_id:entityId, entity_type: "", name: ""}, newEntity: undefined});
+        orphanEntities.push({oldEntity: {entity_id:entityId, entity_type: "", name: ""}, newEntity: undefined,
+        origin, activity});
       }
     }
     if (!entity) entity = {entity_id: entityId} as any;
@@ -282,7 +286,7 @@ export class ActivitySyncComponent implements OnInit {
       const sequences = updatedActivity.options!.sequences[sequenceName];
       sequences.forEach(sequence => {
         if (sequence.command?.entity_id) this.checkIncludedEntity(activityOperations.orphanEntities, targetRemoteData,
-          sequence.command!.entity_id, updatedActivity!);
+          sequence.command!.entity_id, updatedActivity!, sequence);
       })
     }
     if (!remoteModel) console.debug("Sync : remote model is not available available yet")
@@ -292,11 +296,11 @@ export class ActivitySyncComponent implements OnInit {
     updatedActivity!.options?.button_mapping?.forEach(button => {
       if (!button.long_press && !button.short_press && !button.double_press) return;
       if (button.long_press) this.checkIncludedEntity(activityOperations.orphanEntities, targetRemoteData,
-        button.long_press.entity_id, updatedActivity!);
+        button.long_press.entity_id, updatedActivity!, button);
       if (button.short_press) this.checkIncludedEntity(activityOperations.orphanEntities, targetRemoteData,
-        button.short_press.entity_id, updatedActivity!);
+        button.short_press.entity_id, updatedActivity!, button);
       if (button.double_press) this.checkIncludedEntity(activityOperations.orphanEntities, targetRemoteData,
-        button.double_press.entity_id, updatedActivity!);
+        button.double_press.entity_id, updatedActivity!, button);
       if (remoteModel && !remoteModel?.buttons?.includes(button.button)) {
         activityOperations.uncompatibleCommands.push(button);
       }
@@ -309,9 +313,9 @@ export class ActivitySyncComponent implements OnInit {
     updatedActivity!.options?.user_interface?.pages?.forEach(page => {
       page.items.forEach(item => {
         if (item.media_player_id) this.checkIncludedEntity(activityOperations.orphanEntities, targetRemoteData,
-          item.media_player_id, updatedActivity!);
+          item.media_player_id, updatedActivity!, page);
         if ((item.command as Command)?.entity_id) this.checkIncludedEntity(activityOperations.orphanEntities, targetRemoteData,
-          (item.command as Command)!.entity_id, updatedActivity!);
+          (item.command as Command)!.entity_id, updatedActivity!, page);
       })
     });
 
@@ -320,7 +324,8 @@ export class ActivitySyncComponent implements OnInit {
         if (!targetRemoteData.entities.find(entity => entity.entity_id === included_entity.entity_id) &&
           !orphanEntities.find(item => item.oldEntity.entity_id === included_entity.entity_id))
         {
-          activityOperations.orphanEntities.push({oldEntity:included_entity, newEntity: undefined});
+          activityOperations.orphanEntities.push({oldEntity:included_entity, newEntity: undefined, origin: "Included entity",
+            activity: activity1});
         }
       })
     }
@@ -640,6 +645,8 @@ export class ActivitySyncComponent implements OnInit {
 
   showButton(button : ButtonsMappingDiff, diffPanelButton: OverlayPanel, $event: MouseEvent) {
     this.selectedButton = button;
+    diffPanelButton.hide();
+    this.cdr.detectChanges();
     diffPanelButton.show($event, $event.target);
     this.cdr.detectChanges();
   }
@@ -712,5 +719,17 @@ export class ActivitySyncComponent implements OnInit {
     });
     this.selectedActivities = [];
     this.cdr.detectChanges();
+  }
+
+  getOrphanOriginLabel(item: OrphanEntity) {
+    const prefix = Helper.getEntityName(item.activity);
+    if (typeof item.origin === 'string') return prefix +" "+ item.origin;
+    if (item.origin.hasOwnProperty("button"))
+      return `${prefix } button : `+(item.origin as ButtonMapping).button;
+    if (item.origin.hasOwnProperty("name"))
+      return `${prefix} page : `+(item.origin as UIPage).name;
+    if (item.origin.hasOwnProperty("type"))
+      return `${prefix} sequence : `+(item.origin as CommandSequence).command;
+    return item.origin.toString()
   }
 }

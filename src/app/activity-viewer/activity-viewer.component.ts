@@ -40,6 +40,7 @@ import {ActivitySequenceComponent} from "../activity-editor/activity-sequence/ac
 import {ImageMapComponent, MapElement} from "../image-map/image-map.component";
 import {DividerModule} from "primeng/divider";
 import {ToolbarModule} from "primeng/toolbar";
+import {DockModule} from "primeng/dock";
 
 enum DataFormat {
   None,
@@ -76,7 +77,8 @@ export class AsPipe implements PipeTransform {
     ActivitySequenceComponent,
     ImageMapComponent,
     DividerModule,
-    ToolbarModule
+    ToolbarModule,
+    DockModule
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',

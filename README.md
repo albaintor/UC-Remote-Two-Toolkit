@@ -2,7 +2,9 @@
 
 This project is aimed to bring further functionalities to [Remote Two Web Configurator](https://www.unfoldedcircle.com)
 It is developed in Angular for the front-end, and NodeJS for the back-end. This project is all-in-one with the front and the back-end, so no need to add any additional components.
-![Capture d'écran 2024-09-13 080938](https://github.com/user-attachments/assets/1507a5de-7c9b-4e15-a85d-7f02be322644)
+
+![image](https://github.com/user-attachments/assets/67dfde04-1fd2-423b-b5ea-3b303cb42812)
+
 
 
 ## Pre-requisites
@@ -31,7 +33,8 @@ You can change the listening port by adding `--port <port number>` argument
 - Select a remote in the dropdown (a refresh may be necessary)
 
 ### Navigation
-![image](https://github.com/user-attachments/assets/3bfa90af-401f-4c1e-89df-3cd9e9a31d31)
+
+![image](https://github.com/user-attachments/assets/cb2fd8a0-bf28-4a2b-a6bf-23afc01cdbbe)
 
 - `Manage Remotes` : add (register) or remove a remote from registration
 - `Integrations` : review installed integrations, upload a custom driver or delete one. Review the subscribed entities per integration

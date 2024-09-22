@@ -148,9 +148,10 @@ jobs:
           echo "Creating blob for injection"
           node --experimental-sea-config sea-config.json
           cp $(command -v node) ucrtool-server
+          codesign --remove-signature ucrtool-server
           echo "Injecting blob in NodeJS executable"
-          npx postject ucrtool-server NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
-          node --experimental-sea-config sea-config.json
+          npx postject ucrtool-server NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 --macho-segment-name NODE_SEA 
+          codesign --sign - ucrtool-server
 
       - name: Prepare artifacts
         shell: bash

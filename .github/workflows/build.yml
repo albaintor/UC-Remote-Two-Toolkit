@@ -158,7 +158,7 @@ jobs:
           mkdir -p artifacts
           cp server/ucrtool-server artifacts/
           cp -r server/public artifacts/
-          echo "ARTIFACT_NAME=ucrtool-${{ env.VERSION }}-aarch64" >> $GITHUB_ENV
+          echo "ARTIFACT_NAME=ucrtool-${{ env.VERSION }}-macos" >> $GITHUB_ENV
 
       - name: Create upload artifact
         shell: bash

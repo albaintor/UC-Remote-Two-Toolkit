@@ -499,6 +499,8 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       if (this.resetMapping)
       {
         activity.options?.button_mapping?.forEach(button => {
+          if (this.updatedActivity?.options?.button_mapping?.find(button2 => button2.button === button.button))
+            return;
           remoteOperations.push({name: `Delete button ${button.button} ${this.updatedActivity!.name}`,
             method: "DELETE", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
             body: {}, status: OperationStatus.Todo});
@@ -573,6 +575,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
             ...button
           }, status: OperationStatus.Todo})
     });
+
     if (this.uncompatibleCommands.length > 0) this.activityViewer?.updateButtons();
     console.log("Updated activity", this.updatedActivity);
     return remoteOperations;

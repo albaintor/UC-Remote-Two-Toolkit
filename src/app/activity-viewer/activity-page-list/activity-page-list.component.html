@@ -1,0 +1,26 @@
+<div style="position: relative">
+  <p-button class="list-item-add" [rounded]="true" (onClick)="addPage($event)" severity="info" icon="pi pi-plus" size="small"
+            pTooltip="Add a page" *ngIf="editable"></p-button>
+  <ng-container *ngIf="activity?.options?.user_interface?.pages">
+    <p-orderList
+      [value]="activity?.options?.user_interface?.pages"
+      [listStyle]="{ 'max-height': '30rem' }"
+      header="Activity pages"
+      [dragdrop]="editable" [stripedRows]="true" (onReorder)="updatePages($event)">
+      <ng-template let-page pTemplate="item">
+        <div class="flex flex-wrap p-2 align-items-center gap-3">
+          <i *ngIf="editable" class="pi pi-bars"></i>
+          <div class="flex-1 flex flex-column gap-2" (click)="selectPage(page)">
+            <span class="font-bold">{{ page.name }}</span>
+            <span class="text-200">
+              {{ page.page_id }}
+          </span>
+          </div>
+          <div *ngIf="editable" class="list-item-delete">
+            <p-button [rounded]="true" (click)="deletePage(page)" severity="danger" icon="pi pi-times" size="small"></p-button>
+          </div>
+        </div>
+      </ng-template>
+    </p-orderList>
+  </ng-container>
+</div>

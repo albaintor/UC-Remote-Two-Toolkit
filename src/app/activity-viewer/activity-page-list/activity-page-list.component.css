@@ -1,0 +1,35 @@
+div[class="p-orderlist-controls"] {
+  display: none !important;
+}
+
+.p-orderlist {
+  min-width: 350px;
+}
+
+.list-item-delay {
+  position: absolute;
+  right: 60px;
+  top: 5px;
+}
+
+.list-item-add {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+
+.list-item-delete {
+  position: absolute;
+  right: 10px;
+  top: 20%;
+  padding-right: 10px;
+  padding-left: 80px;
+  opacity:0;
+  transition: visibility 0.1s linear,opacity 0.1s linear;
+}
+
+.list-item-delete:hover {
+  visibility: visible;
+  opacity:1;
+  cursor: pointer;
+}

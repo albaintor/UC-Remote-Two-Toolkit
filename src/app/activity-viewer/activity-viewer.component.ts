@@ -41,6 +41,7 @@ import {ImageMapComponent, MapElement} from "../image-map/image-map.component";
 import {DividerModule} from "primeng/divider";
 import {ToolbarModule} from "primeng/toolbar";
 import {DockModule} from "primeng/dock";
+import {ActivityPageListComponent} from "./activity-page-list/activity-page-list.component";
 
 enum DataFormat {
   None,
@@ -78,7 +79,8 @@ export class AsPipe implements PipeTransform {
     ImageMapComponent,
     DividerModule,
     ToolbarModule,
-    DockModule
+    DockModule,
+    ActivityPageListComponent
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',
@@ -283,6 +285,15 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.currentPage = this.activity?.options?.user_interface?.pages?.[$event.page!];
     this.updateButtonsGrid();
     console.log("Page changed", this.gridCommands);
+    this.cdr.detectChanges();
+  }
+
+  onReorderPages($event: any)
+  {
+    this.currentPage = this.activity?.options?.user_interface?.pages?.[0];
+    this.firstPage = 0;
+    this.updateButtonsGrid();
+    this.onChange.emit();
     this.cdr.detectChanges();
   }
 
@@ -611,14 +622,6 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  addPage($event: MouseEvent) {
-    if (!this.activity) return;
-    if (!this.activity.options) this.activity.options = {};
-    if (!this.activity.options.user_interface) this.activity.options.user_interface = { pages: []};
-    this.activity.options.user_interface.pages?.push({name: "New page", items: [], grid: {width: 4, height: 6}});
-    this.updateButtonsGrid();
-  }
-
   buttonOver($event: MapElement) {
     const buttonId = $event.tag;
     if (!buttonId) return;
@@ -643,5 +646,9 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.cdr.detectChanges();
     this.buttonEditor?.show();
     this.cdr.detectChanges();
+  }
+
+  selectPage($event: { activity: Activity; page: UIPage }) {
+    this.onPageChange({page: this.activity?.options?.user_interface?.pages?.indexOf($event.page)})
   }
 }

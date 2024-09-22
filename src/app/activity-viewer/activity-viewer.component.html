@@ -157,9 +157,6 @@
     </p-button>
   </div>
   <div class="flex align-items-center justify-content-center" *ngIf="editMode">
-    <p-button label="Add a new page" (onClick)="addPage($event)" severity="success" icon="pi pi-file-plus" size="small"></p-button>
-  </div>
-  <div class="flex align-items-center justify-content-center" *ngIf="editMode">
     <p-button label="Delete current page" (onClick)="deletePage($event)" severity="danger" icon="pi pi-trash" size="small"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
@@ -174,8 +171,10 @@
   </div>
 </div>
 </p-toolbar>
-<ng-container *ngIf="currentPage">
+<div class="flex align-content-left flex-wrap gap-3">
+  <ng-container *ngIf="currentPage">
   <br>
+    <div class="flex-grow-1 flex-column">
   <p-paginator (onPageChange)="onPageChange($event)" [first]="firstPage" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
   <div class="grid-container" *ngIf="toggleGrid"
        [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width), 'width': gridPixelWidth+'px', 'height': gridPixelHeight+'px'}">
@@ -206,8 +205,12 @@
       {{getParams(item?.command)}}
     </grid-button>
   </div>
-</ng-container>
-
+    </div>
+  </ng-container>
+  <ng-container *ngIf="editMode">
+    <app-activity-page-list [activity]="activity" [editable]="editMode" (onReorder)="onReorderPages($event)" (onSelectPage)="selectPage($event)"/>
+  </ng-container>
+</div>
 <app-button-editor [activity]="activity" [remote]="remote" [button]="selectedButton" (buttonChanged)="buttonChanged($event)"></app-button-editor>
   <ng-container *ngIf="activity"><br><p-button label="Show data" (onClick)="showDump = true"></p-button>&nbsp;
     <p-button *ngIf="showDump"  label="Copy data to clipboard" (onClick)="copyToClipboard(activity)"></p-button>

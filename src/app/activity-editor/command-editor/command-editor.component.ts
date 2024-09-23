@@ -149,16 +149,20 @@ export class CommandEditorComponent implements OnInit {
         this.selectedEntity = this.activityEntities?.find(entity => entity.entity_id ==
           this.uiCommand?.media_player_id);
       else if (command?.entity_id && this.remote)
-      {
-        this.server.getRemotetEntity(this.remote, command.entity_id).subscribe(entity => {
-          this.selectedEntity = entity;
-          this.activityEntities = this.activityEntities.map(activityEntity =>
-            activityEntity.entity_id === entity.entity_id ? entity : activityEntity);
-          console.log("Extracted entity", entity);
-          this.updateSelection();
-        })
-      }
+        this.loadEntity(command.entity_id);
     this.updateSelection();
+  }
+
+  loadEntity(entity_id: string)
+  {
+    if (!this.remote) return;
+    this.server.getRemotetEntity(this.remote, entity_id).subscribe(entity => {
+      this.selectedEntity = entity;
+      this.activityEntities = this.activityEntities.map(activityEntity =>
+        activityEntity.entity_id === entity.entity_id ? entity : activityEntity);
+      console.log("Extracted entity", entity);
+      this.updateSelection();
+    })
   }
 
   getSelectionItems(parameter: EntityCommandParameter)
@@ -181,11 +185,14 @@ export class CommandEditorComponent implements OnInit {
     let command = this.getCommand();
 
     if (this.selectedEntity?.entity_id) {
+
       const selectedEntity = this.entities.find(entity => entity.entity_id == this.selectedEntity?.entity_id);
       this.entityCommands = this.configEntityCommands.filter(command =>
         command.id.startsWith(this.selectedEntity?.entity_type!)).sort((a, b) =>
         Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!));
       const entity = this.entities.find(entity => entity.entity_id === this.selectedEntity?.entity_id);
+
+
       if (this.featuresMap?.length > 0 && entity)
       {
         const features = this.featuresMap.find(featuresMap => featuresMap.entity_type === entity.entity_type);
@@ -240,6 +247,8 @@ export class CommandEditorComponent implements OnInit {
   }
 
   entitySelected($event: any) {
+    if (this.selectedEntity?.entity_id)
+      this.loadEntity(this.selectedEntity.entity_id);
     this.updateSelection();
   }
 

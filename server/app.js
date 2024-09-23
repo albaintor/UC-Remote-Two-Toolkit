@@ -1028,6 +1028,11 @@ app.delete('/api/uploaded_files/:filename', (req, res, next) => {
     res.status(404).send(filename).end();
   }
 })
+
+app.all('*', function (req, res) {
+  res.status(200).sendFile(`/`, {root: 'public/browser'});
+});
+
 if (fs.existsSync(WORKING_FOLDER))
   rc2Model.loadFromPath(WORKING_FOLDER);
 // console.dir(rc2Model.entities_catalog, {depth: null, colors: true});

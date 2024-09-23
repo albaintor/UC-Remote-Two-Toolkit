@@ -12,8 +12,9 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  HASH_FILENAME_WINDOWS: ucr-tool-windows.hash
-  HASH_FILENAME: ucr-tool-ubuntu.hash
+  HASH_FILENAME_WINDOWS: ucrtool-windows.hash
+  HASH_FILENAME_MAC: ucrtool-macos.hash
+  HASH_FILENAME: ucrtool-ubuntu.hash
 
 jobs:
   build-windows:
@@ -81,7 +82,7 @@ jobs:
           mkdir -p artifacts
           cp server/ucrtool-server.exe artifacts/
           cp -r server/public artifacts/
-          echo "ARTIFACT_NAME=ucrtoolkit-${{ env.VERSION }}-windows" >> $GITHUB_ENV
+          echo "ARTIFACT_NAME=ucrtool-${{ env.VERSION }}-windows" >> $GITHUB_ENV
 
       - name: Create upload artifact
         run: |
@@ -290,8 +291,9 @@ jobs:
           # append timestamp
           for filename in *.zip; do mv $filename "$(basename $filename .zip)-${{ env.TIMESTAMP }}.zip"; done;
           for filename in *.zip; do echo "sha256  `sha256sum $filename`" >> ${{ env.HASH_FILENAME_WINDOWS }}; done;
+          for filename in *aarch64.tar.gz; do echo "sha256  `sha256sum $filename`" >> ${{ env.HASH_FILENAME }}; done;
+          for filename in *macos.tar.gz; do echo "sha256  `sha256sum $filename`" >> ${{ env.HASH_FILENAME_MAC }}; done;
           for filename in *.tar.gz; do mv $filename "$(basename $filename .tar.gz)-${{ env.TIMESTAMP }}.tar.gz"; done;
-          for filename in *.tar.gz; do echo "sha256  `sha256sum $filename`" >> ${{ env.HASH_FILENAME }}; done;
 
       - name: Create Pre-Release
         uses: "marvinpinto/action-automatic-releases@latest"
@@ -324,3 +326,4 @@ jobs:
             *.zip
             ${{ env.HASH_FILENAME_WINDOWS }}
             ${{ env.HASH_FILENAME }}
+            ${{ env.HASH_FILENAME_MAC }}

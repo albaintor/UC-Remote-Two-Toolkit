@@ -15,31 +15,10 @@ import {Remote} from "./remote.js";
 import {getConfigFile, writeConfigFile} from "./config.js";
 import {program} from 'commander';
 import cors from 'cors';
-import process from 'process';
-import open from 'open';
-
-import { fileURLToPath } from 'url';
-try {
-  const filename = import.meta.url;
-  if (filename)
-  {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    try {
-      process.chdir(__dirname);
-    }
-    catch (err) {
-    }
-  }
-} catch (err2) {}
-
 
 let LISTEN_PORT = "8000";
 const UPLOAD_DIR = './uploads';
 const RESOURCES_DIR = './resources';
-
-
-
 var app = express();
 var storage = multer.diskStorage({
   destination: function (req, file, callback) {
@@ -1054,7 +1033,6 @@ if (fs.existsSync(WORKING_FOLDER))
 // console.dir(rc2Model.entities_catalog, {depth: null, colors: true});
 app.listen(LISTEN_PORT, function () {
   console.log(`Listening on port ${LISTEN_PORT}!`);
-  open(`http://localhost:${LISTEN_PORT}`);
 });
 
 

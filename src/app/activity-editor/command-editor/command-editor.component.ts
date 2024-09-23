@@ -16,13 +16,15 @@ import {
   ActivityPageCommand,
   Command,
   Entity,
-  EntityCommand,
+  EntityCommand, EntityCommandParameter,
   EntityFeature, Remote, RemoteData,
   RemoteMap
 } from "../../interfaces";
-import {NgIf} from "@angular/common";
+import {NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {ToastModule} from "primeng/toast";
+import {InputNumberModule} from "primeng/inputnumber";
+import {CheckboxModule} from "primeng/checkbox";
 
 @Component({
   selector: 'app-command-editor',
@@ -32,7 +34,13 @@ import {ToastModule} from "primeng/toast";
     SharedModule,
     NgIf,
     FormsModule,
-    ToastModule
+    ToastModule,
+    NgSwitch,
+    NgSwitchCase,
+    NgForOf,
+    InputNumberModule,
+    CheckboxModule,
+    NgSwitchDefault
   ],
   templateUrl: './command-editor.component.html',
   styleUrl: './command-editor.component.css',
@@ -51,6 +59,10 @@ export class CommandEditorComponent implements OnInit {
   uiCommand:  ActivityPageCommand | undefined;
   @Input('uiCommand') set _uiCommand(value: ActivityPageCommand | undefined) {
     this.uiCommand = value;
+    this.command = undefined;
+    if (this.uiCommand?.command && typeof this.uiCommand?.command !== 'string') {
+      this.command = (this.uiCommand.command as Command);
+    }
     if (value?.command)
       this.backupCommand = JSON.parse(JSON.stringify(value.command));
     this.initSelection();
@@ -136,10 +148,31 @@ export class CommandEditorComponent implements OnInit {
       if (this.uiCommand?.media_player_id)
         this.selectedEntity = this.activityEntities?.find(entity => entity.entity_id ==
           this.uiCommand?.media_player_id);
-      else if (command)
-        this.selectedEntity = this.activityEntities?.find(entity => entity.entity_id === command?.entity_id);
-
+      else if (command?.entity_id && this.remote)
+      {
+        this.server.getRemotetEntity(this.remote, command.entity_id).subscribe(entity => {
+          this.selectedEntity = entity;
+          this.activityEntities = this.activityEntities.map(activityEntity =>
+            activityEntity.entity_id === entity.entity_id ? entity : activityEntity);
+          console.log("Extracted entity", entity);
+          this.updateSelection();
+        })
+      }
     this.updateSelection();
+  }
+
+  getSelectionItems(parameter: EntityCommandParameter)
+  {
+    const source = parameter.items?.source;
+    const field = parameter.items?.field;
+    if (!source || !field)
+    {
+      if (parameter.values) return Helper.getItems(parameter.values);
+      return [];
+    }
+    if ((this.selectedEntity as any)?.[source]?.[field])
+      return Helper.getItems((this.selectedEntity as any)?.[source]?.[field])
+    return [];
   }
 
   updateSelection()
@@ -182,7 +215,27 @@ export class CommandEditorComponent implements OnInit {
           (entityCommand.id.startsWith(this.selectedEntity?.entity_type!) &&
             command.cmd_id.endsWith(entityCommand.cmd_id)));
       }
+
+      if (!this.selectedCommand || !this.selectedCommand.params) delete this.command?.params;
+
+      if (this.command && this.selectedCommand)
+      {
+        if (this.selectedCommand.params && !this.command.params)
+          this.command.params = {};
+
+        // Remove invalid params
+        if (this.command.params)
+        for (const [key, value] of Object.entries(this.command.params)) {
+          if (!this.selectedCommand.params?.find(param => param.param === key))
+            delete this.command.params[key];
+        }
+
+        /*this.selectedCommand.params?.forEach(params => {
+
+        })*/
+      }
     }
+    console.log("Entity & command selected", this.selectedEntity, this.selectedCommand);
     this.cdr.detectChanges();
   }
 
@@ -209,6 +262,20 @@ export class CommandEditorComponent implements OnInit {
     if (!command || !this.selectedEntity) return;
     command.entity_id = this.selectedEntity.entity_id!;
     command.cmd_id = this.selectedCommand.id;
+
+    if (!this.selectedCommand || !this.selectedCommand.params) delete this.command?.params;
+    if (this.command && this.selectedCommand) {
+      if (this.selectedCommand.params && !this.command.params)
+        this.command.params = {};
+
+      // Remove invalid params
+      if (this.command.params)
+        for (const [key, value] of Object.entries(this.command.params)) {
+          if (!this.selectedCommand.params?.find(param => param.param === key))
+            delete this.command.params[key];
+        }
+    }
+
     this.messageService.add({key: 'commandEditor', severity: "info", summary: `Entity ${Helper.getEntityName(this.selectedEntity)}`,
       detail: `Entity id : ${this.selectedEntity?.entity_id}, command ${this.selectedCommand.cmd_id} assigned`});
     this.cdr.detectChanges();

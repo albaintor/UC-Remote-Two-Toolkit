@@ -22,7 +22,7 @@
                       optionLabel="label" optionValue="value" (ngModelChange)="itemTypeSelected($event)"></p-selectButton>
     </div>
   </div>
-  <ng-container *ngIf="gridItem?.item && gridItem!.item!.type !== 'media_player'">
+  <ng-container *ngIf="!Helper.isEmptyItem(gridItem?.item) && gridItem!.item!.type !== 'media_player'">
     <div class="flex flex-wrap gap-3">
       <div class="flex align-items-center" *ngIf="gridItem!.item!.type === 'text'">
         <label for="text">Display text</label>
@@ -43,7 +43,7 @@
     </div>
   </ng-container>
   <br>
-  <app-command-editor *ngIf="gridItem?.item" [remote]="remote" [activity]="activity" [uiCommand]="gridItem?.item" (updateItem)="updateCommand()"></app-command-editor>
+  <app-command-editor *ngIf="!Helper.isEmptyItem(gridItem?.item)" [remote]="remote" [activity]="activity" [uiCommand]="gridItem?.item" (updateItem)="updateCommand()"></app-command-editor>
 <br><br>
   <div class="flex flex-wrap gap-3" *ngIf="!Helper.isEmptyItem(gridItem?.item)">
     <div class="flex  align-items-center">

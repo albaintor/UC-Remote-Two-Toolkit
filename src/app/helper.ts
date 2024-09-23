@@ -455,9 +455,13 @@ export class Helper
     }, baseObject|| self);
   }
 
-  static getValues(table: any[], field_name: string) {
+  static getValues(table: any[], field_name?: string) {
     const values = new Set<any>();
     table.forEach(item => {
+      if (!field_name) {
+        values.add(item);
+        return;
+      }
       const value = Helper.resolve(field_name, item);
       if (value) {
         values.add(value)
@@ -466,7 +470,7 @@ export class Helper
     return Array.from(values).sort();
   }
 
-  static getItems(table: any[], field_name: string) {
+  static getItems(table: any[], field_name?: string) {
     return Helper.getValues(table, field_name).map(value => {
       return {name: value.toString(), value}
     });

@@ -234,6 +234,29 @@ export class Remote
     }
   }
 
+  async getEntity(entityId)
+  {
+    let headers = this.getHeaders();
+    const limit = 100;
+    const options = {
+      ...this.getOptions(),
+      searchParams: {
+        limit,
+        page: 1
+      }
+    }
+    const url = this.getURL() + `/api/entities/${entityId}`;
+    const res = await got.get(url, options);
+    let resBody;
+    try {
+      if (res?.body) resBody = JSON.parse(res.body);
+      return resBody;
+    } catch (err) {
+      console.error('Error', err, res?.body);
+      throw(err);
+    }
+  }
+
   async getEntities()
   {
     let headers = this.getHeaders();

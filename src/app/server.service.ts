@@ -200,6 +200,13 @@ export class ServerService {
     }))
   }
 
+  getRemotetEntity(remote: Remote, entityId: string): Observable<Entity>
+  {
+    return this.http.get<Entity>(`/api/remote/${remote.address}/entities/${entityId}`).pipe(map(results => {
+      return results;
+    }))
+  }
+
   getRemoteActivities(remote: Remote): Observable<Activity[]>
   {
     return this.http.get<Activity[]>(`/api/remote/${remote.address}/activities`).pipe(map(activities => {
@@ -448,7 +455,7 @@ export class ServerService {
     }))
   }
 
-  getEntity(query: string): Observable<Entity[]>
+  findEntities(query: string): Observable<Entity[]>
   {
     return this.http.get<Entity[]>('/api/entity/'+query).pipe(map(results => {
       return results;

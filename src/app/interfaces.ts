@@ -9,6 +9,27 @@ export interface EntityFeature
   ]
 }
 
+export interface EntityCommandParameter {
+  items?:{
+    field: string;
+    source: string;
+  }
+  name: {
+    en: string;
+    fr?: string;
+    de?: string
+  }
+  param?: string;
+  type: "enum"|"number"|"regex"|"bool"|"selection";
+  values?: string[];
+  default?: number;
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+  source?: string;
+}
+
 export interface EntityCommand
 {
   id: string;
@@ -18,27 +39,7 @@ export interface EntityCommand
     fr?: string;
     de?: string
   }
-  params?: [
-    {
-      items?:{
-        field: string;
-        source: string;
-      }
-      name: {
-        en: string;
-        fr?: string;
-        de?: string
-      }
-      param?: string;
-      type: "enum"|"number"|"regex"|"bool"|"selection";
-      values?: string[];
-      default?: number;
-      min?: number;
-      max?: number;
-      step?: number;
-      unit?: string;
-    }
-  ]
+  params?: EntityCommandParameter[];
 }
 
 
@@ -212,6 +213,7 @@ export interface Entity
   entity_type: string;
   integration?: string | EntityIntegration;
   features?:string[];
+  attributes?: any;
   options?: {
     button_mapping?:ButtonMapping[];
     user_interface?: {

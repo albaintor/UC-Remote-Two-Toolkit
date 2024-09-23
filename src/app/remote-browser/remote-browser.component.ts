@@ -317,7 +317,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       this.cdr.detectChanges();
       return;
     }
-    this.server.getEntity($event.query).subscribe(results => {
+    this.server.findEntities($event.query).subscribe(results => {
       this.suggestions = Helper.queryEntity($event.query, results);
       this.cdr.detectChanges();
     })

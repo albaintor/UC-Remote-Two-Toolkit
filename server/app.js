@@ -15,10 +15,23 @@ import {Remote} from "./remote.js";
 import {getConfigFile, writeConfigFile} from "./config.js";
 import {program} from 'commander';
 import cors from 'cors';
+import process from 'process';
+import { fileURLToPath } from 'url';
+import open from 'open';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+try {
+  process.chdir(__dirname);
+}
+catch (err) {
+}
 
 let LISTEN_PORT = "8000";
 const UPLOAD_DIR = './uploads';
 const RESOURCES_DIR = './resources';
+
+
+
 var app = express();
 var storage = multer.diskStorage({
   destination: function (req, file, callback) {
@@ -462,6 +475,29 @@ app.delete('/api/remote/:address/activities/:activity_id/ui/pages/:page_id', asy
     const results = await remote.deleteActivityPage(activity_id, page_id);
     // console.log(results);
     res.status(200).json(results);
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
+
+app.get('/api/remote/:address/entities/:entity_id', async (req, res, next) => {
+  const address = req.params.address;
+  const entity_id = req.params.entity_id;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getEntity(entity_id));
   } catch (error)
   {
     errorHandler(error, req, res, next);
@@ -1010,6 +1046,7 @@ if (fs.existsSync(WORKING_FOLDER))
 // console.dir(rc2Model.entities_catalog, {depth: null, colors: true});
 app.listen(LISTEN_PORT, function () {
   console.log(`Listening on port ${LISTEN_PORT}!`);
+  open(`http://localhost:${LISTEN_PORT}`);
 });
 
 

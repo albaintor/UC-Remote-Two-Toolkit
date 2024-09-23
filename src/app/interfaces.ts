@@ -223,6 +223,7 @@ export interface Entity
   }
   foldername?: string;
   filename?: string;
+  entity_commands?: string[];
 }
 
 export interface EntitiesUsage

@@ -91,11 +91,8 @@ export class CommandEditorComponent implements OnInit {
 
   @Output() updateItem: EventEmitter<ActivityPageCommand | Command> = new EventEmitter();
   backupCommand: Command | undefined;
-  /*@Output() addItem: EventEmitter<ActivityPageCommand | undefined> = new EventEmitter();
-  @Output() deleteItem: EventEmitter<ActivityPageCommand | undefined> = new EventEmitter();*/
   protected readonly Helper = Helper;
   templates: RemoteMap[] | undefined;
-  featuresMap: EntityFeature[] = [];
   configEntityCommands: EntityCommand[] = [];
   entityCommands: EntityCommand[] = [];
   selectedCommand: EntityCommand | undefined;
@@ -109,10 +106,6 @@ export class CommandEditorComponent implements OnInit {
       this.templates = templates;
       this.cdr.detectChanges();
     });
-    this.server.getFeaturesMap().subscribe(featuresMap => {
-      this.featuresMap = featuresMap;
-      this.cdr.detectChanges();
-    })
     const data = localStorage.getItem("remoteData");
     if (data) {
       const remoteData: RemoteData = JSON.parse(data);
@@ -157,10 +150,10 @@ export class CommandEditorComponent implements OnInit {
   {
     if (!this.remote) return;
     this.server.getRemotetEntity(this.remote, entity_id).subscribe(entity => {
-      this.selectedEntity = entity;
       this.activityEntities = this.activityEntities.map(activityEntity =>
-        activityEntity.entity_id === entity.entity_id ? entity : activityEntity);
-      console.log("Extracted entity", entity);
+        activityEntity.entity_id === entity.entity_id ? Object.assign(activityEntity, entity) : activityEntity);
+      this.selectedEntity = this.activityEntities.find(activityEntity => activityEntity.entity_id == entity_id);
+      console.log("Extracted entity", this.selectedEntity);
       this.updateSelection();
     })
   }
@@ -185,31 +178,13 @@ export class CommandEditorComponent implements OnInit {
     let command = this.getCommand();
 
     if (this.selectedEntity?.entity_id) {
-
-      const selectedEntity = this.entities.find(entity => entity.entity_id == this.selectedEntity?.entity_id);
       this.entityCommands = this.configEntityCommands.filter(command =>
-        command.id.startsWith(this.selectedEntity?.entity_type!)).sort((a, b) =>
+        this.selectedEntity?.entity_commands?.includes(command.id)).sort((a, b) =>
         Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!));
-      const entity = this.entities.find(entity => entity.entity_id === this.selectedEntity?.entity_id);
 
-
-      if (this.featuresMap?.length > 0 && entity)
+      if (this.selectedEntity?.options?.simple_commands)
       {
-        const features = this.featuresMap.find(featuresMap => featuresMap.entity_type === entity.entity_type);
-        if (features)
-        {
-          const commands: string[] = [];
-          features.features_map.forEach(command => {
-            if (!command.feature || entity.features?.includes(command.feature))
-              commands.push(...command.commands);
-          });
-          // console.log("Features", features, commands, this.selectedEntity, entity);
-          this.entityCommands = this.entityCommands.filter(command => commands.includes(command.id));
-        }
-      }
-      if (selectedEntity?.options?.simple_commands)
-      {
-        this.entityCommands.push(...selectedEntity.options.simple_commands.map(command => { return {
+        this.entityCommands.push(...this.selectedEntity.options.simple_commands.map(command => { return {
             id: command, cmd_id: command, name: {en: command}
           }})
         );
@@ -289,26 +264,4 @@ export class CommandEditorComponent implements OnInit {
       detail: `Entity id : ${this.selectedEntity?.entity_id}, command ${this.selectedCommand.cmd_id} assigned`});
     this.cdr.detectChanges();
   }
-
-
-  /*addCommand() {
-    if (!this.uiCommand) return;
-    if (!this.selectedEntity)
-    {
-      this.selectedEntity = this.entities[0];
-    }
-    (this.uiCommand.command as Command) = {entity_id: this.selectedEntity!.entity_id!, cmd_id: ""};
-    this.addItem.emit(this.gridItem);
-    this.cdr.detectChanges();
-  }
-
-  deleteCommand() {
-    if (this.gridItem?.item)
-    {
-      this.deleteItem.emit(this.gridItem);
-      this.visible = false;
-      this.cdr.detectChanges();
-    }
-  }*/
-
 }

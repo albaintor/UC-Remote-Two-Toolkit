@@ -18,13 +18,16 @@ import cors from 'cors';
 import process from 'process';
 import { fileURLToPath } from 'url';
 import open from 'open';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 try {
-  process.chdir(__dirname);
-}
-catch (err) {
-}
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  try {
+    process.chdir(__dirname);
+  }
+  catch (err) {
+  }
+} catch (err2) {}
+
 
 let LISTEN_PORT = "8000";
 const UPLOAD_DIR = './uploads';

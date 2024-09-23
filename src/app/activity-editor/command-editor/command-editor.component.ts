@@ -25,6 +25,7 @@ import {FormsModule} from "@angular/forms";
 import {ToastModule} from "primeng/toast";
 import {InputNumberModule} from "primeng/inputnumber";
 import {CheckboxModule} from "primeng/checkbox";
+import {InputTextModule} from "primeng/inputtext";
 
 @Component({
   selector: 'app-command-editor',
@@ -40,7 +41,8 @@ import {CheckboxModule} from "primeng/checkbox";
     NgForOf,
     InputNumberModule,
     CheckboxModule,
-    NgSwitchDefault
+    NgSwitchDefault,
+    InputTextModule
   ],
   templateUrl: './command-editor.component.html',
   styleUrl: './command-editor.component.css',

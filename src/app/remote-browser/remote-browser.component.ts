@@ -21,16 +21,16 @@ import {ConfirmationService, MenuItem, MessageService} from "primeng/api";
 import {TableModule} from "primeng/table";
 import {UploadedFilesComponent} from "../uploaded-files/uploaded-files.component";
 import {
-    Activity,
-    Config,
-    Context,
-    Entity,
-    EntityCommand,
-    EntityUsage,
-    OrphanEntity,
-    Profile,
-    Profiles,
-    Remote, RemoteData
+  Activity, ActivityEntityUsage,
+  Config,
+  Context,
+  Entity,
+  EntityCommand,
+  EntityUsage,
+  OrphanEntity,
+  Profile,
+  Profiles,
+  Remote, RemoteData
 } from "../interfaces";
 import {ServerService} from "../server.service";
 import {catchError, forkJoin, from, map, mergeMap, Observable, of} from "rxjs";
@@ -500,9 +500,13 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     })
   }
 
-  viewActivity(activityeditor: ActivityViewerComponent, activity: Activity)
+  viewActivity(activityeditor: ActivityViewerComponent, activity: Activity | ActivityEntityUsage)
   {
-    activityeditor.view(activity, false);
+    if ((activity as ActivityEntityUsage).activity_id && this.activities)
+      activityeditor.view(this.activities!
+        .find(item => item.entity_id === (activity as ActivityEntityUsage).activity_id)!, false);
+    else
+      activityeditor.view(activity, false);
     this.viewerVisible = true;
     this.cdr.detectChanges();
   }

@@ -24,8 +24,8 @@
 </ng-container>
 <p-messages severity="info">
   <ng-template pTemplate>
-    <div class="ml-2">Here you can review your activities and entities. When you click on an activity you can edit it (buttons and UI mapping, replace an entity by another...).<br>
-    If you want to replace entities in all activities, please select <b>Rename entities</b> option above</div>
+    <div class="ml-2">Review your activities and entities, when you click on an activity you can edit it (buttons and UI mapping, replace entities...).<br>
+    If you want to replace entities in all activities, rather select <b>Rename entities</b> option above</div>
   </ng-template>
 </p-messages>
 <ng-container *ngIf="context && !context.type">
@@ -70,7 +70,8 @@
     <p><b>Type : </b><p-chip [label]="entity.entity_type" [style]="getStyle(entity.entity_type)"></p-chip></p>
     <p *ngIf="entityUsages?.activity_entities!.length > 0"><b>Usages in activities : </b>
       <ng-container *ngFor="let activity_entity of entityUsages?.activity_entities">
-        <p-chip [label]="activity_entity.name" [style]="getStyle(activity_entity.name)"></p-chip>&nbsp;
+        <p-chip [label]="activity_entity.name"
+                [style]="getStyle(activity_entity.name)" (click)="viewActivity(activityeditor, activity_entity)" styleClass="link-element"></p-chip>&nbsp;
       </ng-container></p>
     <p *ngIf="entityUsages?.activity_sequences!.length > 0"><b>Usages in sequences : </b>
       <ng-container *ngFor="let sequence of entityUsages?.activity_sequences">

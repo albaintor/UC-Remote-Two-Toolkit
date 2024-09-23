@@ -5,13 +5,12 @@ import {
   Activity,
   Config,
   Context, Driver,
-  EntitiesUsage,
   Entity, EntityCommand, EntityFeature,
-  EntityUsage, Integration, Macro, Page, Profile, ProfileGroup,
+  Integration, Macro, Page, Profile, ProfileGroup,
   Profiles,
   Remote, RemoteMap, RemoteModels, RemoteRegistration, RemoteStatus, RemoteVersion
 } from "./interfaces";
-import {compileResults} from "@angular/compiler-cli/src/ngtsc/annotations/common";
+import { DomHandler } from 'primeng/dom';
 
 @Injectable({
   providedIn: 'root'
@@ -25,18 +24,21 @@ export class ServerService {
   private entities: Entity[] = [];
   private activities: Activity[] = [];
   private profiles: Profile[] = [];
-  private configCommands: EntityCommand[] = [];
-  private version: RemoteVersion | undefined;
   version$ = new Subject<RemoteVersion | undefined>();
   entities$ = new Subject<Entity[]>();
   activities$ = new Subject<Activity[]>();
   profiles$: Subject<Profile[]> = new Subject<Profile[]>();
   configCommands$ = new Subject<EntityCommand[]>();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+    // PrimeNG bug
+    DomHandler.getParents = function (element, parents = []) {
+      const parent = element.parentElement;
+      return parent ? this.getParents(parent, [...parents, parent]) : parents;
+    };
+  }
 
-  static getHttpOptions(remote: Remote, url: string) : {headers: HttpHeaders}
-  {
+  static getHttpOptions(remote: Remote, url: string): { headers: HttpHeaders } {
     let authKey;
     if (remote.api_key)
       authKey = `Bearer ${remote.api_key}`;
@@ -55,43 +57,38 @@ export class ServerService {
     };
   }
 
-  getCachedEntities(): Entity[]
-  {
+  getCachedEntities(): Entity[] {
     return this.entities;
   }
 
-  getCachedActivities(): Activity[]
-  {
+  getCachedActivities(): Activity[] {
     return this.activities;
   }
 
-  getCachedProfiles(): Profile[]
-  {
+  getCachedProfiles(): Profile[] {
     return this.profiles;
   }
 
-  setEntities(entities: Entity[]) : void {
+  setEntities(entities: Entity[]): void {
     this.entities = entities;
     this.entities$.next(entities);
   }
 
-  setActivities(activities: Activity[]) : void {
+  setActivities(activities: Activity[]): void {
     this.activities = activities;
     this.activities$.next(activities);
   }
 
   setConfigCommands(configCommands: EntityCommand[]) {
-    this.configCommands = configCommands;
     this.configCommands$.next(configCommands);
   }
 
-  setProfiles(profiles: Profile[]) : void {
+  setProfiles(profiles: Profile[]): void {
     this.profiles = profiles;
     this.profiles$.next(profiles);
   }
 
   setVersion(version: RemoteVersion | undefined) {
-    this.version = version;
     this.version$.next(version);
   }
 

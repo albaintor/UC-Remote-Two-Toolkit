@@ -16,19 +16,22 @@ import {getConfigFile, writeConfigFile} from "./config.js";
 import {program} from 'commander';
 import cors from 'cors';
 import process from 'process';
-// TODO Crash on windows, to be investigated
 import open from 'open';
 
-/*import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'url';
 try {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  try {
-    process.chdir(__dirname);
+  const filename = import.meta.url;
+  if (filename)
+  {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    try {
+      process.chdir(__dirname);
+    }
+    catch (err) {
+    }
   }
-  catch (err) {
-  }
-} catch (err2) {}*/
+} catch (err2) {}
 
 
 let LISTEN_PORT = "8000";

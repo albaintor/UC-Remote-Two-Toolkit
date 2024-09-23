@@ -11,7 +11,7 @@
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
-    "express": "~4.16.1",
+    "express": "^4.21.0",
     "got": "^14.2.1",
     "http-errors": "^2.0.0",
     "jszip": "^3.10.1",
@@ -24,6 +24,6 @@
     "rimraf": "^6.0.1"
   },
   "devDependencies": {
-    "esbuild": "^0.23.0"
+    "esbuild": "^0.23.1"
   }
 }

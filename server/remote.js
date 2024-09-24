@@ -481,6 +481,16 @@ export class Remote
     return JSON.parse(res.body);
   }
 
+  async executeCommand(entity_id, command)
+  {
+    const options = {
+      ...this.getOptions(),
+      json: command
+    }
+    const url = this.getURL() + `/api/entities/${entity_id}/command`;
+    let res = await got.put(url, options);
+    return JSON.parse(res.body);
+  }
 
   async powerRemote(value)
   {

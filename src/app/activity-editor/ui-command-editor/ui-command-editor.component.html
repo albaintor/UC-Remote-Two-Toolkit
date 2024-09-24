@@ -1,16 +1,16 @@
 <p-toast id="remoteCommand"></p-toast>
 <app-icon-selector (iconSelected)="iconSelected($event)"></app-icon-selector>
-<p-dialog header="Edit command" [(visible)]="visible" [style]="{width: '50vw', height: '40vw'}" appendTo="body"
+<p-dialog header="Edit command" [(visible)]="visible" [style]="{width: '65vw', height: '40vw'}" appendTo="body"
   [dismissableMask]="true">
   <div class="flex flex-wrap gap-3">
-    <!-- div class="flex align-items-center" *ngIf="!Helper.isEmptyItem(gridItem?.item)">
-      <p-button icon="pi pi-undo" label="TO REMOVE Revert changes"></p-button><br>
-    </div-->
     <div class="flex align-items-center" *ngIf="Helper.isEmptyItem(gridItem?.item)">
       <p-button severity="warning" icon="pi pi-file-plus" (onClick)="addCommand()" label="Create a command"></p-button><br>
     </div>
     <div class="flex align-items-center" *ngIf="!Helper.isEmptyItem(gridItem?.item)">
       <p-button severity="danger" icon="pi pi-trash" (onClick)="deleteCommand()" label="Delete this command"></p-button><br>
+    </div>
+    <div class="flex align-items-center" *ngIf="!Helper.isEmptyItem(gridItem?.item) && gridItem?.item?.command">
+      <p-button icon="pi pi-bolt" (onClick)="executeCommand(gridItem!.item!.command!)" label="Execute command"></p-button>
     </div>
   </div>
   <br><div class="flex flex-wrap gap-3" *ngIf="!Helper.isEmptyItem(gridItem?.item)">

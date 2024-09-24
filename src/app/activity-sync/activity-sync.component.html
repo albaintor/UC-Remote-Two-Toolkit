@@ -214,11 +214,17 @@
             </div>
             <span class="entity_id">{{selectedButton.button1?.long_press?.entity_id}}</span>
           </div>
+          <div class="flex align-items-center justify-content-center" *ngIf="!selectedButton.button1?.long_press?.entity_id">
+            <p-chip label="Unassigned" styleClass="unassigned_button"/>&nbsp;
+          </div>
           <div class="flex align-items-center justify-content-center" >
             <p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" [disabled]="true"/>
           </div>
           <div class="flex flex-column">
-            <div class="flex align-items-center justify-content-center" >
+            <div class="flex align-items-center justify-content-center" *ngIf="!selectedButton.button2?.long_press?.entity_id">
+              <p-chip label="Unassigned" styleClass="unassigned_button"/>&nbsp;
+            </div>
+            <div class="flex align-items-center justify-content-center" *ngIf="selectedButton.button2?.long_press?.entity_id">
               <app-icon [remote]="selectedRemote2" [icon]="getEntityIcon(selectedButton.button2?.long_press?.entity_id)" [size]="40"/>&nbsp;
               {{getEntityName(selectedButton.button2?.long_press?.entity_id)}} : {{selectedButton.button2?.long_press?.cmd_id}}
             </div>
@@ -234,11 +240,17 @@
             </div>
             <span class="entity_id">{{selectedButton.button1?.double_press?.entity_id}}</span>
           </div>
+          <div class="flex align-items-center justify-content-center" *ngIf="!selectedButton.button1?.double_press?.entity_id">
+            <p-chip label="Unassigned" styleClass="unassigned_button"/>&nbsp;
+          </div>
           <div class="flex align-items-center justify-content-center">
             <p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" [disabled]="true"/>
           </div>
           <div class="flex flex-column">
-            <div class="flex align-items-center justify-content-center">
+            <div class="flex align-items-center justify-content-center" *ngIf="!selectedButton.button2?.double_press?.entity_id">
+              <p-chip label="Unassigned" styleClass="unassigned_button"/>&nbsp;
+            </div>
+            <div class="flex align-items-center justify-content-center" *ngIf="selectedButton.button2?.double_press?.entity_id">
               <app-icon [remote]="selectedRemote2" [icon]="getEntityIcon(selectedButton.button2?.double_press?.entity_id)" [size]="40"/>&nbsp;
               {{getEntityName(selectedButton.button2?.double_press?.entity_id)}} : {{selectedButton.button2?.double_press?.cmd_id}}
             </div>

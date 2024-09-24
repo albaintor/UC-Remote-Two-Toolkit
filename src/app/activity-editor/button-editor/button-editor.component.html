@@ -1,5 +1,5 @@
 <p-toast id="remoteButton"></p-toast>
-<p-dialog [header]="'Edit button '+button?.button" [(visible)]="visible" [style]="{width: '50vw', height: '40vw'}" appendTo="body"
+<p-dialog [header]="'Edit button '+button?.button" [(visible)]="visible" [style]="{width: '65vw', height: '40vw'}" appendTo="body"
           [dismissableMask]="true" [modal]="true" [closeOnEscape]="true" [closable]="true" [responsive]="true">
   <div class="flex flex-wrap gap-3">
     <div class="flex align-items-center" *ngIf="button">
@@ -9,46 +9,61 @@
       <p-button severity="danger" icon="pi pi-trash" (onClick)="deleteCommand()" label="Delete this command"></p-button><br>
     </div>
   </div>
-  <div class="flex flex-wrap gap-3" *ngIf="button">
+  <div class="flex-grow-1 flex-column">
     <div class="flex align-items-center">
       <h2>Short press</h2>
     </div>
-    <div class="flex align-items-center" *ngIf="!button.short_press">
-      <p-button icon="pi pi-plus" (onClick)="assignShortPress()" label="Assign short press"></p-button><br>
-    </div>
-    <ng-container *ngIf="button.short_press">
-      <app-command-editor [remote]="remote" [activity]="activity" [command]="button.short_press" (updateItem)="updateCommand()"></app-command-editor>
-      <div class="flex align-items-center" *ngIf="button.short_press">
-        <p-button icon="pi pi-trash" (onClick)="removeElement(button, 'short_press')" label="Remove short press"></p-button><br>
+    <div class="flex flex-wrap gap-3" *ngIf="button">
+      <div class="flex align-items-center" *ngIf="!button.short_press">
+        <p-button icon="pi pi-plus" (onClick)="assignShortPress()" label="Assign short press"></p-button><br>
       </div>
-    </ng-container>
+      <ng-container *ngIf="button.short_press">
+        <app-command-editor [remote]="remote" [activity]="activity" [command]="button.short_press" (updateItem)="updateCommand()"></app-command-editor>
+        <div class="flex align-items-center">
+          <p-button icon="pi pi-trash" (onClick)="removeElement(button, 'short_press')" label="Remove short press"></p-button><br>
+        </div>
+        <div class="flex align-items-center">
+          <p-button icon="pi pi-bolt" (onClick)="executeCommand(button.short_press)" label="Execute command" severity="success"></p-button>
+        </div>
+      </ng-container>
+    </div>
   </div>
-  <div class="flex flex-wrap gap-3" *ngIf="button">
+  <div class="flex-grow-1 flex-column">
     <div class="flex align-items-center">
       <h2>Long press</h2>
     </div>
-    <div class="flex align-items-center" *ngIf="!button.long_press">
-      <p-button icon="pi pi-plus" (onClick)="assignLongPress()" label="Assign long press"></p-button><br>
-    </div>
-    <ng-container *ngIf="button.long_press">
-      <app-command-editor [remote]="remote" [activity]="activity" [command]="button.long_press" (updateItem)="updateCommand()"></app-command-editor>
-      <div class="flex align-items-center" *ngIf="button.long_press">
-        <p-button icon="pi pi-trash" (onClick)="removeElement(button, 'long_press')" label="Remove long press"></p-button><br>
+    <div class="flex flex-wrap gap-3" *ngIf="button">
+      <div class="flex align-items-center" *ngIf="!button.long_press">
+        <p-button icon="pi pi-plus" (onClick)="assignLongPress()" label="Assign long press"></p-button><br>
       </div>
-    </ng-container>
+      <ng-container *ngIf="button.long_press">
+        <app-command-editor [remote]="remote" [activity]="activity" [command]="button.long_press" (updateItem)="updateCommand()"></app-command-editor>
+        <div class="flex align-items-center">
+          <p-button icon="pi pi-trash" (onClick)="removeElement(button, 'long_press')" label="Remove long press"></p-button><br>
+        </div>
+        <div class="flex align-items-center">
+          <p-button icon="pi pi-bolt" (onClick)="executeCommand(button.long_press)" label="Execute command" severity="success"></p-button>
+        </div>
+      </ng-container>
+    </div>
   </div>
-  <div class="flex flex-wrap gap-3" *ngIf="button">
+  <div class="flex-grow-1 flex-column">
     <div class="flex align-items-center">
       <h2>Double press (not covered yet)</h2>
     </div>
-    <div class="flex align-items-center" *ngIf="!button.double_press">
-      <p-button [disabled]="true" icon="pi pi-plus" (onClick)="assignDoublePress()" label="Assign double press"></p-button><br>
-    </div>
-    <ng-container *ngIf="button.double_press">
-      <app-command-editor [remote]="remote" [activity]="activity" [command]="button.double_press" (updateItem)="updateCommand()"></app-command-editor>
-      <div class="flex align-items-center" *ngIf="button.long_press">
-        <p-button icon="pi pi-trash" (onClick)="removeElement(button, 'double_press')" label="Remove double_press press"></p-button><br>
+    <div class="flex flex-wrap gap-3" *ngIf="button">
+      <div class="flex align-items-center" *ngIf="!button.double_press">
+        <p-button [disabled]="true" icon="pi pi-plus" (onClick)="assignDoublePress()" label="Assign double press"></p-button><br>
       </div>
-    </ng-container>
+      <ng-container *ngIf="button.double_press">
+        <app-command-editor [remote]="remote" [activity]="activity" [command]="button.double_press" (updateItem)="updateCommand()"></app-command-editor>
+        <div class="flex align-items-center">
+          <p-button icon="pi pi-trash" (onClick)="removeElement(button, 'double_press')" label="Remove double_press press"></p-button><br>
+        </div>
+        <div class="flex align-items-center">
+          <p-button icon="pi pi-bolt" (onClick)="executeCommand(button.double_press)" label="Execute command" severity="success"></p-button>
+        </div>
+      </ng-container>
+    </div>
   </div>
 </p-dialog>

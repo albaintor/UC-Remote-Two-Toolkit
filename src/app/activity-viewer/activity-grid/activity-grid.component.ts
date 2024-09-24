@@ -67,7 +67,10 @@ export class ActivityGridComponent  implements AfterViewInit{
   getClass(): string {
     if (this.selectionMode && !this.selected) return 'grid-item-selection';
     if (this.selectionMode && this.selected) return 'grid-item-selected';
-    if (!this.editable) return 'grid-item-static';
+    if (!this.editable) {
+      if (Helper.isEmptyItem(this.item)) return 'grid-item-static';
+      return 'grid-item-clickable';
+    }
     return 'grid-item';
   }
 
@@ -78,7 +81,13 @@ export class ActivityGridComponent  implements AfterViewInit{
       this.itemClicked.emit(this)
       this.cdr.detectChanges();
       return;
-    } else if (!this.editable) return;
+    } else if (!this.editable)
+    {
+      if (Helper.isEmptyItem(this.item) || !this.item.command || typeof this.item.command === "string") return;
+      this.itemClicked.emit(this)
+      this.cdr.detectChanges();
+      return;
+    }
     this.itemClicked.emit(this)
     this.cdr.detectChanges();
   }

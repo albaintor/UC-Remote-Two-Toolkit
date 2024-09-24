@@ -355,9 +355,24 @@ export class ActivityViewerComponent implements AfterViewInit {
       this.cdr.detectChanges();
       return;
     }
+    if (!this.editMode)
+    {
+      if ($event.item.command && typeof $event.item.command != "string")
+        this.executeCommand($event.item.command);
+      return;
+    }
 
     this.cdr.detectChanges();
     this.commandeditor?.show();
+    this.cdr.detectChanges();
+  }
+
+  executeCommand(command: Command) {
+    if (!this.remote) return;
+    this.server.executeRemotetCommand(this.remote, command).subscribe(results => {
+      this.messageService.add({key: "activity", summary: "Command executed",
+        severity: "success", detail: `Results : ${results.code} : ${results.message}`});
+    });
     this.cdr.detectChanges();
   }
 
@@ -642,7 +657,14 @@ export class ActivityViewerComponent implements AfterViewInit {
   selectButton($event: MapElement) {
     if (!$event.tag) return;
     const buttonId = $event.tag;
-    this.selectedButton = this.activity?.options?.button_mapping?.find(button => button.button === this.buttonsMap[buttonId]);
+    const button = this.activity?.options?.button_mapping?.find(button => button.button === this.buttonsMap[buttonId]);
+    if (!this.editMode && button?.short_press)
+    {
+      this.executeCommand(button.short_press);
+      return;
+    }
+    this.selectedButton = button;
+
     this.cdr.detectChanges();
     this.buttonEditor?.show();
     this.cdr.detectChanges();

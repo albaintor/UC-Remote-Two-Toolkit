@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {
   Activity,
-  ButtonMapping,
+  ButtonMapping, Command,
   Remote,
 } from "../../interfaces";
 import {ButtonModule} from "primeng/button";
@@ -114,5 +114,14 @@ export class ButtonEditorComponent {
     delete object[element];
     this.cdr.detectChanges();
     this.buttonChanged.emit(this.button);
+  }
+
+  executeCommand(command: Command) {
+    if (!this.remote) return;
+    this.server.executeRemotetCommand(this.remote, command).subscribe(results => {
+      this.messageService.add({key: "remoteButton", summary: "Command executed",
+        severity: "success", detail: `Results : ${results.code} : ${results.message}`});
+    });
+    this.cdr.detectChanges();
   }
 }

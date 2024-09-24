@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import {forkJoin, from, map, mergeMap, Observable, of, Subject} from "rxjs";
 import {
-  Activity,
+  Activity, Command,
   Config,
   Context, Driver,
   Entity, EntityCommand, EntityFeature,
@@ -17,7 +17,7 @@ import { DomHandler } from 'primeng/dom';
 })
 export class ServerService {
 
-  API_KEY_NAME = "RC2Tool";
+  API_KEY_NAME = "UCWebTool";
   config$ = new Subject<Config>();
   remote$ = new Subject<Remote>();
   config: Config | undefined;
@@ -312,6 +312,20 @@ export class ServerService {
         return macros;
       }))
     }));
+  }
+
+  executeRemotetCommand(remote: Remote, command: Command): Observable<{code: string, message: string}>
+  {
+    const body: any = {
+      entity_id: command.entity_id,
+      cmd_id: command.cmd_id
+    }
+    if (command.params)
+      body.params = {...command.params};
+
+    return this.http.put<{code: string, message: string}>(`/api/remote/${remote.address}/entities/${command.entity_id}/command`, body).pipe(map(results => {
+      return results;
+    }))
   }
 
   registerRemote(remote: Remote): Observable<Remote>

@@ -33,6 +33,7 @@ export class IconComponent {
   protected readonly Helper = Helper;
   constructor(private cdr:ChangeDetectorRef) {}
 
+
   onClick($event: any) {
     this.click.emit($event);
   }
@@ -50,5 +51,13 @@ export class IconComponent {
       if (integration.icon) return integration.icon;
     }
     return undefined;
+  }
+
+  replaceImage($event: ErrorEvent) {
+    console.log($event);
+    const image:HTMLImageElement = <HTMLImageElement>$event.target;
+    image.src = 'assets/icons/media_player.svg';
+    image.width = image.width * 60/100;
+    image.height = image.height * 60/100;
   }
 }

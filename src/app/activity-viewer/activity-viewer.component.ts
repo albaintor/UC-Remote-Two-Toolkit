@@ -116,7 +116,6 @@ export class ActivityViewerComponent implements AfterViewInit {
   buttonsMap:{ [id: string]: string } = {};
   reversedButtonMap:{ [id: string]: string } = {};
   public Command!: Command;
-  @ViewChild("buttonpanel", {static: false}) buttonpanel: OverlayPanel | undefined;
   @ViewChild("commandeditor", {static: false}) commandeditor: UiCommandEditorComponent | undefined;
   @ViewChild("input_file_page", {static: false}) input_file_page: ElementRef | undefined;
   @ViewChildren(ActivityGridComponent) gridButtons:QueryList<ActivityGridComponent> | undefined;
@@ -642,7 +641,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     if (!buttonId) return;
     this.mouseOverButtonName = this.buttonsMap[buttonId];
     this.mouseoverButton = this.activity?.options?.button_mapping?.find(button => button.button === this.mouseOverButtonName);
-    this.buttonpanel?.show($event.event, $event.event.target);
+    // this.buttonpanel?.show($event.event, $event.event.target);
     // @ts-ignore
     this.buttonPanelStyle = { width: '450px',
       'left': $event.event.pageX +'px',

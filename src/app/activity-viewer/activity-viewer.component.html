@@ -1,33 +1,4 @@
 <p-toast key="activity"></p-toast>
-<p-overlayPanel id="buttonpanel" #buttonpanel [style]="buttonPanelStyle" [showCloseIcon]="true">
-  <ng-template pTemplate="content">
-    <h3>{{mouseOverButtonName!}}</h3>
-    <ng-container *ngIf="mouseoverButton && mouseoverButton.short_press">
-      <br>Short press :
-      <p-chip [label]="getEntityName(mouseoverButton.short_press.entity_id)"
-              [style]="getStyle(getEntityName(mouseoverButton.short_press.entity_id))"></p-chip>&nbsp;
-      <p-chip [label]="mouseoverButton.short_press.cmd_id" styleClass="chip-command"
-              [style]="getStyle(mouseoverButton.short_press.cmd_id)"></p-chip>
-      <ng-container *ngIf="mouseoverButton.short_press.params">{{getParams(mouseoverButton.short_press)}}</ng-container>
-    </ng-container>
-    <ng-container *ngIf="mouseoverButton && mouseoverButton.long_press">
-      <br>Long press :
-      <p-chip [label]="getEntityName(mouseoverButton.long_press.entity_id)"
-              [style]="getStyle(getEntityName(mouseoverButton.long_press.entity_id))"></p-chip>&nbsp;
-      <p-chip [label]="mouseoverButton.long_press.cmd_id" styleClass="chip-command"
-              [style]="getStyle(mouseoverButton.long_press.cmd_id)"></p-chip>
-      <ng-container *ngIf="mouseoverButton.long_press.params">{{getParams(mouseoverButton.long_press)}}</ng-container>
-    </ng-container>
-    <ng-container *ngIf="mouseoverButton && mouseoverButton.double_press">
-      <br>Double press :
-      <p-chip [label]="getEntityName(mouseoverButton.double_press.entity_id)"
-              [style]="getStyle(getEntityName(mouseoverButton.double_press.entity_id))"></p-chip>&nbsp;
-      <p-chip [label]="mouseoverButton.double_press.cmd_id" styleClass="chip-command"
-              [style]="getStyle(mouseoverButton.double_press.cmd_id)"></p-chip>
-      <ng-container *ngIf="mouseoverButton.double_press.params">{{getParams(mouseoverButton.double_press)}}</ng-container>
-    </ng-container>
-  </ng-template>
-</p-overlayPanel>
 <app-ui-command-editor #commandeditor (updateItem)="updateGridItem($event)"
   (addItem)="addGridItem($event)" (deleteItem)="deleteGridItem($event)"
   [remote]="remote" [activity]="activity" [gridItem]="gridItem" [gridCommands]="gridCommands" [grid]="currentPage?.grid"></app-ui-command-editor>
@@ -128,6 +99,35 @@
           <area target="" alt="Play Pause" title="Play Pause" href="#" data-tag="playpause" coords="201,649,292,717" shape="rect">
         </ng-template>
       </app-image-map>
+    </div>
+  </div>
+  <div class="flex align-items-start justify-content-center" style="width: 400px">
+    <div class="flex-grow-1 flex-column">
+    <h3>{{mouseOverButtonName!}}</h3>
+    <ng-container *ngIf="mouseoverButton && mouseoverButton.short_press">
+      <br><b>Short press</b> :
+      <p-chip [label]="getEntityName(mouseoverButton.short_press.entity_id)"
+              [style]="getStyle(getEntityName(mouseoverButton.short_press.entity_id))"></p-chip>&nbsp;
+      <p-chip [label]="mouseoverButton.short_press.cmd_id" styleClass="chip-command"
+              [style]="getStyle(mouseoverButton.short_press.cmd_id)"></p-chip>
+      <ng-container *ngIf="mouseoverButton.short_press.params">{{getParams(mouseoverButton.short_press)}}</ng-container>
+    </ng-container>
+    <ng-container *ngIf="mouseoverButton && mouseoverButton.long_press">
+      <br><b>Long press</b> :
+      <p-chip [label]="getEntityName(mouseoverButton.long_press.entity_id)"
+              [style]="getStyle(getEntityName(mouseoverButton.long_press.entity_id))"></p-chip>&nbsp;
+      <p-chip [label]="mouseoverButton.long_press.cmd_id" styleClass="chip-command"
+              [style]="getStyle(mouseoverButton.long_press.cmd_id)"></p-chip>
+      <ng-container *ngIf="mouseoverButton.long_press.params">{{getParams(mouseoverButton.long_press)}}</ng-container>
+    </ng-container>
+    <ng-container *ngIf="mouseoverButton && mouseoverButton.double_press">
+      <br><b>Double press</b> :
+      <p-chip [label]="getEntityName(mouseoverButton.double_press.entity_id)"
+              [style]="getStyle(getEntityName(mouseoverButton.double_press.entity_id))"></p-chip>&nbsp;
+      <p-chip [label]="mouseoverButton.double_press.cmd_id" styleClass="chip-command"
+              [style]="getStyle(mouseoverButton.double_press.cmd_id)"></p-chip>
+      <ng-container *ngIf="mouseoverButton.double_press.params">{{getParams(mouseoverButton.double_press)}}</ng-container>
+    </ng-container>
     </div>
   </div>
   <div class="flex align-items-start justify-content-center">

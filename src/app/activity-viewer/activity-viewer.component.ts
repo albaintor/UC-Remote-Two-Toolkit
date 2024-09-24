@@ -42,6 +42,7 @@ import {DividerModule} from "primeng/divider";
 import {ToolbarModule} from "primeng/toolbar";
 import {DockModule} from "primeng/dock";
 import {ActivityPageListComponent} from "./activity-page-list/activity-page-list.component";
+import {TagModule} from "primeng/tag";
 
 enum DataFormat {
   None,
@@ -80,7 +81,8 @@ export class AsPipe implements PipeTransform {
     DividerModule,
     ToolbarModule,
     DockModule,
-    ActivityPageListComponent
+    ActivityPageListComponent,
+    TagModule
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',

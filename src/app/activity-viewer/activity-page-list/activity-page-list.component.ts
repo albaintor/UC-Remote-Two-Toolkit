@@ -3,7 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
-  Input,
+  Input, OnInit,
   Output,
   ViewEncapsulation
 } from '@angular/core';
@@ -15,8 +15,15 @@ import {NgIf} from "@angular/common";
 import {OrderListModule} from "primeng/orderlist";
 import {MessageService, PrimeTemplate} from "primeng/api";
 import {TooltipModule} from "primeng/tooltip";
-import {Activity, Remote, UIPage} from "../../interfaces";
+import {Activity, Remote, ScreenLayout, UIPage} from "../../interfaces";
 import {ServerService} from "../../server.service";
+
+export enum Operation {
+  ReorderPages,
+  AddPage,
+  DeletePage,
+  UpdatePage
+}
 
 @Component({
   selector: 'app-activity-page-list',
@@ -36,33 +43,57 @@ import {ServerService} from "../../server.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class ActivityPageListComponent {
+export class ActivityPageListComponent implements OnInit {
+  remote: Remote | undefined;
+  private screenLayout: ScreenLayout | undefined;
+  @Input("remote") set _remote(value: Remote | undefined) {
+    this.remote = value;
+    if (value) {
+      this.server.getConfigScreenLayout(value).subscribe(screenLayout => {
+        this.screenLayout = screenLayout;
+        this.cdr.detectChanges();
+      })
+    }
+  }
   @Input() activity: Activity | undefined;
   @Input() editable = true;
-  @Output() onReorder = new EventEmitter<{activity:Activity, page:UIPage}>();
+  @Output() onReorder = new EventEmitter<{activity:Activity, page:UIPage, operation: Operation}>();
   @Output() onSelectPage = new EventEmitter<{activity:Activity, page:UIPage}>();
 
-    protected readonly Helper = Helper;
+  protected readonly Helper = Helper;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) { }
+
+  ngOnInit(): void {
+    if (this.remote)
+    this.server.getConfigScreenLayout(this.remote).subscribe(screenLayout => {
+      this.screenLayout = screenLayout;
+      this.cdr.detectChanges();
+    })
+  }
 
   addPage($event: MouseEvent) {
     if (!this.activity) return;
     if (!this.activity.options) this.activity.options = {};
     if (!this.activity.options.user_interface) this.activity.options.user_interface = { pages: []};
     const newPage: UIPage = {name: "New page", items: [], grid: {width: 4, height: 6}};
+    if (this.screenLayout)
+    {
+      newPage.grid.width = this.screenLayout.grid.default.width;
+      newPage.grid.height = this.screenLayout.grid.default.height;
+    }
     this.activity.options.user_interface.pages?.push(newPage);
     const activity = this.activity;
     this.activity = undefined;
     this.cdr.detectChanges();
     this.activity = activity;
     this.cdr.detectChanges();
-    this.onReorder.emit({activity: this.activity!, page: newPage});
+    this.onReorder.emit({activity: this.activity!, page: newPage, operation: Operation.AddPage});
   }
 
   updatePages($event: UIPage) {
     console.log("Reorder pages", $event);
-    this.onReorder.emit({activity: this.activity!, page: $event});
+    this.onReorder.emit({activity: this.activity!, page: $event, operation: Operation.UpdatePage});
   }
 
   selectPage(page: UIPage) {
@@ -71,6 +102,6 @@ export class ActivityPageListComponent {
 
   deletePage(page: UIPage) {
     this.activity?.options?.user_interface?.pages?.splice(this.activity?.options?.user_interface?.pages.indexOf(page), 1);
-    this.onReorder.emit({activity: this.activity!, page: page});
+    this.onReorder.emit({activity: this.activity!, page: page, operation: Operation.DeletePage});
   }
 }

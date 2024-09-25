@@ -18,7 +18,7 @@ import {
   Command,
   Remote,
   Entity,
-  EntityCommand, RemoteVersion, RemoteModels, RemoteModel, RemoteData
+  EntityCommand, RemoteVersion, RemoteModels, RemoteModel, RemoteData, ScreenLayout
 } from "../interfaces";
 import {DialogModule} from "primeng/dialog";
 import {ToastModule} from "primeng/toast";
@@ -41,8 +41,10 @@ import {ImageMapComponent, MapElement} from "../image-map/image-map.component";
 import {DividerModule} from "primeng/divider";
 import {ToolbarModule} from "primeng/toolbar";
 import {DockModule} from "primeng/dock";
-import {ActivityPageListComponent} from "./activity-page-list/activity-page-list.component";
+import {ActivityPageListComponent, Operation} from "./activity-page-list/activity-page-list.component";
 import {TagModule} from "primeng/tag";
+import {InputNumber} from "primeng/inputnumber";
+import {InputTextModule} from "primeng/inputtext";
 
 enum DataFormat {
   None,
@@ -82,7 +84,8 @@ export class AsPipe implements PipeTransform {
     ToolbarModule,
     DockModule,
     ActivityPageListComponent,
-    TagModule
+    TagModule,
+    InputTextModule
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',
@@ -94,6 +97,8 @@ export class ActivityViewerComponent implements AfterViewInit {
   currentPage: UIPage | undefined;
   configEntityCommands: EntityCommand[] | undefined;
   mappedButtons: string[] | undefined;
+  gridSizeMin: { width: number; height: number } = {width: 1, height: 1};
+  screenLayout: ScreenLayout | undefined;
   @Input('activity') set _activity(value: Activity | undefined) {
     this.activity = value;
     if (value) {
@@ -106,11 +111,17 @@ export class ActivityViewerComponent implements AfterViewInit {
   remote: Remote | undefined;
   @Input("remote") set _remote(value: Remote | undefined) {
     this.remote = value;
-    if (value)
+    if (value) {
       this.server.getRemoteVersion(value).subscribe(version => {
         this.version = version;
         this.cdr.detectChanges();
+      });
+      this.server.getConfigScreenLayout(value).subscribe(screenLayout => {
+        this.screenLayout = screenLayout;
+        console.debug("Screen layout", this.screenLayout);
+        this.cdr.detectChanges();
       })
+    }
   }
   @Input() editMode = true;
   @Output() onChange: EventEmitter<void> = new EventEmitter();
@@ -164,7 +175,12 @@ export class ActivityViewerComponent implements AfterViewInit {
       this.server.getConfigEntityCommands(this.remote).subscribe(entityCommands => {
         this.configEntityCommands = entityCommands;
         this.cdr.detectChanges();
-      })
+      });
+      this.server.getConfigScreenLayout(this.remote).subscribe(screenLayout => {
+        this.screenLayout = screenLayout;
+        console.debug("Screen layout", this.screenLayout);
+        this.cdr.detectChanges();
+      });
     }
     this.server.getRemoteModels().subscribe(remoteModels => {
       this.remoteModels = remoteModels;
@@ -205,6 +221,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.firstPage = 0;
     console.log("View activity", this.activity);
     this.updateButtonsGrid();
+    this.updateCurrentPage();
   }
 
   updateButtons()
@@ -221,6 +238,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   {
     this.gridCommands = this.getGridItems();
     this.updateButtons();
+    this.updateCurrentPage();
     this.cdr.detectChanges();
   }
 
@@ -235,6 +253,12 @@ export class ActivityViewerComponent implements AfterViewInit {
     if ((command as any)?.params)
       return JSON.stringify((command as any)?.params);
     return "";
+  }
+
+  updateCurrentPage()
+  {
+    this.gridSizeMin = Helper.getGridMinSize(this.gridCommands);
+    console.debug("Minimal grid size", this.gridSizeMin);
   }
 
   getGridItems(): ActivityPageCommand[]
@@ -285,16 +309,25 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.firstPage = $event.page as number;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[$event.page!];
     this.updateButtonsGrid();
+    this.updateCurrentPage();
     console.log("Page changed", this.gridCommands);
     this.cdr.detectChanges();
   }
 
-  onReorderPages($event: any)
+  onReorderPages($event:  {activity: Activity, page: UIPage, operation: Operation})
   {
     this.currentPage = this.activity?.options?.user_interface?.pages?.[0];
     this.firstPage = 0;
+    if ($event.operation == Operation.AddPage)
+    {
+      this.currentPage = this.activity?.options?.user_interface?.pages?.[this.activity?.options?.user_interface?.pages?.length-1];
+      if (this.activity?.options?.user_interface?.pages?.length)
+        this.firstPage = this.activity.options.user_interface.pages.length-1;
+    }
     this.updateButtonsGrid();
+    this.updateCurrentPage();
     this.onChange.emit();
+
     this.cdr.detectChanges();
   }
 

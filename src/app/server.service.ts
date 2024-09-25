@@ -8,7 +8,7 @@ import {
   Entity, EntityCommand, EntityFeature,
   Integration, Macro, Page, Profile, ProfileGroup,
   Profiles,
-  Remote, RemoteMap, RemoteModels, RemoteRegistration, RemoteStatus, RemoteVersion
+  Remote, RemoteMap, RemoteModels, RemoteRegistration, RemoteStatus, RemoteVersion, ScreenLayout
 } from "./interfaces";
 import { DomHandler } from 'primeng/dom';
 
@@ -155,6 +155,13 @@ export class ServerService {
   {
     return this.http.get<EntityCommand[]>(`/api/remote/${remote.address}/cfg/entity/commands`).pipe(map(results => {
       this.configCommands$.next(results);
+      return results;
+    }))
+  }
+
+  getConfigScreenLayout(remote: Remote): Observable<ScreenLayout>
+  {
+    return this.http.get<ScreenLayout>(`/api/remote/${remote.address}/cfg/device/screen_layout`).pipe(map(results => {
       return results;
     }))
   }

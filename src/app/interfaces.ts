@@ -417,6 +417,24 @@ export interface Integration
   driver_state?: string
 }
 
+export interface ScreenLayout
+{
+  grid: {
+    default: {
+      width: number;
+      height: number;
+    }
+    min: {
+      width: number;
+      height: number;
+    }
+    max: {
+      width: number;
+      height: number;
+    }
+  }
+}
+
 export interface Driver
 {
   driver_id: string

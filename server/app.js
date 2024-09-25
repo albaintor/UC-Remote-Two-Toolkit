@@ -667,6 +667,24 @@ app.get('/api/remote/:address/cfg/entity/commands', async (req, res, next) => {
   }
 })
 
+app.get('/api/remote/:address/cfg/device/screen_layout', async (req, res, next) => {
+  const address = req.params.address;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getConfigScreenLayout());
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
 
 app.get('/api/remote/:address/macros', async (req, res, next) => {
   const address = req.params.address;

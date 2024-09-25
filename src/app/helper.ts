@@ -354,21 +354,34 @@ export class Helper
     return true;
   }
 
+  static getGridMinSize(grid: (ActivityPageCommand | null)[]): {width: number, height: number}
+  {
+    const gridSize = {width: 1, height: 1};
+    grid.forEach(item => {
+      if (!item || Helper.isEmptyItem(item)) return;
+      if (item.location.x + item.size.width > gridSize.width)
+        gridSize.width = item.location.x + item.size.width;
+      if (item.location.y + item.size.height > gridSize.height)
+        gridSize.height = item.location.y + item.size.height;
+    });
+    return gridSize;
+  }
+
   static getItemPosition(grid: (ActivityPageCommand | null)[], index: number, gridWidth: number, gridHeight: number): {x: number, y: number, width: number, height: number} | null
   {
+    if (gridWidth <= 0 || gridHeight <= 0 || grid.length == 0) return null;
     const matrix: boolean[][] = new Array(gridHeight)
       .fill(false)
       .map(() =>
         new Array(gridWidth).fill(false)
       );
-    let x= 0, y = 0;
     for (let i=0; i < grid.length; )
     {
       let width = 1, height = 1;
-      if (grid[i] && grid[i]?.size)
+      if (grid?.[i]?.size)
       {
-        width = grid[i]!.size.width!;
-        height = grid[i]!.size.height!;
+        width = grid[i]?.size.width ? grid[i]!.size.width : 1;
+        height = grid[i]?.size.height ? grid[i]!.size.height : 1;
       }
       for (let row =0; row < matrix.length; row++)
       {

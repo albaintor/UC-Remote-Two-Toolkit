@@ -388,6 +388,21 @@ export class Remote
     return JSON.parse(res.body);
   }
 
+  async getConfigScreenLayout()
+  {
+    const limit = 100;
+    const options = {
+      ...this.getOptions(),
+      searchParams: {
+        limit,
+        page: 1
+      }
+    }
+    const url = this.getURL() + '/api/cfg/device/screen_layout';
+    let res = await got.get(url, options);
+    return JSON.parse(res.body);
+  }
+
   async getMacros()
   {
     const options = this.getOptions();

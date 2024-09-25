@@ -42,3 +42,8 @@
 svg * {
   transition: all 2s;
 }
+
+.grid-size input
+{
+  width: 35px !important;
+}

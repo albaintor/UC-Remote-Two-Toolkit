@@ -188,7 +188,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       this.server.setEntities(this.entities);
       this.server.setActivities(this.activities);
       this.remoteOperations = this.buildData();
-      this.cdr.detectChanges();
+      // this.cdr.detectChanges();
     }
     this.server.getRemoteModels().subscribe(remoteModels => {
       this.remoteModels = remoteModels;

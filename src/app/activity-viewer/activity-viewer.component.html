@@ -183,7 +183,34 @@
   <ng-container *ngIf="currentPage">
   <br>
     <div class="flex-grow-1 flex-column">
-  <p-paginator (onPageChange)="onPageChange($event)" [first]="firstPage" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
+      <div class="flex align-items-center justify-content-center">
+        <div class="flex-none" *ngIf="editMode">
+          <div class="flex-column">
+            <div class="flex align-items-center justify-content-center">
+              <b>Page name</b>
+            </div>
+            <input type="text" pInputText [(ngModel)]="currentPage.name" placeholder="Page name" style="min-width: 150px"/>
+          </div>
+        </div>
+        <div class="flex-grow-1">
+          <p-paginator (onPageChange)="onPageChange($event)" [first]="firstPage" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
+        </div>
+        <div class="flex-none" *ngIf="editMode">
+          <div class="flex-column">
+            <div class="flex align-items-center justify-content-center">
+              Grid size
+            </div>
+            <div class="flex align-items-center">
+              <p-inputNumber [(ngModel)]="currentPage.grid.width" [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal" [step]="1" pTooltip="Grid width"
+                             decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus" (ngModelChange)="updateButtonsGrid()"
+                             decrementButtonIcon="pi pi-minus" [min]="gridSizeMin.width" [max]="screenLayout?.grid!.max.width" styleClass="grid-size"></p-inputNumber>
+              <p-inputNumber [(ngModel)]="currentPage.grid.height" [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal" [step]="1" pTooltip="Grid height"
+                             decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus" (ngModelChange)="updateButtonsGrid()"
+                             decrementButtonIcon="pi pi-minus" [min]="gridSizeMin.height" [max]="screenLayout?.grid!.max.height" styleClass="grid-size"></p-inputNumber>
+            </div>
+          </div>
+          </div>
+      </div>
   <div class="grid-container" *ngIf="toggleGrid"
        [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width), 'width': gridPixelWidth+'px', 'height': gridPixelHeight+'px'}">
     <grid-button [editable]="editMode" *ngFor="let item of gridCommands; let index=index" [source]="gridItemSource" [item]="item" [grid]="currentPage.grid" [style]="getGridItemSize(item)"
@@ -216,7 +243,7 @@
     </div>
   </ng-container>
   <ng-container *ngIf="editMode">
-    <app-activity-page-list [activity]="activity" [editable]="editMode" (onReorder)="onReorderPages($event)" (onSelectPage)="selectPage($event)"/>
+    <app-activity-page-list [remote]="remote" [activity]="activity" [editable]="editMode" (onReorder)="onReorderPages($event)" (onSelectPage)="selectPage($event)"/>
   </ng-container>
 </div>
 <app-button-editor [activity]="activity" [remote]="remote" [button]="selectedButton" (buttonChanged)="buttonChanged($event)"></app-button-editor>

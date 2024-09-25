@@ -247,6 +247,16 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.updateButtonsGrid();
   }
 
+  getCommandName(command: Command | undefined | string): string
+  {
+    if (!command) return "";
+    if (typeof command === 'string') return command;
+    if (!this.configEntityCommands) return command.cmd_id;
+    const config = this.configEntityCommands.find(item => command.cmd_id === item.id);
+    if (!config) return command.cmd_id;
+    return Helper.getEntityName(config);
+  }
+
   getParamValue(command: Command | undefined | string, param: string): string
   {
     if (!command || typeof command === 'string') return "";
@@ -258,7 +268,6 @@ export class ActivityViewerComponent implements AfterViewInit {
     if (!command || typeof command === 'string') return undefined;
     if (!this.configEntityCommands) return undefined;
     const config = this.configEntityCommands.find(item => command.cmd_id === item.id);
-    console.debug("Get Param", command, param, this.configEntityCommands, config);
     if (!config) return undefined;
     return config.params?.find(item => item.param === param);
   }
@@ -274,7 +283,6 @@ export class ActivityViewerComponent implements AfterViewInit {
   updateCurrentPage()
   {
     this.gridSizeMin = Helper.getGridMinSize(this.gridCommands);
-    console.debug("Minimal grid size", this.gridSizeMin);
   }
 
   getGridItems(): ActivityPageCommand[]

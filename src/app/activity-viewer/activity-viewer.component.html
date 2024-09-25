@@ -110,9 +110,11 @@
       <div class="flex align-items-start gap-1">
         <p-tag severity="success" value="Short press"/>
         <p-chip [label]="getEntityName(mouseoverButton.short_press.entity_id)"
-                [style]="getStyle(getEntityName(mouseoverButton.short_press.entity_id))"></p-chip>&nbsp;
-        <p-chip [label]="mouseoverButton.short_press.cmd_id" styleClass="chip-command"
-                [style]="getStyle(mouseoverButton.short_press.cmd_id)"></p-chip>
+                [style]="getStyle(getEntityName(mouseoverButton.short_press.entity_id))"
+                [pTooltip]="mouseoverButton.short_press.entity_id"></p-chip>&nbsp;
+        <p-chip [label]="getCommandName(mouseoverButton.short_press)" styleClass="chip-command"
+                [style]="getStyle(mouseoverButton.short_press.cmd_id)"
+                [pTooltip]="mouseoverButton.short_press.cmd_id"></p-chip>
       <ng-container *ngIf="mouseoverButton.short_press.params">
         <ng-container *ngFor="let param of getParams(mouseoverButton.short_press)">
           <ng-container *ngIf="getParam(mouseoverButton.short_press, param)">
@@ -127,9 +129,12 @@
       <div class="flex align-items-start gap-1">
         <p-tag severity="warning" value="Long press"/>
         <p-chip [label]="getEntityName(mouseoverButton.long_press.entity_id)"
-                [style]="getStyle(getEntityName(mouseoverButton.long_press.entity_id))"></p-chip>&nbsp;
-        <p-chip [label]="mouseoverButton.long_press.cmd_id" styleClass="chip-command"
-                [style]="getStyle(mouseoverButton.long_press.cmd_id)"></p-chip>
+                [style]="getStyle(getEntityName(mouseoverButton.long_press.entity_id))"
+                [pTooltip]="mouseoverButton.long_press.entity_id"></p-chip>&nbsp;
+        <p-chip [label]="getCommandName(mouseoverButton.long_press)" styleClass="chip-command"
+                [style]="getStyle(mouseoverButton.long_press.cmd_id)"
+                [pTooltip]="mouseoverButton.long_press.cmd_id"></p-chip>
+        {{mouseoverButton.long_press.cmd_id}}
         <ng-container *ngIf="mouseoverButton.long_press.params">
           <ng-container *ngFor="let param of getParams(mouseoverButton.long_press)">
             <ng-container *ngIf="getParam(mouseoverButton.long_press, param)">
@@ -144,9 +149,11 @@
       <div class="flex align-items-start gap-1">
         <p-tag severity="danger" value="Double press"/>
         <p-chip [label]="getEntityName(mouseoverButton.double_press.entity_id)"
-                [style]="getStyle(getEntityName(mouseoverButton.double_press.entity_id))"></p-chip>&nbsp;
-        <p-chip [label]="mouseoverButton.double_press.cmd_id" styleClass="chip-command"
-                [style]="getStyle(mouseoverButton.double_press.cmd_id)"></p-chip>
+                [style]="getStyle(getEntityName(mouseoverButton.double_press.entity_id))"
+                [pTooltip]="mouseoverButton.double_press.entity_id"></p-chip>&nbsp;
+        <p-chip [label]="getCommandName(mouseoverButton.double_press)" styleClass="chip-command"
+                [style]="getStyle(mouseoverButton.double_press.cmd_id)"
+                [pTooltip]="mouseoverButton.double_press.cmd_id"></p-chip>
         <ng-container *ngIf="mouseoverButton.double_press.params">
           <ng-container *ngFor="let param of getParams(mouseoverButton.double_press)">
             <ng-container *ngIf="getParam(mouseoverButton.double_press, param)">
@@ -250,13 +257,15 @@
       <ng-container *ngIf="item && item.command != null">
         <p-chip [label]="getEntityName((item.command | as : Command)?.entity_id!)"
                 [style]="getStyle(getEntityName((item.command | as : Command)?.entity_id!))"></p-chip><br><br>
-        <p-chip [label]="(item.command | as : Command)?.cmd_id" styleClass="chip-command"
+        <p-chip [label]="getCommandName(item.command)" styleClass="chip-command"
                 [style]="getStyle((item.command | as : Command)?.cmd_id!)"></p-chip>
       </ng-container>
-      <span *ngIf="item?.media_player_id != null" style="text-align: center">
+      <span *ngIf="item?.media_player_id" style="text-align: center">
         <p-chip [label]="getEntityName(item?.media_player_id!)"
-                [style]="getStyle(getEntityName(item?.media_player_id!))"></p-chip><br><br>
-        <img src="/assets/icons/play-button.png" alt="Media player" width="100px" height="100px"><br>
+                [style]="getStyle(getEntityName(item?.media_player_id!))"></p-chip>
+        <div style="position: relative; width: 100%;height: 100%">
+          <img src="/assets/icons/media_player.svg" alt="Media player" class="media_player_icon">
+        </div>
       </span>
       <ng-container *ngFor="let param of getParams(item?.command)">
         <ng-container *ngIf="getParam(item?.command, param)">

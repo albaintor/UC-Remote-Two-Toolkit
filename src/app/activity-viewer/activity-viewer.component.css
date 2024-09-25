@@ -47,3 +47,7 @@ svg * {
 {
   width: 35px !important;
 }
+
+.toolbar-included-entities {
+  padding: 0.1rem;
+}

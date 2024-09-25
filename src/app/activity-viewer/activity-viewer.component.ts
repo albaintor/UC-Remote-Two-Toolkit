@@ -18,7 +18,7 @@ import {
   Command,
   Remote,
   Entity,
-  EntityCommand, RemoteVersion, RemoteModels, RemoteModel, RemoteData, ScreenLayout
+  EntityCommand, RemoteVersion, RemoteModels, RemoteModel, RemoteData, ScreenLayout, EntityCommandParameter
 } from "../interfaces";
 import {DialogModule} from "primeng/dialog";
 import {ToastModule} from "primeng/toast";
@@ -247,12 +247,28 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.updateButtonsGrid();
   }
 
-  getParams(command: Command | undefined | string): string
+  getParamValue(command: Command | undefined | string, param: string): string
   {
-    if (!command) return "";
+    if (!command || typeof command === 'string') return "";
+    return command.params?.[param];
+  }
+
+  getParam(command: Command | undefined | string, param: string): EntityCommandParameter | undefined
+  {
+    if (!command || typeof command === 'string') return undefined;
+    if (!this.configEntityCommands) return undefined;
+    const config = this.configEntityCommands.find(item => command.cmd_id === item.id);
+    console.debug("Get Param", command, param, this.configEntityCommands, config);
+    if (!config) return undefined;
+    return config.params?.find(item => item.param === param);
+  }
+
+  getParams(command: Command | undefined | string): string[]
+  {
+    if (!command) return [];
     if ((command as any)?.params)
-      return JSON.stringify((command as any)?.params);
-    return "";
+      return Object.keys((command as any)?.params);
+    return [];
   }
 
   updateCurrentPage()

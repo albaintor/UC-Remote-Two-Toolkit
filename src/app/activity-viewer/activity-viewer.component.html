@@ -34,7 +34,7 @@
   </div>
 </div>
 </p-toolbar>
-<p-toolbar><h3>Included entities</h3>
+<p-toolbar styleClass="toolbar-included-entities"><h3>Included entities</h3>
   <p-chip *ngFor="let entity of activity?.options?.included_entities" [label]="Helper.getEntityName(entity)"
           [style]="getStyle(Helper.getEntityName(entity))" [pTooltip]="entity.entity_id"></p-chip>&nbsp;
 </p-toolbar>
@@ -113,7 +113,14 @@
                 [style]="getStyle(getEntityName(mouseoverButton.short_press.entity_id))"></p-chip>&nbsp;
         <p-chip [label]="mouseoverButton.short_press.cmd_id" styleClass="chip-command"
                 [style]="getStyle(mouseoverButton.short_press.cmd_id)"></p-chip>
-      <ng-container *ngIf="mouseoverButton.short_press.params">{{getParams(mouseoverButton.short_press)}}</ng-container>
+      <ng-container *ngIf="mouseoverButton.short_press.params">
+        <ng-container *ngFor="let param of getParams(mouseoverButton.short_press)">
+          <ng-container *ngIf="getParam(mouseoverButton.short_press, param)">
+            {{Helper.getEntityName(getParam(mouseoverButton.short_press, param))}} :
+            {{getParamValue(mouseoverButton.short_press, param)}}
+          </ng-container>
+        </ng-container>
+      </ng-container>
       </div>
     </ng-container>
     <ng-container *ngIf="mouseoverButton && mouseoverButton.long_press">
@@ -123,7 +130,14 @@
                 [style]="getStyle(getEntityName(mouseoverButton.long_press.entity_id))"></p-chip>&nbsp;
         <p-chip [label]="mouseoverButton.long_press.cmd_id" styleClass="chip-command"
                 [style]="getStyle(mouseoverButton.long_press.cmd_id)"></p-chip>
-        <ng-container *ngIf="mouseoverButton.long_press.params">{{getParams(mouseoverButton.long_press)}}</ng-container>
+        <ng-container *ngIf="mouseoverButton.long_press.params">
+          <ng-container *ngFor="let param of getParams(mouseoverButton.long_press)">
+            <ng-container *ngIf="getParam(mouseoverButton.long_press, param)">
+              {{Helper.getEntityName(getParam(mouseoverButton.long_press, param))}} :
+              {{getParamValue(mouseoverButton.long_press, param)}}
+            </ng-container>
+          </ng-container>
+        </ng-container>
       </div>
     </ng-container>
     <ng-container *ngIf="mouseoverButton && mouseoverButton.double_press">
@@ -133,7 +147,14 @@
                 [style]="getStyle(getEntityName(mouseoverButton.double_press.entity_id))"></p-chip>&nbsp;
         <p-chip [label]="mouseoverButton.double_press.cmd_id" styleClass="chip-command"
                 [style]="getStyle(mouseoverButton.double_press.cmd_id)"></p-chip>
-        <ng-container *ngIf="mouseoverButton.double_press.params">{{getParams(mouseoverButton.double_press)}}</ng-container>
+        <ng-container *ngIf="mouseoverButton.double_press.params">
+          <ng-container *ngFor="let param of getParams(mouseoverButton.double_press)">
+            <ng-container *ngIf="getParam(mouseoverButton.double_press, param)">
+              {{Helper.getEntityName(getParam(mouseoverButton.double_press, param))}} :
+              {{getParamValue(mouseoverButton.double_press, param)}}
+            </ng-container>
+          </ng-container>
+        </ng-container>
       </div>
     </ng-container>
     </div>
@@ -237,7 +258,12 @@
                 [style]="getStyle(getEntityName(item?.media_player_id!))"></p-chip><br><br>
         <img src="/assets/icons/play-button.png" alt="Media player" width="100px" height="100px"><br>
       </span>
-      {{getParams(item?.command)}}
+      <ng-container *ngFor="let param of getParams(item?.command)">
+        <ng-container *ngIf="getParam(item?.command, param)">
+          {{Helper.getEntityName(getParam(item?.command, param))}} :
+          {{getParamValue(item?.command, param)}}
+        </ng-container>
+      </ng-container>
     </grid-button>
   </div>
     </div>

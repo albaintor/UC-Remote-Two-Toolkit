@@ -17,7 +17,7 @@ import {
   Command,
   Entity,
   EntityCommand, EntityCommandParameter,
-  EntityFeature, Remote, RemoteData,
+  Remote, RemoteData,
   RemoteMap
 } from "../../interfaces";
 import {NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from "@angular/common";
@@ -139,11 +139,10 @@ export class CommandEditorComponent implements OnInit {
   {
     let command = this.getCommand();
 
-    if (command)
-      if (this.uiCommand?.media_player_id)
-        this.selectedEntity = this.activityEntities?.find(entity => entity.entity_id ==
-          this.uiCommand?.media_player_id);
-      else if (command?.entity_id && this.remote)
+    if (this.uiCommand?.media_player_id)
+      this.selectedEntity = this.activityEntities?.find(entity => entity.entity_id ==
+        this.uiCommand?.media_player_id);
+    else if (command?.entity_id && this.remote)
         this.loadEntity(command.entity_id);
     this.updateSelection();
   }

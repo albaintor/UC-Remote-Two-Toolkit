@@ -112,9 +112,8 @@
         <p-chip [label]="getEntityName(mouseoverButton.short_press.entity_id)"
                 [style]="getStyle(getEntityName(mouseoverButton.short_press.entity_id))"
                 [pTooltip]="mouseoverButton.short_press.entity_id"></p-chip>&nbsp;
-        <p-chip [label]="getCommandName(mouseoverButton.short_press)" styleClass="chip-command"
-                [style]="getStyle(mouseoverButton.short_press.cmd_id)"
-                [pTooltip]="mouseoverButton.short_press.cmd_id"></p-chip>
+        <p-tag [value]="getCommandName(mouseoverButton.short_press)" [pTooltip]="mouseoverButton.short_press.cmd_id"
+               severity="secondary"></p-tag>
       <ng-container *ngIf="mouseoverButton.short_press.params">
         <ng-container *ngFor="let param of getParams(mouseoverButton.short_press)">
           <ng-container *ngIf="getParam(mouseoverButton.short_press, param)">
@@ -131,9 +130,8 @@
         <p-chip [label]="getEntityName(mouseoverButton.long_press.entity_id)"
                 [style]="getStyle(getEntityName(mouseoverButton.long_press.entity_id))"
                 [pTooltip]="mouseoverButton.long_press.entity_id"></p-chip>&nbsp;
-        <p-chip [label]="getCommandName(mouseoverButton.long_press)" styleClass="chip-command"
-                [style]="getStyle(mouseoverButton.long_press.cmd_id)"
-                [pTooltip]="mouseoverButton.long_press.cmd_id"></p-chip>
+        <p-tag [value]="getCommandName(mouseoverButton.long_press)" [pTooltip]="mouseoverButton.long_press.cmd_id"
+               severity="secondary"></p-tag>
         {{mouseoverButton.long_press.cmd_id}}
         <ng-container *ngIf="mouseoverButton.long_press.params">
           <ng-container *ngFor="let param of getParams(mouseoverButton.long_press)">
@@ -151,9 +149,8 @@
         <p-chip [label]="getEntityName(mouseoverButton.double_press.entity_id)"
                 [style]="getStyle(getEntityName(mouseoverButton.double_press.entity_id))"
                 [pTooltip]="mouseoverButton.double_press.entity_id"></p-chip>&nbsp;
-        <p-chip [label]="getCommandName(mouseoverButton.double_press)" styleClass="chip-command"
-                [style]="getStyle(mouseoverButton.double_press.cmd_id)"
-                [pTooltip]="mouseoverButton.double_press.cmd_id"></p-chip>
+        <p-tag [value]="getCommandName(mouseoverButton.double_press)" [pTooltip]="mouseoverButton.double_press.cmd_id"
+               severity="secondary"></p-tag>
         <ng-container *ngIf="mouseoverButton.double_press.params">
           <ng-container *ngFor="let param of getParams(mouseoverButton.double_press)">
             <ng-container *ngIf="getParam(mouseoverButton.double_press, param)">
@@ -257,8 +254,7 @@
       <ng-container *ngIf="item && item.command != null">
         <p-chip [label]="getEntityName((item.command | as : Command)?.entity_id!)"
                 [style]="getStyle(getEntityName((item.command | as : Command)?.entity_id!))"></p-chip><br><br>
-        <p-chip [label]="getCommandName(item.command)" styleClass="chip-command"
-                [style]="getStyle((item.command | as : Command)?.cmd_id!)"></p-chip>
+        <p-tag [value]="getCommandName(item.command)" severity="secondary"></p-tag>
       </ng-container>
       <span *ngIf="item?.media_player_id" style="text-align: center">
         <p-chip [label]="getEntityName(item?.media_player_id!)"

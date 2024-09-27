@@ -45,6 +45,7 @@ import {ActivityPageListComponent, Operation} from "./activity-page-list/activit
 import {TagModule} from "primeng/tag";
 import {InputNumber} from "primeng/inputnumber";
 import {InputTextModule} from "primeng/inputtext";
+import {HttpErrorResponse} from "@angular/common/http";
 
 enum DataFormat {
   None,
@@ -427,10 +428,14 @@ export class ActivityViewerComponent implements AfterViewInit {
 
   executeCommand(command: Command) {
     if (!this.remote) return;
-    this.server.executeRemotetCommand(this.remote, command).subscribe(results => {
+    this.server.executeRemotetCommand(this.remote, command).subscribe({next: results => {
       this.messageService.add({key: "activity", summary: "Command executed",
         severity: "success", detail: `Results : ${results.code} : ${results.message}`});
-    });
+    }, error: (err: HttpErrorResponse) => {
+      console.error("Error command", err);
+        this.messageService.add({key: "activity", summary: "Error executing command",
+          severity: "error", detail: `Results : ${err.error.name} (${err.status} ${err.statusText})`});
+      }});
     this.cdr.detectChanges();
   }
 

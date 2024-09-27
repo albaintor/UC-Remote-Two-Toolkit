@@ -167,6 +167,21 @@ export class Remote
     }
   }
 
+  async getBattery()
+  {
+    const options = this.getOptions();
+    const url = this.getURL() + '/api/system/power/battery';
+    const res = await got.get(url, options);
+    let resBody;
+    try {
+      if (res?.body) resBody = JSON.parse(res.body);
+      return resBody;
+    } catch (err) {
+      console.error('Error', err, res?.body);
+      throw(err);
+    }
+  }
+
   async getRegisteredKeys()
   {
     const options = this.getOptions();

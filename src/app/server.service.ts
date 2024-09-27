@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import {forkJoin, from, map, mergeMap, Observable, of, Subject} from "rxjs";
 import {
-  Activity, Command,
+  Activity, BatteryState, Command,
   Config,
   Context, Driver,
   Entity, EntityCommand, EntityFeature,
@@ -129,6 +129,22 @@ export class ServerService {
       return this.config;
     }))
   }
+
+  getRemoteKey(remote: Remote): Observable<string>
+  {
+    return this.http.get<string>(`/api/config/remote/${remote.address}/key`).pipe(map(results => {
+      return results;
+    }))
+  }
+
+
+  getRemoteBattery(remote: Remote): Observable<BatteryState>
+  {
+    return this.http.get<BatteryState>(`/api/remote/${remote.address}/system/power/battery`).pipe(map(results => {
+      return results;
+    }))
+  }
+
 
   // setConfig(config: Config): Observable<any>
   // {

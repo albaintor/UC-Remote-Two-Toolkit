@@ -1,0 +1,71 @@
+<p-dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
+          contentStyleClass="widget-dialog" class="widget" styleClass="widget-header" appendTo="body">
+  <ng-template pTemplate="header">
+      <div class="flex justify-content-between flex-wrap gap-3 column-gap-4" style="width: 100%">
+        <div class="flex align-items-center justify-content-center">
+          <p-button icon="pi pi-window-minimize" pTooltip="Minimize" (click)="minimized = !minimized"/>
+        </div>
+        <div class="flex align-items-center" style="max-width: 300px">
+          <app-scrolling-text [text]="getMediaInfo()"/>
+        </div>
+        <div class="flex align-items-center justify-content-center" *ngIf="batteryState?.capacity" style="width:40px">
+          <div class="flex align-items-center justify-content-center">{{batteryState!.capacity!}}%</div>
+          <div style="position: relative">
+            <div class="icon icon-battery" *ngIf="batteryState!.capacity!> 30 && batteryState!.capacity! < 85"></div>
+            <div class="icon icon-battery-low" *ngIf="batteryState!.capacity! <= 30"></div>
+            <div class="icon icon-battery-full" *ngIf="batteryState!.capacity! >= 85"></div>
+            <div class="pi pi-bolt charging-status" *ngIf="batteryState?.status === 'CHARGING'"></div>
+          </div>
+
+        </div>
+        <div class="flex align-items-center justify-content-center">
+          <p-tag [value]="(connectionStatus$ | async) ? 'Connected' : 'Disconnected'" [severity]="(connectionStatus$ | async) ? 'success' : 'warning'"/>
+        </div>
+    </div>
+  </ng-template>
+  <ng-container *ngIf="!minimized">
+    <ng-container *ngIf="mediaEntity">
+      <div class="flex gap-2">
+        <div class="flex-initial flex align-items-center">
+          <img *ngIf="mediaEntity?.new_state?.attributes?.media_image_url" [src]="mediaEntity.new_state!.attributes!.media_image_url!"
+               [alt]="mediaEntity.new_state!.attributes!.media_title!" width="400" height="300"/>
+        </div>
+        <div class="flex flex-column row-gap-2" style="max-width: 250px">
+            <p-dropdown [(ngModel)]="mediaEntity" [options]="mediaEntities" placeholder="Media entity" appendTo="body" [style]="{'max-width': '220px'}"
+              (ngModelChange)="changedMediaEntity($event)">
+              <ng-template pTemplate="selectedItem">
+                {{getEntityName(mediaEntity)}}
+              </ng-template>
+              <ng-template let-item pTemplate="item">
+                {{getEntityName(item)}}
+              </ng-template>
+            </p-dropdown>
+          <app-scrolling-text *ngIf="mediaEntity?.new_state?.attributes?.media_title" [text]="mediaEntity.new_state!.attributes!.media_title!"/>
+          <app-scrolling-text *ngIf="mediaEntity?.new_state?.attributes?.media_artist" [text]="mediaEntity.new_state!.attributes!.media_artist!"/>
+          <app-scrolling-text *ngIf="mediaEntity.new_state!.attributes!.media_album!" [text]="mediaEntity.new_state!.attributes!.media_album!"/>
+          <div *ngIf="mediaPosition && mediaEntity.new_state?.attributes?.media_duration &&
+                      mediaEntity.new_state!.attributes!.media_duration! > 0">
+            <p-progressBar [style]="{'width': '100%'}" [value]="Math.round(mediaPosition*100/mediaEntity.new_state!.attributes!.media_duration!)">
+              <ng-template pTemplate="content" let-value>
+                <span>{{mediaPosition * 1000 | date:'hh:mm:ss' }}</span>
+              </ng-template>
+            </p-progressBar>
+          </div>
+          <div *ngIf="mediaPosition" class="flex align-items-center justify-content-center">
+            <b>{{mediaPosition * 1000 | date:'hh:mm:ss' }}</b>
+          </div>
+          <div *ngIf="mediaEntity.new_state?.attributes?.volume && mediaEntity.new_state!.attributes!.volume! > 0">
+            <p-progressBar [style]="{'width': '100%'}" [value]="Math.round(mediaEntity.new_state!.attributes!.volume!)">
+              <ng-template pTemplate="content" let-value>
+                <span>{{Math.round(mediaEntity.new_state!.attributes!.volume!)}}%</span>
+              </ng-template>
+            </p-progressBar>
+          </div>
+          <div *ngIf="mediaEntity.new_state?.attributes?.volume" class="flex align-items-center justify-content-center">
+            <b>Volume {{Math.round(mediaEntity.new_state!.attributes!.volume!)}}%</b>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+</p-dialog>

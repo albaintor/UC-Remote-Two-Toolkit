@@ -15,12 +15,14 @@ import {Remote} from "./remote.js";
 import {getConfigFile, writeConfigFile} from "./config.js";
 import {program} from 'commander';
 import cors from 'cors';
+// import expressws from 'express-ws';
 
 let LISTEN_PORT = "8000";
 const UPLOAD_DIR = './uploads';
 const RESOURCES_DIR = './resources';
-var app = express();
-var storage = multer.diskStorage({
+const app = express();
+// const expressWs = expressws(app);
+const storage = multer.diskStorage({
   destination: function (req, file, callback) {
     callback(null, UPLOAD_DIR);
   },
@@ -233,6 +235,8 @@ app.post('/api/config', (req, res, next) => {
   }
 })
 
+
+
 app.post('/api/config/remote', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
@@ -279,6 +283,22 @@ app.get('/api/config/remote/:address', async (req, res, next) => {
   {
     errorHandler(error, req, res, next);
   }
+})
+
+app.get('/api/config/remote/:address/key', async (req, res, next) => {
+  const address = req.params.address;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  res.status(200).json(remoteEntry.api_key);
 })
 
 app.delete('/api/config/remote/:address', async (req, res, next) => {
@@ -344,6 +364,27 @@ app.get('/api/remote/:address/version', async (req, res, next) => {
   const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
   try {
     res.status(200).json(await remote.getVersion());
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
+app.get('/api/remote/:address/system/power/battery', async (req, res, next) => {
+  const address = req.params.address;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.getBattery());
   } catch (error)
   {
     errorHandler(error, req, res, next);
@@ -1069,6 +1110,12 @@ app.delete('/api/uploaded_files/:filename', (req, res, next) => {
     res.status(404).send(filename).end();
   }
 })
+
+// app.ws('/ws', (ws, req) => {
+//   ws.on('message', function(msg) {
+//     console.log(msg);
+//   });
+// })
 
 app.all('*', function (req, res) {
   res.status(200).sendFile(`/`, {root: 'public/browser'});

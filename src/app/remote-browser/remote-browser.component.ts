@@ -53,6 +53,7 @@ import {BlockUIModule} from "primeng/blockui";
 import { saveAs } from 'file-saver-es';
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {IconComponent} from "../icon/icon.component";
+import {RemoteWidgetComponent} from "../remote-widget/remote-widget.component";
 
 interface FileProgress
 {
@@ -91,7 +92,8 @@ interface FileProgress
     RemoteDataLoaderComponent,
     BlockUIModule,
     ConfirmDialogModule,
-    IconComponent
+    IconComponent,
+    RemoteWidgetComponent
   ],
   templateUrl: './remote-browser.component.html',
   styleUrl: './remote-browser.component.css',

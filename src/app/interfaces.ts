@@ -481,3 +481,9 @@ export interface RemoteModel {
 export interface RemoteModels {
   models: RemoteModel[];
 }
+
+export interface BatteryState {
+  status?: "CHARGING" | "DISCHARGING" | "NOT_CHARGING" | "FULL";
+  capacity?: number;
+  power_supply?: boolean;
+}

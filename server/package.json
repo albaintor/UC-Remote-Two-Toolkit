@@ -1,7 +1,7 @@
 {
   "name": "server",
   "type": "module",
-  "version": "1.4.3",
+  "version": "1.5.0",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
@@ -21,7 +21,8 @@
     "nodemon": "^3.1.4",
     "open": "^10.1.0",
     "process": "^0.11.10",
-    "rimraf": "^6.0.1"
+    "rimraf": "^6.0.1",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "esbuild": "^0.23.1"

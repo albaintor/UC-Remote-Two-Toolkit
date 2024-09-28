@@ -12,7 +12,7 @@
 }
 .scrolling-text .animate {
   position: relative;
-  animation: leftright 3s infinite alternate ease-in-out;
+  animation: leftright 5s infinite alternate ease-in-out;
 }
 
 @keyframes leftright {

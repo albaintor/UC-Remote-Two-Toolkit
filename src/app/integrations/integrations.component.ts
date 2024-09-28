@@ -111,6 +111,7 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
     this.config = config;
     this.remotes = config.remotes!;
     this.selectedRemote  = Helper.getSelectedRemote(this.remotes);
+    if (this.selectedRemote) this.server.remote$.next(this.selectedRemote);
     this.loadRemoteData();
     this.cdr.detectChanges();
   }

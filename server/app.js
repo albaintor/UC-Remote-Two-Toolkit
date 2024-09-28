@@ -3,7 +3,8 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import multer from 'multer';
 import JSZip from 'jszip';
-import got from 'got'
+import got from 'got';
+import {pipeline as streamPipeline} from 'node:stream/promises';
 import {rimraf} from 'rimraf';
 
 import path from 'path';
@@ -953,6 +954,21 @@ app.put('/api/remote/:address/entities/:entity_id/command', async (req, res, nex
   }
 })
 
+app.get('/api/proxy',  async (req, res) => {
+  const options = {
+    // prefixUrl: req.query.url,
+    isStream: true,
+    throwHttpErrors: false
+  };
+  console.log("Proxy get", decodeURI(req.query.url), options);
+
+  await streamPipeline(
+    got.get(encodeURI(decodeURI(req.query.url)), options),
+    res
+  );
+  res.end();
+});
+
 app.post('/upload',upload.single('file'),(req,res)=>{
   console.log(req.file, req.body.name);
   res.status(200).json(req.file.filename)
@@ -1117,7 +1133,7 @@ app.delete('/api/uploaded_files/:filename', (req, res, next) => {
 //   });
 // })
 
-app.all('*', function (req, res) {
+app.all('*', function (req, res, next) {
   res.status(200).sendFile(`/`, {root: 'public/browser'});
 });
 

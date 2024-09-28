@@ -161,6 +161,7 @@ export class ReplaceEntityComponent implements OnInit{
     this.config = config;
     this.remotes = config.remotes!;
     this.selectedRemote  = Helper.getSelectedRemote(this.remotes);
+    if (this.selectedRemote) this.server.remote$.next(this.selectedRemote);
     this.cdr.detectChanges();
   }
 

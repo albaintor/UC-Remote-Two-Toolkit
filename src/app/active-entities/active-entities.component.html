@@ -1,0 +1,87 @@
+<p-menubar [model]="menuItems">
+  <ng-template pTemplate="end">
+    <div class="flex align-items-center gap-2">
+      <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
+        <ng-template pTemplate="selectedItem">
+          <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
+          <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
+        </ng-template>
+        <ng-template let-item pTemplate="item">
+          {{item.remote_name}} ({{item.address}})
+        </ng-template>
+      </p-dropdown>
+    </div>
+  </ng-template>
+</p-menubar>
+<div class="flex align-content-center flex-wrap gap-3 column-gap-4" style="width: 100%">
+  <div class="flex align-items-center justify-content-center" *ngIf="remoteState?.batteryInfo?.capacity" style="width: 160px">
+    <div class="flex align-items-center justify-content-center">{{remoteState!.batteryInfo!.capacity!}}%</div>
+    <div style="position: relative; font-size: 4rem">
+      <div class="icon icon-battery" *ngIf="remoteState!.batteryInfo!.capacity!> 30 && remoteState!.batteryInfo!.capacity! < 85"></div>
+      <div class="icon icon-battery-low" *ngIf="remoteState!.batteryInfo!.capacity! <= 30"></div>
+      <div class="icon icon-battery-full" *ngIf="remoteState!.batteryInfo!.capacity! >= 85"></div>
+      <div class="pi pi-bolt charging-status" *ngIf="remoteState!.batteryInfo?.status === 'CHARGING'"></div>
+    </div>
+  </div>
+  <div class="flex align-items-center justify-content-center">
+    <p-tag [value]="(remoteWebsocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
+           [severity]="(remoteWebsocketService.connectionStatus  | async) ? 'success' : 'warning'"/>
+  </div>
+</div>
+<div class="flex flex-wrap gap-6">
+  <div class="flex gap-2 align-content-center justify-content-center media-card" style="width: 600px" *ngFor="let mediaEntity of mediaEntities">
+    <div class="flex-column" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url">
+      <div class="flex align-content-center justify-content-center">
+        <h2>{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2>
+      </div>
+      <div class="flex-initial flex align-items-center">
+        <img *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && !mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="mediaEntity.new_state!.attributes!.media_image_url!"
+             [alt]="mediaEntity.new_state!.attributes!.media_title!" width="400" height="300"/>
+        <img *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="'/api/proxy?url='+mediaEntity.new_state!.attributes!.media_image_url!"
+             [alt]="mediaEntity.new_state!.attributes!.media_title!" width="400" height="300"/>
+      </div>
+    </div>
+    <div class="flex flex-column justify-content-between" [style]="'max-width: '+!mediaEntity?.new_state?.attributes?.media_image_url ? '250px' : '600px'">
+      <div class="flex align-content-center justify-content-center" *ngIf="!mediaEntity?.new_state?.attributes?.media_image_url">
+        <h2>{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2>
+      </div>
+      <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state?.attributes?.state">
+        <p-tag [value]="mediaEntity.new_state!.attributes!.state!" [severity]="getStatusStyle(mediaEntity.new_state!.attributes!.state!)"/>
+      </div>
+      <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_title">
+        <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_title!"/>
+      </div>
+      <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_artist">
+        <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_artist!"/>
+      </div>
+      <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state!.attributes!.media_album!">
+        <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_album!"/>
+      </div>
+      <div class="flex flex-column" style="width: 100%">
+        <p-progressBar *ngIf="mediaEntity.new_state?.attributes?.media_position && mediaEntity.new_state?.attributes?.media_duration &&
+                      mediaEntity.new_state!.attributes!.media_duration! > 0"  [style]="{'width': '100%'}" [value]="Math.round(remoteWebsocketService.getMediaPosition(mediaEntity)*100/mediaEntity.new_state!.attributes!.media_duration!)">
+          <ng-template pTemplate="content" let-value>
+            <span>{{formatDuration(remoteWebsocketService.getMediaPosition(mediaEntity))}}</span>
+          </ng-template>
+        </p-progressBar>
+        <div *ngIf="mediaEntity.new_state?.attributes?.media_position" class="flex align-items-center justify-content-center">
+          <b>{{formatDuration(remoteWebsocketService.getMediaPosition(mediaEntity))}}</b>
+        </div>
+      </div>
+      <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state!.attributes!.source">
+        <p-tag [value]="mediaEntity.new_state!.attributes!.source!" severity="secondary"></p-tag>
+      </div>
+      <div class="flex flex-column" style="width: 100%">
+        <p-progressBar *ngIf="mediaEntity.new_state?.attributes?.volume && mediaEntity.new_state!.attributes!.volume! > 0" [style]="{'width': '100%'}" [value]="Math.round(mediaEntity.new_state!.attributes!.volume!)">
+          <ng-template pTemplate="content" let-value>
+            <span>{{Math.round(mediaEntity.new_state!.attributes!.volume!)}}%</span>
+          </ng-template>
+        </p-progressBar>
+        <div *ngIf="mediaEntity.new_state?.attributes?.volume" class="flex align-items-center justify-content-center">
+          <b>Volume {{Math.round(mediaEntity.new_state!.attributes!.volume!)}}%</b>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

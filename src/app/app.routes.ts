@@ -4,6 +4,7 @@ import {RemoteBrowserComponent} from "./remote-browser/remote-browser.component"
 import {ReplaceEntityComponent} from "./replace-entity/replace-entity.component";
 import {IntegrationsComponent} from "./integrations/integrations.component";
 import {ActivitySyncComponent} from "./activity-sync/activity-sync.component";
+import {ActiveEntitiesComponent} from "./active-entities/active-entities.component";
 
 export const routes: Routes = [
   { path: 'home', component: RemoteBrowserComponent },
@@ -14,4 +15,5 @@ export const routes: Routes = [
   { path: 'entity/rename', component: ReplaceEntityComponent},
   { path: 'integrations', component: IntegrationsComponent},
   { path: 'activities/sync', component: ActivitySyncComponent},
+  { path: 'status', component: ActiveEntitiesComponent},
 ];

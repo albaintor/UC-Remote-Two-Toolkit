@@ -143,6 +143,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       ]
     },
     {label: 'Sync activities', routerLink:'/activities/sync', icon: 'pi pi-sync'},
+      {label: 'Remote status', routerLink:'/status', icon: 'pi pi-play'},
   ]
   entityUsages: EntityUsage | null | undefined;
   localMode = true;
@@ -250,6 +251,7 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     this.config = config;
     this.remotes = config.remotes!;
     this.selectedRemote  = Helper.getSelectedRemote(this.remotes);
+    if (this.selectedRemote) this.server.remote$.next(this.selectedRemote);
     this.cdr.detectChanges();
   }
 

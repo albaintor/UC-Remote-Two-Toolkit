@@ -462,6 +462,7 @@ export class ActivitySyncComponent implements OnInit {
     this.config = config;
     this.remotes = config.remotes!;
     this.selectedRemote1  = Helper.getSelectedRemote(this.remotes);
+    if (this.selectedRemote1) this.server.remote$.next(this.selectedRemote1);
     this.cdr.detectChanges();
   }
 

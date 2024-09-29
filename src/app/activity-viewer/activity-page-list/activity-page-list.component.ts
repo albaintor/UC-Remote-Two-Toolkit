@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {Helper} from "../../helper";
 import {Button} from "primeng/button";
-import {IconComponent} from "../../icon/icon.component";
+import {IconComponent} from "../../controls/icon/icon.component";
 import {InputNumberModule} from "primeng/inputnumber";
 import {NgIf} from "@angular/common";
 import {OrderListModule} from "primeng/orderlist";

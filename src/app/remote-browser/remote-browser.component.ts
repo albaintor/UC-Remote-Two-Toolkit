@@ -52,7 +52,7 @@ import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loade
 import {BlockUIModule} from "primeng/blockui";
 import { saveAs } from 'file-saver-es';
 import {ConfirmDialogModule} from "primeng/confirmdialog";
-import {IconComponent} from "../icon/icon.component";
+import {IconComponent} from "../controls/icon/icon.component";
 import {RemoteWidgetComponent} from "../remote-widget/remote-widget.component";
 
 interface FileProgress

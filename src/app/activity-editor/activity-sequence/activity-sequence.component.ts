@@ -13,7 +13,7 @@ import {Activity, CommandSequence, Entity, Remote, RemoteMap} from "../../interf
 import {CommandEditorComponent} from "../command-editor/command-editor.component";
 import {NgIf} from "@angular/common";
 import {OrderListModule} from "primeng/orderlist";
-import {IconComponent} from "../../icon/icon.component";
+import {IconComponent} from "../../controls/icon/icon.component";
 import {ToastModule} from "primeng/toast";
 import {Button} from "primeng/button";
 import {DialogModule} from "primeng/dialog";

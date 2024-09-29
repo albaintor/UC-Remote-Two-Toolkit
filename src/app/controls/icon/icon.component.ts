@@ -7,9 +7,9 @@ import {
   Output,
   ViewEncapsulation
 } from '@angular/core';
-import {Helper} from "../helper";
+import {Helper} from "../../helper";
 import {NgIf} from "@angular/common";
-import {Entity, EntityIntegration, Remote} from "../interfaces";
+import {Entity, EntityIntegration, Remote} from "../../interfaces";
 
 @Component({
   selector: 'app-icon',

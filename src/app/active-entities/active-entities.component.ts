@@ -8,10 +8,12 @@ import {TagModule} from "primeng/tag";
 import {MediaEntityState, RemoteState, RemoteWebsocketService} from "../remote-widget/remote-websocket.service";
 import {ServerService} from "../server.service";
 import {MenubarModule} from "primeng/menubar";
-import {Remote, RemoteData} from "../interfaces";
+import {Activity, Remote, RemoteData} from "../interfaces";
 import {FormsModule} from "@angular/forms";
 import {Helper} from "../helper";
-import {SliderComponent} from "../slider/slider.component";
+import {SliderComponent} from "../controls/slider/slider.component";
+import {Button} from "primeng/button";
+import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.component";
 
 @Component({
   selector: 'app-active-entities',
@@ -27,7 +29,9 @@ import {SliderComponent} from "../slider/slider.component";
     AsyncPipe,
     MenubarModule,
     FormsModule,
-    SliderComponent
+    SliderComponent,
+    Button,
+    DropdownOverComponent
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',
@@ -43,6 +47,7 @@ export class ActiveEntitiesComponent implements OnInit {
   ]
   selectedRemote: Remote | undefined;
   remotes: Remote[] | undefined;
+  activities: Activity[] = [];
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
 
@@ -58,6 +63,7 @@ export class ActiveEntitiesComponent implements OnInit {
         this.remoteState = {batteryInfo};
         this.cdr.detectChanges();
       })
+      this.loadActivities();
       this.cdr.detectChanges();
     })
     this.remoteWebsocketService.onRemoteStateChange().subscribe(remoteState => {
@@ -71,9 +77,42 @@ export class ActiveEntitiesComponent implements OnInit {
     this.server.getConfig().subscribe(config => {
       this.remotes = config.remotes!;
       this.selectedRemote  = Helper.getSelectedRemote(this.remotes);
-      if (this.selectedRemote) this.server.remote$.next(this.selectedRemote);
+      if (this.selectedRemote) {
+        this.server.remote$.next(this.selectedRemote);
+        this.loadActivities();
+      }
       this.cdr.detectChanges();
-    })
+    });
+  }
+
+  loadActivities()
+  {
+    if (!this.selectedRemote) return;
+    this.server.getRemoteActivities(this.selectedRemote).subscribe(activities => {
+      this.activities = activities;
+      activities.forEach(activity => {
+        if (activity.attributes?.state && activity.attributes.state === "ON"
+          && this.selectedRemote && activity.entity_id)
+        {
+          this.server.getRemoteActivity(this.selectedRemote, activity.entity_id).subscribe(activity => {
+            const existingActivity = this.activities.find(item => item.entity_id === activity.entity_id);
+            if (!existingActivity)
+              this.activities.push(activity);
+            else
+              Object.assign(existingActivity, activity);
+            this.cdr.detectChanges();
+            activity.options?.included_entities?.forEach(entity => {
+              if (entity.entity_type !== "media_player") return; //TODO add other entities
+              if (this.mediaEntities.find(item => item.entity_id === entity.entity_id)) return;
+              if (this.selectedRemote && entity.entity_id)
+              {
+                this.remoteWebsocketService.updateEntity(entity.entity_id);
+              }
+            })
+          })
+        }
+      })
+    });
   }
 
   getStatusStyle(state: string) {
@@ -161,5 +200,37 @@ export class ActiveEntitiesComponent implements OnInit {
           cmd_id:"media_player.play_pause"}).subscribe();
       }
     }
+  }
+
+  powerToggle(mediaEntity: MediaEntityState) {
+    if (!this.selectedRemote) return;
+    if (this.checkFeature(mediaEntity, 'toggle')) {
+      this.server.executeRemotetCommand(this.selectedRemote, {
+        entity_id: mediaEntity.entity_id,
+        cmd_id: "media_player.toggle"
+      }).subscribe();
+      return;
+    }
+    else if (!mediaEntity.new_state?.attributes?.state || ["OFF", "UNAVAILABLE", "UNKNOWN", "STANDBY"].includes(mediaEntity.new_state.attributes.state))
+      this.server.executeRemotetCommand(this.selectedRemote, {
+        entity_id: mediaEntity.entity_id,
+        cmd_id: "media_player.on"
+      }).subscribe();
+    else
+      this.server.executeRemotetCommand(this.selectedRemote, {
+        entity_id: mediaEntity.entity_id,
+        cmd_id: "media_player.off"
+      }).subscribe();
+  }
+
+  sourceSelected(mediaEntity: MediaEntityState, source: any) {
+    if (!this.selectedRemote || !source) return;
+    console.debug("Source selected", mediaEntity.new_state?.attributes?.source);
+    this.server.executeRemotetCommand(this.selectedRemote, {
+      entity_id: mediaEntity.entity_id,
+      cmd_id: "media_player.select_source", params: {
+        "source": source
+      }
+    }).subscribe();
   }
 }

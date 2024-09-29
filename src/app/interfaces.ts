@@ -377,6 +377,7 @@ export interface Activity {
   icon?: string;
   description?: any;
   options?: ActivityOption;
+  attributes?: any;
 }
 
 export interface Macro {

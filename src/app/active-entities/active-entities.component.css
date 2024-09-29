@@ -11,8 +11,16 @@
 .media-card {
   border-radius: 20px;
   border: 2px solid rgba(255, 255, 255, 0.73);
+  position: relative;
 }
 
 .active-tag {
   cursor: pointer;
+}
+
+.power-button {
+  cursor: pointer;
+  position: absolute;
+  top: 8px;
+  left: 8px;
 }

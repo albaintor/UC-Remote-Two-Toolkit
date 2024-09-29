@@ -1,0 +1,11 @@
+<div style="position: relative; width: 100%" class="control-wrapper">
+  <div class="control-text">
+    <ng-container *ngIf="textTemplate" [ngTemplateOutlet]="textTemplate"/>
+  </div>
+  <div class="flex flex-column align-items-center justify-content-center control-edit" *ngIf="editable" style="width: 100%">
+    <p-dropdown [(ngModel)]="selectedValue" [options]="formattedOptions" (ngModelChange)="valueUpdate($event)"
+                [style]="{'min-width':'150px','width': '100%'}" appendTo="body" optionLabel="label">
+    </p-dropdown>
+  </div>
+</div>
+

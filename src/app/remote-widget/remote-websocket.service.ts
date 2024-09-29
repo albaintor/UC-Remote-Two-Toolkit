@@ -25,6 +25,7 @@ export interface MediaEntityState
       volume?: number;
       state?:  "UNAVAILABLE" | "UNKNOWN" | "ON" | "OFF" | "PLAYING" | "PAUSED" | "STANDBY" | "BUFFERING";
       last_update_time?: number;
+      source_list?: string[];
     }
   }
 }
@@ -186,7 +187,21 @@ export class RemoteWebsocketService implements OnDestroy {
     }
   }
 
-  updateEntity(message: EventMessage): void {
+  updateEntity(entity_id: string)
+  {
+    if (!this.remote) return;
+    this.serverService.getRemotetEntity(this.remote, entity_id).subscribe(entity => {
+      let entityEntry = this._mediaEntities.find(item =>
+        item.entity_id === entity.entity_id);
+      if (!entityEntry) {
+        this._mediaEntities.push({entity_id, entity_type:entity.entity_type, event_type: "", new_state: {...entity}});
+        entityEntry = this._mediaEntities.find(item => item.entity_id === entity.entity_id);
+      }
+      this.fillEntityFields(entityEntry, entity);
+    });
+  }
+
+  updateEntityFromEvent(message: EventMessage): void {
     if (!message.msg_data?.entity_id) return;
     let entity = this._mediaEntities.find(item => item.entity_id === message.msg_data.entity_id);
     if (!entity)
@@ -195,29 +210,7 @@ export class RemoteWebsocketService implements OnDestroy {
         message.msg_data.new_state.attributes.last_update_time = Date.now();
       entity = message.msg_data as MediaEntityState;
       this._mediaEntities.push(entity);
-
-      if (this.remote) {
-        this.serverService.getRemotetEntity(this.remote, entity.entity_id).subscribe(entity => {
-          const entityEntry = this._mediaEntities.find(item =>
-            item.entity_id === entity.entity_id);
-          if (entityEntry)
-          {
-            this.checkEntityImage(entityEntry, entity.attributes);
-            for (const [key, value] of Object.entries(entity.attributes))
-            {
-              if (!entityEntry.new_state) entityEntry.new_state = {};
-              if (!entityEntry.new_state.attributes) entityEntry.new_state.attributes = {};
-              (entityEntry.new_state.attributes as any)[key] = value;
-            }
-            for (const [key, value] of Object.entries(entity))
-            {
-              if (key === "attributes") continue;
-              if (!entityEntry.new_state) entityEntry.new_state = {};
-              (entityEntry.new_state as any)[key] = value;
-            }
-          }
-        });
-      }
+      this.updateEntity(entity.entity_id);
     }
     else {
       this.checkEntityImage(entity, message.msg_data.new_state.attributes);
@@ -249,19 +242,7 @@ export class RemoteWebsocketService implements OnDestroy {
         this.serverService.getRemotetEntity(remote, entity.entity_id).subscribe(entity => {
           const entityEntry = this._mediaEntities.find(item =>
             item.entity_id === entity.entity_id);
-          if (entityEntry) {
-            this.checkEntityImage(entityEntry, entity.attributes);
-            for (const [key, value] of Object.entries(entity.attributes)) {
-              if (!entityEntry.new_state) entityEntry.new_state = {};
-              if (!entityEntry.new_state.attributes) entityEntry.new_state.attributes = {};
-              (entityEntry.new_state.attributes as any)[key] = value;
-            }
-            for (const [key, value] of Object.entries(entity)) {
-              if (key === "attributes") continue;
-              if (!entityEntry.new_state) entityEntry.new_state = {};
-              (entityEntry.new_state as any)[key] = value;
-            }
-          }
+          this.fillEntityFields(entityEntry, entity);
         })
         }
       )
@@ -272,7 +253,7 @@ export class RemoteWebsocketService implements OnDestroy {
   {
     if (message.msg_data?.new_state?.attributes)
     {
-      this.updateEntity(message);
+      this.updateEntityFromEvent(message);
       const entity = this._mediaEntities.find(item => item.entity_id === message.msg_data.entity_id);
       if (!this._mediaEntity) {
         this._mediaEntity = entity;
@@ -329,5 +310,24 @@ export class RemoteWebsocketService implements OnDestroy {
       return mediaEntity.new_state.attributes.media_position;
     }
     return Math.floor(mediaEntity.new_state.attributes.media_position + Math.abs(Date.now() - mediaEntity.new_state?.attributes?.last_update_time)/1000);
+  }
+
+  private fillEntityFields(entityEntry: MediaEntityState | undefined, entity: Entity) {
+    if (entityEntry)
+    {
+      this.checkEntityImage(entityEntry, entity.attributes);
+      for (const [key, value] of Object.entries(entity.attributes))
+      {
+        if (!entityEntry.new_state) entityEntry.new_state = {};
+        if (!entityEntry.new_state.attributes) entityEntry.new_state.attributes = {};
+        (entityEntry.new_state.attributes as any)[key] = value;
+      }
+      for (const [key, value] of Object.entries(entity))
+      {
+        if (key === "attributes") continue;
+        if (!entityEntry.new_state) entityEntry.new_state = {};
+        (entityEntry.new_state as any)[key] = value;
+      }
+    }
   }
 }

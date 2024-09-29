@@ -30,7 +30,7 @@ import {ServerService} from "../server.service";
 import {Helper} from "../helper";
 import {forkJoin, from, map} from "rxjs";
 import {ChipModule} from "primeng/chip";
-import {IconComponent} from "../icon/icon.component";
+import {IconComponent} from "../controls/icon/icon.component";
 import {InputTextModule} from "primeng/inputtext";
 import {TableModule} from "primeng/table";
 import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";

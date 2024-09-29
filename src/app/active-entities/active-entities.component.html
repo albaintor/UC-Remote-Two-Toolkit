@@ -30,6 +30,9 @@
 </div>
 <div class="flex flex-wrap gap-6">
   <div class="flex gap-2 align-content-center justify-content-center media-card" style="width: 675px" *ngFor="let mediaEntity of mediaEntities">
+    <div class="power-button" *ngIf="checkFeature(mediaEntity, 'on_off') || checkFeature(mediaEntity, 'toggle')">
+      <p-button icon="pi pi-power-off" [rounded]="true" (click)="powerToggle(mediaEntity)" size="small" pTooltip="Power toggle"/>
+    </div>
     <div class="flex-column" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url">
       <div class="flex align-content-center justify-content-center">
         <h2>{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2>
@@ -48,20 +51,25 @@
       <div class="flex align-content-center justify-content-center column-gap-2">
         <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state?.attributes?.state">
           <p-tag [value]="mediaEntity.new_state!.attributes!.state!" [severity]="getStatusStyle(mediaEntity.new_state!.attributes!.state!)"
-                 (click)="clickState(mediaEntity)" styleClass="active-tag"/>
+                 (click)="clickState(mediaEntity)" styleClass="active-tag" pTooltip="Play / Pause"/>
         </div>
         <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state!.attributes!.source">
-          <p-tag [value]="mediaEntity.new_state!.attributes!.source!" severity="secondary"></p-tag>
+          <app-dropdown-over [value]="mediaEntity.new_state!.attributes!.source!" [options]="mediaEntity.new_state?.attributes?.source_list"
+                             [textTemplate]="sourceValue" (valueChange)="sourceSelected(mediaEntity, $event)">
+            <ng-template #sourceValue>
+              <p-tag [value]="mediaEntity.new_state!.attributes!.source!" severity="secondary"></p-tag>
+            </ng-template>
+          </app-dropdown-over>
         </div>
       </div>
       <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_title">
-        <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_title!"/>
+        <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_title!" style="width: 250px"/>
       </div>
       <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_artist">
-        <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_artist!"/>
+        <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_artist!" style="width: 250px"/>
       </div>
       <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state!.attributes!.media_album!">
-        <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_album!"/>
+        <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_album!" style="width: 250px"/>
       </div>
       <div class="flex flex-column" style="width: 100%">
         <div *ngIf="mediaEntity.new_state?.attributes?.media_position && mediaEntity.new_state?.attributes?.media_duration &&

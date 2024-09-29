@@ -14,6 +14,7 @@ import {Helper} from "../helper";
 import {SliderComponent} from "../controls/slider/slider.component";
 import {Button} from "primeng/button";
 import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.component";
+import {MediaEntityComponent} from "./media-entity/media-entity.component";
 
 @Component({
   selector: 'app-active-entities',
@@ -31,7 +32,8 @@ import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.com
     FormsModule,
     SliderComponent,
     Button,
-    DropdownOverComponent
+    DropdownOverComponent,
+    MediaEntityComponent
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',
@@ -115,122 +117,8 @@ export class ActiveEntitiesComponent implements OnInit {
     });
   }
 
-  getStatusStyle(state: string) {
-    switch(state)
-    {
-      case "UNAVAILABLE":
-      case "UNKNOWN": return "danger";
-      case "ON": return "info";
-      case "OFF": return "secondary";
-      case "PLAYING": return "success";
-      case "PAUSED": return "warning";
-      case "STANDBY": return "secondary";
-      case "BUFFERING":return "success";
-      default: return "secondary";
-    }
-  }
-
-  formatDuration(duration: number): string {
-    const hours = Math.floor(duration / 3600);
-    const minutes = Math.floor((duration - (hours * 3600)) / 60);
-    const seconds = duration - (hours * 3600) - (minutes * 60);
-    return hours.toString().padStart(2, '0') + ':' +
-      minutes.toString().padStart(2, '0') + ':' +
-      seconds.toString().padStart(2, '0');
-  }
-
   setRemote(remote: Remote) {
     this.server.remote$.next(remote);
     this.cdr.detectChanges();
-  }
-
-  checkFeature(mediaEntity: MediaEntityState, feature: string): boolean
-  {
-    if (!mediaEntity.new_state?.features) return false;
-    return mediaEntity.new_state.features.includes(feature);
-  }
-
-  updateVolume(volume: number, mediaEntity: MediaEntityState) {
-    console.debug("Volume update", volume, mediaEntity);
-    if (!mediaEntity || !this.selectedRemote
-      || !this.checkFeature(mediaEntity, "volume")) return;
-    this.server.executeRemotetCommand(this.selectedRemote, {entity_id: mediaEntity.entity_id,
-      cmd_id:"media_player.volume", params: {"volume": volume}}).subscribe(
-      {error: err => console.error("Error updating volume", err)});
-  }
-
-  updatePosition(position: number, mediaEntity: MediaEntityState) {
-    console.debug("Position update", position, mediaEntity);
-    if (!mediaEntity || !this.selectedRemote || !mediaEntity.new_state?.attributes?.media_duration
-      || !this.checkFeature(mediaEntity, "seek")) return;
-
-    const newPosition = Math.floor(mediaEntity.new_state.attributes.media_duration*position/100);
-    const body = {entity_id: mediaEntity.entity_id,
-      cmd_id:"media_player.seek", params: {"media_position": newPosition}};
-    console.debug("Seek", body);
-    this.server.executeRemotetCommand(this.selectedRemote, body).subscribe(
-        {error: err => console.error("Error updting position", err)});
-  }
-
-  clickState(mediaEntity: MediaEntityState) {
-    if (!this.selectedRemote) return;
-    const hasPlayPause = this.checkFeature(mediaEntity, "play_pause");
-    const hasPause = this.checkFeature(mediaEntity, "pause");
-    const hasPlay = this.checkFeature(mediaEntity, "play");
-    if (mediaEntity.new_state?.attributes?.state === "PLAYING")
-    {
-      if (hasPause)
-      {
-        this.server.executeRemotetCommand(this.selectedRemote, {entity_id: mediaEntity.entity_id,
-          cmd_id:"media_player.pause"}).subscribe();
-      } else if (hasPlayPause)
-      {
-        this.server.executeRemotetCommand(this.selectedRemote, {entity_id: mediaEntity.entity_id,
-          cmd_id:"media_player.play_pause"}).subscribe();
-      }
-    } else
-    {
-      if (hasPlay)
-      {
-        this.server.executeRemotetCommand(this.selectedRemote, {entity_id: mediaEntity.entity_id,
-          cmd_id:"media_player.play"}).subscribe();
-      } else if (hasPlayPause)
-      {
-        this.server.executeRemotetCommand(this.selectedRemote, {entity_id: mediaEntity.entity_id,
-          cmd_id:"media_player.play_pause"}).subscribe();
-      }
-    }
-  }
-
-  powerToggle(mediaEntity: MediaEntityState) {
-    if (!this.selectedRemote) return;
-    if (this.checkFeature(mediaEntity, 'toggle')) {
-      this.server.executeRemotetCommand(this.selectedRemote, {
-        entity_id: mediaEntity.entity_id,
-        cmd_id: "media_player.toggle"
-      }).subscribe();
-      return;
-    }
-    else if (!mediaEntity.new_state?.attributes?.state || ["OFF", "UNAVAILABLE", "UNKNOWN", "STANDBY"].includes(mediaEntity.new_state.attributes.state))
-      this.server.executeRemotetCommand(this.selectedRemote, {
-        entity_id: mediaEntity.entity_id,
-        cmd_id: "media_player.on"
-      }).subscribe();
-    else
-      this.server.executeRemotetCommand(this.selectedRemote, {
-        entity_id: mediaEntity.entity_id,
-        cmd_id: "media_player.off"
-      }).subscribe();
-  }
-
-  sourceSelected(mediaEntity: MediaEntityState, source: any) {
-    if (!this.selectedRemote || !source) return;
-    console.debug("Source selected", mediaEntity.new_state?.attributes?.source);
-    this.server.executeRemotetCommand(this.selectedRemote, {
-      entity_id: mediaEntity.entity_id,
-      cmd_id: "media_player.select_source", params: {
-        "source": source
-      }
-    }).subscribe();
   }
 }

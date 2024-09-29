@@ -72,6 +72,7 @@ export class DropdownOverComponent {
 
   valueUpdate(value: {value: any; label: string} | undefined)
   {
+    if (!this.options || this.options.length == 0) return;
     if (!value) return;
     this.valueChange.emit(value.value);
   }

@@ -5,7 +5,7 @@
         <div class="flex align-items-center justify-content-center">
           <p-button icon="pi pi-window-minimize" pTooltip="Minimize" (click)="minimized = !minimized"/>
         </div>
-        <div class="flex align-items-center overflow-hidden" style="max-width: 300px">
+        <div class="flex align-items-center overflow-hidden" style="max-width: 250px">
           <app-scrolling-text [text]="remoteWebsocketService.getMediaInfo()"/>
         </div>
         <div class="flex align-items-center justify-content-center" *ngIf="remoteState?.batteryInfo?.capacity" style="width:40px">
@@ -25,52 +25,23 @@
     </div>
   </ng-template>
   <ng-container *ngIf="!minimized">
-    <ng-container *ngIf="mediaEntity">
-      <div class="flex gap-2">
-        <div class="flex-initial flex align-items-center" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url">
-          <img *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && !mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="mediaEntity.new_state!.attributes!.media_image_url!"
-               [alt]="mediaEntity.new_state!.attributes!.media_title!" width="400" height="300"/>
-          <img *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="'/api/proxy?url='+mediaEntity.new_state!.attributes!.media_image_url!"
-               [alt]="mediaEntity.new_state!.attributes!.media_title!" width="400" height="300"/>
-        </div>
-        <div class="flex flex-column row-gap-2" style="max-width: 250px">
-            <p-dropdown [(ngModel)]="mediaEntity" [options]="mediaEntities" placeholder="Media entity" appendTo="body" [style]="{'max-width': '220px'}"
-              (ngModelChange)="changedMediaEntity($event)">
-              <ng-template pTemplate="selectedItem">
-                {{remoteWebsocketService.getEntityName(mediaEntity)}}
-              </ng-template>
-              <ng-template let-item pTemplate="item">
-                {{remoteWebsocketService.getEntityName(item)}}
-              </ng-template>
-            </p-dropdown>
-          <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state?.attributes?.state">
-            <p-tag [value]="mediaEntity.new_state!.attributes!.state!" [severity]="getStatusStyle(mediaEntity.new_state!.attributes!.state!)"/>
-          </div>
-          <app-scrolling-text *ngIf="mediaEntity?.new_state?.attributes?.media_title" [text]="mediaEntity.new_state!.attributes!.media_title!"/>
-          <app-scrolling-text *ngIf="mediaEntity?.new_state?.attributes?.media_artist" [text]="mediaEntity.new_state!.attributes!.media_artist!"/>
-          <app-scrolling-text *ngIf="mediaEntity.new_state!.attributes!.media_album!" [text]="mediaEntity.new_state!.attributes!.media_album!"/>
-          <div *ngIf="mediaEntity.new_state?.attributes?.media_position && mediaEntity.new_state?.attributes?.media_duration &&
-                      mediaEntity.new_state!.attributes!.media_duration! > 0">
-            <p-progressBar [style]="{'width': '100%'}" [value]="Math.round(remoteWebsocketService.getMediaPosition(mediaEntity)*100/mediaEntity.new_state!.attributes!.media_duration!)">
-              <ng-template pTemplate="content" let-value>
-                <span>{{formatDuration(remoteWebsocketService.getMediaPosition(mediaEntity))}}</span>
-              </ng-template>
-            </p-progressBar>
-          </div>
-          <div *ngIf="mediaEntity.new_state?.attributes?.media_position" class="flex align-items-center justify-content-center">
-            <b>{{formatDuration(remoteWebsocketService.getMediaPosition(mediaEntity))}}</b>
-          </div>
-          <div *ngIf="mediaEntity.new_state?.attributes?.volume && mediaEntity.new_state!.attributes!.volume! > 0">
-            <p-progressBar [style]="{'width': '100%'}" [value]="Math.round(mediaEntity.new_state!.attributes!.volume!)">
-              <ng-template pTemplate="content" let-value>
-                <span>{{Math.round(mediaEntity.new_state!.attributes!.volume!)}}%</span>
-              </ng-template>
-            </p-progressBar>
-          </div>
-          <div *ngIf="mediaEntity.new_state?.attributes?.volume" class="flex align-items-center justify-content-center">
-            <b>Volume {{Math.round(mediaEntity.new_state!.attributes!.volume!)}}%</b>
-          </div>
-        </div>
+    <ng-container *ngIf="mediaEntity && selectedRemote">
+      <div class="flex flex-column align-items-center justify-content-center">
+      <div class="flex align-items-center justify-content-center" style="width: 300px; max-width: 450px">
+        <p-dropdown [(ngModel)]="mediaEntity" [options]="mediaEntities" placeholder="Media entity" appendTo="body"
+                    (ngModelChange)="changedMediaEntity($event)" optionLabel="entity_id">
+          <ng-template pTemplate="selectedItem">
+            {{remoteWebsocketService.getEntityName(mediaEntity)}}
+          </ng-template>
+          <ng-template let-item pTemplate="item">
+            {{remoteWebsocketService.getEntityName(item)}}
+          </ng-template>
+        </p-dropdown>
+      </div>
+      <div class="flex gap-2 align-content-center justify-content-center" style="width: 675px">
+      <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" style="width: 675px"
+                        class="flex flex-wrap gap-2 align-content-center justify-content-center ng-star-inserted"></app-media-entity>
+      </div>
       </div>
     </ng-container>
   </ng-container>

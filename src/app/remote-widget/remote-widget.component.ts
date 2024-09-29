@@ -17,6 +17,9 @@ import {ScrollingTextComponent} from "./scrolling-text/scrolling-text.component"
 import {DropdownModule} from "primeng/dropdown";
 import {FormsModule} from "@angular/forms";
 import {MediaEntityState, RemoteState, RemoteWebsocketService} from "./remote-websocket.service";
+import {Activity, Remote, RemoteData} from "../interfaces";
+import {MediaEntityComponent} from "../active-entities/media-entity/media-entity.component";
+import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.component";
 
 
 @Component({
@@ -33,7 +36,9 @@ import {MediaEntityState, RemoteState, RemoteWebsocketService} from "./remote-we
     ProgressBarModule,
     ScrollingTextComponent,
     DropdownModule,
-    FormsModule
+    FormsModule,
+    MediaEntityComponent,
+    DropdownOverComponent
   ],
   templateUrl: './remote-widget.component.html',
   styleUrl: './remote-widget.component.css',
@@ -46,6 +51,8 @@ export class RemoteWidgetComponent implements OnInit {
   remoteState: RemoteState | undefined;
   mediaEntity: MediaEntityState | undefined;
   mediaEntities: MediaEntityState[] = [];
+  selectedRemote: Remote | undefined;
+  activities: Activity[] = [];
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
 
@@ -57,40 +64,53 @@ export class RemoteWidgetComponent implements OnInit {
     this.remoteWebsocketService.onMediaStateChange().subscribe(remoteState => {
       this.mediaEntity = this.remoteWebsocketService.mediaEntity;
       this.mediaEntities = this.remoteWebsocketService.mediaEntities;
+      console.log("Media entities updated", this.mediaEntity, this.mediaEntities);
       this.cdr.detectChanges();
     })
+    this.server.remote$.subscribe(remote => {
+      this.selectedRemote = remote;
+      this.server.getRemoteBattery(this.selectedRemote).subscribe(batteryInfo => {
+        this.remoteState = {batteryInfo};
+        this.cdr.detectChanges();
+      })
+      this.loadActivities();
+      this.cdr.detectChanges();
+    })
+  }
+
+  loadActivities()
+  {
+    if (!this.selectedRemote) return;
+    this.server.getRemoteActivities(this.selectedRemote).subscribe(activities => {
+      this.activities = activities;
+      activities.forEach(activity => {
+        if (activity.attributes?.state && activity.attributes.state === "ON"
+          && this.selectedRemote && activity.entity_id)
+        {
+          this.server.getRemoteActivity(this.selectedRemote, activity.entity_id).subscribe(activity => {
+            const existingActivity = this.activities.find(item => item.entity_id === activity.entity_id);
+            if (!existingActivity)
+              this.activities.push(activity);
+            else
+              Object.assign(existingActivity, activity);
+            this.cdr.detectChanges();
+            activity.options?.included_entities?.forEach(entity => {
+              if (entity.entity_type !== "media_player") return; //TODO add other entities
+              if (this.mediaEntities.find(item => item.entity_id === entity.entity_id)) return;
+              if (this.selectedRemote && entity.entity_id)
+              {
+                this.remoteWebsocketService.updateEntity(entity.entity_id);
+              }
+            })
+          })
+        }
+      })
+    });
   }
 
   changedMediaEntity($event: any) {
     this.remoteWebsocketService.mediaEntity = this.mediaEntity;
   }
 
-
-  getStatusStyle(state: string) {
-    switch(state)
-    {
-      case "UNAVAILABLE":
-      case "UNKNOWN": return "danger";
-      case "ON": return "info";
-      case "OFF": return "secondary";
-      case "PLAYING": return "success";
-      case "PAUSED": return "warning";
-      case "STANDBY": return "secondary";
-      case "BUFFERING":return "success";
-      default: return "secondary";
-    }
-  }
-
-  formatDuration(duration: number): string {
-    const hours = Math.floor(duration / 3600);
-    const minutes = Math.floor((duration - (hours * 3600)) / 60);
-    const seconds = duration - (hours * 3600) - (minutes * 60);
-    return hours.toString().padStart(2, '0') + ':' +
-      minutes.toString().padStart(2, '0') + ':' +
-      seconds.toString().padStart(2, '0');
-  }
-
   protected readonly Math = Math;
-
-
 }

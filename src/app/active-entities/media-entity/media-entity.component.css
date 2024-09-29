@@ -8,10 +8,9 @@
   color: #fbf100;
 }
 
-.media-card-border {
-  border-radius: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.73);
+.media-card {
   position: relative;
+  width: 100%;
 }
 
 .active-tag {

@@ -659,8 +659,10 @@ export class ActivityViewerComponent implements AfterViewInit {
   }
 
   addGridItem($event: ActivityGridComponent) {
-    const position = Helper.getItemPosition(this.gridCommands, $event.getIndex(), this.currentPage!.grid.width,
-      this.currentPage!.grid.height);
+    // const position = Helper.getItemPosition(this.gridCommands, $event.getIndex(), this.currentPage!.grid.width,
+    //   this.currentPage!.grid.height);
+    const position = {x: $event.item.location.x, y: $event.item.location.y,
+      width: $event.item.size.width, height: $event.item.size.height};
     if (!position || !this.activity?.options?.included_entities || this.activity.options.included_entities.length == 0 ||
       !this.configEntityCommands) return;
     if (!this.currentEntity)

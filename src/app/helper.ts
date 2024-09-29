@@ -401,9 +401,9 @@ export class Helper
           if (rowFilled) break;
           if (index == i) return {x: col, y: row, width: width, height: height};
           Helper.fillSquare(matrix, col, row, width, height);
-          i++;
         }
       }
+      i++;
     }
     return null;
   }

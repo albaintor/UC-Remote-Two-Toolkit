@@ -1,0 +1,61 @@
+.slider-edit {
+  display: none;
+  position:absolute;
+  width: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: all 0.5s ease;
+}
+
+.progress-text {
+  position:absolute;
+  width: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.5s ease;
+  color: white;
+  font-weight: bolder;
+}
+
+.progress-max {
+  position:absolute;
+  top: 100%;
+  right: 0;
+  transform: translate(0%, 0%);
+  transition: all 0.5s ease;
+  color: white;
+  font-size: smaller;
+}
+
+.slider-wrapper-noedit {
+  height: 40px;
+}
+
+.slider-wrapper {
+  height: 40px;
+}
+
+.slider-wrapper:hover .slider-progress
+{
+  display:none;
+}
+
+.slider-wrapper:hover .slider-edit
+{
+  display:block;
+  opacity: 1;
+}
+
+.slider-progress {
+  width: 100%;
+  position: relative;
+  text-align: center;
+}
+
+.slider-progress:hover {
+  cursor: pointer;
+}
+

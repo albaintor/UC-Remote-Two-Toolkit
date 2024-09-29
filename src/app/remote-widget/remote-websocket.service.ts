@@ -11,6 +11,7 @@ export interface MediaEntityState
   entity_type: string;
   event_type: string;
   new_state?: {
+    features?: string[];
     attributes?: {
       media_artist?: string;
       media_album?: string;
@@ -22,7 +23,7 @@ export interface MediaEntityState
       media_type?: string;
       source?: string;
       volume?: number;
-      state?: string;
+      state?:  "UNAVAILABLE" | "UNKNOWN" | "ON" | "OFF" | "PLAYING" | "PAUSED" | "STANDBY" | "BUFFERING";
       last_update_time?: number;
     }
   }
@@ -169,6 +170,11 @@ export class RemoteWebsocketService implements OnDestroy {
 
   checkEntityImage(entity: MediaEntityState, attributes: any)
   {
+    if (entity.new_state?.attributes?.media_image_url)
+    {
+      entity.new_state.attributes.media_image_proxy = entity.new_state.attributes.media_image_url.search(/\.[A-Za-z0-9]+$/) == -1 &&
+        !entity.new_state.attributes.media_image_url.startsWith("data:");
+    }
     if (!attributes.media_image_url) return;
     if (entity.new_state?.attributes?.media_image_url !== attributes.media_image_url)
     {
@@ -203,6 +209,12 @@ export class RemoteWebsocketService implements OnDestroy {
               if (!entityEntry.new_state.attributes) entityEntry.new_state.attributes = {};
               (entityEntry.new_state.attributes as any)[key] = value;
             }
+            for (const [key, value] of Object.entries(entity))
+            {
+              if (key === "attributes") continue;
+              if (!entityEntry.new_state) entityEntry.new_state = {};
+              (entityEntry.new_state as any)[key] = value;
+            }
           }
         });
       }
@@ -222,7 +234,38 @@ export class RemoteWebsocketService implements OnDestroy {
         entity.new_state.attributes.last_update_time = Date.now();
       }
     }
+    this.initEntities();
     console.debug("Media entities", this._mediaEntities);
+  }
+
+  initEntities()
+  {
+    if (this.remote) {
+      const remote = this.remote;
+      this._mediaEntities.forEach(entity => {
+        const entityEntry = this._mediaEntities.find(item =>
+          item.entity_id === entity.entity_id);
+        if (!entityEntry || entityEntry.new_state?.features) return;
+        this.serverService.getRemotetEntity(remote, entity.entity_id).subscribe(entity => {
+          const entityEntry = this._mediaEntities.find(item =>
+            item.entity_id === entity.entity_id);
+          if (entityEntry) {
+            this.checkEntityImage(entityEntry, entity.attributes);
+            for (const [key, value] of Object.entries(entity.attributes)) {
+              if (!entityEntry.new_state) entityEntry.new_state = {};
+              if (!entityEntry.new_state.attributes) entityEntry.new_state.attributes = {};
+              (entityEntry.new_state.attributes as any)[key] = value;
+            }
+            for (const [key, value] of Object.entries(entity)) {
+              if (key === "attributes") continue;
+              if (!entityEntry.new_state) entityEntry.new_state = {};
+              (entityEntry.new_state as any)[key] = value;
+            }
+          }
+        })
+        }
+      )
+    }
   }
 
   handleMediaPlayerEvent(message: EventMessage)

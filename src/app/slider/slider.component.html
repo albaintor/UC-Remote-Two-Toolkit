@@ -1,0 +1,14 @@
+<div style="position: relative; width: 100%" [class]="editable ? 'slider-wrapper' : 'slider-wrapper-noedit'">
+  <div class="slider-progress">
+    <p-progressBar [style]="{'width': '100%'}" [value]="value">
+      <ng-template pTemplate="content"></ng-template>
+    </p-progressBar>
+    <div class="progress-text">{{textValue}}</div>
+    <div class="progress-max" *ngIf="max">{{max}}</div>
+  </div>
+  <div class="flex flex-column align-items-center justify-content-center slider-edit" *ngIf="editable">
+    <p-slider [(ngModel)]="value" class="w-full" (ngModelChange)="valueUpdate(value)" />
+    {{textValue}}
+  </div>
+</div>
+

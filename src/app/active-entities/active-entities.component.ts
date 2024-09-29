@@ -11,6 +11,7 @@ import {MenubarModule} from "primeng/menubar";
 import {Remote, RemoteData} from "../interfaces";
 import {FormsModule} from "@angular/forms";
 import {Helper} from "../helper";
+import {SliderComponent} from "../slider/slider.component";
 
 @Component({
   selector: 'app-active-entities',
@@ -25,7 +26,8 @@ import {Helper} from "../helper";
     NgForOf,
     AsyncPipe,
     MenubarModule,
-    FormsModule
+    FormsModule,
+    SliderComponent
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',
@@ -52,6 +54,10 @@ export class ActiveEntitiesComponent implements OnInit {
     }
     this.server.remote$.subscribe(remote => {
       this.selectedRemote = remote;
+      this.server.getRemoteBattery(this.selectedRemote).subscribe(batteryInfo => {
+        this.remoteState = {batteryInfo};
+        this.cdr.detectChanges();
+      })
       this.cdr.detectChanges();
     })
     this.remoteWebsocketService.onRemoteStateChange().subscribe(remoteState => {
@@ -97,5 +103,63 @@ export class ActiveEntitiesComponent implements OnInit {
   setRemote(remote: Remote) {
     this.server.remote$.next(remote);
     this.cdr.detectChanges();
+  }
+
+  checkFeature(mediaEntity: MediaEntityState, feature: string): boolean
+  {
+    if (!mediaEntity.new_state?.features) return false;
+    return mediaEntity.new_state.features.includes(feature);
+  }
+
+  updateVolume(volume: number, mediaEntity: MediaEntityState) {
+    console.debug("Volume update", volume, mediaEntity);
+    if (!mediaEntity || !this.selectedRemote
+      || !this.checkFeature(mediaEntity, "volume")) return;
+    this.server.executeRemotetCommand(this.selectedRemote, {entity_id: mediaEntity.entity_id,
+      cmd_id:"media_player.volume", params: {"volume": volume}}).subscribe(
+      {error: err => console.error("Error updating volume", err)});
+  }
+
+  updatePosition(position: number, mediaEntity: MediaEntityState) {
+    console.debug("Position update", position, mediaEntity);
+    if (!mediaEntity || !this.selectedRemote || !mediaEntity.new_state?.attributes?.media_duration
+      || !this.checkFeature(mediaEntity, "seek")) return;
+
+    const newPosition = Math.floor(mediaEntity.new_state.attributes.media_duration*position/100);
+    const body = {entity_id: mediaEntity.entity_id,
+      cmd_id:"media_player.seek", params: {"media_position": newPosition}};
+    console.debug("Seek", body);
+    this.server.executeRemotetCommand(this.selectedRemote, body).subscribe(
+        {error: err => console.error("Error updting position", err)});
+  }
+
+  clickState(mediaEntity: MediaEntityState) {
+    if (!this.selectedRemote) return;
+    const hasPlayPause = this.checkFeature(mediaEntity, "play_pause");
+    const hasPause = this.checkFeature(mediaEntity, "pause");
+    const hasPlay = this.checkFeature(mediaEntity, "play");
+    if (mediaEntity.new_state?.attributes?.state === "PLAYING")
+    {
+      if (hasPause)
+      {
+        this.server.executeRemotetCommand(this.selectedRemote, {entity_id: mediaEntity.entity_id,
+          cmd_id:"media_player.pause"}).subscribe();
+      } else if (hasPlayPause)
+      {
+        this.server.executeRemotetCommand(this.selectedRemote, {entity_id: mediaEntity.entity_id,
+          cmd_id:"media_player.play_pause"}).subscribe();
+      }
+    } else
+    {
+      if (hasPlay)
+      {
+        this.server.executeRemotetCommand(this.selectedRemote, {entity_id: mediaEntity.entity_id,
+          cmd_id:"media_player.play"}).subscribe();
+      } else if (hasPlayPause)
+      {
+        this.server.executeRemotetCommand(this.selectedRemote, {entity_id: mediaEntity.entity_id,
+          cmd_id:"media_player.play_pause"}).subscribe();
+      }
+    }
   }
 }

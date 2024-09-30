@@ -13,7 +13,8 @@
          [alt]="mediaEntity.new_state!.attributes!.media_title!" width="400" height="300"/>
   </div>
 </div>
-<div class="flex flex-column justify-content-between gap-4" [style]="{'max-width': mediaEntity?.new_state?.attributes?.media_image_url ? '250px' : '600px'}">
+<div class="flex flex-column justify-content-between gap-4" [style]="{'max-width': mediaEntity.new_state?.attributes?.media_image_url ? '250px' : '600px'}">
+  <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
   <div class="flex align-content-center justify-content-center" *ngIf="!mediaEntity?.new_state?.attributes?.media_image_url">
     <h2>{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2>
   </div>

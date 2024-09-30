@@ -27,20 +27,24 @@
   <ng-container *ngIf="!minimized">
     <ng-container *ngIf="mediaEntity && selectedRemote">
       <div class="flex flex-column align-items-center justify-content-center">
-      <div class="flex align-items-center justify-content-center" style="width: 300px; max-width: 450px">
-        <p-dropdown [(ngModel)]="mediaEntity" [options]="mediaEntities" placeholder="Media entity" appendTo="body"
-                    (ngModelChange)="changedMediaEntity($event)" optionLabel="entity_id">
-          <ng-template pTemplate="selectedItem">
-            {{remoteWebsocketService.getEntityName(mediaEntity)}}
-          </ng-template>
-          <ng-template let-item pTemplate="item">
-            {{remoteWebsocketService.getEntityName(item)}}
-          </ng-template>
-        </p-dropdown>
-      </div>
       <div class="flex gap-2 align-content-center justify-content-center" style="width: 675px">
       <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" style="width: 675px"
-                        class="flex flex-wrap gap-2 align-content-center justify-content-center ng-star-inserted"></app-media-entity>
+                        class="flex flex-wrap gap-2 align-content-center justify-content-center ng-star-inserted"
+                        [headerTemplate]="entitySelector">
+        <ng-template #entitySelector>
+          <div class="flex align-items-center justify-content-center" style="width: 100%">
+            <p-dropdown [(ngModel)]="mediaEntity" [options]="mediaEntities" placeholder="Media entity" appendTo="body"
+                        (ngModelChange)="changedMediaEntity($event)" optionLabel="entity_id">
+              <ng-template pTemplate="selectedItem">
+                {{remoteWebsocketService.getEntityName(mediaEntity)}}
+              </ng-template>
+              <ng-template let-item pTemplate="item">
+                {{remoteWebsocketService.getEntityName(item)}}
+              </ng-template>
+            </p-dropdown>
+          </div>
+        </ng-template>
+      </app-media-entity>
       </div>
       </div>
     </ng-container>

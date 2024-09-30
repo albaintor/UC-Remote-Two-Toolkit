@@ -1,10 +1,18 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, ViewEncapsulation} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnInit,
+  TemplateRef,
+  ViewEncapsulation
+} from '@angular/core';
 import {MediaEntityState, RemoteWebsocketService} from "../../remote-widget/remote-websocket.service";
 import {Remote} from "../../interfaces";
 import {ServerService} from "../../server.service";
 import {Button} from "primeng/button";
 import {DropdownOverComponent} from "../../controls/dropdown-over/dropdown-over.component";
-import {NgIf} from "@angular/common";
+import {NgIf, NgTemplateOutlet} from "@angular/common";
 import {ScrollingTextComponent} from "../../remote-widget/scrolling-text/scrolling-text.component";
 import {SliderComponent} from "../../controls/slider/slider.component";
 import {TagModule} from "primeng/tag";
@@ -20,7 +28,8 @@ import {TooltipModule} from "primeng/tooltip";
     ScrollingTextComponent,
     SliderComponent,
     TagModule,
-    TooltipModule
+    TooltipModule,
+    NgTemplateOutlet
   ],
   templateUrl: './media-entity.component.html',
   styleUrl: './media-entity.component.css',
@@ -31,6 +40,7 @@ export class MediaEntityComponent implements OnInit {
   protected readonly Math = Math;
   @Input() mediaEntity: MediaEntityState | undefined;
   @Input() remote: Remote | undefined;
+  @Input() headerTemplate : TemplateRef<HTMLAreaElement> | undefined;
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
 

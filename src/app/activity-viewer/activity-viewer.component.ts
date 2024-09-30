@@ -25,7 +25,7 @@ import {ToastModule} from "primeng/toast";
 import {NgForOf, NgIf} from "@angular/common";
 import {PaginatorModule, PaginatorState} from "primeng/paginator";
 import {ChipModule} from "primeng/chip";
-import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
+import {OverlayPanelModule} from "primeng/overlaypanel";
 import {RouterLink} from "@angular/router";
 import {ActivityGridComponent} from "./activity-grid/activity-grid.component";
 import {ButtonModule} from "primeng/button";
@@ -43,7 +43,6 @@ import {ToolbarModule} from "primeng/toolbar";
 import {DockModule} from "primeng/dock";
 import {ActivityPageListComponent, Operation} from "./activity-page-list/activity-page-list.component";
 import {TagModule} from "primeng/tag";
-import {InputNumber} from "primeng/inputnumber";
 import {InputTextModule} from "primeng/inputtext";
 import {HttpErrorResponse} from "@angular/common/http";
 
@@ -109,6 +108,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   }
   activity: Activity | undefined;
   currentEntity: Entity | undefined;
+  entities: Entity[] = [];
   remote: Remote | undefined;
   @Input("remote") set _remote(value: Remote | undefined) {
     this.remote = value;
@@ -153,6 +153,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   selectionMode = false;
   selection: ActivityGridComponent[] = [];
   remoteModels: RemoteModels | undefined;
+  includedEntity: Entity | undefined;
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
@@ -185,6 +186,10 @@ export class ActivityViewerComponent implements AfterViewInit {
     }
     this.server.getRemoteModels().subscribe(remoteModels => {
       this.remoteModels = remoteModels;
+      this.cdr.detectChanges();
+    })
+    this.server.entities$.subscribe(entities => {
+      this.entities = entities;
       this.cdr.detectChanges();
     })
   }
@@ -737,5 +742,40 @@ export class ActivityViewerComponent implements AfterViewInit {
 
   selectPage($event: { activity: Activity; page: UIPage }) {
     this.onPageChange({page: this.activity?.options?.user_interface?.pages?.indexOf($event.page)})
+  }
+
+  deleteIncludedEntity(entity: Entity, $event: MouseEvent) {
+    this.confirmationService.confirm({
+      target: $event.target as EventTarget,
+      key: "activityViewerDialog",
+      header: `Are you sure that you want to remove this included entity "${Helper.getEntityName(entity)}" from the activity ?`,
+      message: "This entity should also be removed from UI and buttons mapping",
+      icon: 'pi pi-exclamation-triangle',
+      acceptIcon:"none",
+      rejectIcon:"none",
+      rejectButtonStyleClass:"p-button-text",
+      accept: () => {
+        if (!this.activity?.entity_id || !this.remote) return;
+        const index = this.activity?.options?.included_entities?.indexOf(entity);
+        if (index && index >= 0)
+            this.activity!.options!.included_entities!.splice(index, 1);
+          this.cdr.detectChanges();
+      },
+      reject: () => {
+        if (!this.activity?.options?.included_entities?.find(item => item.entity_id === entity.entity_id))
+          this.activity!.options!.included_entities!.push(entity);
+          this.cdr.detectChanges();
+      }
+    });
+  }
+
+  addIncludedEntity(entity: Entity | undefined) {
+    if (entity) {
+      if (!this.activity?.options?.included_entities?.find(item => item.entity_id === entity.entity_id)) {
+        this.activity?.options?.included_entities?.push(entity);
+        this.cdr.detectChanges();
+      }
+    }
+    this.includedEntity = undefined;
   }
 }

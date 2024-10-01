@@ -25,7 +25,7 @@
   top: 100%;
   right: 0;
   transform: translate(0%, 0%);
-  transition: all 0.5s ease;
+  transition: all 0.5s ease-in-out;
   color: white;
   font-size: smaller;
 }
@@ -36,11 +36,13 @@
 
 .slider-wrapper {
   height: 40px;
+  transition: all 0.5s ease-in-out;
 }
 
 .slider-wrapper:hover .slider-progress
 {
   display:none;
+  transition: all 0.5s ease-in-out;
 }
 
 .slider-wrapper:hover .slider-edit
@@ -53,6 +55,7 @@
   width: 100%;
   position: relative;
   text-align: center;
+  transition: all 0.5s ease-in-out;
 }
 
 .slider-progress:hover {

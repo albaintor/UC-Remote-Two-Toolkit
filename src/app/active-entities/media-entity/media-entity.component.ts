@@ -74,10 +74,11 @@ export class MediaEntityComponent implements OnInit {
       seconds.toString().padStart(2, '0');
   }
 
-  checkFeature(mediaEntity: MediaEntityState, feature: string): boolean
+  checkFeature(mediaEntity: MediaEntityState, feature: string | string[]): boolean
   {
     if (!mediaEntity.new_state?.features) return false;
-    return mediaEntity.new_state.features.includes(feature);
+    const features = (Array.isArray(feature)) ? feature as string[] : [feature];
+    return mediaEntity.new_state.features.find(item => features.includes(item)) !== undefined;
   }
 
   updateVolume(volume: number, mediaEntity: MediaEntityState) {
@@ -162,5 +163,16 @@ export class MediaEntityComponent implements OnInit {
         "source": source
       }
     }).subscribe();
+  }
+
+  hasMediaControls(mediaEntity: MediaEntityState) {
+    return this.checkFeature(mediaEntity, ["stop", "play_pause", "rewind", "fast_forward"])
+  }
+
+  mediaAction(mediaEntity: MediaEntityState, cmd_id: string)
+  {
+    if (!this.remote) return;
+    this.server.executeRemotetCommand(this.remote, {entity_id: mediaEntity.entity_id,
+      cmd_id}).subscribe();
   }
 }

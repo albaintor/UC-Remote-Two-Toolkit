@@ -23,3 +23,7 @@
   top: 8px;
   left: 8px;
 }
+
+.uc-button .p-button-icon {
+  font-size: 2rem !important;
+}

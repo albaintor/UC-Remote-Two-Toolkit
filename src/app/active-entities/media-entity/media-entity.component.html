@@ -1,10 +1,11 @@
-<div *ngIf="mediaEntity" class="flex gap-2 align-content-center justify-content-center media-card">
+<div *ngIf="mediaEntity" class="flex gap-2 justify-content-center media-card">
 <div class="power-button" *ngIf="checkFeature(mediaEntity, 'on_off') || checkFeature(mediaEntity, 'toggle')">
   <p-button icon="pi pi-power-off" [rounded]="true" (click)="powerToggle(mediaEntity)" size="small" pTooltip="Power toggle"/>
 </div>
-<div class="flex-column" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url">
+<div class="flex-column align-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url">
   <div class="flex align-content-center justify-content-center">
-    <h2>{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2>
+    <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
+    <ng-container *ngIf="!headerTemplate"><h2>{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2></ng-container>
   </div>
   <div class="flex-initial flex align-items-center" style="max-width: 400px; max-height: 300px">
     <img *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && !mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="mediaEntity.new_state!.attributes!.media_image_url!"
@@ -13,54 +14,74 @@
          [alt]="mediaEntity.new_state!.attributes!.media_title!" width="400" height="300"/>
   </div>
 </div>
-<div class="flex flex-column justify-content-between gap-4" [style]="{'width': '100%','max-width': mediaEntity.new_state?.attributes?.media_image_url ? '250px' : '600px'}">
-  <div class="flex align-content-center justify-content-center" *ngIf="!mediaEntity?.new_state?.attributes?.media_image_url">
-    <h2>{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2>
+<div class="flex flex-column justify-content-start gap-2" [style]="{'width': '100%','max-width': mediaEntity.new_state?.attributes?.media_image_url ? '250px' : '600px'}">
+  <div class="flex flex-column align-content-start justify-content-center" *ngIf="!mediaEntity?.new_state?.attributes?.media_image_url">
+    <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
+    <ng-container *ngIf="!headerTemplate"><h2 style="text-align: center;">{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2></ng-container>
   </div>
-  <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
-  <div class="flex align-content-center justify-content-center column-gap-2">
-    <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state?.attributes?.state">
-      <p-tag [value]="mediaEntity.new_state!.attributes!.state!" [severity]="getStatusStyle(mediaEntity.new_state!.attributes!.state!)"
-             (click)="clickState(mediaEntity)" styleClass="active-tag" pTooltip="Play / Pause"/>
+  <div class="flex flex-column justify-content-between gap-2" style="width: 100%;height: 100%;">
+    <div class="flex align-content-center justify-content-between column-gap-2 p-2">
+      <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state?.attributes?.state">
+        <p-tag [value]="mediaEntity.new_state!.attributes!.state!" [severity]="getStatusStyle(mediaEntity.new_state!.attributes!.state!)"
+               (click)="clickState(mediaEntity)" styleClass="active-tag" pTooltip="Play / Pause"/>
+      </div>
+      <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state!.attributes!.source">
+        <app-dropdown-over [value]="mediaEntity.new_state!.attributes!.source!" [options]="mediaEntity.new_state?.attributes?.source_list"
+                           [textTemplate]="sourceValue" (valueChange)="sourceSelected(mediaEntity, $event)">
+          <ng-template #sourceValue>
+            <p-tag [value]="mediaEntity.new_state!.attributes!.source!" severity="secondary"></p-tag>
+          </ng-template>
+        </app-dropdown-over>
+      </div>
     </div>
-    <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state!.attributes!.source">
-      <app-dropdown-over [value]="mediaEntity.new_state!.attributes!.source!" [options]="mediaEntity.new_state?.attributes?.source_list"
-                         [textTemplate]="sourceValue" (valueChange)="sourceSelected(mediaEntity, $event)">
-        <ng-template #sourceValue>
-          <p-tag [value]="mediaEntity.new_state!.attributes!.source!" severity="secondary"></p-tag>
-        </ng-template>
-      </app-dropdown-over>
+    <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_title">
+      <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_title!" style="width: 250px"/>
     </div>
-  </div>
-  <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_title">
-    <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_title!" style="width: 250px"/>
-  </div>
-  <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_artist">
-    <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_artist!" style="width: 250px"/>
-  </div>
-  <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state!.attributes!.media_album!">
-    <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_album!" style="width: 250px"/>
-  </div>
-  <div class="flex flex-column" style="width: 100%">
-    <div *ngIf="mediaEntity.new_state?.attributes?.media_position && mediaEntity.new_state?.attributes?.media_duration &&
+    <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_artist">
+      <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_artist!" style="width: 250px"/>
+    </div>
+    <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state!.attributes!.media_album!">
+      <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_album!" style="width: 250px"/>
+    </div>
+    <div class="flex align-items-center justify-content-between" *ngIf="hasMediaControls(mediaEntity)">
+      <p-button *ngIf="checkFeature(mediaEntity, 'rewind')" (click)="mediaAction(mediaEntity, 'media_player.rewind')" icon="icon icon-bw" size="small" pTooltip="Rewind" [rounded]="true" [outlined]="true" class="uc-button"/>
+      <p-button *ngIf="checkFeature(mediaEntity, 'stop')" (click)="mediaAction(mediaEntity, 'media_player.stop')" icon="icon icon-stop" size="small" pTooltip="Stop" [rounded]="true" [outlined]="true" class="uc-button"/>
+      <p-button *ngIf="checkFeature(mediaEntity, 'play_pause')" (click)="mediaAction(mediaEntity, 'media_player.play_pause')" icon="icon icon-play-pause" size="small" pTooltip="Play pause" [rounded]="true" [outlined]="true" class="uc-button"/>
+      <p-button *ngIf="checkFeature(mediaEntity, 'fast_forward')" (click)="mediaAction(mediaEntity, 'media_player.fast_forward')" icon="icon icon-ff" size="small" pTooltip="Fast foward" [rounded]="true" [outlined]="true" class="uc-button"/>
+    </div>
+    <div class="flex align-items-center justify-content-between" *ngIf="checkFeature(mediaEntity, ['previous', 'next', 'channel_switcher'])">
+      <p-button *ngIf="checkFeature(mediaEntity, 'previous')" (click)="mediaAction(mediaEntity, 'media_player.previous')" icon="icon icon-prev" size="small" pTooltip="Previous chapter" [rounded]="true" [outlined]="true" class="uc-button"/>
+      <p-button *ngIf="checkFeature(mediaEntity, 'next')" (click)="mediaAction(mediaEntity, 'media_player.next')" icon="icon icon-next" size="small" pTooltip="Next chapter" [rounded]="true" [outlined]="true" class="uc-button"/>
+      <p-button *ngIf="checkFeature(mediaEntity, 'channel_switcher')" (click)="mediaAction(mediaEntity, 'media_player.channel_down')" icon="icon icon-down-arrow" size="small" pTooltip="Previous channel" [rounded]="true" [outlined]="true" class="uc-button"/>
+      <p-button *ngIf="checkFeature(mediaEntity, 'channel_switcher')" (click)="mediaAction(mediaEntity, 'media_player.channel_up')" icon="icon icon-up-arrow" size="small" pTooltip="Next channel" [rounded]="true" [outlined]="true" class="uc-button"/>
+    </div>
+    <div class="flex flex-column" style="width: 100%">
+      <div *ngIf="mediaEntity.new_state?.attributes?.media_position && mediaEntity.new_state?.attributes?.media_duration &&
                       mediaEntity.new_state!.attributes!.media_duration! > 0"
-         class="flex align-items-center justify-content-center" style="width: 100%">
-      <app-slider [value]="Math.round(remoteWebsocketService.getMediaPosition(mediaEntity)*100/mediaEntity.new_state!.attributes!.media_duration!)"
-                  style="width: 100%" (valueChange)="updatePosition($event, mediaEntity)"
-                  [textValue]="formatDuration(remoteWebsocketService.getMediaPosition(mediaEntity))"
-                  [editable]="checkFeature(mediaEntity, 'seek')" [max]="formatDuration(mediaEntity.new_state!.attributes!.media_duration!)"></app-slider>
-      <b *ngIf="mediaEntity.new_state?.attributes?.media_position &&
+           class="flex align-items-center justify-content-center" style="width: 100%; height: 100%">
+        <app-slider [value]="Math.round(remoteWebsocketService.getMediaPosition(mediaEntity)*100/mediaEntity.new_state!.attributes!.media_duration!)"
+                    style="width: 100%; height: 100%" (valueChange)="updatePosition($event, mediaEntity)"
+                    [textValue]="formatDuration(remoteWebsocketService.getMediaPosition(mediaEntity))"
+                    [editable]="checkFeature(mediaEntity, 'seek')" [max]="formatDuration(mediaEntity.new_state!.attributes!.media_duration!)"></app-slider>
+        <b *ngIf="mediaEntity.new_state?.attributes?.media_position &&
             (!mediaEntity.new_state?.attributes?.media_duration ||
                       mediaEntity.new_state!.attributes!.media_duration! == 0)">
-        {{formatDuration(remoteWebsocketService.getMediaPosition(mediaEntity))}}</b>
+          {{formatDuration(remoteWebsocketService.getMediaPosition(mediaEntity))}}</b>
+      </div>
     </div>
-  </div>
-  <div class="flex flex-column" style="width: 100%" *ngIf="mediaEntity.new_state?.attributes?.volume">
-    <div class="flex align-items-center justify-content-center" style="width: 100%">
-      <app-slider [value]="Math.round(mediaEntity.new_state!.attributes!.volume!)" style="width: 100%" (valueChange)="updateVolume($event, mediaEntity)"
-                  [textValue]="'Volume '+Math.round(mediaEntity.new_state!.attributes!.volume!)+'%'"
-                  [editable]="checkFeature(mediaEntity, 'volume')"></app-slider>
-    </div>
+      <div class="flex align-items-center justify-content-center gap-2" style="width: 100%" *ngIf="mediaEntity.new_state?.attributes?.volume">
+        <p-button *ngIf="checkFeature(mediaEntity, 'mute_toggle')" (click)="mediaAction(mediaEntity, 'media_player.mute_toggle')"
+                  icon="icon icon-mute" size="small" pTooltip="Mute" [rounded]="true" [outlined]="true" class="uc-button"/>
+        <p-button *ngIf="!checkFeature(mediaEntity, 'mute_toggle') && checkFeature(mediaEntity, 'mute')"
+                  (click)="mediaAction(mediaEntity, 'media_player.mute')"
+                  icon="icon icon-mute" size="small" pTooltip="Mute" [rounded]="true" [outlined]="true" class="uc-button"/>
+        <p-button *ngIf="!checkFeature(mediaEntity, 'mute_toggle') && checkFeature(mediaEntity, 'unmute')"
+                  (click)="mediaAction(mediaEntity, 'media_player.unmute')"
+                  icon="icon icon-mute" size="small" pTooltip="Unmute" [rounded]="true" [outlined]="true" class="uc-button"/>
+        <app-slider [value]="Math.round(mediaEntity.new_state!.attributes!.volume!)" style="width: 100%" (valueChange)="updateVolume($event, mediaEntity)"
+                    [textValue]="'Volume '+Math.round(mediaEntity.new_state!.attributes!.volume!)+'%'"
+                    [editable]="checkFeature(mediaEntity, 'volume')"></app-slider>
+      </div>
   </div>
 </div>
 </div>

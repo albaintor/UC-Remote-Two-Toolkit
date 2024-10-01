@@ -26,6 +26,8 @@ export interface MediaEntityState
       state?:  "UNAVAILABLE" | "UNKNOWN" | "ON" | "OFF" | "PLAYING" | "PAUSED" | "STANDBY" | "BUFFERING";
       last_update_time?: number;
       source_list?: string[];
+      sound_mode?: string;
+      sound_mode_list?: string[];
     }
   }
 }

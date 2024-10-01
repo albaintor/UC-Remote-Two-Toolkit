@@ -165,6 +165,17 @@ export class MediaEntityComponent implements OnInit {
     }).subscribe();
   }
 
+  soundModeSelected(mediaEntity: MediaEntityState, sound_mode: any) {
+    if (!this.remote || !sound_mode || sound_mode == mediaEntity.new_state?.attributes?.sound_mode) return;
+    console.debug("Sound mode selected", mediaEntity.new_state?.attributes?.sound_mode);
+    this.server.executeRemotetCommand(this.remote, {
+      entity_id: mediaEntity.entity_id,
+      cmd_id: "media_player.select_sound_mode", params: {
+        "mode": sound_mode
+      }
+    }).subscribe();
+  }
+
   hasMediaControls(mediaEntity: MediaEntityState) {
     return this.checkFeature(mediaEntity, ["stop", "play_pause", "rewind", "fast_forward"])
   }

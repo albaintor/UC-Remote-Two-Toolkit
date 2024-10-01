@@ -115,7 +115,7 @@ The integrations and entities must be configured first on the target remote, oth
 When the remote is connected, a widget will be displayed in overlay and will be filled in by active media player entities. It is possible to execute media player commands based on its capabilities, or to switch to another active media player entity.
 To see more, a "Remote status" link ![image](https://github.com/user-attachments/assets/a9be53f5-ccd5-489c-98d7-adb17df4ab1a) will let display all the active media entities and execute commands on them
 
-<img width="100%" alt="UI grid" src="https://github.com/user-attachments/assets/370ca38a-ca99-4891-8b98-436e1b58ceab">
+<img width="40%" alt="UI grid" src="https://github.com/user-attachments/assets/370ca38a-ca99-4891-8b98-436e1b58ceab">
 
 
 ## Compilation

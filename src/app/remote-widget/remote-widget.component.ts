@@ -67,6 +67,9 @@ export class RemoteWidgetComponent implements OnInit {
       console.log("Media entities updated", this.mediaEntity, this.mediaEntities);
       this.cdr.detectChanges();
     })
+    this.remoteWebsocketService.onMediaPositionChange().subscribe(entities => {
+      this.cdr.detectChanges();
+    });
     this.server.remote$.subscribe(remote => {
       this.selectedRemote = remote;
       this.server.getRemoteBattery(this.selectedRemote).subscribe(batteryInfo => {

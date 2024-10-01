@@ -48,6 +48,9 @@ export class MediaEntityComponent implements OnInit {
     this.remoteWebsocketService.onMediaStateChange().subscribe(remoteState => {
       this.cdr.detectChanges();
     })
+    this.remoteWebsocketService.onMediaPositionChange().subscribe(entities => {
+      this.cdr.detectChanges();
+    });
   }
 
   getStatusStyle(state: string) {

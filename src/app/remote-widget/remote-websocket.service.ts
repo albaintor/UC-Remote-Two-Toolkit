@@ -2,7 +2,7 @@ import {Injectable, OnDestroy, OnInit} from '@angular/core';
 import {ServerService} from "../server.service";
 import {EventMessage, RequestMessage, ResponseMessage, WebsocketService} from "../websocket.service";
 import {BatteryState, Entity, Remote} from "../interfaces";
-import {map, Observable, Observer, share, Subject, Subscription, timer} from "rxjs";
+import {BehaviorSubject, map, Observable, Observer, share, Subject, Subscription, timer} from "rxjs";
 import {Helper} from "../helper";
 
 export interface MediaEntityState
@@ -55,8 +55,9 @@ export class RemoteWebsocketService implements OnDestroy {
   batteryState: BatteryState | undefined;
   private mediaPositionTask: Subscription | undefined;
   entities: Entity[] = [];
-  mediaUpdated$ = new Subject<MediaEntityState[]>();
-  remoteStateUpdated$ = new Subject<RemoteState>();
+  mediaUpdated$ = new BehaviorSubject<MediaEntityState[]>(this.mediaEntities);
+  remoteStateUpdated$ = new BehaviorSubject<RemoteState>({});
+  mediaPositionUpdated$ = new BehaviorSubject<MediaEntityState[]>([]);
   private remote: Remote | undefined;
 
   constructor(private serverService: ServerService, private websocketService: WebsocketService) {
@@ -93,6 +94,11 @@ export class RemoteWebsocketService implements OnDestroy {
   public onMediaStateChange()
   {
     return this.mediaUpdated$;
+  }
+
+  public onMediaPositionChange()
+  {
+    return this.mediaPositionUpdated$;
   }
 
   reset()
@@ -151,7 +157,7 @@ export class RemoteWebsocketService implements OnDestroy {
               entities.push(mediaEntity);
             }
           });
-          if (entities.length > 0) this.mediaUpdated$.next(entities);
+          if (entities.length > 0) this.mediaPositionUpdated$.next(entities);
           return entities;
         }),
         share()

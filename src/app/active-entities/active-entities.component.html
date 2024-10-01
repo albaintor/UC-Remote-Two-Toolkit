@@ -1,6 +1,14 @@
 <p-menubar [model]="menuItems">
+
   <ng-template pTemplate="end">
     <div class="flex align-items-center gap-2">
+      <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntities($event)" appendTo="body"
+                      [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addEntity($event)"
+                      pTooltip="Add entity">
+        <ng-template let-item pTemplate="item">
+          <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
+        </ng-template>
+      </p-autoComplete>
       <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
         <ng-template pTemplate="selectedItem">
           <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>

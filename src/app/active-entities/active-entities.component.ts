@@ -8,13 +8,14 @@ import {TagModule} from "primeng/tag";
 import {MediaEntityState, RemoteState, RemoteWebsocketService} from "../remote-widget/remote-websocket.service";
 import {ServerService} from "../server.service";
 import {MenubarModule} from "primeng/menubar";
-import {Activity, Remote, RemoteData} from "../interfaces";
+import {Activity, Entity, Remote, RemoteData} from "../interfaces";
 import {FormsModule} from "@angular/forms";
 import {Helper} from "../helper";
 import {SliderComponent} from "../controls/slider/slider.component";
 import {Button} from "primeng/button";
 import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.component";
 import {MediaEntityComponent} from "./media-entity/media-entity.component";
+import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
 
 @Component({
   selector: 'app-active-entities',
@@ -33,7 +34,8 @@ import {MediaEntityComponent} from "./media-entity/media-entity.component";
     SliderComponent,
     Button,
     DropdownOverComponent,
-    MediaEntityComponent
+    MediaEntityComponent,
+    AutoCompleteModule
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',
@@ -50,6 +52,9 @@ export class ActiveEntitiesComponent implements OnInit {
   selectedRemote: Remote | undefined;
   remotes: Remote[] | undefined;
   activities: Activity[] = [];
+  newEntity: Entity | undefined;
+  entities: Entity[] = [];
+  suggestions: Entity[] = [];
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
 
@@ -57,8 +62,13 @@ export class ActiveEntitiesComponent implements OnInit {
     const data = localStorage.getItem("remoteData");
     if (data) {
       const remoteData: RemoteData = JSON.parse(data);
+      this.entities = remoteData.entities.filter(item => item.entity_type === 'media_player');
       this.server.setEntities(remoteData.entities);
     }
+    this.server.entities$.subscribe(entities => {
+      this.entities = entities.filter(item => item.entity_type === 'media_player');
+      this.cdr.detectChanges();
+    });
     this.server.remote$.subscribe(remote => {
       this.selectedRemote = remote;
       this.server.getRemoteBattery(this.selectedRemote).subscribe(batteryInfo => {
@@ -76,6 +86,9 @@ export class ActiveEntitiesComponent implements OnInit {
       this.mediaEntities = this.remoteWebsocketService.mediaEntities;
       this.cdr.detectChanges();
     })
+    this.remoteWebsocketService.onMediaPositionChange().subscribe(entities => {
+      this.cdr.detectChanges();
+    });
     this.server.getConfig().subscribe(config => {
       this.remotes = config.remotes!;
       this.selectedRemote  = Helper.getSelectedRemote(this.remotes);
@@ -120,5 +133,21 @@ export class ActiveEntitiesComponent implements OnInit {
   setRemote(remote: Remote) {
     this.server.remote$.next(remote);
     this.cdr.detectChanges();
+  }
+
+  searchEntities($event: AutoCompleteCompleteEvent) {
+    if (!$event.query) this.suggestions = [...this.entities];
+    this.suggestions = this.entities.filter(entity =>
+      Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()));
+  }
+
+  protected readonly Helper = Helper;
+
+  addEntity($event: Entity) {
+    if ($event?.entity_id)
+    {
+      this.remoteWebsocketService.updateEntity($event.entity_id);
+      this.cdr.detectChanges();
+    }
   }
 }

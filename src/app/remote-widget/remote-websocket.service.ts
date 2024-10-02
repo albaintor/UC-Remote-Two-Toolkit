@@ -116,6 +116,11 @@ export class RemoteWebsocketService implements OnDestroy {
 
   initWidget()
   {
+    if (!this._mediaEntity && this._mediaEntities?.length > 0) {
+      this._mediaEntity = this._mediaEntities[0];
+      console.debug("Init media entity", this._mediaEntity);
+      this.mediaUpdated$.next([this._mediaEntity!]);
+    }
     this.websocketService.getMessageEvent().subscribe(message => {
       if (message.kind === "event")
       {
@@ -157,6 +162,9 @@ export class RemoteWebsocketService implements OnDestroy {
               entities.push(mediaEntity);
             }
           });
+          if (!this._mediaEntity && this._mediaEntities?.length > 0) {
+            this._mediaEntity = this._mediaEntities[0];
+          }
           if (entities.length > 0) this.mediaPositionUpdated$.next(entities);
           return entities;
         }),

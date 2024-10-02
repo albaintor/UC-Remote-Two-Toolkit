@@ -1,20 +1,22 @@
 <div *ngIf="mediaEntity" class="flex gap-2 justify-content-center media-card">
 <div class="power-button" *ngIf="checkFeature(mediaEntity, 'on_off') || checkFeature(mediaEntity, 'toggle')">
-  <p-button icon="pi pi-power-off" [rounded]="true" (click)="powerToggle(mediaEntity)" size="small" pTooltip="Power toggle"/>
+  <p-button *ngIf="!isPowerOn(mediaEntity)" icon="pi pi-power-off" [rounded]="true" (click)="powerToggle(mediaEntity)"
+            size="small" pTooltip="Power toggle" severity="secondary"/>
+  <p-button *ngIf="isPowerOn(mediaEntity)" icon="pi pi-power-off" [rounded]="true" (click)="powerToggle(mediaEntity)" size="small" pTooltip="Power toggle"/>
 </div>
 <div class="flex-column align-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url">
-  <div class="flex align-content-center justify-content-center">
+  <div class="flex align-content-center justify-content-center card-title">
     <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
     <ng-container *ngIf="!headerTemplate"><h2>{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2></ng-container>
   </div>
   <div class="flex-initial flex align-items-center" style="max-width: 400px; max-height: 300px">
-    <img *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && !mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="mediaEntity.new_state!.attributes!.media_image_url!"
-         [alt]="mediaEntity.new_state!.attributes!.media_title!" width="400" height="300"/>
-    <img *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="'/api/proxy?url='+mediaEntity.new_state!.attributes!.media_image_url!"
-         [alt]="mediaEntity.new_state!.attributes!.media_title!" width="400" height="300"/>
+    <img class="media-image" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && !mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="mediaEntity.new_state!.attributes!.media_image_url!"
+         [alt]="mediaEntity.new_state!.attributes!.media_title!" />
+    <img class="media-image" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="'/api/proxy?url='+mediaEntity.new_state!.attributes!.media_image_url!"
+         [alt]="mediaEntity.new_state!.attributes!.media_title!"/>
   </div>
 </div>
-<div class="flex flex-column justify-content-start gap-2" [style]="{'width': '100%','max-width': mediaEntity.new_state?.attributes?.media_image_url ? '250px' : '600px'}">
+<div class="flex flex-column justify-content-start gap-2" [style]="{'width': '100%','max-width': mediaEntity.new_state?.attributes?.media_image_url ? '300px' : '500px'}">
   <div class="flex flex-column align-content-start justify-content-center" *ngIf="!mediaEntity?.new_state?.attributes?.media_image_url">
     <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
     <ng-container *ngIf="!headerTemplate"><h2 style="text-align: center;">{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2></ng-container>
@@ -43,13 +45,13 @@
       </div>
     </div>
     <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_title">
-      <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_title!" style="width: 250px"/>
+      <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_title!" class="card-info"/>
     </div>
     <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_artist">
-      <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_artist!" style="width: 250px"/>
+      <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_artist!" class="card-info"/>
     </div>
     <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state!.attributes!.media_album!">
-      <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_album!" style="width: 250px"/>
+      <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_album!" class="card-info"/>
     </div>
     <div class="flex align-items-center justify-content-between" *ngIf="hasMediaControls(mediaEntity)">
       <p-button *ngIf="checkFeature(mediaEntity, 'rewind')" (click)="mediaAction(mediaEntity, 'media_player.rewind')" icon="icon icon-bw" size="small" pTooltip="Rewind" [rounded]="true" [outlined]="true" class="uc-button"/>
@@ -77,7 +79,8 @@
           {{formatDuration(remoteWebsocketService.getMediaPosition(mediaEntity))}}</b>
       </div>
     </div>
-      <div class="flex align-items-center justify-content-center gap-2" style="width: 100%" *ngIf="mediaEntity.new_state?.attributes?.volume">
+      <div class="flex align-items-center justify-content-center gap-2" style="width: 100%"
+           *ngIf="checkFeature(mediaEntity, ['volume', 'volume_up_down', 'mute_toggle', 'mute'])">
         <p-button *ngIf="checkFeature(mediaEntity, 'mute_toggle')" (click)="mediaAction(mediaEntity, 'media_player.mute_toggle')"
                   icon="icon icon-mute" size="small" pTooltip="Mute" [rounded]="true" [outlined]="true" class="uc-button"/>
         <p-button *ngIf="!checkFeature(mediaEntity, 'mute_toggle') && checkFeature(mediaEntity, 'mute')"
@@ -86,6 +89,12 @@
         <p-button *ngIf="!checkFeature(mediaEntity, 'mute_toggle') && checkFeature(mediaEntity, 'unmute')"
                   (click)="mediaAction(mediaEntity, 'media_player.unmute')"
                   icon="icon icon-mute" size="small" pTooltip="Unmute" [rounded]="true" [outlined]="true" class="uc-button"/>
+        <p-button *ngIf="!checkFeature(mediaEntity, 'volume') && checkFeature(mediaEntity, 'volume_up_down')"
+                  (click)="mediaAction(mediaEntity, 'media_player.volume_down')"
+                  icon="icon icon-minus" size="small" pTooltip="Volume -" [rounded]="true" [outlined]="true" class="uc-button"/>
+        <p-button *ngIf="!checkFeature(mediaEntity, 'volume') && checkFeature(mediaEntity, 'volume_up_down')"
+                  (click)="mediaAction(mediaEntity, 'media_player.volume_up')"
+                  icon="icon icon-plus" size="small" pTooltip="Volume +" [rounded]="true" [outlined]="true" class="uc-button"/>
         <app-slider [value]="Math.round(mediaEntity.new_state!.attributes!.volume!)" style="width: 100%" (valueChange)="updateVolume($event, mediaEntity)"
                     [textValue]="'Volume '+Math.round(mediaEntity.new_state!.attributes!.volume!)+'%'"
                     [editable]="checkFeature(mediaEntity, 'volume')"></app-slider>

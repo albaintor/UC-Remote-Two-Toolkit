@@ -13,7 +13,7 @@ import {TagModule} from "primeng/tag";
 import {AsyncPipe, DatePipe, NgIf} from "@angular/common";
 import {DockModule} from "primeng/dock";
 import {ProgressBarModule} from "primeng/progressbar";
-import {ScrollingTextComponent} from "./scrolling-text/scrolling-text.component";
+import {ScrollingTextComponent} from "../controls/scrolling-text/scrolling-text.component";
 import {DropdownModule} from "primeng/dropdown";
 import {FormsModule} from "@angular/forms";
 import {MediaEntityState, RemoteState, RemoteWebsocketService} from "./remote-websocket.service";

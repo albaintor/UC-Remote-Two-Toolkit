@@ -13,7 +13,7 @@ import {ServerService} from "../../server.service";
 import {Button} from "primeng/button";
 import {DropdownOverComponent} from "../../controls/dropdown-over/dropdown-over.component";
 import {NgIf, NgTemplateOutlet} from "@angular/common";
-import {ScrollingTextComponent} from "../../remote-widget/scrolling-text/scrolling-text.component";
+import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-text.component";
 import {SliderComponent} from "../../controls/slider/slider.component";
 import {TagModule} from "primeng/tag";
 import {TooltipModule} from "primeng/tooltip";
@@ -136,6 +136,11 @@ export class MediaEntityComponent implements OnInit {
     }
   }
 
+  isPowerOn(mediaEntity: MediaEntityState): boolean {
+    return !(!mediaEntity?.new_state?.attributes?.state ||
+      ["OFF", "UNAVAILABLE", "UNKNOWN", "STANDBY"].includes(mediaEntity.new_state?.attributes.state));
+  }
+
   powerToggle(mediaEntity: MediaEntityState) {
     if (!this.remote) return;
     if (this.checkFeature(mediaEntity, 'toggle')) {
@@ -145,7 +150,7 @@ export class MediaEntityComponent implements OnInit {
       }).subscribe();
       return;
     }
-    else if (!mediaEntity.new_state?.attributes?.state || ["OFF", "UNAVAILABLE", "UNKNOWN", "STANDBY"].includes(mediaEntity.new_state.attributes.state))
+    else if (!this.isPowerOn(mediaEntity))
       this.server.executeRemotetCommand(this.remote, {
         entity_id: mediaEntity.entity_id,
         cmd_id: "media_player.on"

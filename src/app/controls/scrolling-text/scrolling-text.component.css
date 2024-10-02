@@ -30,6 +30,8 @@
   top: 0;
   height: 100%;
   width: 10px;
+  padding: 0;
+  margin: 0;
 }
 .fader.fader-left {
   left: 0;
@@ -37,5 +39,5 @@
 }
 .fader.fader-right {
   right: 0;
-  background: linear-gradient(to left, transparent, #2c2c2c);
+  background: linear-gradient(to right, transparent, #2c2c2c);
 }

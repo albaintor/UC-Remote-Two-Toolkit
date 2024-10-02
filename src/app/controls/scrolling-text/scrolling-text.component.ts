@@ -40,7 +40,7 @@ export class ScrollingTextComponent implements AfterViewInit {
   updateClass()
   {
     if (!this.textContainer || !this.textContent) return;
-    if (this.textContainer.nativeElement.clientWidth < this.textContent.nativeElement.clientWidth) {
+    if (this.textContainer.nativeElement.clientWidth < this.textContent.nativeElement.clientWidth + 15) {
       this.textContent.nativeElement.classList.add("animate");
     }
     else {

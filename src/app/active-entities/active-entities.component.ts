@@ -3,7 +3,7 @@ import {DropdownModule} from "primeng/dropdown";
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
 import {MenuItem, PrimeTemplate} from "primeng/api";
 import {ProgressBarModule} from "primeng/progressbar";
-import {ScrollingTextComponent} from "../remote-widget/scrolling-text/scrolling-text.component";
+import {ScrollingTextComponent} from "../controls/scrolling-text/scrolling-text.component";
 import {TagModule} from "primeng/tag";
 import {MediaEntityState, RemoteState, RemoteWebsocketService} from "../remote-widget/remote-websocket.service";
 import {ServerService} from "../server.service";
@@ -138,6 +138,7 @@ export class ActiveEntitiesComponent implements OnInit {
   searchEntities($event: AutoCompleteCompleteEvent) {
     if (!$event.query) this.suggestions = [...this.entities];
     this.suggestions = this.entities.filter(entity =>
+      !this.mediaEntities.find(item => item.entity_id === entity.entity_id) &&
       Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()));
   }
 
@@ -147,6 +148,7 @@ export class ActiveEntitiesComponent implements OnInit {
     if ($event?.entity_id)
     {
       this.remoteWebsocketService.updateEntity($event.entity_id);
+      this.newEntity = undefined;
       this.cdr.detectChanges();
     }
   }

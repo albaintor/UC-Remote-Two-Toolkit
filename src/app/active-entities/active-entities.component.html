@@ -2,6 +2,7 @@
 
   <ng-template pTemplate="end">
     <div class="flex align-items-center gap-2">
+      Add entities :
       <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntities($event)" appendTo="body"
                       [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addEntity($event)"
                       pTooltip="Add entity">
@@ -36,9 +37,9 @@
            [severity]="(remoteWebsocketService.connectionStatus  | async) ? 'success' : 'warning'"/>
   </div>
 </div>
-<div class="flex flex-wrap gap-6">
-  <div class="flex gap-2 align-content-center justify-content-center media-card-border" style="width: 675px" *ngFor="let mediaEntity of mediaEntities">
-    <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" style="width: 675px"
+<div class="flex flex-wrap gap-3">
+  <div class="flex gap-2 align-content-center justify-content-center media-card-border" style="width: 600px" *ngFor="let mediaEntity of mediaEntities">
+    <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" style="width: 600px"
                       class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"></app-media-entity>
   </div>
 </div>

@@ -153,7 +153,7 @@ export class WebsocketService implements OnDestroy {
     if (this.remote.port)
       url = `ws://${this.remote.address}:${this.remote.port}/ws`;
     this.messageId = 0;
-    console.trace("Init websocket", url);
+    console.debug("Init websocket", url);
     const openObserver = new Subject<Event>();
     openObserver.subscribe(() => {
       this.status$.next(true);

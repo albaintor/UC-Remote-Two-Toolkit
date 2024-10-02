@@ -1,0 +1,97 @@
+.grid-item-static {
+  /*background-color: rgba(28, 28, 28, 0.8);*/
+  border: 1px solid rgb(255, 255, 255);
+  padding: 5px;
+  text-align: center;
+  min-height: 75px;
+  width: 100%;
+  height: 100%;
+  user-select: auto;
+}
+
+.grid-item-clickable {
+  /*background-color: rgba(28, 28, 28, 0.8);*/
+  border: 1px solid rgb(255, 255, 255);
+  padding: 5px;
+  text-align: center;
+  cursor: pointer;
+  min-height: 75px;
+  width: 100%;
+  height: 100%;
+  user-select: auto;
+}
+
+.grid-item {
+  /*background-color: rgba(28, 28, 28, 0.8);*/
+  border: 1px solid rgb(255, 255, 255);
+  padding: 5px;
+  text-align: center;
+  min-height: 75px;
+  cursor: move;
+  width: 100%;
+  height: 100%;
+}
+
+.grid-item-run {
+  /*border: 1px solid rgba(255, 255, 255, 0.23);*/
+  padding: 5px;
+  text-align: center;
+  cursor: pointer;
+  min-height: 75px;
+  width: 100%;
+  height: 100%;
+  user-select: auto;
+  transition: all 0.2s ease-in-out;
+}
+
+.grid-item-run-static {
+  /*border: 1px solid rgba(255, 255, 255, 0.23);*/
+  padding: 5px;
+  text-align: center;
+  min-height: 75px;
+  width: 100%;
+  height: 100%;
+  user-select: auto;
+}
+
+.grid-item-run:hover
+{
+  background-color: rgba(142, 132, 132, 0.56);
+}
+
+
+.grid-item-selection {
+  /*background-color: rgba(28, 28, 28, 0.8);*/
+  border: 1px solid rgb(255, 255, 255);
+  padding: 5px;
+  text-align: center;
+  min-height: 75px;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.grid-item-selected {
+  background-color: rgba(70, 116, 223, 0.8);
+  border: 1px solid rgb(255, 255, 255);
+  padding: 5px;
+  text-align: center;
+  min-height: 75px;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.grid-item.over {
+  border: 3px dotted #666;
+  background-color: rgba(191, 191, 191, 0.8);
+  animation: pulse  2s infinite;
+}
+
+@keyframes pulse  {
+  0%, 100% {background-color: rgba(191, 191, 191, 0.8);}
+  50% {background-color: rgba(76, 76, 76, 0.8);}
+}
+/*[draggable] {
+  user-select: none;
+}*/

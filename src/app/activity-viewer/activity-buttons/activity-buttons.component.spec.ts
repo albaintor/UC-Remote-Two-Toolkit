@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ActivityGridComponent } from './activity-grid.component';
+import { ActivityButtonsComponent } from './activity-buttons.component';
 
-describe('ActivityGridComponent', () => {
-  let component: ActivityGridComponent;
-  let fixture: ComponentFixture<ActivityGridComponent>;
+describe('ActivityButtonsComponent', () => {
+  let component: ActivityButtonsComponent;
+  let fixture: ComponentFixture<ActivityButtonsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ActivityGridComponent]
+      imports: [ActivityButtonsComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ActivityGridComponent);
+    fixture = TestBed.createComponent(ActivityButtonsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

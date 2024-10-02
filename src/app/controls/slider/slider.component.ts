@@ -34,7 +34,12 @@ import {debounceTime, Subject, Subscription} from "rxjs";
   }]
 })
 export class SliderComponent implements OnInit {
-  @Input() value: number | undefined;
+  value: number | undefined;
+  @Input("value") set _value(value: any | undefined) {
+    this.value = value;
+    if (isNaN(value)) this.value = 0;
+    this.cdr.detectChanges();
+  }
   @Output() valueChange = new EventEmitter<number>();
   @Input() textValue: string | undefined;
   @Input() editable = true;
@@ -59,4 +64,5 @@ export class SliderComponent implements OnInit {
     this.sliderSubject.next(value);
   }
 
+  protected readonly isNaN = isNaN;
 }

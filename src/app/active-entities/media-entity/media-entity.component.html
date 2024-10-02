@@ -96,7 +96,7 @@
                   (click)="mediaAction(mediaEntity, 'media_player.volume_up')"
                   icon="icon icon-plus" size="small" pTooltip="Volume +" [rounded]="true" [outlined]="true" class="uc-button"/>
         <app-slider [value]="Math.round(mediaEntity.new_state!.attributes!.volume!)" style="width: 100%" (valueChange)="updateVolume($event, mediaEntity)"
-                    [textValue]="'Volume '+Math.round(mediaEntity.new_state!.attributes!.volume!)+'%'"
+                    [textValue]="'Volume '+getNumber(mediaEntity.new_state!.attributes!.volume!)+'%'"
                     [editable]="checkFeature(mediaEntity, 'volume')"></app-slider>
       </div>
   </div>

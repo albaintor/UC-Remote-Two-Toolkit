@@ -16,6 +16,7 @@ import {Button} from "primeng/button";
 import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.component";
 import {MediaEntityComponent} from "./media-entity/media-entity.component";
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
+import {ActivityPlayerComponent} from "../activity-player/activity-player.component";
 
 @Component({
   selector: 'app-active-entities',
@@ -35,7 +36,8 @@ import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplet
     Button,
     DropdownOverComponent,
     MediaEntityComponent,
-    AutoCompleteModule
+    AutoCompleteModule,
+    ActivityPlayerComponent
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',
@@ -55,6 +57,10 @@ export class ActiveEntitiesComponent implements OnInit {
   newEntity: Entity | undefined;
   entities: Entity[] = [];
   suggestions: Entity[] = [];
+  selectedActivities: Activity[] = [];
+  suggestedActivities: Activity[] = [];
+  protected readonly Helper = Helper;
+  newActivity: Activity | undefined;
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
 
@@ -142,8 +148,6 @@ export class ActiveEntitiesComponent implements OnInit {
       Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()));
   }
 
-  protected readonly Helper = Helper;
-
   addEntity($event: Entity) {
     if ($event?.entity_id)
     {
@@ -151,5 +155,31 @@ export class ActiveEntitiesComponent implements OnInit {
       this.newEntity = undefined;
       this.cdr.detectChanges();
     }
+  }
+
+  searchActivities($event: AutoCompleteCompleteEvent) {
+    if (!this.activities) return;
+    if (!$event.query) this.suggestedActivities = [...this.activities];
+    this.suggestedActivities = this.activities.filter(entity =>
+      !this.selectedActivities.find(item => item.entity_id === entity.entity_id) &&
+      Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()));
+  }
+
+  addActivity($event: Activity) {
+    if (!this.selectedRemote || !$event?.entity_id || this.selectedActivities.find(item => item.entity_id === $event.entity_id)) return;
+    this.server.getRemoteActivity(this.selectedRemote, $event.entity_id).subscribe(activity => {
+      this.selectedActivities.push(activity);
+    })
+    this.cdr.detectChanges();
+  }
+
+  removeActivity($event: ActivityPlayerComponent) {
+    console.log("REMOVED");
+    if (!this.selectedActivities.find(item => item.entity_id === $event.activity?.entity_id)) return;
+    this.selectedActivities.splice(this.selectedActivities.indexOf(
+      this.selectedActivities.find(item => item.entity_id === $event.activity?.entity_id)!
+    ), 1);
+
+    this.cdr.detectChanges();
   }
 }

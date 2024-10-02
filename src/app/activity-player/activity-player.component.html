@@ -1,0 +1,26 @@
+<p-dialog #dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
+          contentStyleClass="widget-dialog" class="widget" styleClass="widget-header" appendTo="body"
+          (close)="closeDialog($event);dialog.close($event)" [style]="{'max-height': 'calc(100vh - 30px)'}">
+  <ng-template pTemplate="header">
+    <div class="flex justify-content-start flex-wrap gap-3 column-gap-4" style="width: 100%">
+      <div class="flex align-items-center justify-content-center">
+        <p-button icon="pi pi-window-minimize" pTooltip="Minimize" (click)="minimized = !minimized"/>
+      </div>
+      <div class="flex flex-grow-1 align-items-center justify-content-center">
+        <h3>Activity {{Helper.getEntityName(activity)}}</h3>
+      </div>
+    </div>
+    <div class="flex align-items-end">
+      <p-button icon="pi pi-times" pTooltip="Minimize" (click)="closeDialog($event)" [rounded]="true" [outlined]="true"/>
+    </div>
+  </ng-template>
+  <div class="flex-initial flex align-items-center justify-content-center gap-4">
+    <p-button icon="pi pi-stop" [rounded]="true" pTooltip="Stop activity" (click)="executeActivity('activity.off')" severity="danger"/>
+    <p-button icon="pi pi-play" [rounded]="true" pTooltip="Start activity" (click)="executeActivity('activity.on')" severity="success"/>
+  </div>
+  <ng-container *ngIf="!minimized">
+    <app-activity-buttons [remote]="remote" [activity]="activity" [editMode]="false"/>
+    <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [gridPixelWidth]="400" [gridPixelHeight]="500"
+                       [selectionMode]="false" [currentPage]="currentPage" [runMode]="true"/>
+  </ng-container>
+</p-dialog>

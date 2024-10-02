@@ -12,13 +12,12 @@ import {ConfirmationService, MessageService} from "primeng/api";
 import {ServerService} from "../server.service";
 import {
   Activity,
-  ButtonMapping,
   UIPage,
   ActivityPageCommand,
   Command,
   Remote,
   Entity,
-  EntityCommand, RemoteVersion, RemoteModels, RemoteModel, RemoteData, ScreenLayout, EntityCommandParameter
+  EntityCommand, RemoteVersion, RemoteModels, RemoteData, ScreenLayout, EntityCommandParameter
 } from "../interfaces";
 import {DialogModule} from "primeng/dialog";
 import {ToastModule} from "primeng/toast";
@@ -27,7 +26,7 @@ import {PaginatorModule, PaginatorState} from "primeng/paginator";
 import {ChipModule} from "primeng/chip";
 import {OverlayPanelModule} from "primeng/overlaypanel";
 import {RouterLink} from "@angular/router";
-import {ActivityGridComponent} from "./activity-grid/activity-grid.component";
+import {ActivityGridItemComponent} from "./activity-grid-item/activity-grid-item.component";
 import {ButtonModule} from "primeng/button";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {Helper} from "../helper";
@@ -45,6 +44,7 @@ import {ActivityPageListComponent, Operation} from "./activity-page-list/activit
 import {TagModule} from "primeng/tag";
 import {InputTextModule} from "primeng/inputtext";
 import {HttpErrorResponse} from "@angular/common/http";
+import {ActivityButtonsComponent} from "./activity-buttons/activity-buttons.component";
 
 enum DataFormat {
   None,
@@ -72,7 +72,7 @@ export class AsPipe implements PipeTransform {
     ChipModule,
     OverlayPanelModule,
     RouterLink,
-    ActivityGridComponent,
+    ActivityGridItemComponent,
     ButtonModule,
     NgxJsonViewerModule,
     UiCommandEditorComponent,
@@ -85,7 +85,8 @@ export class AsPipe implements PipeTransform {
     DockModule,
     ActivityPageListComponent,
     TagModule,
-    InputTextModule
+    InputTextModule,
+    ActivityButtonsComponent
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',
@@ -96,7 +97,6 @@ export class AsPipe implements PipeTransform {
 export class ActivityViewerComponent implements AfterViewInit {
   currentPage: UIPage | undefined;
   configEntityCommands: EntityCommand[] | undefined;
-  mappedButtons: string[] | undefined;
   gridSizeMin: { width: number; height: number } = {width: 1, height: 1};
   screenLayout: ScreenLayout | undefined;
   @Input('activity') set _activity(value: Activity | undefined) {
@@ -113,10 +113,6 @@ export class ActivityViewerComponent implements AfterViewInit {
   @Input("remote") set _remote(value: Remote | undefined) {
     this.remote = value;
     if (value) {
-      this.server.getRemoteVersion(value).subscribe(version => {
-        this.version = version;
-        this.cdr.detectChanges();
-      });
       this.server.getConfigScreenLayout(value).subscribe(screenLayout => {
         this.screenLayout = screenLayout;
         console.debug("Screen layout", this.screenLayout);
@@ -127,21 +123,14 @@ export class ActivityViewerComponent implements AfterViewInit {
   @Input() editMode = true;
   @Output() onChange: EventEmitter<void> = new EventEmitter();
   @Output() reload = new EventEmitter<void>();
-  buttonsMap:{ [id: string]: string } = {};
-  reversedButtonMap:{ [id: string]: string } = {};
   public Command!: Command;
   @ViewChild("commandeditor", {static: false}) commandeditor: UiCommandEditorComponent | undefined;
   @ViewChild("input_file_page", {static: false}) input_file_page: ElementRef | undefined;
-  @ViewChildren(ActivityGridComponent) gridButtons:QueryList<ActivityGridComponent> | undefined;
-  @ViewChild(ButtonEditorComponent) buttonEditor:ButtonEditorComponent | undefined;
-  version: RemoteVersion | undefined;
+  @ViewChildren(ActivityGridItemComponent) gridButtons:QueryList<ActivityGridItemComponent> | undefined;
+  @ViewChild(ActivityButtonsComponent) buttons:ActivityButtonsComponent | undefined;
 
-  mouseOverButtonName: string = "";
-  mouseoverButton: ButtonMapping | undefined;
-  selectedButton: ButtonMapping | undefined;
-  buttonPanelStyle: any = { width: '450px' };
   protected readonly JSON = JSON;
-  gridItemSource: ActivityGridComponent | undefined;
+  gridItemSource: ActivityGridItemComponent | undefined;
   gridCommands: ActivityPageCommand[] = [];
   showDump: boolean = false;
   firstPage = 0;
@@ -149,20 +138,13 @@ export class ActivityViewerComponent implements AfterViewInit {
   gridPixelHeight = 6*185;
   protected readonly Helper = Helper;
   toggleGrid = true;
-  gridItem: ActivityGridComponent | undefined;
+  gridItem: ActivityGridItemComponent | undefined;
   selectionMode = false;
-  selection: ActivityGridComponent[] = [];
-  remoteModels: RemoteModels | undefined;
+  selection: ActivityGridItemComponent[] = [];
   includedEntity: Entity | undefined;
-
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private confirmationService: ConfirmationService) {
-    this.server.getPictureRemoteMap().subscribe(buttonsMap => {
-      this.buttonsMap = buttonsMap;
-      this.reversedButtonMap = Object.fromEntries(Object.entries(buttonsMap).map(([key, value]) => [value, key]));
-      this.updateButtons();
-    })
     const data = localStorage.getItem("remoteData");
     if (data) {
       const remoteData: RemoteData = JSON.parse(data);
@@ -184,14 +166,10 @@ export class ActivityViewerComponent implements AfterViewInit {
         this.cdr.detectChanges();
       });
     }
-    this.server.getRemoteModels().subscribe(remoteModels => {
-      this.remoteModels = remoteModels;
-      this.cdr.detectChanges();
-    })
     this.server.entities$.subscribe(entities => {
       this.entities = entities;
       this.cdr.detectChanges();
-    })
+    });
   }
 
   @HostListener('window:resize', ['$event'])
@@ -205,12 +183,6 @@ export class ActivityViewerComponent implements AfterViewInit {
     // this.remotePicture?.nativeElement.addListener()
     this.gridPixelWidth = Math.min(window.innerWidth*0.8, 4*185);
     this.gridPixelHeight = Math.min(window.innerHeight*1.2, 6*185);
-  }
-
-  getRemoteModel(): RemoteModel | undefined
-  {
-    if (!this.remoteModels || !this.version) return undefined;
-    return this.remoteModels.models.find(model => model.model === this.version?.model);
   }
 
   view(activity: Activity, editable: boolean): void {
@@ -230,16 +202,6 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.updateCurrentPage();
   }
 
-  updateButtons()
-  {
-    if (Object.keys(this.reversedButtonMap).length === 0|| !this.activity?.options?.button_mapping) return;
-    const selectedButtons = this.activity.options.button_mapping.filter(item => item.long_press
-      || item.short_press || item.double_press)
-      .map(item => item.button);
-    this.mappedButtons = selectedButtons?.map(button => this.reversedButtonMap[button])?.filter(item => item !== undefined);
-    this.cdr.detectChanges();
-  }
-
   updateButtonsGrid()
   {
     this.gridCommands = this.getGridItems();
@@ -248,42 +210,14 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  updateGridItem(gridItem: ActivityGridComponent) {
+  updateButtons()
+  {
+    this.buttons?.updateButtons();
+  }
+
+  updateGridItem(gridItem: ActivityGridItemComponent) {
     if (!gridItem?.item) return;
     this.updateButtonsGrid();
-  }
-
-  getCommandName(command: Command | undefined | string): string
-  {
-    if (!command) return "";
-    if (typeof command === 'string') return command;
-    if (!this.configEntityCommands) return command.cmd_id;
-    const config = this.configEntityCommands.find(item => command.cmd_id === item.id);
-    if (!config) return command.cmd_id;
-    return Helper.getEntityName(config);
-  }
-
-  getParamValue(command: Command | undefined | string, param: string): string
-  {
-    if (!command || typeof command === 'string') return "";
-    return command.params?.[param];
-  }
-
-  getParam(command: Command | undefined | string, param: string): EntityCommandParameter | undefined
-  {
-    if (!command || typeof command === 'string') return undefined;
-    if (!this.configEntityCommands) return undefined;
-    const config = this.configEntityCommands.find(item => command.cmd_id === item.id);
-    if (!config) return undefined;
-    return config.params?.find(item => item.param === param);
-  }
-
-  getParams(command: Command | undefined | string): string[]
-  {
-    if (!command) return [];
-    if ((command as any)?.params)
-      return Object.keys((command as any)?.params);
-    return [];
   }
 
   updateCurrentPage()
@@ -388,12 +322,12 @@ export class ActivityViewerComponent implements AfterViewInit {
     return `hsl(${stringUniqueHash % 360}, 95%, 40%)`;
   }
 
-  gridSourceSelected($event: ActivityGridComponent) {
+  gridSourceSelected($event: ActivityGridItemComponent) {
     this.gridItemSource = $event;
     this.cdr.detectChanges();
   }
 
-  gridDestinationSelected($event: ActivityGridComponent) {
+  gridDestinationSelected($event: ActivityGridItemComponent) {
      this.updateButtonsGrid();
     this.cdr.detectChanges();
   }
@@ -405,7 +339,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  gridItemClicked($event: ActivityGridComponent) {
+  gridItemClicked($event: ActivityGridItemComponent) {
     this.gridItem = $event;
     if (this.selectionMode)
     {
@@ -663,7 +597,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     });
   }
 
-  addGridItem($event: ActivityGridComponent) {
+  addGridItem($event: ActivityGridItemComponent) {
     // const position = Helper.getItemPosition(this.gridCommands, $event.getIndex(), this.currentPage!.grid.width,
     //   this.currentPage!.grid.height);
     const position = {x: $event.item.location.x, y: $event.item.location.y,
@@ -695,49 +629,11 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  deleteGridItem($event: ActivityGridComponent) {
+  deleteGridItem($event: ActivityGridItemComponent) {
     if (!$event.item) return;
     const index = this.currentPage?.items.indexOf($event.item as ActivityPageCommand);
     if (index) this.currentPage?.items.splice(index, 1);
     this.updateButtonsGrid();
-  }
-
-  buttonChanged($event: ButtonMapping) {
-    this.updateButtons();
-    this.cdr.detectChanges();
-  }
-
-  buttonOver($event: MapElement) {
-    const buttonId = $event.tag;
-    if (!buttonId) return;
-    this.mouseOverButtonName = this.buttonsMap[buttonId];
-    this.mouseoverButton = this.activity?.options?.button_mapping?.find(button => button.button === this.mouseOverButtonName);
-    // this.buttonpanel?.show($event.event, $event.event.target);
-    // @ts-ignore
-    this.buttonPanelStyle = { width: '450px',
-      'left': $event.event.pageX +'px',
-      'top': $event.event.pageY +'px',
-      'margin-left': '5px',
-      'margin-top': '5px',
-    };
-    $event.event.stopPropagation();
-    this.cdr.detectChanges();
-  }
-
-  selectButton($event: MapElement) {
-    if (!$event.tag) return;
-    const buttonId = $event.tag;
-    const button = this.activity?.options?.button_mapping?.find(button => button.button === this.buttonsMap[buttonId]);
-    if (!this.editMode && button?.short_press)
-    {
-      this.executeCommand(button.short_press);
-      return;
-    }
-    this.selectedButton = button;
-
-    this.cdr.detectChanges();
-    this.buttonEditor?.show();
-    this.cdr.detectChanges();
   }
 
   selectPage($event: { activity: Activity; page: UIPage }) {

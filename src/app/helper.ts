@@ -7,7 +7,7 @@ import {
   ButtonMapping,
   UIPage,
   Remote,
-  ActivityPageCommand, OrphanEntity, CommandSequence
+  ActivityPageCommand, OrphanEntity, CommandSequence, EntityCommand, EntityCommandParameter
 } from "./interfaces";
 
 export class Helper
@@ -277,6 +277,39 @@ export class Helper
     if (!icon) return "";
     const filename = icon.replace("custom:", "");
     return `/api/remote/${remote?.address}/resources/Icon/${filename}`;
+  }
+
+  static getParamValue(command: Command | undefined | string, param: string): string
+  {
+    if (!command || typeof command === 'string') return "";
+    return command.params?.[param];
+  }
+
+  static getParams(command: Command | undefined | string): string[]
+  {
+    if (!command) return [];
+    if ((command as any)?.params)
+      return Object.keys((command as any)?.params);
+    return [];
+  }
+
+  static getCommandName(command: Command | undefined | string, configEntityCommands: EntityCommand[] | undefined): string
+  {
+    if (!command) return "";
+    if (typeof command === 'string') return command;
+    if (!configEntityCommands) return command.cmd_id;
+    const config = configEntityCommands.find(item => command.cmd_id === item.id);
+    if (!config) return command.cmd_id;
+    return Helper.getEntityName(config);
+  }
+
+  static getParam(command: Command | undefined | string, param: string, configEntityCommands: EntityCommand[] | undefined): EntityCommandParameter | undefined
+  {
+    if (!command || typeof command === 'string') return undefined;
+    if (!configEntityCommands) return undefined;
+    const config = configEntityCommands.find(item => command.cmd_id === item.id);
+    if (!config) return undefined;
+    return config.params?.find(item => item.param === param);
   }
 
   static getEntityName(entity: any): string

@@ -29,7 +29,7 @@ import {DialogModule} from "primeng/dialog";
 import {IconSelectorComponent} from "../../icon-selector/icon-selector.component";
 import {DropdownModule} from "primeng/dropdown";
 import {ButtonModule} from "primeng/button";
-import {ActivityGridComponent, GridItem} from "../../activity-viewer/activity-grid/activity-grid.component";
+import {ActivityGridItemComponent, GridItem} from "../../activity-viewer/activity-grid-item/activity-grid-item.component";
 import {CommandEditorComponent} from "../command-editor/command-editor.component";
 
 @Component({
@@ -56,13 +56,13 @@ import {CommandEditorComponent} from "../command-editor/command-editor.component
 })
 export class UiCommandEditorComponent {
   @Input() remote: Remote | undefined;
-  @Input() gridItem: ActivityGridComponent | undefined;
+  @Input() gridItem: ActivityGridItemComponent | undefined;
   @Input() activity: Activity | undefined;
   @Input() gridCommands: ActivityPageCommand[] | undefined;
   @Input() grid : { width: number; height: number} | undefined;
-  @Output() updateItem: EventEmitter<ActivityGridComponent> = new EventEmitter();
-  @Output() addItem: EventEmitter<ActivityGridComponent> = new EventEmitter();
-  @Output() deleteItem: EventEmitter<ActivityGridComponent> = new EventEmitter();
+  @Output() updateItem: EventEmitter<ActivityGridItemComponent> = new EventEmitter();
+  @Output() addItem: EventEmitter<ActivityGridItemComponent> = new EventEmitter();
+  @Output() deleteItem: EventEmitter<ActivityGridItemComponent> = new EventEmitter();
   templates: RemoteMap[] | undefined;
   stateOptions: any[] = [
     { label: 'Text', value: 'text' },

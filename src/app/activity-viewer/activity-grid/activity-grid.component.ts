@@ -1,175 +1,266 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy, ChangeDetectorRef,
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  Input,
-  Output,
-  ViewChild
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, EventEmitter, HostListener,
+  Input, Output, Pipe, PipeTransform, QueryList,
+  ViewChild, ViewChildren,
+  ViewEncapsulation
 } from '@angular/core';
-import {Activity, ActivityPageCommand} from "../../interfaces";
 import {Helper} from "../../helper";
+import {ActivityGridItemComponent} from "../activity-grid-item/activity-grid-item.component";
+import {ChipModule} from "primeng/chip";
+import {NgForOf, NgIf} from "@angular/common";
+import {TagModule} from "primeng/tag";
+import {
+  Activity,
+  ActivityPageCommand,
+  Command,
+  EntityCommand,
+  Remote,
+  RemoteData,
+  ScreenLayout,
+  UIPage
+} from "../../interfaces";
+import {UiCommandEditorComponent} from "../../activity-editor/ui-command-editor/ui-command-editor.component";
+import {HttpErrorResponse} from "@angular/common/http";
+import {ServerService} from "../../server.service";
+import {MessageService} from "primeng/api";
+import {ToastModule} from "primeng/toast";
 
-export interface GridItem
-{
-  item: ActivityPageCommand | undefined;
-  gridComponent: ActivityGridComponent;
-  index: number;
+@Pipe({name: 'as', standalone: true, pure: true})
+export class AsPipe implements PipeTransform {
+  transform<T>(input: unknown, baseItem: T | undefined): T {
+    return (input as unknown) as T;
+  }
 }
-
 @Component({
-  selector: 'grid-button',
+  selector: 'app-activity-grid',
   standalone: true,
-  imports: [],
+  imports: [
+    ActivityGridItemComponent,
+    AsPipe,
+    ChipModule,
+    NgForOf,
+    NgIf,
+    TagModule,
+    UiCommandEditorComponent,
+    ToastModule
+  ],
   templateUrl: './activity-grid.component.html',
   styleUrl: './activity-grid.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  providers: [MessageService]
 })
-export class ActivityGridComponent  implements AfterViewInit{
-  // @Input() items: HTMLElement[];
-  @Input() editable: boolean = true;
-  @Input({required: true}) source: ActivityGridComponent | undefined;
-  @Input() item!: ActivityPageCommand;
-  // @Input() index!: number;
-  @Input() gridCommands: ActivityPageCommand[] = [];
-  @Input() selectionMode: boolean = false;
-  selected = false;
-  @Input('selected') set _selected(value: boolean | undefined) {
-    if (value === undefined) return;
-    this.selected = value;
-  }
-  @Output() sourceSelected = new EventEmitter<ActivityGridComponent>();
-  @Output() destinationSelected = new EventEmitter<ActivityGridComponent>();
-  @Output() itemClicked = new EventEmitter<ActivityGridComponent>();
-  @ViewChild("griditem", {static: false}) gridItem: ElementRef | undefined;
-  @Input() grid!: { width: number; height: number };
-
-  constructor(private cdr:ChangeDetectorRef) {
-  }
-
-  getIndex(): number
+export class ActivityGridComponent implements AfterViewInit {
+  currentPage: UIPage | undefined;
+  @Input() activity: Activity | undefined;
+  @Input("currentPage") set _currentPage( currentPage: UIPage | undefined)
   {
-    if (!this.gridCommands) return 0;
-    return this.gridCommands.indexOf(this.item);
+    this.currentPage = currentPage;
+    this.gridCommands = this.getGridItems();
+    this.cdr.detectChanges();
+  }
+  @Input() remote: Remote | undefined;
+  gridPixelWidth = 4*185;
+  gridPixelWidthInit = this.gridPixelWidth;
+  @Input("gridPixelWidth") set _gridPixelWidth(gridPixelWidth: number) {
+    this.gridPixelWidth = gridPixelWidth;
+    this.gridPixelWidthInit = gridPixelWidth;
+  }
+  gridPixelHeight = 6*185;
+  gridPixelHeightInit = this.gridPixelHeight;
+  @Input("gridPixelHeight") set _gridPixelHeight(gridPixelHeight: number) {
+    this.gridPixelHeight = gridPixelHeight;
+    this.gridPixelHeightInit = gridPixelHeight;
+  }
+  @Input() editMode = false;
+  @Input() selectionMode = false;
+  @Input() runMode = false;
+  gridCommands: ActivityPageCommand[] = [];
+  gridItemSource: ActivityGridItemComponent | undefined;
+  gridItem: ActivityGridItemComponent | undefined;
+  selection: ActivityGridItemComponent[] = [];
+  @ViewChild("commandeditor", {static: false}) commandeditor: UiCommandEditorComponent | undefined;
+  @ViewChildren(ActivityGridItemComponent) gridButtons:QueryList<ActivityGridItemComponent> | undefined;
+
+  configEntityCommands: EntityCommand[] | undefined;
+  public Command!: Command;
+  protected readonly Helper = Helper;
+  screenLayout: ScreenLayout | undefined;
+
+  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
+    const data = localStorage.getItem("remoteData");
+    if (data) {
+      const remoteData: RemoteData = JSON.parse(data);
+      if (remoteData.configCommands)
+        this.configEntityCommands = remoteData.configCommands;
+    }
+    this.server.configCommands$.subscribe(entityCommands => {
+      this.configEntityCommands = entityCommands;
+    })
+    if (this.remote && (!this.configEntityCommands || this.configEntityCommands.length == 0))
+    {
+      this.server.getConfigEntityCommands(this.remote).subscribe(entityCommands => {
+        this.configEntityCommands = entityCommands;
+        this.cdr.detectChanges();
+      });
+      this.server.getConfigScreenLayout(this.remote).subscribe(screenLayout => {
+        this.screenLayout = screenLayout;
+        console.debug("Screen layout", this.screenLayout);
+        this.cdr.detectChanges();
+      });
+    }
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize($event: any) {
+    this.gridPixelWidth = Math.min(window.innerWidth*0.8, this.gridPixelWidthInit);
+    this.gridPixelHeight = Math.min(window.innerHeight*1.2, this.gridPixelHeightInit);
+    this.updateButtonsGrid();
   }
 
   ngAfterViewInit(): void {
-    if (!this.editable && !this.selectionMode) return;
-    for (let i = 0; i < this.gridItem?.nativeElement.children?.length; i++) {
-      let child = this.gridItem?.nativeElement.children[i];
-      child.style['pointer-events'] = 'none';
-    }
-    this.cdr.detectChanges();
+    this.gridPixelWidth = Math.min(window.innerWidth*0.8, this.gridPixelWidthInit);
+    this.gridPixelHeight = Math.min(window.innerHeight*1.2, this.gridPixelHeightInit);
   }
 
-  getClass(): string {
-    if (this.selectionMode && !this.selected) return 'grid-item-selection';
-    if (this.selectionMode && this.selected) return 'grid-item-selected';
-    if (!this.editable) {
-      if (Helper.isEmptyItem(this.item)) return 'grid-item-static';
-      return 'grid-item-clickable';
-    }
-    return 'grid-item';
-  }
-
-  @HostListener('click', ['$event']) onClick(event: any) {
-    if (this.selectionMode) {
-      if (Helper.isEmptyItem(this.item)) return;
-      this.selected = !this.selected;
-      this.itemClicked.emit(this)
-      this.cdr.detectChanges();
-      return;
-    } else if (!this.editable)
-    {
-      if (Helper.isEmptyItem(this.item) || !this.item.command || typeof this.item.command === "string") return;
-      this.itemClicked.emit(this)
-      this.cdr.detectChanges();
-      return;
-    }
-    this.itemClicked.emit(this)
-    this.cdr.detectChanges();
-  }
-
-  @HostListener('dragstart', ['$event']) handleDragStart(event: any){
-    if (!this.editable || Helper.isEmptyItem(this.item)) {
-      event.stopPropagation();
-      this.cdr.detectChanges();
-      return false;
-    }
-    this.gridItem!.nativeElement.style.opacity = '0.4';
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/html', this.gridItem!.nativeElement.innerHTML);
-    this.sourceSelected.emit(this);
-    this.cdr.detectChanges();
-    return true;
-  }
-
-
-  checkDraggableDestination(): boolean
+  getGridItems(): ActivityPageCommand[]
   {
-    if (!this.source) return false;
-    if (Helper.isSameSize(this.source.item, this.item)) return true;
-    if (!Helper.isEmptyItem(this.item)) return false;
-    if (!Helper.checkItemOverflow(this.item.location.x, this.item.location.y,
-      this.source.item.size.width, this.source.item.size.height, this.grid.width, this.grid.height)) return false;
 
-    return Helper.checkItem(this.source.item, this.gridCommands, this.item.location.x, this.item.location.y,
-      this.source.item.size.width, this.source.item.size.height);
-  }
+    // if (this.currentPage && this.activity?.options?.user_interface?.pages?.indexOf(this.currentPage) == -1)
+    // {
+    //   if (this.firstPage >= this.activity.options.user_interface.pages.length)
+    //     this.firstPage = this.activity.options.user_interface.pages.length -1;
+    //   if (this.activity.options.user_interface.pages.length > 0)
+    //   {
+    //     this.currentPage = this.activity.options.user_interface.pages[this.firstPage];
+    //   }
+    //   this.toggleGrid = false;
+    //   this.cdr.detectChanges();
+    //   this.toggleGrid = true;
+    // }
+    const width = this.currentPage?.grid?.width ? this.currentPage.grid.width : 4;
+    const height = this.currentPage?.grid?.height ? this.currentPage.grid.height : 6;
 
-
-  @HostListener('dragover', ['$event']) handleDragOver(event: any){
-    if (!this.source) return false;
-    if (!this.checkDraggableDestination()) return;
-    if (event.preventDefault) {
-      event.preventDefault();
+    const list: ActivityPageCommand[] = [];
+    for (let y=0; y<this.currentPage?.grid.height!;y++)
+    {
+      for (let x=0; x<this.currentPage?.grid.width!;x++)
+      {
+        const item = this.currentPage?.items.find(item => item.location.x == x && item.location.y == y);
+        if (item == null)
+        {
+          if (!Helper.findItem(list, x, y)) list.push({type: "text", location:{x, y}, size: {width: 1, height: 1}});
+        }
+        else {
+          list.push(item);
+        }
+      }
     }
-    event.dataTransfer.dropEffect = 'move';
-    this.cdr.detectChanges();
-    return;
+    // console.log("Grid for activity", list);
+    return list;
   }
 
-  @HostListener('dragenter', ['$event']) handleDragEnter(event: any) {
-    if (!this.editable || !this.source || this.source == this) return;
-    if (!this.checkDraggableDestination()) return;
-    this.cdr.detectChanges();
-    this.gridItem!.nativeElement.classList.add('over');
-    event.preventDefault();
+  updateGridItem(gridItem: ActivityGridItemComponent) {
+    if (!gridItem?.item) return;
+    this.updateButtonsGrid();
+  }
+
+  deleteGridItem($event: ActivityGridItemComponent) {
+    if (!$event.item) return;
+    const index = this.currentPage?.items.indexOf($event.item as ActivityPageCommand);
+    if (index) this.currentPage?.items.splice(index, 1);
+    this.updateButtonsGrid();
+  }
+
+  gridSourceSelected($event: ActivityGridItemComponent) {
+    this.gridItemSource = $event;
     this.cdr.detectChanges();
   }
 
-  @HostListener('dragleave', ['$event']) handleDragLeave(event:any) {
-    if (!this.editable) return;
-    this.gridItem!.nativeElement.classList.remove('over');
+  gridDestinationSelected($event: ActivityGridItemComponent) {
+    this.updateButtonsGrid();
     this.cdr.detectChanges();
   }
 
-  @HostListener('drop', ['$event']) handleDrop(event:any) {
-    if (event.stopPropagation) {
-      event.stopPropagation(); // stops the browser from redirecting.
-    }
-    if (!this.editable) return;
-    if (this.source?.gridItem && this.source.gridItem != this.gridItem) {
-      /*this.source.gridItem.nativeElement.innerHTML = this.gridItem!.nativeElement.innerHTML;
-      this.gridItem!.nativeElement.innerHTML = event.dataTransfer.getData('text/html');*/
-      this.gridItem!.nativeElement.classList.remove('over');
-      console.log(`Drop ${this.source.item.location.x} ${this.source.item.location.y} => ${this.item.location.x} ${this.item.location.y}`, event);
-      const x = this.item.location.x;
-      const y = this.item.location.y;
+  updateButtonsGrid()
+  {
+    this.gridCommands = this.getGridItems();
+    this.cdr.detectChanges();
+  }
 
-      this.item.location = {x: this.source.item.location.x, y: this.source.item.location.y};
-      this.source.item.location = {x, y};
-      this.destinationSelected.emit(this);
+  gridItemClicked($event: ActivityGridItemComponent) {
+    this.gridItem = $event;
+    if (this.selectionMode)
+    {
+      if (this.selection.includes($event))
+      {
+        this.selection.splice(this.selection.indexOf($event), 1);
+      }
+      else {
+        this.selection.push($event);
+      }
       this.cdr.detectChanges();
+      return;
     }
-    return false;
-  }
-
-  @HostListener('dragend', ['$event']) handleDragEnd(event:any) {
-    this.gridItem!.nativeElement.style.opacity = '1';
-    this.gridItem!.nativeElement.classList.remove('over');
+    if (!this.editMode)
+    {
+      if ($event.item.command && typeof $event.item.command != "string")
+        this.executeCommand($event.item.command);
+      return;
+    }
+    this.cdr.detectChanges();
+    this.commandeditor?.show();
     this.cdr.detectChanges();
   }
+
+  executeCommand(command: Command) {
+    if (!this.remote) return;
+    this.server.executeRemotetCommand(this.remote, command).subscribe({next: results => {
+        this.messageService.add({key: "activityGrid", summary: "Command executed",
+          severity: "success", detail: `Results : ${results.code} : ${results.message}`});
+      }, error: (err: HttpErrorResponse) => {
+        console.error("Error command", err);
+        this.messageService.add({key: "activityGrid", summary: "Error executing command",
+          severity: "error", detail: `Results : ${err.error.name} (${err.status} ${err.statusText})`});
+      }});
+    this.cdr.detectChanges();
+  }
+
+
+  addGridItem($event: ActivityGridItemComponent) {
+    const position = {x: $event.item.location.x, y: $event.item.location.y,
+      width: $event.item.size.width, height: $event.item.size.height};
+    this.currentPage?.items.push({location: {x: position.x, y: position.y},
+      size: {width: 1, height: 1}, type: "text", text:"New command", command: {cmd_id: "", entity_id: ""}});
+    this.updateButtonsGrid();
+    this.cdr.detectChanges();
+    const targetGridItem = this.gridButtons?.find(gridButton =>
+      gridButton.item?.location.x == position.x && gridButton.item?.location.y == position.y)
+    this.gridItem = targetGridItem;
+    console.log("New command", targetGridItem, this.gridButtons, position);
+    this.commandeditor?.show();
+    this.cdr.detectChanges();
+  }
+
+  getGridItemSize(item: ActivityPageCommand | null): any {
+    const width = this.currentPage?.grid.width;
+    const height = this.currentPage?.grid.height;
+    const itemWidth = item?.size?.width ? item!.size.width : 1;
+    const itemHeight = item?.size?.height ? item!.size.height : 1;
+    if (!width || !height) return {};
+    const style: any = {width: (itemWidth*this.gridPixelWidth/width)+'px', height: (itemHeight!*this.gridPixelHeight/height)+'px'};
+    if (item?.size?.width! > 1)
+    {
+      style['grid-column-end'] = `span ${item!.size.width}`;
+    }
+    if (item?.size?.height! > 1)
+    {
+      style['grid-row-end'] = `span ${item!.size.height}`;
+    }
+    return style;
+  }
+
 }

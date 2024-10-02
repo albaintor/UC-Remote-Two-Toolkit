@@ -4,8 +4,10 @@
   width: 100%;
   top: 50%;
   left: 50%;
+  height: 40px;
   transform: translate(-50%, -50%);
   opacity: 0;
+  padding-left: 4px;
   transition: all 0.5s ease;
 }
 

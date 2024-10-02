@@ -21,7 +21,7 @@
 }
 
 .media-image:hover, focus {
-  transform: scale(1.5);
+  transform: scale(1.4);
 }
 
 .card-info {

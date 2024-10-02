@@ -194,4 +194,9 @@ export class MediaEntityComponent implements OnInit {
     this.server.executeRemotetCommand(this.remote, {entity_id: mediaEntity.entity_id,
       cmd_id}).subscribe();
   }
+
+  getNumber(number: number) {
+    if (isNaN(number)) return 0;
+    return Math.round(number);
+  }
 }

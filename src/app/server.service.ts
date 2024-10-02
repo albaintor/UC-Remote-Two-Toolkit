@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
-import {forkJoin, from, map, mergeMap, Observable, of, Subject} from "rxjs";
+import {BehaviorSubject, forkJoin, from, map, mergeMap, Observable, of, Subject} from "rxjs";
 import {
   Activity, BatteryState, Command,
   Config,
@@ -28,7 +28,7 @@ export class ServerService {
   entities$ = new Subject<Entity[]>();
   activities$ = new Subject<Activity[]>();
   profiles$: Subject<Profile[]> = new Subject<Profile[]>();
-  configCommands$ = new Subject<EntityCommand[]>();
+  configCommands$ = new BehaviorSubject<EntityCommand[]>([]);
 
   constructor(private http: HttpClient) {
     // PrimeNG bug

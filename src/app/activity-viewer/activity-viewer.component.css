@@ -10,12 +10,12 @@
 }
 
 .icon {
-  order: 1;
-  font-size: 3.688rem;
-  color: var(--vt-c-grex-light);
-  width: unset;
-  height: unset
-}
+   order: 1;
+   font-size: 3.688rem;
+   color: var(--vt-c-grex-light);
+   width: unset;
+   height: unset
+ }
 
 .remotebutton:hover
 {

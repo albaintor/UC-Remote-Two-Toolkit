@@ -2,6 +2,14 @@
 
   <ng-template pTemplate="end">
     <div class="flex align-items-center gap-2">
+      Play activities :
+      <p-autoComplete [(ngModel)]="newActivity" [dropdown]="true" [suggestions]="suggestedActivities" (completeMethod)="searchActivities($event)" appendTo="body"
+                      [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addActivity($event)"
+                      pTooltip="View activity">
+        <ng-template let-item pTemplate="item">
+          <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
+        </ng-template>
+      </p-autoComplete>
       Add entities :
       <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntities($event)" appendTo="body"
                       [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addEntity($event)"
@@ -43,4 +51,6 @@
                       class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"></app-media-entity>
   </div>
 </div>
+<app-activity-player *ngFor="let activity of selectedActivities" [remote]="selectedRemote" [activity]="activity" [visible]="true"
+  (onClose)="removeActivity($event)"/>
 

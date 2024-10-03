@@ -118,11 +118,12 @@ To see more, a "Play Remote" link from the menu bar :
 Remote play of any activities : from the activities drop down, a dialog will show a virtual remote that reproduces the buttons mapping and UI mapping of the activity, and even the media players.
 You can execute any buttons and UI commands.
 <img width="300px" alt="Virtual remote" src="https://github.com/user-attachments/assets/11f9ea51-c61f-4e71-bd2f-f515f576284a">
-
+<img width="300px" alt="Virtual remote" src="https://github.com/user-attachments/assets/7900983b-4269-49d7-ae12-3077bfee0669">
 
 Also in this page it will display all the active media entities and it is possible to execute commands on them
 
 <img width="40%" alt="UI grid" src="https://github.com/user-attachments/assets/370ca38a-ca99-4891-8b98-436e1b58ceab">
+
 
 
 ## Compilation

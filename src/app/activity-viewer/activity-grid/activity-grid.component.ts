@@ -28,7 +28,7 @@ import {ServerService} from "../../server.service";
 import {MessageService} from "primeng/api";
 import {ToastModule} from "primeng/toast";
 import {MediaEntityState, RemoteWebsocketService} from "../../remote-widget/remote-websocket.service";
-import {ActiivtyMediaEntityComponent} from "../actiivty-media-entity/actiivty-media-entity.component";
+import {ActivityMediaEntityComponent} from "../actiivty-media-entity/activity-media-entity.component";
 
 @Pipe({name: 'as', standalone: true, pure: true})
 export class AsPipe implements PipeTransform {
@@ -48,7 +48,7 @@ export class AsPipe implements PipeTransform {
     TagModule,
     UiCommandEditorComponent,
     ToastModule,
-    ActiivtyMediaEntityComponent
+    ActivityMediaEntityComponent
   ],
   templateUrl: './activity-grid.component.html',
   styleUrl: './activity-grid.component.css',
@@ -110,10 +110,7 @@ export class ActivityGridComponent implements AfterViewInit {
     this.gridPixelHeight = Math.min(window.innerHeight*1.2, this.gridPixelHeightInit);
     this.remoteWebsocketService.onMediaStateChange().subscribe(mediaStates => {
       mediaStates.forEach(mediaState => {
-        const existing = this.mediaStates.find(mediaState => mediaState.entity_id);
-        if (existing)
-        {
-          this.mediaStates[this.mediaStates.indexOf(existing)] = mediaState;
+        if (this.mediaStates.includes(mediaState)) {
           this.cdr.detectChanges();
           return;
         }

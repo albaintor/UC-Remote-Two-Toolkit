@@ -24,8 +24,14 @@
 
   <ng-container *ngIf="!minimized">
     <app-activity-buttons [remote]="remote" [activity]="activity" [editMode]="false"/>
-    <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [gridPixelWidth]="400" [gridPixelHeight]="500"
-                       [selectionMode]="false" [currentPage]="currentPage" [runMode]="true"/>
+    <div style="position: relative">
+      <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [gridPixelWidth]="400" [gridPixelHeight]="500"
+                         [selectionMode]="false" [currentPage]="currentPage" [runMode]="true"/>
+      <app-pagination *ngIf="activity?.options?.user_interface?.pages && currentPage"
+        [currentIndex]="activity!.options!.user_interface!.pages!.indexOf(currentPage)"
+        [numberOfPages]="activity!.options!.user_interface!.pages!.length" class="grid-pagination"
+        (onIndexChange)="selectPage($event)"/>
+    </div>
   </ng-container>
 </p-dialog>
 <p-dialog [modal]="true" position="center" [showHeader]="false"

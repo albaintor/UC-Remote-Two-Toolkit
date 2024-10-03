@@ -23,6 +23,7 @@ import {ActivityGridComponent} from "../activity-viewer/activity-grid/activity-g
 import {ToastModule} from "primeng/toast";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ProgressBarModule} from "primeng/progressbar";
+import {PaginationComponent} from "../controls/pagination/pagination.component";
 
 @Component({
   selector: 'app-activity-player',
@@ -37,7 +38,8 @@ import {ProgressBarModule} from "primeng/progressbar";
     NgIf,
     ActivityGridComponent,
     ToastModule,
-    ProgressBarModule
+    ProgressBarModule,
+    PaginationComponent
   ],
   templateUrl: './activity-player.component.html',
   styleUrl: './activity-player.component.css',
@@ -144,5 +146,10 @@ export class ActivityPlayerComponent {
       this.progress = 0;
       this.cdr.detectChanges();
     })
+  }
+
+  selectPage($event: number) {
+    this.currentPage = this.activity?.options?.user_interface?.pages?.[$event];
+    this.cdr.detectChanges();
   }
 }

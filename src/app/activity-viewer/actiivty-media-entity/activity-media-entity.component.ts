@@ -8,23 +8,32 @@ import {Helper} from "../../helper";
 import {Remote} from "../../interfaces";
 
 @Component({
-  selector: 'app-actiivty-media-entity',
+  selector: 'app-activity-media-entity',
   standalone: true,
   imports: [
     NgIf,
     ScrollingTextComponent,
     SliderComponent
   ],
-  templateUrl: './actiivty-media-entity.component.html',
-  styleUrl: './actiivty-media-entity.component.css',
-  changeDetection: ChangeDetectionStrategy.Default,
+  templateUrl: './activity-media-entity.component.html',
+  styleUrl: './activity-media-entity.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class ActiivtyMediaEntityComponent {
-  @Input() mediaEntity: MediaEntityState | undefined;
+export class ActivityMediaEntityComponent {
+  mediaEntity: MediaEntityState | undefined;
+  @Input("mediaEntity") set _mediaEntity (mediaEntity: MediaEntityState | undefined)
+  {
+    this.mediaEntity = mediaEntity;
+    this.cdr.detectChanges();
+  }
   @Input() remote: Remote | undefined;
 
-  constructor(protected remoteWebsocketService: RemoteWebsocketService, private server:ServerService) {
+  constructor(protected remoteWebsocketService: RemoteWebsocketService, private server:ServerService,
+              private cdr: ChangeDetectorRef) {
+    this.remoteWebsocketService.onMediaStateChange().subscribe(mediaStates => {
+      if (this.mediaEntity && mediaStates.includes(this.mediaEntity)) this.cdr.detectChanges();
+    })
   }
   protected readonly Math = Math;
 

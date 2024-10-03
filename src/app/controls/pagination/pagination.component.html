@@ -1,0 +1,3 @@
+<div *ngIf="numberOfPages > 1" class="flex align-items-center pagination-container">
+<div *ngFor="let index of indexes" [class]="index.current ? 'active-dot' : 'dot'" (click)="selectIndex($event, index)"></div>
+</div>

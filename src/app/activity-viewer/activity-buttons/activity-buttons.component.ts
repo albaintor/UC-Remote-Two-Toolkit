@@ -109,8 +109,8 @@ export class ActivityButtonsComponent implements AfterViewInit {
   executeCommand(command: Command) {
     if (!this.remote) return;
     this.server.executeRemotetCommand(this.remote, command).subscribe({next: results => {
-        this.messageService.add({key: "activityButtons", summary: "Command executed",
-          severity: "success", detail: `Results : ${results.code} : ${results.message}`});
+        // this.messageService.add({key: "activityButtons", summary: "Command executed",
+        //   severity: "success", detail: `Results : ${results.code} : ${results.message}`});
       }, error: (err: HttpErrorResponse) => {
         console.error("Error command", err);
         this.messageService.add({key: "activityButtons", summary: "Error executing command",

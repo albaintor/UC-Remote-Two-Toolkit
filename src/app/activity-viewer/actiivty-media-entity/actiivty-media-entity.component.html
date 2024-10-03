@@ -1,0 +1,31 @@
+<ng-container *ngIf="mediaEntity?.new_state">
+  <div style="position: relative; width: 100%; height: 100%">
+    <img class="media-image-run" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && !mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="mediaEntity!.new_state!.attributes!.media_image_url!"
+         [alt]="mediaEntity!.new_state!.attributes!.media_title!" />
+    <img class="media-image-run" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="'/api/proxy?url='+mediaEntity!.new_state!.attributes!.media_image_url!"
+         [alt]="mediaEntity!.new_state!.attributes!.media_title!"/>
+    <div style="position: absolute; bottom: 0; left:0; right: 0">
+      <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_title" style="width: 100%">
+        <app-scrolling-text [text]="mediaEntity!.new_state!.attributes!.media_title!" style="width: 100%" textClass="text-content"/>
+      </div>
+      <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_artist" style="width: 100%">
+        <app-scrolling-text [text]="mediaEntity!.new_state!.attributes!.media_artist!" style="width: 100%" textClass="text-content"/>
+      </div>
+      <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_album!" style="width: 100%">
+        <app-scrolling-text [text]="mediaEntity!.new_state!.attributes!.media_album!" style="width: 100%" textClass="text-content"/>
+      </div>
+      <div *ngIf="mediaEntity?.new_state?.attributes?.media_position && mediaEntity?.new_state?.attributes?.media_duration &&
+                      mediaEntity?.new_state!.attributes!.media_duration! > 0"
+           class="flex align-items-center justify-content-center" style="width: 100%; height: 100%">
+        <app-slider [value]="Math.round(remoteWebsocketService.getMediaPosition(mediaEntity!)*100/mediaEntity!.new_state!.attributes!.media_duration!)"
+                    style="width: 100%; height: 100%" (valueChange)="updatePosition($event, mediaEntity!)"
+                    [textValue]="Helper.formatDuration(remoteWebsocketService.getMediaPosition(mediaEntity!))"
+                    [editable]="checkFeature(mediaEntity!, 'seek')" [max]="Helper.formatDuration(mediaEntity!.new_state!.attributes!.media_duration!)"></app-slider>
+        <b *ngIf="mediaEntity?.new_state?.attributes?.media_position &&
+            (!mediaEntity?.new_state?.attributes?.media_duration ||
+                      mediaEntity?.new_state!.attributes!.media_duration! == 0)">
+          {{Helper.formatDuration(remoteWebsocketService.getMediaPosition(mediaEntity!))}}</b>
+      </div>
+    </div>
+  </div>
+</ng-container>

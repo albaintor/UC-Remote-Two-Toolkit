@@ -9,3 +9,25 @@
   width: 50%;
 }
 
+.media_player_icon
+{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 40%;
+  height: 40%;
+}
+
+.grid-size input
+{
+  width: 35px !important;
+}
+
+.icon {
+  order: 1;
+  font-size: 3.688rem;
+  color: var(--vt-c-grex-light);
+  width: unset;
+  height: unset
+}

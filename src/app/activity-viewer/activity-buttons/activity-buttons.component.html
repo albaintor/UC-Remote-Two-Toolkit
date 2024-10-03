@@ -57,13 +57,12 @@
     </app-image-map>
   </div>
 </div>
-<div class="flex flex-column column-gap-1 align-items-center" style="min-width:400px;height: 120px">
+<div class="flex flex-column gap-1" style="min-width:400px;height: 120px">
   <div class="flex align-items-start justify-content-center">
     <h3>{{mouseOverButtonName!}}</h3>
   </div>
-  <div class="flex flex-wrap" style="max-width: 400px">
     <ng-container *ngIf="mouseoverButton && mouseoverButton.short_press">
-      <div class="flex align-items-start">
+      <div class="flex flex-wrap align-items-start justify-content-start gap-1" style="max-width: 400px">
         <p-tag severity="success" value="Short press"/>
         <p-chip [label]="Helper.getEntityName(mouseoverButton.short_press.entity_id)"
                 [style]="Helper.getStyle(Helper.getEntityName(mouseoverButton.short_press.entity_id))"
@@ -81,14 +80,13 @@
       </div>
     </ng-container>
     <ng-container *ngIf="mouseoverButton && mouseoverButton.long_press">
-      <div class="flex align-items-start">
+      <div class="flex flex-wrap align-items-start justify-content-start gap-1" style="max-width: 400px">
         <p-tag severity="warning" value="Long press"/>
         <p-chip [label]="Helper.getEntityName(mouseoverButton.long_press.entity_id)"
                 [style]="Helper.getStyle(Helper.getEntityName(mouseoverButton.long_press.entity_id))"
                 [pTooltip]="mouseoverButton.long_press.entity_id"></p-chip>&nbsp;
         <p-tag [value]="Helper.getCommandName(mouseoverButton.long_press, configEntityCommands)" [pTooltip]="mouseoverButton.long_press.cmd_id"
                severity="secondary"></p-tag>
-        {{mouseoverButton.long_press.cmd_id}}
         <ng-container *ngIf="mouseoverButton.long_press.params">
           <ng-container *ngFor="let param of Helper.getParams(mouseoverButton.long_press)">
             <ng-container *ngIf="Helper.getParam(mouseoverButton.long_press, param, configEntityCommands)">
@@ -100,7 +98,7 @@
       </div>
     </ng-container>
     <ng-container *ngIf="mouseoverButton && mouseoverButton.double_press">
-      <div class="flex align-items-start">
+      <div class="flex flex-wrap align-items-start justify-content-start gap-1" style="max-width: 400px">
         <p-tag severity="danger" value="Double press"/>
         <p-chip [label]="Helper.getEntityName(mouseoverButton.double_press.entity_id)"
                 [style]="Helper.getStyle(Helper.getEntityName(mouseoverButton.double_press.entity_id))"
@@ -118,5 +116,4 @@
       </div>
     </ng-container>
   </div>
-</div>
 <app-button-editor [activity]="activity" [remote]="remote" [button]="selectedButton" (buttonChanged)="buttonChanged($event)"></app-button-editor>

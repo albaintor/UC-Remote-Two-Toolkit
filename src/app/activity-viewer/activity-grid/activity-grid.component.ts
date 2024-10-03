@@ -27,6 +27,8 @@ import {HttpErrorResponse} from "@angular/common/http";
 import {ServerService} from "../../server.service";
 import {MessageService} from "primeng/api";
 import {ToastModule} from "primeng/toast";
+import {MediaEntityState, RemoteWebsocketService} from "../../remote-widget/remote-websocket.service";
+import {ActiivtyMediaEntityComponent} from "../actiivty-media-entity/actiivty-media-entity.component";
 
 @Pipe({name: 'as', standalone: true, pure: true})
 export class AsPipe implements PipeTransform {
@@ -45,7 +47,8 @@ export class AsPipe implements PipeTransform {
     NgIf,
     TagModule,
     UiCommandEditorComponent,
-    ToastModule
+    ToastModule,
+    ActiivtyMediaEntityComponent
   ],
   templateUrl: './activity-grid.component.html',
   styleUrl: './activity-grid.component.css',
@@ -60,6 +63,12 @@ export class ActivityGridComponent implements AfterViewInit {
   {
     this.currentPage = currentPage;
     this.gridCommands = this.getGridItems();
+    this.mediaEntities = [];
+    this.currentPage?.items?.forEach(item => {
+      if (item.type === "media_player" && item.media_player_id)
+        this.mediaEntities.push(item.media_player_id);
+    })
+    this.mediaStates = this.mediaStates.filter(item => this.mediaEntities.includes(item.entity_id));
     this.cdr.detectChanges();
   }
   @Input() remote: Remote | undefined;
@@ -89,16 +98,49 @@ export class ActivityGridComponent implements AfterViewInit {
   public Command!: Command;
   protected readonly Helper = Helper;
   screenLayout: ScreenLayout | undefined;
+  mediaEntities: string[] = [];
+  mediaStates: MediaEntityState[] = [];
 
-  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
-    const data = localStorage.getItem("remoteData");
-    if (data) {
-      const remoteData: RemoteData = JSON.parse(data);
-      if (remoteData.configCommands)
-        this.configEntityCommands = remoteData.configCommands;
-    }
+  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
+              private remoteWebsocketService: RemoteWebsocketService) {
+  }
+
+  ngAfterViewInit(): void {
+    this.gridPixelWidth = Math.min(window.innerWidth*0.8, this.gridPixelWidthInit);
+    this.gridPixelHeight = Math.min(window.innerHeight*1.2, this.gridPixelHeightInit);
+    this.remoteWebsocketService.onMediaStateChange().subscribe(mediaStates => {
+      mediaStates.forEach(mediaState => {
+        const existing = this.mediaStates.find(mediaState => mediaState.entity_id);
+        if (existing)
+        {
+          this.mediaStates[this.mediaStates.indexOf(existing)] = mediaState;
+          this.cdr.detectChanges();
+          return;
+        }
+        if (this.mediaEntities.includes(mediaState.entity_id))
+        {
+          this.mediaStates.push(mediaState);
+          this.cdr.detectChanges();
+        }
+      })
+    });
+    this.remoteWebsocketService.onMediaPositionChange().subscribe(mediaPositions => {
+      let update = false;
+      mediaPositions.forEach(mediaState => {
+        if (this.mediaEntities.includes(mediaState.entity_id)) update = true;
+      });
+      if (update) this.cdr.detectChanges();
+    })
+    // const data = localStorage.getItem("remoteData");
+    // if (data) {
+    //   const remoteData: RemoteData = JSON.parse(data);
+    //   if (remoteData.configCommands) {
+    //     this.configEntityCommands = remoteData.configCommands;
+    //   }
+    // }
     this.server.configCommands$.subscribe(entityCommands => {
       this.configEntityCommands = entityCommands;
+      this.cdr.detectChanges();
     })
     if (this.remote && (!this.configEntityCommands || this.configEntityCommands.length == 0))
     {
@@ -108,10 +150,28 @@ export class ActivityGridComponent implements AfterViewInit {
       });
       this.server.getConfigScreenLayout(this.remote).subscribe(screenLayout => {
         this.screenLayout = screenLayout;
-        console.debug("Screen layout", this.screenLayout);
         this.cdr.detectChanges();
       });
     }
+    this.init(this.remoteWebsocketService.mediaEntities);
+  }
+
+  init(mediaStates: MediaEntityState[])
+  {
+    mediaStates.forEach(mediaState => {
+      const existing = this.mediaStates.find(mediaState => mediaState.entity_id);
+      if (existing)
+      {
+        this.mediaStates[this.mediaStates.indexOf(existing)] = mediaState;
+        this.cdr.detectChanges();
+        return;
+      }
+      if (this.mediaEntities.includes(mediaState.entity_id))
+      {
+        this.mediaStates.push(mediaState);
+        this.cdr.detectChanges();
+      }
+    })
   }
 
   @HostListener('window:resize', ['$event'])
@@ -121,14 +181,13 @@ export class ActivityGridComponent implements AfterViewInit {
     this.updateButtonsGrid();
   }
 
-  ngAfterViewInit(): void {
-    this.gridPixelWidth = Math.min(window.innerWidth*0.8, this.gridPixelWidthInit);
-    this.gridPixelHeight = Math.min(window.innerHeight*1.2, this.gridPixelHeightInit);
+  getMediaEntity(entityId: string)
+  {
+    return this.mediaStates.find(item => item.entity_id === entityId)
   }
 
   getGridItems(): ActivityPageCommand[]
   {
-
     // if (this.currentPage && this.activity?.options?.user_interface?.pages?.indexOf(this.currentPage) == -1)
     // {
     //   if (this.firstPage >= this.activity.options.user_interface.pages.length)
@@ -141,8 +200,8 @@ export class ActivityGridComponent implements AfterViewInit {
     //   this.cdr.detectChanges();
     //   this.toggleGrid = true;
     // }
-    const width = this.currentPage?.grid?.width ? this.currentPage.grid.width : 4;
-    const height = this.currentPage?.grid?.height ? this.currentPage.grid.height : 6;
+    // const width = this.currentPage?.grid?.width ? this.currentPage.grid.width : 4;
+    // const height = this.currentPage?.grid?.height ? this.currentPage.grid.height : 6;
 
     const list: ActivityPageCommand[] = [];
     for (let y=0; y<this.currentPage?.grid.height!;y++)
@@ -161,6 +220,15 @@ export class ActivityGridComponent implements AfterViewInit {
     }
     // console.log("Grid for activity", list);
     return list;
+  }
+
+  getEntityName(entityId: string | undefined): string
+  {
+    if (!entityId) return "";
+    const entity = this.server.getCachedEntities().find(entity => entity.entity_id === entityId);
+    if (entity?.name)
+      return Helper.getEntityName(entity)!;
+    return `Unknown ${entityId}`;
   }
 
   updateGridItem(gridItem: ActivityGridItemComponent) {

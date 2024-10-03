@@ -4,7 +4,7 @@
     <div class="flex align-items-center gap-2">
       Play activities :
       <p-autoComplete [(ngModel)]="newActivity" [dropdown]="true" [suggestions]="suggestedActivities" (completeMethod)="searchActivities($event)" appendTo="body"
-                      [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addActivity($event)"
+                      [style]="{'width':'100%'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addActivity($event)"
                       pTooltip="View activity">
         <ng-template let-item pTemplate="item">
           <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
@@ -12,7 +12,7 @@
       </p-autoComplete>
       Add entities :
       <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntities($event)" appendTo="body"
-                      [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addEntity($event)"
+                      [style]="{'width':'100%'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addEntity($event)"
                       pTooltip="Add entity">
         <ng-template let-item pTemplate="item">
           <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>

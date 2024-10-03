@@ -8,18 +8,21 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {DialogModule} from "primeng/dialog";
-import {PrimeTemplate} from "primeng/api";
+import {MessageService, PrimeTemplate} from "primeng/api";
 import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
 import {ServerService} from "../server.service";
 import {RemoteWebsocketService} from "../remote-widget/remote-websocket.service";
-import {Activity, Remote, UIPage} from "../interfaces";
+import {Activity, EntityCommand, Remote, UIPage} from "../interfaces";
 import {Helper} from "../helper";
 import {Button} from "primeng/button";
 import {TooltipModule} from "primeng/tooltip";
 import {ActivityButtonsComponent} from "../activity-viewer/activity-buttons/activity-buttons.component";
 import {NgIf} from "@angular/common";
-import {delay, from, map, mergeMap, of} from "rxjs";
+import {catchError, delay, forkJoin, from, map, mergeMap, of} from "rxjs";
 import {ActivityGridComponent} from "../activity-viewer/activity-grid/activity-grid.component";
+import {ToastModule} from "primeng/toast";
+import {HttpErrorResponse} from "@angular/common/http";
+import {ProgressBarModule} from "primeng/progressbar";
 
 @Component({
   selector: 'app-activity-player',
@@ -32,15 +35,27 @@ import {ActivityGridComponent} from "../activity-viewer/activity-grid/activity-g
     TooltipModule,
     ActivityButtonsComponent,
     NgIf,
-    ActivityGridComponent
+    ActivityGridComponent,
+    ToastModule,
+    ProgressBarModule
   ],
   templateUrl: './activity-player.component.html',
   styleUrl: './activity-player.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  providers: [MessageService]
 })
 export class ActivityPlayerComponent {
-  @Input() remote : Remote | undefined;
+  remote: Remote | undefined;
+  configEntityCommands: EntityCommand[] | undefined;
+  @Input('remote') set _remote(value: Remote | undefined) {
+    this.remote = value;
+    if (this.remote)
+      this.server.getConfigEntityCommands(this.remote).subscribe(entityCommands => {
+        this.configEntityCommands = entityCommands;
+        this.cdr.detectChanges();
+      })
+  }
   activity: Activity | undefined;
   @Input("activity") set _activity (activity: Activity | undefined) {
     this.activity = activity;
@@ -51,8 +66,11 @@ export class ActivityPlayerComponent {
   @Output() onClose: EventEmitter<ActivityPlayerComponent> = new EventEmitter();
   minimized = false;
   currentPage: UIPage | undefined;
+  progress = 0;
+  progressDetail: string | undefined;
 
-  constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
+  constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService,
+              private cdr:ChangeDetectorRef, private messageService: MessageService) { }
 
   protected readonly Helper = Helper;
 
@@ -67,22 +85,64 @@ export class ActivityPlayerComponent {
     this.server.executeRemotetCommand(this.remote, {
       entity_id: this.activity.entity_id,
       cmd_id
-    }).subscribe();
+    }).subscribe({next: results =>
+      {
+        this.messageService.add({
+          key: "activityPlayer", summary: `Sequence executed`,
+          severity: "success", detail: `Results : ${results.code} : ${results.message}`
+        });
+        this.cdr.detectChanges();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.messageService.add({key: "activityPlayer", summary: `Sequence executed`,
+          severity: "error", detail: `Results : ${err.error.code} : ${err.error.message}`});
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   executeSequence(sequenceName: string) {
     if (!this.activity?.options?.sequences?.[sequenceName] || !this.remote) return;
     const remote = this.remote;
-    from(this.activity.options.sequences[sequenceName]).pipe(mergeMap(command => {
+    this.progress = 0;
+    this.progressDetail = "";
+    this.cdr.detectChanges();
+    const steps = this.activity.options.sequences[sequenceName].length;
+    const errors: string[] = [];
+    forkJoin([from(this.activity.options.sequences[sequenceName]).pipe(mergeMap(command => {
       if (command.type === "delay" && command.delay)
       {
-        return of(true).pipe(delay(command.delay*1000));
+        this.progressDetail = `Delay ${command.delay}`;
+        this.cdr.detectChanges();
+        return of(true).pipe(delay(command.delay*1000), map(res=> {
+          this.progress += 100/steps;
+          this.cdr.detectChanges();
+        }));
       }
-      else if (command.command)
-        return this.server.executeRemotetCommand(remote, command.command)
+      else if (command.command) {
+        const entity = this.activity?.options?.included_entities?.find(item => item.entity_id === command.command?.entity_id);
+        this.progressDetail = `Command ${Helper.getEntityName(entity)} : ${Helper.getCommandName(command.command, this.configEntityCommands)}`
+        this.cdr.detectChanges();
+        return this.server.executeRemotetCommand(remote, command.command).pipe(catchError(err => {
+          console.error("Error executing sequence", err);
+          errors.push(err.toString());
+          return of(command);
+        }), map(results => {
+          this.progress += 100/steps;
+          this.cdr.detectChanges();
+        }))
+      }
       return of(command);
-    },1)).subscribe(results => {
-
+    },1))]).subscribe(results => {
+      if (errors.length > 0)
+        this.messageService.add({key: "activityPlayer", summary: `Sequence ${sequenceName} executed`,
+          severity: "warning", detail: `Results : ${errors.length} errors during operations (${errors.join(", ")})`});
+      else
+        this.messageService.add({key: "activityPlayer", summary: `Sequence ${sequenceName} executed`,
+          severity: "success"});
+      this.progressDetail = undefined;
+      this.progress = 0;
+      this.cdr.detectChanges();
     })
   }
 }

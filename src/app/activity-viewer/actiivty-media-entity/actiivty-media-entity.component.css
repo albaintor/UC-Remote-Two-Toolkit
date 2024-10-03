@@ -1,0 +1,16 @@
+.media-image-run
+{
+  display: block;
+  max-width:100%;
+  max-height:100%;
+  width: auto;
+  height: auto;
+  /*transform-origin: top left;*/
+  transition: all 1s ease-in-out;
+  z-index: 10;
+}
+
+.text-content {
+  font-size: 1.2rem;
+  text-shadow: #676767 2px 0 10px;
+}

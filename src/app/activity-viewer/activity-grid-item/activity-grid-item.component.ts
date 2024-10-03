@@ -73,7 +73,10 @@ export class ActivityGridItemComponent implements AfterViewInit{
         if (this.runMode) return 'grid-item-run-static';
         return 'grid-item-static';
       }
-      if (this.runMode) return 'grid-item-run';
+      if (this.runMode) {
+        if (this.item.type === "media_player") return 'grid-item-run-static';
+        return 'grid-item-run';
+      }
       return 'grid-item-clickable';
     }
     return 'grid-item';

@@ -68,11 +68,13 @@ export class ActiveEntitiesComponent implements OnInit {
     const data = localStorage.getItem("remoteData");
     if (data) {
       const remoteData: RemoteData = JSON.parse(data);
-      this.entities = remoteData.entities.filter(item => item.entity_type === 'media_player');
+      this.entities = remoteData.entities.filter(item => item.entity_type === 'media_player')
+        .sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
       this.server.setEntities(remoteData.entities);
     }
     this.server.entities$.subscribe(entities => {
-      this.entities = entities.filter(item => item.entity_type === 'media_player');
+      this.entities = entities.filter(item => item.entity_type === 'media_player')
+        .sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
       this.cdr.detectChanges();
     });
     this.server.remote$.subscribe(remote => {
@@ -159,10 +161,12 @@ export class ActiveEntitiesComponent implements OnInit {
 
   searchActivities($event: AutoCompleteCompleteEvent) {
     if (!this.activities) return;
-    if (!$event.query) this.suggestedActivities = [...this.activities];
+    if (!$event.query) this.suggestedActivities = [...this.activities]
+      .sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
     this.suggestedActivities = this.activities.filter(entity =>
       !this.selectedActivities.find(item => item.entity_id === entity.entity_id) &&
-      Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()));
+      Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()))
+      .sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
   }
 
   addActivity($event: Activity) {
@@ -174,7 +178,6 @@ export class ActiveEntitiesComponent implements OnInit {
   }
 
   removeActivity($event: ActivityPlayerComponent) {
-    console.log("REMOVED");
     if (!this.selectedActivities.find(item => item.entity_id === $event.activity?.entity_id)) return;
     this.selectedActivities.splice(this.selectedActivities.indexOf(
       this.selectedActivities.find(item => item.entity_id === $event.activity?.entity_id)!

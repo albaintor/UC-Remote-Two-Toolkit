@@ -27,6 +27,7 @@ export class ScrollingTextComponent implements AfterViewInit {
     this.cdr.detectChanges();
     this.updateClass();
   }
+  @Input() textClass: string | undefined;
   @ViewChild("textContainer", {static: false}) textContainer: ElementRef<HTMLDivElement> | undefined;
   @ViewChild("textContent", {static: false}) textContent: ElementRef<HTMLDivElement> | undefined;
 
@@ -40,12 +41,18 @@ export class ScrollingTextComponent implements AfterViewInit {
   updateClass()
   {
     if (!this.textContainer || !this.textContent) return;
+    if (this.textClass) this.textContent.nativeElement.classList.add(this.textClass);
+    this.cdr.detectChanges();
     if (this.textContainer.nativeElement.clientWidth < this.textContent.nativeElement.clientWidth + 15) {
       this.textContent.nativeElement.classList.add("animate");
+      const speed =  Math.floor(10*this.textContent.nativeElement.clientWidth / this.textContainer.nativeElement.clientWidth);
+      this.textContent.nativeElement.setAttribute("style", `animation: leftright ${speed}s infinite alternate ease-in-out;`);
     }
     else {
       this.textContent.nativeElement.classList.remove("animate");
+      this.textContent.nativeElement.setAttribute("style", "");
     }
+
     this.cdr.detectChanges();
   }
 }

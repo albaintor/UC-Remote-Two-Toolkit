@@ -1,4 +1,8 @@
 <p-toast key="activityGrid"></p-toast>
+<app-ui-command-editor #commandeditor (updateItem)="updateGridItem($event)"
+                       (addItem)="addGridItem($event)" (deleteItem)="deleteGridItem($event)"
+                       [remote]="remote" [activity]="activity" [gridItem]="gridItem"
+                       [gridCommands]="gridCommands" [grid]="currentPage?.grid"></app-ui-command-editor>
 <div class="grid-container" *ngIf="currentPage"
      [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width), 'width': gridPixelWidth+'px', 'height': gridPixelHeight+'px'}">
   <grid-button [editable]="editMode" *ngFor="let item of gridCommands; let index=index" [source]="gridItemSource" [item]="item" [grid]="currentPage.grid" [style]="getGridItemSize(item)"
@@ -14,16 +18,19 @@
     <ng-container *ngIf="item?.text">
       <span><b>{{item?.text}}</b></span><br>
     </ng-container>
-    <ng-container *ngIf="!runMode && item && item.command != null">
-      <p-chip [label]="Helper.getEntityName((item.command | as : Command)?.entity_id!)"
-              [style]="Helper.getStyle(Helper.getEntityName((item.command | as : Command)?.entity_id!))"></p-chip><br><br>
+    <ng-container *ngIf="!runMode && item && item.command != undefined">
+      <p-chip [label]="getEntityName((item.command | as : Command)?.entity_id!)"
+              [style]="Helper.getStyle(getEntityName((item.command | as : Command)?.entity_id!))"></p-chip><br><br>
       <p-tag [value]="Helper.getCommandName(item.command, configEntityCommands)" severity="secondary"></p-tag>
     </ng-container>
     <span *ngIf="item?.media_player_id" style="text-align: center">
-        <p-chip *ngIf="!runMode" [label]="Helper.getEntityName(item?.media_player_id!)"
-                [style]="Helper.getStyle(Helper.getEntityName(item?.media_player_id!))"></p-chip>
+        <p-chip *ngIf="!runMode" [label]="getEntityName(item?.media_player_id!)"
+                [style]="Helper.getStyle(getEntityName(item?.media_player_id!))"></p-chip>
         <div style="position: relative; width: 100%;height: 100%">
-          <img src="/assets/icons/media_player.svg" alt="Media player" class="media_player_icon">
+          <img *ngIf="!runMode" src="/assets/icons/media_player.svg" alt="Media player" class="media_player_icon">
+          <ng-container *ngIf="runMode">
+            <app-actiivty-media-entity [mediaEntity]="getMediaEntity(item.media_player_id!)" [remote]="remote"/>
+          </ng-container>
         </div>
       </span>
     <ng-container *ngIf="!runMode">

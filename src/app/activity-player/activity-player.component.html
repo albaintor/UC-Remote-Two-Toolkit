@@ -1,3 +1,4 @@
+<p-toast key="activityPlayer"/>
 <p-dialog #dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
           contentStyleClass="widget-dialog" class="widget" styleClass="widget-header" appendTo="body"
           (close)="closeDialog($event);dialog.close($event)" [style]="{'max-height': 'calc(100vh - 30px)'}">
@@ -17,10 +18,21 @@
   <div class="flex-initial flex align-items-center justify-content-center gap-4">
     <p-button icon="pi pi-stop" [rounded]="true" pTooltip="Stop activity" (click)="executeActivity('activity.off')" severity="danger"/>
     <p-button icon="pi pi-play" [rounded]="true" pTooltip="Start activity" (click)="executeActivity('activity.on')" severity="success"/>
+    <p-button icon="pi pi-hammer" [rounded]="true" pTooltip="Fix states to turn off" (click)="executeSequence('off')" severity="danger"/>
+    <p-button icon="pi pi-hammer" [rounded]="true" pTooltip="Fix states to turn on" (click)="executeSequence('on')" severity="success"/>
   </div>
+
   <ng-container *ngIf="!minimized">
     <app-activity-buttons [remote]="remote" [activity]="activity" [editMode]="false"/>
     <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [gridPixelWidth]="400" [gridPixelHeight]="500"
                        [selectionMode]="false" [currentPage]="currentPage" [runMode]="true"/>
   </ng-container>
+</p-dialog>
+<p-dialog [modal]="true" position="center" [showHeader]="false"
+          [closable]="true" [visible]="progressDetail !== undefined" [draggable]="true" appendTo="body">
+  <div class="flex flex-column align-items-center">
+    <h3>Executing {{Helper.getEntityName(activity)}} sequence fix...</h3>
+    <p-progressBar [style]="{'width': '250px'}" [value]="progress"/>
+    <div class="flex flex-wrap">{{progressDetail}}</div>
+  </div>
 </p-dialog>

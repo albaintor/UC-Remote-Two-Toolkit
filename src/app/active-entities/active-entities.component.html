@@ -27,6 +27,12 @@
           {{item.remote_name}} ({{item.address}})
         </ng-template>
       </p-dropdown>
+      <ng-container *ngFor="let activity of activities">
+        <ng-container *ngIf="activity.attributes?.state === 'ON'">
+          <p-button icon="pi pi-play" pTooltip="Play activity" (click)="playActivity(activity)"
+                    [label]="Helper.getEntityName(activity)"/>
+        </ng-container>
+      </ng-container>
     </div>
   </ng-template>
 </p-menubar>

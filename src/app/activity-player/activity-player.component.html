@@ -1,7 +1,7 @@
 <p-toast key="activityPlayer"/>
 <p-dialog #dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
           contentStyleClass="widget-dialog" class="widget" styleClass="widget-header" appendTo="body"
-          (close)="closeDialog($event);dialog.close($event)" [style]="{'max-height': 'calc(100vh - 30px)'}">
+          (close)="closeDialog($event);dialog.close($event)" [style]="{'width': '420px', 'max-height': 'calc(100vh - 30px)'}">
   <ng-template pTemplate="header">
     <div class="flex justify-content-start flex-wrap gap-3 column-gap-4" style="width: 100%">
       <div class="flex align-items-center justify-content-center">
@@ -20,6 +20,7 @@
     <p-button icon="pi pi-play" [rounded]="true" pTooltip="Start activity" (click)="executeActivity('activity.on')" severity="success"/>
     <p-button icon="pi pi-hammer" [rounded]="true" pTooltip="Fix states to turn off" (click)="executeSequence('off')" severity="danger"/>
     <p-button icon="pi pi-hammer" [rounded]="true" pTooltip="Fix states to turn on" (click)="executeSequence('on')" severity="success"/>
+    <p-button icon="pi pi-cog" [rounded]="true" pTooltip="Edit activity" [routerLink]="'/activity/edit/'+activity?.entity_id" />
   </div>
 
   <ng-container *ngIf="!minimized">

@@ -68,7 +68,7 @@ export class ActivityGridComponent implements AfterViewInit {
       if (item.type === "media_player" && item.media_player_id)
         this.mediaEntities.push(item.media_player_id);
     })
-    this.mediaStates = this.mediaStates.filter(item => this.mediaEntities.includes(item.entity_id));
+    this.mediaStates = this.remoteWebsocketService.mediaEntities.filter(item => this.mediaEntities.includes(item.entity_id));
     this.cdr.detectChanges();
   }
   @Input() remote: Remote | undefined;
@@ -109,17 +109,7 @@ export class ActivityGridComponent implements AfterViewInit {
     this.gridPixelWidth = Math.min(window.innerWidth*0.8, this.gridPixelWidthInit);
     this.gridPixelHeight = Math.min(window.innerHeight*1.2, this.gridPixelHeightInit);
     this.remoteWebsocketService.onMediaStateChange().subscribe(mediaStates => {
-      mediaStates.forEach(mediaState => {
-        if (this.mediaStates.includes(mediaState)) {
-          this.cdr.detectChanges();
-          return;
-        }
-        if (this.mediaEntities.includes(mediaState.entity_id))
-        {
-          this.mediaStates.push(mediaState);
-          this.cdr.detectChanges();
-        }
-      })
+      this.init(mediaStates);
     });
     this.remoteWebsocketService.onMediaPositionChange().subscribe(mediaPositions => {
       let update = false;

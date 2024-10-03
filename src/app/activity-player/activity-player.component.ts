@@ -24,6 +24,7 @@ import {ToastModule} from "primeng/toast";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ProgressBarModule} from "primeng/progressbar";
 import {PaginationComponent} from "../controls/pagination/pagination.component";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-activity-player',
@@ -39,7 +40,8 @@ import {PaginationComponent} from "../controls/pagination/pagination.component";
     ActivityGridComponent,
     ToastModule,
     ProgressBarModule,
-    PaginationComponent
+    PaginationComponent,
+    RouterLink
   ],
   templateUrl: './activity-player.component.html',
   styleUrl: './activity-player.component.css',
@@ -114,9 +116,9 @@ export class ActivityPlayerComponent {
     forkJoin([from(this.activity.options.sequences[sequenceName]).pipe(mergeMap(command => {
       if (command.type === "delay" && command.delay)
       {
-        this.progressDetail = `Delay ${command.delay}`;
+        this.progressDetail = `Delay ${command.delay}ms`;
         this.cdr.detectChanges();
-        return of(true).pipe(delay(command.delay*1000), map(res=> {
+        return of(true).pipe(delay(command.delay), map(res=> {
           this.progress += 100/steps;
           this.cdr.detectChanges();
         }));

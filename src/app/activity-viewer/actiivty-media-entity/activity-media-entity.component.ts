@@ -34,6 +34,9 @@ export class ActivityMediaEntityComponent {
     this.remoteWebsocketService.onMediaStateChange().subscribe(mediaStates => {
       if (this.mediaEntity && mediaStates.includes(this.mediaEntity)) this.cdr.detectChanges();
     })
+    this.remoteWebsocketService.onMediaPositionChange().subscribe(entities => {
+      if (this.mediaEntity && entities.includes(this.mediaEntity)) this.cdr.detectChanges();
+    })
   }
   protected readonly Math = Math;
 

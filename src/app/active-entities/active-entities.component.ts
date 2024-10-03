@@ -177,6 +177,13 @@ export class ActiveEntitiesComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  playActivity(activity: Activity) {
+    if (!this.selectedActivities.includes(activity)) {
+      this.selectedActivities.push(activity);
+      this.cdr.detectChanges();
+    }
+  }
+
   removeActivity($event: ActivityPlayerComponent) {
     if (!this.selectedActivities.find(item => item.entity_id === $event.activity?.entity_id)) return;
     this.selectedActivities.splice(this.selectedActivities.indexOf(

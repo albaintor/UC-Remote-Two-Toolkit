@@ -110,10 +110,17 @@ The integrations and entities must be configured first on the target remote, oth
 <img width="100%" alt="UI grid" src="https://github.com/user-attachments/assets/f40c524c-bc26-4ce3-b823-33fafdbb60f1">
 
 
-## Media player widget and active entities page
+## Media player widget and Play Remote page
 
 When the remote is connected, a widget will be displayed in overlay and will be filled in by active media player entities. It is possible to execute media player commands based on its capabilities, or to switch to another active media player entity.
-To see more, a "Remote status" link ![image](https://github.com/user-attachments/assets/a9be53f5-ccd5-489c-98d7-adb17df4ab1a) will let display all the active media entities and execute commands on them
+To see more, a "Play Remote" link from the menu bar : 
+
+Remote play of any activities : from the activities drop down, a dialog will show a virtual remote that reproduces the buttons mapping and UI mapping of the activity, and even the media players.
+You can execute any buttons and UI commands.
+<img width="300px" alt="Virtual remote" src="https://github.com/user-attachments/assets/11f9ea51-c61f-4e71-bd2f-f515f576284a">
+
+
+Also in this page it will display all the active media entities and it is possible to execute commands on them
 
 <img width="40%" alt="UI grid" src="https://github.com/user-attachments/assets/370ca38a-ca99-4891-8b98-436e1b58ceab">
 

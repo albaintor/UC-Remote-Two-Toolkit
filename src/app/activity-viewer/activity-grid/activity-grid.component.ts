@@ -2,8 +2,8 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, EventEmitter, HostListener,
-  Input, Output, Pipe, PipeTransform, QueryList,
+  Component, HostListener,
+  Input, Pipe, PipeTransform, QueryList,
   ViewChild, ViewChildren,
   ViewEncapsulation
 } from '@angular/core';
@@ -18,7 +18,6 @@ import {
   Command,
   EntityCommand,
   Remote,
-  RemoteData,
   ScreenLayout,
   UIPage
 } from "../../interfaces";
@@ -27,7 +26,6 @@ import {HttpErrorResponse} from "@angular/common/http";
 import {ServerService} from "../../server.service";
 import {MessageService} from "primeng/api";
 import {ToastModule} from "primeng/toast";
-import {MediaEntityState, RemoteWebsocketService} from "../../remote-widget/remote-websocket.service";
 import {ActivityMediaEntityComponent} from "../actiivty-media-entity/activity-media-entity.component";
 
 @Pipe({name: 'as', standalone: true, pure: true})
@@ -63,26 +61,20 @@ export class ActivityGridComponent implements AfterViewInit {
   {
     this.currentPage = currentPage;
     this.gridCommands = this.getGridItems();
-    this.mediaEntities = [];
-    this.currentPage?.items?.forEach(item => {
-      if (item.type === "media_player" && item.media_player_id)
-        this.mediaEntities.push(item.media_player_id);
-    })
-    this.mediaStates = this.remoteWebsocketService.mediaEntities.filter(item => this.mediaEntities.includes(item.entity_id));
     this.cdr.detectChanges();
   }
   @Input() remote: Remote | undefined;
-  gridPixelWidth = 4*185;
-  gridPixelWidthInit = this.gridPixelWidth;
-  @Input("gridPixelWidth") set _gridPixelWidth(gridPixelWidth: number) {
-    this.gridPixelWidth = gridPixelWidth;
-    this.gridPixelWidthInit = gridPixelWidth;
+  width = 4*185;
+  widthInit = this.width;
+  @Input("width") set _width(width: number) {
+    this.width = width;
+    this.widthInit = width;
   }
-  gridPixelHeight = 6*185;
-  gridPixelHeightInit = this.gridPixelHeight;
-  @Input("gridPixelHeight") set _gridPixelHeight(gridPixelHeight: number) {
-    this.gridPixelHeight = gridPixelHeight;
-    this.gridPixelHeightInit = gridPixelHeight;
+  height = 6*185;
+  heightInit = this.height;
+  @Input("height") set _height(height: number) {
+    this.height = height;
+    this.heightInit = height;
   }
   @Input() editMode = false;
   @Input() selectionMode = false;
@@ -98,26 +90,13 @@ export class ActivityGridComponent implements AfterViewInit {
   public Command!: Command;
   protected readonly Helper = Helper;
   screenLayout: ScreenLayout | undefined;
-  mediaEntities: string[] = [];
-  mediaStates: MediaEntityState[] = [];
 
-  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
-              private remoteWebsocketService: RemoteWebsocketService) {
+  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
   }
 
   ngAfterViewInit(): void {
-    this.gridPixelWidth = Math.min(window.innerWidth*0.8, this.gridPixelWidthInit);
-    this.gridPixelHeight = Math.min(window.innerHeight*1.2, this.gridPixelHeightInit);
-    this.remoteWebsocketService.onMediaStateChange().subscribe(mediaStates => {
-      this.init(mediaStates);
-    });
-    this.remoteWebsocketService.onMediaPositionChange().subscribe(mediaPositions => {
-      let update = false;
-      mediaPositions.forEach(mediaState => {
-        if (this.mediaEntities.includes(mediaState.entity_id)) update = true;
-      });
-      if (update) this.cdr.detectChanges();
-    })
+    this.width = Math.min(window.innerWidth*0.8, this.widthInit);
+    this.height = Math.min(window.innerHeight*1.2, this.heightInit);
     // const data = localStorage.getItem("remoteData");
     // if (data) {
     //   const remoteData: RemoteData = JSON.parse(data);
@@ -140,37 +119,13 @@ export class ActivityGridComponent implements AfterViewInit {
         this.cdr.detectChanges();
       });
     }
-    this.init(this.remoteWebsocketService.mediaEntities);
-  }
-
-  init(mediaStates: MediaEntityState[])
-  {
-    mediaStates.forEach(mediaState => {
-      const existing = this.mediaStates.find(mediaState => mediaState.entity_id);
-      if (existing)
-      {
-        this.mediaStates[this.mediaStates.indexOf(existing)] = mediaState;
-        this.cdr.detectChanges();
-        return;
-      }
-      if (this.mediaEntities.includes(mediaState.entity_id))
-      {
-        this.mediaStates.push(mediaState);
-        this.cdr.detectChanges();
-      }
-    })
   }
 
   @HostListener('window:resize', ['$event'])
   onResize($event: any) {
-    this.gridPixelWidth = Math.min(window.innerWidth*0.8, this.gridPixelWidthInit);
-    this.gridPixelHeight = Math.min(window.innerHeight*1.2, this.gridPixelHeightInit);
+    this.width = Math.min(window.innerWidth*0.8, this.widthInit);
+    this.height = Math.min(window.innerHeight*1.2, this.heightInit);
     this.updateButtonsGrid();
-  }
-
-  getMediaEntity(entityId: string)
-  {
-    return this.mediaStates.find(item => item.entity_id === entityId)
   }
 
   getGridItems(): ActivityPageCommand[]
@@ -300,13 +255,13 @@ export class ActivityGridComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  getGridItemSize(item: ActivityPageCommand | null): any {
+  getGridItemStyleSize(item: ActivityPageCommand | null): any {
     const width = this.currentPage?.grid.width;
     const height = this.currentPage?.grid.height;
     const itemWidth = item?.size?.width ? item!.size.width : 1;
     const itemHeight = item?.size?.height ? item!.size.height : 1;
     if (!width || !height) return {};
-    const style: any = {width: (itemWidth*this.gridPixelWidth/width)+'px', height: (itemHeight!*this.gridPixelHeight/height)+'px'};
+    const style: any = {width: (itemWidth*this.width/width)+'px', height: (itemHeight!*this.height/height)+'px'};
     if (item?.size?.width! > 1)
     {
       style['grid-column-end'] = `span ${item!.size.width}`;
@@ -316,6 +271,15 @@ export class ActivityGridComponent implements AfterViewInit {
       style['grid-row-end'] = `span ${item!.size.height}`;
     }
     return style;
+  }
+
+  getGridItemSize(item: ActivityPageCommand | null): {width: number; height: number} {
+    const width = this.currentPage?.grid.width;
+    const height = this.currentPage?.grid.height;
+    const itemWidth = item?.size?.width ? item!.size.width : 1;
+    const itemHeight = item?.size?.height ? item!.size.height : 1;
+    if (!width || !height) return {width: 0, height: 0};
+    return  {width: (itemWidth*this.width/width), height: (itemHeight!*this.height/height)};
   }
 
 }

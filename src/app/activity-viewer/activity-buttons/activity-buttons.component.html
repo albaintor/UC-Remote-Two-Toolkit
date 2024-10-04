@@ -1,6 +1,9 @@
 <p-toast key="activityButtons"></p-toast>
-<div class="flex flex-column">
-  <div class="flex align-items-start justify-content-center" *ngIf="getRemoteModel()?.model == 'UCR2'">
+<div class="flex flex-column" style="position:relative">
+  <div class="flex align-items-start justify-content-center"
+       [style]="{width: 400*scale+'px', height: 400*scale+'px'}"></div>
+  <div class="flex align-items-start justify-content-center" *ngIf="getRemoteModel()?.model == 'UCR2'"
+       [style]="'position: absolute;top:0;left:0;right:0;text-align: center;transform-origin: top;scale:'+scale">
     <app-image-map image="assets/remote/remote-two.png" [imageSize]="{width: 400, height: 400}" (overElement)="buttonOver($event)"
                    (clickElement)="selectButton($event)" [selectedTags]="mappedButtons" [imageTemplate]="r2Areas">
       <ng-template #r2Areas>
@@ -28,7 +31,8 @@
       </ng-template>
     </app-image-map>
   </div>
-  <div class="flex align-items-start justify-content-center"  *ngIf="getRemoteModel()?.model == 'UCR3'">
+  <div class="flex align-items-start justify-content-center"  *ngIf="getRemoteModel()?.model == 'UCR3'"
+       [style]="'position: absolute;top:0;left:0;transform-origin: top left;scale:'+scale">
     <app-image-map image="assets/remote/remote-3.png" [imageSize]="{width: 400, height: 724}" (overElement)="buttonOver($event)"
                    (clickElement)="selectButton($event)" [selectedTags]="mappedButtons" [imageTemplate]="r3Areas">
       <ng-template #r3Areas>
@@ -57,63 +61,92 @@
     </app-image-map>
   </div>
 </div>
-<div class="flex flex-column gap-1" style="min-width:400px;height: 120px">
-  <div class="flex align-items-start justify-content-center">
+<div class="grid align-content-start" *ngIf="!hideButtonsInfo && mouseoverButton" style="width:400px; height: 150px">
+  <div class="col-12 text-center">
     <h3>{{mouseOverButtonName!}}</h3>
   </div>
-    <ng-container *ngIf="mouseoverButton && mouseoverButton.short_press">
-      <div class="flex flex-wrap align-items-start justify-content-start gap-1" style="max-width: 400px">
-        <p-tag severity="success" value="Short press"/>
-        <p-chip [label]="Helper.getEntityName(mouseoverButton.short_press.entity_id)"
-                [style]="Helper.getStyle(Helper.getEntityName(mouseoverButton.short_press.entity_id))"
-                [pTooltip]="mouseoverButton.short_press.entity_id"></p-chip>&nbsp;
-        <p-tag [value]="Helper.getCommandName(mouseoverButton.short_press, configEntityCommands)" [pTooltip]="mouseoverButton.short_press.cmd_id"
-               severity="secondary"></p-tag>
-        <ng-container *ngIf="mouseoverButton.short_press.params">
-          <ng-container *ngFor="let param of Helper.getParams(mouseoverButton.short_press)">
-            <ng-container *ngIf="Helper.getParam(mouseoverButton.short_press, param, configEntityCommands)">
-              {{Helper.getEntityName(Helper.getParam(mouseoverButton.short_press, param, configEntityCommands))}} :
-              {{Helper.getParamValue(mouseoverButton.short_press, param)}}
-            </ng-container>
-          </ng-container>
-        </ng-container>
-      </div>
-    </ng-container>
-    <ng-container *ngIf="mouseoverButton && mouseoverButton.long_press">
-      <div class="flex flex-wrap align-items-start justify-content-start gap-1" style="max-width: 400px">
-        <p-tag severity="warning" value="Long press"/>
-        <p-chip [label]="Helper.getEntityName(mouseoverButton.long_press.entity_id)"
-                [style]="Helper.getStyle(Helper.getEntityName(mouseoverButton.long_press.entity_id))"
-                [pTooltip]="mouseoverButton.long_press.entity_id"></p-chip>&nbsp;
-        <p-tag [value]="Helper.getCommandName(mouseoverButton.long_press, configEntityCommands)" [pTooltip]="mouseoverButton.long_press.cmd_id"
-               severity="secondary"></p-tag>
-        <ng-container *ngIf="mouseoverButton.long_press.params">
-          <ng-container *ngFor="let param of Helper.getParams(mouseoverButton.long_press)">
-            <ng-container *ngIf="Helper.getParam(mouseoverButton.long_press, param, configEntityCommands)">
-              {{Helper.getEntityName(Helper.getParam(mouseoverButton.long_press, param, configEntityCommands))}} :
-              {{Helper.getParamValue(mouseoverButton.long_press, param)}}
-            </ng-container>
-          </ng-container>
-        </ng-container>
-      </div>
-    </ng-container>
-    <ng-container *ngIf="mouseoverButton && mouseoverButton.double_press">
-      <div class="flex flex-wrap align-items-start justify-content-start gap-1" style="max-width: 400px">
-        <p-tag severity="danger" value="Double press"/>
-        <p-chip [label]="Helper.getEntityName(mouseoverButton.double_press.entity_id)"
-                [style]="Helper.getStyle(Helper.getEntityName(mouseoverButton.double_press.entity_id))"
-                [pTooltip]="mouseoverButton.double_press.entity_id"></p-chip>&nbsp;
-        <p-tag [value]="Helper.getCommandName(mouseoverButton.double_press, configEntityCommands)" [pTooltip]="mouseoverButton.double_press.cmd_id"
-               severity="secondary"></p-tag>
-        <ng-container *ngIf="mouseoverButton.double_press.params">
-          <ng-container *ngFor="let param of Helper.getParams(mouseoverButton.double_press)">
-            <ng-container *ngIf="Helper.getParam(mouseoverButton.double_press, param, configEntityCommands)">
-              {{Helper.getEntityName(Helper.getParam(mouseoverButton.double_press, param, configEntityCommands))}} :
-              {{Helper.getParamValue(mouseoverButton.double_press, param)}}
-            </ng-container>
-          </ng-container>
-        </ng-container>
-      </div>
-    </ng-container>
-  </div>
+  <ng-container [ngTemplateOutlet]="buttonTemplate" [ngTemplateOutletContext]="{button:mouseoverButton}"/>
+</div>
 <app-button-editor [activity]="activity" [remote]="remote" [button]="selectedButton" (buttonChanged)="buttonChanged($event)"></app-button-editor>
+<p-overlayPanel #executeButtonPanel [showCloseIcon]="true" appendTo="body" [style]="{width: '450px'}">
+  <ng-template pTemplate="content">
+    <div class="grid">
+      <ng-container *ngIf="executeButton" [ngTemplateOutlet]="buttonTemplate" [ngTemplateOutletContext]="{button:executeButton}"/>
+    </div>
+  </ng-template>
+</p-overlayPanel>
+
+<ng-template let-button="button" #buttonTemplate>
+  <ng-container *ngIf="button.short_press">
+    <div class="col-3 button-action" (click)="executeCommand(button.short_press)">
+      <p-tag severity="success" value="Short press"/>
+    </div>
+    <div class="col-3 button-action" (click)="executeCommand(button.short_press)">
+      <p-chip [label]="getEntityName(button.short_press.entity_id)"
+              [style]="Helper.getStyle(Helper.getEntityName(button.short_press.entity_id))"
+              [pTooltip]="button.short_press.entity_id"></p-chip>&nbsp;
+    </div>
+    <div class="col-3 button-action" (click)="executeCommand(button.short_press)">
+      <p-tag [value]="Helper.getCommandName(button.short_press, configEntityCommands)" [pTooltip]="button.short_press.cmd_id"
+             severity="secondary"></p-tag>
+    </div>
+    <div class="col-3">
+      <ng-container *ngIf="button.short_press.params">
+        <ng-container *ngFor="let param of Helper.getParams(button.short_press)">
+          <ng-container *ngIf="Helper.getParam(button.short_press, param, configEntityCommands)">
+            {{Helper.getEntityName(Helper.getParam(button.short_press, param, configEntityCommands))}} :
+            {{Helper.getParamValue(button.short_press, param)}}
+          </ng-container>
+        </ng-container>
+      </ng-container>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="button && button.long_press">
+    <div class="col-3 button-action" (click)="executeCommand(button.long_press)">
+      <p-tag severity="warning" value="Long press"/>
+    </div>
+    <div class="col-3 button-action" (click)="executeCommand(button.long_press)">
+      <p-chip [label]="getEntityName(button.long_press.entity_id)"
+              [style]="Helper.getStyle(Helper.getEntityName(button.long_press.entity_id))"
+              [pTooltip]="button.long_press.entity_id"></p-chip>&nbsp;
+    </div>
+    <div class="col-3 button-action" (click)="executeCommand(button.long_press)">
+      <p-tag [value]="Helper.getCommandName(button.long_press, configEntityCommands)" [pTooltip]="button.long_press.cmd_id"
+             severity="secondary"></p-tag>
+    </div>
+    <div class="col-3">
+      <ng-container *ngIf="button.long_press.params">
+        <ng-container *ngFor="let param of Helper.getParams(button.long_press)">
+          <ng-container *ngIf="Helper.getParam(button.long_press, param, configEntityCommands)">
+            {{Helper.getEntityName(Helper.getParam(button.long_press, param, configEntityCommands))}} :
+            {{Helper.getParamValue(button.long_press, param)}}
+          </ng-container>
+        </ng-container>
+      </ng-container>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="button && button.double_press">
+    <div class="col-3 button-action" (click)="executeCommand(button.double_press)">
+      <p-tag severity="danger" value="Double press"/>
+    </div>
+    <div class="col-3 button-action" (click)="executeCommand(button.double_press)">
+      <p-chip [label]="getEntityName(button.double_press.entity_id)"
+              [style]="Helper.getStyle(Helper.getEntityName(button.double_press.entity_id))"
+              [pTooltip]="button.double_press.entity_id"></p-chip>&nbsp;
+    </div>
+    <div class="col-3 button-action" (click)="executeCommand(button.double_press)">
+      <p-tag [value]="Helper.getCommandName(button.double_press, configEntityCommands)" [pTooltip]="button.double_press.cmd_id"
+             severity="secondary"></p-tag>
+    </div>
+    <div class="col-3">
+      <ng-container *ngIf="button.double_press.params">
+        <ng-container *ngFor="let param of Helper.getParams(button.double_press)">
+          <ng-container *ngIf="Helper.getParam(button.double_press, param, configEntityCommands)">
+            {{Helper.getEntityName(Helper.getParam(button.double_press, param, configEntityCommands))}} :
+            {{Helper.getParamValue(button.double_press, param)}}
+          </ng-container>
+        </ng-container>
+      </ng-container>
+    </div>
+  </ng-container>
+</ng-template>

@@ -67,6 +67,7 @@ export class ActivityPlayerComponent {
     this.cdr.detectChanges();
   }
   @Input() visible = false;
+  @Input() scale = 0.7;
   @Output() onClose: EventEmitter<ActivityPlayerComponent> = new EventEmitter();
   minimized = false;
   currentPage: UIPage | undefined;

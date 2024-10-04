@@ -1,17 +1,17 @@
 .widget-dialog {
-  padding: 0.1rem !important;
+  padding: 0 !important;
   transition: width 1s, height 1s;
 }
 
 .widget-header {
-  padding: 0.1rem !important;
+  padding: 0 !important;
   opacity: 0.7;
   transition: width 1s ease-in-out, height 1s ease-in-out, opacity 0.5s ease;
 }
 
 .widget-header .p-dialog-header
 {
-  padding: 10px !important;
+  padding: 6px !important;
 }
 
 .widget {

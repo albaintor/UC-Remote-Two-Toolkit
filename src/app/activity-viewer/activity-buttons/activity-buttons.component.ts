@@ -2,7 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, EventEmitter,
+  Component, ElementRef, EventEmitter,
   Input, Output, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
@@ -10,7 +10,7 @@ import {Helper} from "../../helper";
 import {TagModule} from "primeng/tag";
 import {ChipModule} from "primeng/chip";
 import {TooltipModule} from "primeng/tooltip";
-import {NgForOf, NgIf} from "@angular/common";
+import {NgForOf, NgIf, NgTemplateOutlet} from "@angular/common";
 import {
   Activity,
   ButtonMapping,
@@ -27,6 +27,9 @@ import {HttpErrorResponse} from "@angular/common/http";
 import {MessageService} from "primeng/api";
 import {ToastModule} from "primeng/toast";
 import {ButtonEditorComponent} from "../../activity-editor/button-editor/button-editor.component";
+import {MediaEntityState} from "../../remote-widget/remote-websocket.service";
+import {IconComponent} from "../../controls/icon/icon.component";
+import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
 
 @Component({
   selector: 'app-activity-buttons',
@@ -39,7 +42,10 @@ import {ButtonEditorComponent} from "../../activity-editor/button-editor/button-
     NgForOf,
     ImageMapComponent,
     ToastModule,
-    ButtonEditorComponent
+    ButtonEditorComponent,
+    IconComponent,
+    OverlayPanelModule,
+    NgTemplateOutlet
   ],
   templateUrl: './activity-buttons.component.html',
   styleUrl: './activity-buttons.component.css',
@@ -70,6 +76,7 @@ export class ActivityButtonsComponent implements AfterViewInit {
     this.updateButtons();
   }
   @Input() editMode = false;
+  @Input() scale: number = 1;
   @ViewChild(ButtonEditorComponent) buttonEditor:ButtonEditorComponent | undefined;
   protected readonly Helper = Helper;
   configEntityCommands: EntityCommand[] | undefined;
@@ -82,6 +89,9 @@ export class ActivityButtonsComponent implements AfterViewInit {
   reversedButtonMap:{ [id: string]: string } = {};
   mappedButtons: string[] | undefined;
   @Output() onSelectButton: EventEmitter<ButtonMapping> = new EventEmitter();
+  @Input() hideButtonsInfo = false;
+  executeButton: ButtonMapping | undefined;
+  @ViewChild("executeButtonPanel") executeButtonPanel: OverlayPanel | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,) {
     const data = localStorage.getItem("remoteData");
@@ -134,8 +144,16 @@ export class ActivityButtonsComponent implements AfterViewInit {
     const buttonId = $event.tag;
     const button = this.activity?.options?.button_mapping?.find(button => button.button === this.buttonsMap[buttonId]);
     if (!this.editMode && button?.short_press)
-    {
-      this.executeCommand(button.short_press);
+    {//executeButtonPanel
+      const commands = (button?.short_press ? 1 : 0) + (button?.long_press ? 1 : 0) + (button?.double_press ? 1 : 0);
+      if (commands == 1)
+        this.executeCommand(button.short_press);
+      else if (commands > 1)
+      {
+        this.executeButton = button;
+        this.executeButtonPanel?.show($event.event, $event.event.target);
+        this.cdr.detectChanges();
+      }
       return;
     }
     this.selectedButton = button;
@@ -143,6 +161,13 @@ export class ActivityButtonsComponent implements AfterViewInit {
     this.cdr.detectChanges();
     this.buttonEditor?.show();
     this.cdr.detectChanges();
+  }
+
+  getEntityName(entityId: string): string
+  {
+    const entity = this.activity?.options?.included_entities?.find(entity => entity.entity_id === entityId);
+    if (entity) return Helper.getEntityName(entity);
+    return entityId;
   }
 
   getRemoteModel(): RemoteModel | undefined
@@ -156,14 +181,6 @@ export class ActivityButtonsComponent implements AfterViewInit {
     if (!buttonId) return;
     this.mouseOverButtonName = this.buttonsMap[buttonId];
     this.mouseoverButton = this.activity?.options?.button_mapping?.find(button => button.button === this.mouseOverButtonName);
-    // this.buttonpanel?.show($event.event, $event.event.target);
-    // @ts-ignore
-    this.buttonPanelStyle = { width: '450px',
-      'left': $event.event.pageX +'px',
-      'top': $event.event.pageY +'px',
-      'margin-left': '5px',
-      'margin-top': '5px',
-    };
     $event.event.stopPropagation();
     this.cdr.detectChanges();
   }

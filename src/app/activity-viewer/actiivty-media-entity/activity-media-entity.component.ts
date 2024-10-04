@@ -1,4 +1,11 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, ViewEncapsulation} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  ViewEncapsulation
+} from '@angular/core';
 import {ServerService} from "../../server.service";
 import {MediaEntityState, RemoteWebsocketService} from "../../remote-widget/remote-websocket.service";
 import {NgIf} from "@angular/common";
@@ -20,28 +27,78 @@ import {Remote} from "../../interfaces";
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class ActivityMediaEntityComponent {
-  mediaEntity: MediaEntityState | undefined;
-  @Input("mediaEntity") set _mediaEntity (mediaEntity: MediaEntityState | undefined)
+export class ActivityMediaEntityComponent implements AfterViewInit {
+  mediaEntityState: MediaEntityState | undefined;
+  imageUrl: string | undefined;
+  entityId: string | undefined;
+  @Input("entityId") set _entityId(entityId: string | undefined)
   {
-    this.mediaEntity = mediaEntity;
-    this.cdr.detectChanges();
+    this.entityId = entityId;
+    this.updateEntity(this.remoteWebsocketService.mediaEntities);
   }
   @Input() remote: Remote | undefined;
+  protected readonly Math = Math;
+  protected readonly Helper = Helper;
+  textStyle = "font-size: 1.2rem";
+  @Input() size: { width: number; height: number } | undefined;
 
   constructor(protected remoteWebsocketService: RemoteWebsocketService, private server:ServerService,
               private cdr: ChangeDetectorRef) {
+  }
+
+  ngAfterViewInit(): void {
     this.remoteWebsocketService.onMediaStateChange().subscribe(mediaStates => {
-      if (this.mediaEntity && mediaStates.includes(this.mediaEntity)) this.cdr.detectChanges();
+      this.updateEntity(mediaStates);
     })
     this.remoteWebsocketService.onMediaPositionChange().subscribe(entities => {
-      if (this.mediaEntity && entities.includes(this.mediaEntity)) this.cdr.detectChanges();
+      this.updatePosition(entities);
     })
+    if (this.size?.height)
+    {
+      const fontSize = Math.round(this.size.height*1.2/400*10)/10;
+      this.textStyle = "font-size: "+fontSize+"rem";
+      this.cdr.detectChanges();
+    }
   }
-  protected readonly Math = Math;
 
 
-  protected readonly Helper = Helper;
+  updateEntity(mediaStates: MediaEntityState[])
+  {
+    if (!this.entityId) {
+      this.mediaEntityState = undefined;
+      this.imageUrl = undefined;
+      this.cdr.detectChanges();
+      return;
+    }
+    const mediaEntityState = mediaStates.find(item => item.entity_id === this.entityId);
+    console.debug("Media Entity update", mediaEntityState);
+    if (!mediaEntityState) return;
+    if (this.mediaEntityState != mediaEntityState)
+    {
+      this.mediaEntityState = mediaEntityState;
+      this.cdr.detectChanges();
+      return;
+    }
+    if (this.mediaEntityState?.new_state?.attributes?.media_image_url && this.mediaEntityState?.new_state?.attributes?.media_image_proxy)
+    {
+      this.imageUrl = `'/api/proxy?url='${this.mediaEntityState.new_state.attributes.media_image_url}`;
+    } else if (this.mediaEntityState?.new_state?.attributes?.media_image_url)
+      this.imageUrl = this.mediaEntityState?.new_state?.attributes?.media_image_url;
+    this.cdr.detectChanges();
+  }
+
+  updatePosition(mediaStates: MediaEntityState[])
+  {
+    if (!this.entityId) {
+      return;
+    }
+    const mediaEntityState = mediaStates.find(item => item.entity_id === this.entityId);
+    if (!mediaEntityState) return;
+    if (this.mediaEntityState != mediaEntityState)
+      this.mediaEntityState = mediaEntityState;
+    this.cdr.detectChanges();
+  }
+
 
   checkFeature(mediaEntity: MediaEntityState, feature: string | string[]): boolean
   {
@@ -50,7 +107,7 @@ export class ActivityMediaEntityComponent {
     return mediaEntity.new_state.features.find(item => features.includes(item)) !== undefined;
   }
 
-  updatePosition(position: number, mediaEntity: MediaEntityState) {
+  setPosition(position: number, mediaEntity: MediaEntityState) {
     console.debug("Position update", position, mediaEntity);
     if (!mediaEntity || !this.remote || !mediaEntity.new_state?.attributes?.media_duration
       || !this.checkFeature(mediaEntity, "seek")) return;

@@ -123,7 +123,7 @@
           </div>
       </div>
       <app-activity-grid #activityGrid *ngIf="toggleGrid" [remote]="remote" [activity]="activity" [currentPage]="currentPage" [selectionMode]="selectionMode"
-                         [gridPixelWidth]="gridPixelWidth" [gridPixelHeight]="gridPixelHeight"  [editMode]="editMode"/>
+                         [width]="gridPixelWidth" [height]="gridPixelHeight"  [editMode]="editMode"/>
     </div>
   </ng-container>
   <ng-container *ngIf="editMode">

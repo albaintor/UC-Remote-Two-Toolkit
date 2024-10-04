@@ -24,10 +24,19 @@ export class ScrollingTextComponent implements AfterViewInit {
   text: string | undefined;
   @Input("text") set _text(value: string | undefined) {
     this.text = value;
-    this.cdr.detectChanges();
     this.updateClass();
   }
-  @Input() textClass: string | undefined;
+  textClass: string | undefined;
+  @Input("textClass") set _textClass(textClass: string | undefined) {
+    this.textClass = textClass;
+    this.updateClass();
+  }
+  textStyle: string | undefined;
+  @Input("textStyle") set _textStyle(textStyle: string | undefined)
+  {
+    this.textStyle = textStyle;
+    this.updateClass();
+  }
   @ViewChild("textContainer", {static: false}) textContainer: ElementRef<HTMLDivElement> | undefined;
   @ViewChild("textContent", {static: false}) textContent: ElementRef<HTMLDivElement> | undefined;
 
@@ -43,14 +52,15 @@ export class ScrollingTextComponent implements AfterViewInit {
     if (!this.textContainer || !this.textContent) return;
     if (this.textClass) this.textContent.nativeElement.classList.add(this.textClass);
     this.cdr.detectChanges();
+    const style = this.textStyle ? this.textStyle : "";
     if (this.textContainer.nativeElement.clientWidth < this.textContent.nativeElement.clientWidth + 15) {
       this.textContent.nativeElement.classList.add("animate");
       const speed =  Math.floor(10*this.textContent.nativeElement.clientWidth / this.textContainer.nativeElement.clientWidth);
-      this.textContent.nativeElement.setAttribute("style", `animation: leftright ${speed}s infinite alternate ease-in-out;`);
+      this.textContent.nativeElement.setAttribute("style", `animation: leftright ${speed}s infinite alternate ease-in-out;${style}`);
     }
     else {
       this.textContent.nativeElement.classList.remove("animate");
-      this.textContent.nativeElement.setAttribute("style", "");
+      this.textContent.nativeElement.setAttribute("style", style);
     }
 
     this.cdr.detectChanges();

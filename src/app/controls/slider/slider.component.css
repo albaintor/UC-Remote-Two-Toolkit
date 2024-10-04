@@ -53,6 +53,13 @@
   opacity: 1;
 }
 
+.slider-progress-noedit {
+  width: 100%;
+  position: relative;
+  text-align: center;
+  transition: all 0.5s ease-in-out;
+}
+
 .slider-progress {
   width: 100%;
   position: relative;

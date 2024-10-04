@@ -1,5 +1,5 @@
 <div style="position: relative; width: 100%; height: 40px" [class]="editable ? 'slider-wrapper' : 'slider-wrapper-noedit'">
-  <div class="slider-progress">
+  <div [class]="editable ?  'slider-progress' : 'slider-progress-noedit'">
     <p-progressBar [style]="{'width': '100%'}" [value]="value">
       <ng-template pTemplate="content"></ng-template>
     </p-progressBar>

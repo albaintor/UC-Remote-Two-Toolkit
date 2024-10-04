@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -36,11 +37,13 @@ import {TooltipModule} from "primeng/tooltip";
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class MediaEntityComponent implements OnInit {
+export class MediaEntityComponent implements OnInit, AfterViewInit {
   protected readonly Math = Math;
   @Input() mediaEntity: MediaEntityState | undefined;
   @Input() remote: Remote | undefined;
   @Input() headerTemplate : TemplateRef<HTMLAreaElement> | undefined;
+  @Input() scale = 1;
+  textStyle = "font-size: 1.2rem";
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
 
@@ -51,6 +54,12 @@ export class MediaEntityComponent implements OnInit {
     this.remoteWebsocketService.onMediaPositionChange().subscribe(entities => {
       this.cdr.detectChanges();
     });
+  }
+
+  ngAfterViewInit() {
+    const fontSize = Math.round(this.scale*1.1*10)/10;
+    this.textStyle = "font-size: "+fontSize+"rem";
+    this.cdr.detectChanges();
   }
 
   getStatusStyle(state: string) {

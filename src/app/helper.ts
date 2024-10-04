@@ -556,4 +556,8 @@ export class Helper
       minutes.toString().padStart(2, '0') + ':' +
       seconds.toString().padStart(2, '0');
   }
+
+  static setScale(scale: number) {
+    localStorage.setItem("scale", scale.toString());
+  }
 }

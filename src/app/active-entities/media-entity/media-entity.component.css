@@ -29,7 +29,7 @@
 }
 
 .card-title {
-  margin-left: 45px;
+
 }
 
 .media-card {
@@ -44,8 +44,8 @@
 .power-button {
   cursor: pointer;
   position: absolute;
-  top: 8px;
-  left: 8px;
+  top: 4px;
+  left: 4px;
 }
 
 .uc-button .p-button-icon {

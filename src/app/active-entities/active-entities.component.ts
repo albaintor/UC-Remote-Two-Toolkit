@@ -17,6 +17,7 @@ import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.com
 import {MediaEntityComponent} from "./media-entity/media-entity.component";
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
 import {ActivityPlayerComponent} from "../activity-player/activity-player.component";
+import {InputNumberModule} from "primeng/inputnumber";
 
 @Component({
   selector: 'app-active-entities',
@@ -37,7 +38,8 @@ import {ActivityPlayerComponent} from "../activity-player/activity-player.compon
     DropdownOverComponent,
     MediaEntityComponent,
     AutoCompleteModule,
-    ActivityPlayerComponent
+    ActivityPlayerComponent,
+    InputNumberModule
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',
@@ -61,10 +63,13 @@ export class ActiveEntitiesComponent implements OnInit {
   suggestedActivities: Activity[] = [];
   protected readonly Helper = Helper;
   newActivity: Activity | undefined;
+  scale = 0.8;
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    const scale = localStorage.getItem("scale");
+    if (scale) this.scale = Number.parseFloat(scale);
     const data = localStorage.getItem("remoteData");
     if (data) {
       const remoteData: RemoteData = JSON.parse(data);

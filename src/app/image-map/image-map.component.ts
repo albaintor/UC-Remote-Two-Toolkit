@@ -132,6 +132,7 @@ export class ImageMapComponent implements AfterViewInit, OnDestroy {
             return {type: "shortpress", event: endEvent};
           }),
           timeout({first: this.longPressThreshold, with: (info) => {
+            if (this.longPressRepeat == 0) return of({type: "longpress", event: startEvent});
             return timer(0, this.longPressRepeat).pipe(map(count => {
               return {type: "longpress", event: startEvent,timing: (count*this.longPressRepeat)}
             }), takeUntil(merge(mouseup, touchEnd, mouseupwindow)))

@@ -194,8 +194,8 @@ export class UiCommandEditorComponent {
   executeCommand(command: string | Command) {
     if (!this.remote || typeof command === 'string') return;
     this.server.executeRemotetCommand(this.remote, command).subscribe(results => {
-      this.messageService.add({key: "remoteCommand", summary: "Command executed",
-        severity: "success", detail: `Results : ${results.code} : ${results.message}`});
+      // this.messageService.add({key: "remoteCommand", summary: "Command executed",
+      //   severity: "success", detail: `Results : ${results.code} : ${results.message}`});
     });
     this.cdr.detectChanges();
   }

@@ -8,15 +8,15 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {DialogModule} from "primeng/dialog";
-import {MessageService, PrimeTemplate} from "primeng/api";
+import {Message, MessageService, PrimeTemplate} from "primeng/api";
 import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
 import {ServerService} from "../server.service";
 import {RemoteWebsocketService} from "../remote-widget/remote-websocket.service";
-import {Activity, EntityCommand, Remote, UIPage} from "../interfaces";
+import {Activity, ButtonMapping, EntityCommand, Remote, UIPage} from "../interfaces";
 import {Helper} from "../helper";
 import {Button} from "primeng/button";
 import {TooltipModule} from "primeng/tooltip";
-import {ActivityButtonsComponent} from "../activity-viewer/activity-buttons/activity-buttons.component";
+import {ActivityButtonsComponent, ButtonMode} from "../activity-viewer/activity-buttons/activity-buttons.component";
 import {NgIf} from "@angular/common";
 import {catchError, delay, forkJoin, from, map, mergeMap, of} from "rxjs";
 import {ActivityGridComponent} from "../activity-viewer/activity-grid/activity-grid.component";
@@ -25,6 +25,7 @@ import {HttpErrorResponse} from "@angular/common/http";
 import {ProgressBarModule} from "primeng/progressbar";
 import {PaginationComponent} from "../controls/pagination/pagination.component";
 import {RouterLink} from "@angular/router";
+import {IconComponent} from "../controls/icon/icon.component";
 
 @Component({
   selector: 'app-activity-player',
@@ -41,7 +42,8 @@ import {RouterLink} from "@angular/router";
     ToastModule,
     ProgressBarModule,
     PaginationComponent,
-    RouterLink
+    RouterLink,
+    IconComponent
   ],
   templateUrl: './activity-player.component.html',
   styleUrl: './activity-player.component.css',
@@ -69,6 +71,7 @@ export class ActivityPlayerComponent {
   @Input() visible = false;
   @Input() scale = 0.7;
   @Output() onClose: EventEmitter<ActivityPlayerComponent> = new EventEmitter();
+  @Output() onMessage: EventEmitter<Message> = new EventEmitter();
   minimized = false;
   currentPage: UIPage | undefined;
   progress = 0;
@@ -154,5 +157,15 @@ export class ActivityPlayerComponent {
   selectPage($event: number) {
     this.currentPage = this.activity?.options?.user_interface?.pages?.[$event];
     this.cdr.detectChanges();
+  }
+
+  handleMessage($event:  {button: ButtonMapping, mode: ButtonMode, severity: "success" | "error", error?: string}) {
+    let message = "Short press";
+    if ($event.mode === ButtonMode.ShortPress) message = `Short press ${$event.button.short_press?.entity_id} ${$event.button.short_press?.cmd_id}`;
+    else if ($event.mode === ButtonMode.LongPress) message = `Long press ${$event.button.long_press?.entity_id} ${$event.button.long_press?.cmd_id}`;
+    else if ($event.mode === ButtonMode.DoublePress) message = `Double press ${$event.button.double_press?.entity_id} ${$event.button.double_press?.cmd_id}`;
+    if ($event.error)
+      message = `${message} : ${$event.error}`;
+    this.onMessage.emit({severity: $event.severity, detail: message});
   }
 }

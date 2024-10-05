@@ -37,3 +37,17 @@
   height: 400px !important;
   max-height: 600px !important;
 }
+
+.message-panel .p-message .p-message-wrapper {
+  padding: 0.1rem 0.1rem;
+}
+
+.message-panel .p-message .p-message-close {
+  width: 0.9rem;
+  height: 0.9rem;
+
+
+  .message-panel .p-message .p-message-icon {
+    font-size: 0.9rem;
+    margin-right: 0.15rem;
+  }}

@@ -54,6 +54,7 @@
     <p-tag [value]="(remoteWebsocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
            [severity]="(remoteWebsocketService.connectionStatus  | async) ? 'success' : 'warning'"/>
   </div>
+  <p-messages *ngIf="messages.length > 0" class="message-panel" [(value)]="messages" [enableService]="false" showTransitionOptions="0ms" hideTransitionOptions="0ms"/>
 </div>
 <div class="flex flex-wrap gap-3">
   <div class="flex gap-2 align-content-center justify-content-center media-card-border"
@@ -63,5 +64,5 @@
   </div>
 </div>
 <app-activity-player *ngFor="let activity of selectedActivities" [remote]="selectedRemote" [activity]="activity" [visible]="true"
-  (onClose)="removeActivity($event)" [scale]="scale"/>
+  (onClose)="removeActivity($event)" [scale]="scale" (onMessage)="handleMessage($event)"/>
 

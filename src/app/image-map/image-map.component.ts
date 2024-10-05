@@ -3,15 +3,17 @@ import {
   ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   ElementRef, EventEmitter,
-  Input, Output, Renderer2,
+  Input, OnDestroy, Output, Renderer2,
   TemplateRef, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import {NgIf, NgOptimizedImage, NgTemplateOutlet} from "@angular/common";
+import {fromEvent, merge, of, Subscription, timer, timeout, from, takeUntil, Observable} from "rxjs";
+import {filter, map, switchMap} from "rxjs/operators";
 
 export interface MapElement
 {
-  event: MouseEvent;
+  event: MouseEvent|Event;
   tag: string | null;
 }
 
@@ -28,7 +30,7 @@ export interface MapElement
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.ShadowDom
 })
-export class ImageMapComponent implements AfterViewInit {
+export class ImageMapComponent implements AfterViewInit, OnDestroy {
   @Input() image: string  = "";
   @Input() description: string = "";
   @Input() useCanvas = false;
@@ -51,6 +53,10 @@ export class ImageMapComponent implements AfterViewInit {
   private hdc: CanvasRenderingContext2D | null | undefined;
   imageMapText: string | undefined;
   private selectedItems:  HTMLDivElement[] = [];
+  subscriptions: Subscription[] = [];
+  @Input() longPressThreshold = 500;
+  @Input() longPressRepeat = 200;
+  @Output() mouseLongPress = new EventEmitter<MapElement>();
 
   constructor(private cdr:ChangeDetectorRef, private renderer: Renderer2) {
   }
@@ -93,21 +99,6 @@ export class ImageMapComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  static addClass(classname: string | undefined, addClass: string): string
-  {
-    if (!classname) return addClass;
-    const entries = classname.split(" ");
-    entries.push(addClass);
-    return entries.join(" ");
-  }
-
-  static removeClass(classname: string | undefined, removeClass: string): string
-  {
-    if (!classname) return "";
-    const entries = classname.split(" ");
-    return entries.filter(entry => entry != removeClass).join(" ")
-  }
-
   static getCoordinates(node: HTMLAreaElement): {left: number, right: number, top: number, bottom: number}
   {
     let coordinates = node.getAttribute('coords')!;
@@ -116,16 +107,49 @@ export class ImageMapComponent implements AfterViewInit {
     return {left, right, top, bottom};
   }
 
+  clickEvents(node: HTMLElement, mouseupwindow:Observable<MouseEvent>)
+  {
+    const mousedown = fromEvent<MouseEvent>(node, 'mousedown').pipe(
+      filter((event) => event.button == 0), // Only allow left button (Primary button)
+      map((event) => event) // turn on threshold counter
+    );
+    const touchstart = fromEvent(node, 'touchstart').pipe(
+      map((touchEvent) => touchEvent)
+    );
+    const touchEnd = fromEvent((node as HTMLAreaElement), 'touchend').pipe(
+      map((touchEvent) => touchEvent)
+    );
+    const mouseup = fromEvent<MouseEvent>(node, 'mouseup').pipe(
+      filter((event) => event.button == 0), // Only allow left button (Primary button)
+      map((event) => event) // reset threshold counter
+    );
+
+    return merge(mousedown, touchstart).pipe(
+      switchMap((startEvent: MouseEvent|Event, index) =>
+        merge(mouseup, touchEnd).pipe(
+          map(endEvent => {
+            console.log("Click", node.getAttribute("data-tag"));
+            return {type: "shortpress", event: endEvent};
+          }),
+          timeout({first: this.longPressThreshold, with: (info) => {
+            return timer(0, this.longPressRepeat).pipe(map(count => {
+              return {type: "longpress", event: startEvent,timing: (count*this.longPressRepeat)}
+            }), takeUntil(merge(mouseup, touchEnd, mouseupwindow)))
+          }}),
+      )));
+  }
+
   initMapselector()
   {
     const image = this.imageElement?.nativeElement;
-    const map = this.imageMap?.nativeElement;
+    const imageMap = this.imageMap?.nativeElement;
     const mapSelector = this.mapSelector?.nativeElement;
     const imageContainer = this.imageContainer?.nativeElement;
-    if (!image || !map || !mapSelector || !imageContainer) return;
+    if (!image || !imageMap || !mapSelector || !imageContainer) return;
     const width = image.width;
     const height = image.height;
-    map.childNodes.forEach(node => {
+    const mouseupwindow = fromEvent<MouseEvent>(window, "mouseup");
+    imageMap.childNodes.forEach(node => {
       if (node instanceof HTMLAreaElement)
       {
           (node as HTMLAreaElement).addEventListener("mouseover", (event) => {
@@ -143,10 +167,15 @@ export class ImageMapComponent implements AfterViewInit {
           this.leaveElement.emit({event, tag: node.getAttribute("data-tag")});
         });
         (node as HTMLAreaElement).addEventListener("click", (event) => {
-          this.clickElement.emit({event, tag: node.getAttribute("data-tag")});
+          // this.clickElement.emit({event, tag: node.getAttribute("data-tag")});
+          // console.log("Short press", event);
           event.preventDefault();
           return false;
         });
+        this.subscriptions.push(this.clickEvents(node, mouseupwindow).subscribe((event) => {
+          if (event.type === "shortpress") this.clickElement.emit({event: event.event, tag: node.getAttribute("data-tag")})
+          else this.mouseLongPress.emit({event: event.event, tag: node.getAttribute("data-tag")})
+        }));
       }
     });
     mapSelector.addEventListener("click", (event) => {
@@ -261,6 +290,11 @@ export class ImageMapComponent implements AfterViewInit {
   {
     if (!this.hdc || !this.canvas?.nativeElement) return;
     this.hdc.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.subscriptions = [];
   }
 
 }

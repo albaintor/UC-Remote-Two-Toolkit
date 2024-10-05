@@ -35,9 +35,9 @@
 }
 .fader.fader-left {
   left: 0;
-  background: linear-gradient(to left, transparent, #2c2c2c);
+  background: linear-gradient(to left, transparent, rgba(0, 0, 0, 0.74));
 }
 .fader.fader-right {
   right: 0;
-  background: linear-gradient(to right, transparent, #2c2c2c);
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.74));
 }

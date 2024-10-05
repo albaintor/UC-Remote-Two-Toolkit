@@ -119,8 +119,8 @@ export class ButtonEditorComponent {
   executeCommand(command: Command) {
     if (!this.remote) return;
     this.server.executeRemotetCommand(this.remote, command).subscribe(results => {
-      this.messageService.add({key: "remoteButton", summary: "Command executed",
-        severity: "success", detail: `Results : ${results.code} : ${results.message}`});
+      // this.messageService.add({key: "remoteButton", summary: "Command executed",
+      //   severity: "success", detail: `Results : ${results.code} : ${results.message}`});
     });
     this.cdr.detectChanges();
   }

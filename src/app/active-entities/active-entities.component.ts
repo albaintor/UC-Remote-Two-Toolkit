@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation} from '@angular/core';
 import {DropdownModule} from "primeng/dropdown";
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
-import {MenuItem, PrimeTemplate} from "primeng/api";
+import {MenuItem, Message, PrimeTemplate} from "primeng/api";
 import {ProgressBarModule} from "primeng/progressbar";
 import {ScrollingTextComponent} from "../controls/scrolling-text/scrolling-text.component";
 import {TagModule} from "primeng/tag";
@@ -18,6 +18,7 @@ import {MediaEntityComponent} from "./media-entity/media-entity.component";
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
 import {ActivityPlayerComponent} from "../activity-player/activity-player.component";
 import {InputNumberModule} from "primeng/inputnumber";
+import {MessagesModule} from "primeng/messages";
 
 @Component({
   selector: 'app-active-entities',
@@ -39,7 +40,8 @@ import {InputNumberModule} from "primeng/inputnumber";
     MediaEntityComponent,
     AutoCompleteModule,
     ActivityPlayerComponent,
-    InputNumberModule
+    InputNumberModule,
+    MessagesModule
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',
@@ -64,6 +66,7 @@ export class ActiveEntitiesComponent implements OnInit {
   protected readonly Helper = Helper;
   newActivity: Activity | undefined;
   scale = 0.8;
+  messages: Message[] = [];
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
 
@@ -195,6 +198,11 @@ export class ActiveEntitiesComponent implements OnInit {
       this.selectedActivities.find(item => item.entity_id === $event.activity?.entity_id)!
     ), 1);
 
+    this.cdr.detectChanges();
+  }
+
+  handleMessage($event: Message) {
+    this.messages = [$event];
     this.cdr.detectChanges();
   }
 }

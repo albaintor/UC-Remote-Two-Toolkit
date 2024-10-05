@@ -3,21 +3,22 @@
           contentStyleClass="widget-dialog" class="widget" styleClass="widget-header" appendTo="body"
           (close)="closeDialog($event);dialog.close($event)" [style]="{'width': (scale*400+30)+'px', 'max-height': 'calc(100vh - 20px)'}">
   <ng-template pTemplate="header">
-    <div [style]="'position: absolute;right:0; top:0;scale:'+scale">
-      <p-button icon="pi pi-times" pTooltip="Close window" (click)="closeDialog($event)" [rounded]="true" [outlined]="true"/>
-    </div>
     <div class="flex align-items-start justify-content-center"
-         [style]="{width: 400*scale+'px', height: 50*scale+'px'}"></div>
-    <div [style]="'position: absolute;top:5px;left:0;right:0;text-align: center;transform-origin: top;scale:'+scale*1.2">
+         [style]="{width: (400*scale+30)+'px', height: 50*scale+'px'}"></div>
+    <div [style]="'position: absolute;top:5px;left:0;right:0;transform-origin: top;scale:'+scale*1.2">
       <div class="flex justify-content-between gap-2 column-gap-2" style="width: 100%">
         <div class="flex align-items-center justify-content-center" >
           <p-button icon="pi pi-window-minimize" pTooltip="Minimize" (click)="minimized = !minimized"/>
         </div>
-        <div class="flex flex-grow-1 align-items-center justify-content-center">
-          <h3>Activity {{Helper.getEntityName(activity)}}</h3>
+        <div class="flex flex-grow-1">
+          <app-icon *ngIf="remote && activity?.icon" [remote]="remote" [icon]="activity!.icon" [size]="50"
+          style="pointer-events: none"/>&nbsp;
+          <h3>{{Helper.getEntityName(activity)}}</h3>
         </div>
       </div>
-
+    </div>
+    <div [style]="'position: absolute;right:0; top:0;scale:'+scale">
+      <p-button icon="pi pi-times" pTooltip="Close window" (click)="closeDialog($event)" [rounded]="true" [outlined]="true"/>
     </div>
 
   </ng-template>
@@ -29,7 +30,8 @@
     <p-button icon="pi pi-cog" [rounded]="true" pTooltip="Edit activity" [routerLink]="'/activity/edit/'+activity?.entity_id" />
   </div>
   <ng-container *ngIf="!minimized">
-    <app-activity-buttons [remote]="remote" [activity]="activity" [editMode]="false" [scale]="scale" [hideButtonsInfo]="true"/>
+    <app-activity-buttons [remote]="remote" [activity]="activity" [editMode]="false" [scale]="scale" [hideButtonsInfo]="true"
+    (onSelectButton)="handleMessage($event)"/>
     <div style="position: relative">
       <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [width]="400*scale" [height]="500*scale"
                          [selectionMode]="false" [currentPage]="currentPage" [runMode]="true"/>

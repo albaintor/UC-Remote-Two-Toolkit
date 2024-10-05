@@ -2,7 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, ElementRef, EventEmitter,
+  Component, EventEmitter,
   Input, Output, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
@@ -14,12 +14,9 @@ import {NgForOf, NgIf, NgTemplateOutlet} from "@angular/common";
 import {
   Activity,
   ButtonMapping,
-  Command,
   EntityCommand,
-  EntityCommandParameter,
   Remote, RemoteData,
   RemoteModel, RemoteModels, RemoteVersion,
-  ScreenLayout
 } from "../../interfaces";
 import {ServerService} from "../../server.service";
 import {ImageMapComponent, MapElement} from "../../image-map/image-map.component";
@@ -27,9 +24,14 @@ import {HttpErrorResponse} from "@angular/common/http";
 import {MessageService} from "primeng/api";
 import {ToastModule} from "primeng/toast";
 import {ButtonEditorComponent} from "../../activity-editor/button-editor/button-editor.component";
-import {MediaEntityState} from "../../remote-widget/remote-websocket.service";
 import {IconComponent} from "../../controls/icon/icon.component";
 import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
+
+export enum ButtonMode {
+  ShortPress,
+  LongPress,
+  DoublePress
+}
 
 @Component({
   selector: 'app-activity-buttons',
@@ -88,7 +90,8 @@ export class ActivityButtonsComponent implements AfterViewInit {
   buttonsMap:{ [id: string]: string } = {};
   reversedButtonMap:{ [id: string]: string } = {};
   mappedButtons: string[] | undefined;
-  @Output() onSelectButton: EventEmitter<ButtonMapping> = new EventEmitter();
+  @Output() onSelectButton: EventEmitter<{button: ButtonMapping, mode: ButtonMode, severity: "success" | "error",
+    error?: string}> = new EventEmitter();
   @Input() hideButtonsInfo = false;
   executeButton: ButtonMapping | undefined;
   @ViewChild("executeButtonPanel") executeButtonPanel: OverlayPanel | undefined;
@@ -116,15 +119,16 @@ export class ActivityButtonsComponent implements AfterViewInit {
   ngAfterViewInit(): void {
   }
 
-  executeCommand(command: Command) {
-    if (!this.remote) return;
+  executeCommand(button: ButtonMapping, mode: ButtonMode) {
+    const command = (mode === ButtonMode.ShortPress) ? button.short_press : (mode === ButtonMode.LongPress) ? button.long_press : button.double_press;
+    if (!this.remote || !command) return;
     this.server.executeRemotetCommand(this.remote, command).subscribe({next: results => {
+      this.onSelectButton.emit({button, mode, severity: "success"});
         // this.messageService.add({key: "activityButtons", summary: "Command executed",
         //   severity: "success", detail: `Results : ${results.code} : ${results.message}`});
       }, error: (err: HttpErrorResponse) => {
         console.error("Error command", err);
-        this.messageService.add({key: "activityButtons", summary: "Error executing command",
-          severity: "error", detail: `Results : ${err.error.name} (${err.status} ${err.statusText})`});
+        this.onSelectButton.emit({button, mode, severity: "error", error: `${err.error.name} (${err.status} ${err.statusText})`});
       }});
     this.cdr.detectChanges();
   }
@@ -139,20 +143,34 @@ export class ActivityButtonsComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  selectButton($event: MapElement) {
+  selectButton($event: MapElement, longPress = false) {
     if (!$event.tag) return;
     const buttonId = $event.tag;
     const button = this.activity?.options?.button_mapping?.find(button => button.button === this.buttonsMap[buttonId]);
-    if (!this.editMode && button?.short_press)
-    {//executeButtonPanel
-      const commands = (button?.short_press ? 1 : 0) + (button?.long_press ? 1 : 0) + (button?.double_press ? 1 : 0);
-      if (commands == 1)
-        this.executeCommand(button.short_press);
-      else if (commands > 1)
+    if (!this.editMode)
+    {
+      if (longPress)
       {
-        this.executeButton = button;
-        this.executeButtonPanel?.show($event.event, $event.event.target);
-        this.cdr.detectChanges();
+        if (button?.long_press) {
+          this.executeCommand(button, ButtonMode.LongPress);
+        }
+        else if (button?.double_press) {
+          this.executeCommand(button, ButtonMode.DoublePress);
+        }
+        else if (button?.short_press) {
+          this.executeCommand(button, ButtonMode.ShortPress);
+        }
+      }
+      else {
+        if (button?.short_press) {
+          this.executeCommand(button, ButtonMode.ShortPress);
+        }
+        else if (button?.long_press) {
+          this.executeCommand(button, ButtonMode.LongPress);
+        }
+        else if (button?.double_press) {
+          this.executeCommand(button, ButtonMode.DoublePress);
+        }
       }
       return;
     }
@@ -189,4 +207,6 @@ export class ActivityButtonsComponent implements AfterViewInit {
     this.updateButtons();
     this.cdr.detectChanges();
   }
+
+  protected readonly ButtonMode = ButtonMode;
 }

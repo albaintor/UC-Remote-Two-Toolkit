@@ -3,8 +3,7 @@ import fs from "node:fs";
 import { readdir } from 'node:fs/promises';
 import path from "path";
 import {pipeline as streamPipeline} from 'node:stream/promises';
-import wakeonlan from "wake-on-lan";
-
+import wakeonlan from "wakeonlan";
 const SystemCommand = {
   STANDBY: 'STANDBY',
   REBOOT: 'REBOOT',
@@ -555,13 +554,9 @@ export class Remote
       throw new Error("MAC address not defined");
     }
     if (broadcast)
-      await wakeonlan(this.mac_address, {ip:broadcast})
+      await wakeonlan(this.mac_address, {address :broadcast})
     else {
-      await wakeonlan(this.mac_address, {ip: '0.0.0.0'});
-      try {
-        let mask = this.address.split('.').slice(0, 3).join('.')+'.0';
-        await wakeonlan(this.mac_address, {ip: mask});
-      } catch (error) {}
+      await wakeonlan(this.mac_address);
     }
   }
 

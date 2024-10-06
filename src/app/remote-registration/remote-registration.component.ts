@@ -159,6 +159,20 @@ export class RemoteRegistrationComponent {
       }})
   }
 
+  wakeRemote(remote: Remote) {
+    if (!remote) return;
+    this.server.wakeRemote(remote).subscribe({next: results => {
+        this.messageService.add({severity:'success', summary: "Wake on lan command sent", key: 'remote'});
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        this.messageService.add({severity:'error', summary: "Wake on lan command sent", key: 'remote'});
+        this.cdr.detectChanges();
+      }
+    });
+    this.server.wakeRemote(remote, "255.255.255.0").subscribe({});
+  }
+
   testRemote(remote: Remote) {
     this.blockedPanel = true;
     this.progress = true;

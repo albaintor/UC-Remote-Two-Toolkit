@@ -10,7 +10,6 @@
                (itemClicked)="gridItemClicked($event)" [selectionMode]="selectionMode" [runMode]="runMode" class="grid-item">
     <div class="flex flex-column align-items-center justify-content-center" style="width:100%;height:100%">
     <ng-container *ngIf="Helper.isStandardIcon(item?.icon)">
-
         <span [class]="Helper.getIconClass(item?.icon)"></span>
     </ng-container>
     <ng-container *ngIf="Helper.isCustomIcon(item?.icon)">
@@ -25,13 +24,14 @@
               [style]="Helper.getStyle(getEntityName((item.command | as : Command)?.entity_id!))"></p-chip>
       <p-tag [value]="Helper.getCommandName(item.command, configEntityCommands)" severity="secondary"></p-tag>
     </ng-container>
-    <span *ngIf="item?.media_player_id" style="text-align: center;height: 100%">
+    <span *ngIf="item?.media_player_id" style="text-align: center;width:100%;height: 100%">
         <p-chip *ngIf="!runMode" [label]="getEntityName(item?.media_player_id!)"
                 [style]="Helper.getStyle(getEntityName(item?.media_player_id!))"></p-chip>
         <div style="position: relative; width: 100%;height: 100%">
           <img *ngIf="!runMode" src="/assets/icons/media_player.svg" alt="Media player" class="media_player_icon">
           <ng-container *ngIf="runMode">
-            <app-activity-media-entity [entityId]="item.media_player_id" [remote]="remote" [size]="getGridItemSize(item)"/>
+            <app-activity-media-entity [entityId]="item.media_player_id" [remote]="remote" [size]="getGridItemSize(item)"
+            (onSelectButton)="onSelectButton.emit($event)"/>
           </ng-container>
         </div>
       </span>

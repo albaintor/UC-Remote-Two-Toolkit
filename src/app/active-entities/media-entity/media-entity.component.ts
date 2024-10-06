@@ -8,7 +8,7 @@ import {
   TemplateRef,
   ViewEncapsulation
 } from '@angular/core';
-import {MediaEntityState, RemoteWebsocketService} from "../../remote-widget/remote-websocket.service";
+import {MediaEntityState, RemoteWebsocketService} from "../../remote-websocket.service";
 import {Remote} from "../../interfaces";
 import {ServerService} from "../../server.service";
 import {Button} from "primeng/button";
@@ -18,6 +18,7 @@ import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-te
 import {SliderComponent} from "../../controls/slider/slider.component";
 import {TagModule} from "primeng/tag";
 import {TooltipModule} from "primeng/tooltip";
+import {Helper} from "../../helper";
 
 @Component({
   selector: 'app-media-entity',
@@ -204,8 +205,5 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
       cmd_id}).subscribe();
   }
 
-  getNumber(number: number) {
-    if (isNaN(number)) return 0;
-    return Math.round(number);
-  }
+  protected readonly Helper = Helper;
 }

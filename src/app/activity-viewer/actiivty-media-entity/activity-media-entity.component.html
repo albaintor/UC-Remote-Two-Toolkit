@@ -4,13 +4,13 @@
            [alt]="mediaEntityState?.new_state?.attributes?.media_title" />
     <div style="position: absolute; bottom: 0; left:0; right: 0">
       <div class="flex align-items-center justify-content-center" *ngIf="mediaEntityState?.new_state?.attributes?.media_title" style="width: 100%">
-        <app-scrolling-text [text]="mediaEntityState!.new_state!.attributes!.media_title!" style="width: 100%" textClass="text-content" [textStyle]="textStyle"/>
+        <app-scrolling-text [text]="mediaEntityState!.new_state!.attributes!.media_title!" textClass="text-content" [textStyle]="textStyle" style="width: 100%"/>
       </div>
       <div class="flex align-items-center justify-content-center" *ngIf="mediaEntityState?.new_state?.attributes?.media_artist" style="width: 100%">
-        <app-scrolling-text [text]="mediaEntityState!.new_state!.attributes!.media_artist!" style="width: 100%" textClass="text-content" [textStyle]="textStyle"/>
+        <app-scrolling-text [text]="mediaEntityState!.new_state!.attributes!.media_artist!" textClass="text-content" [textStyle]="textStyle" style="width: 100%" />
       </div>
       <div class="flex align-items-center justify-content-center" *ngIf="mediaEntityState?.new_state?.attributes?.media_album!" style="width: 100%">
-        <app-scrolling-text [text]="mediaEntityState!.new_state!.attributes!.media_album!" style="width: 100%" textClass="text-content" [textStyle]="textStyle"/>
+        <app-scrolling-text [text]="mediaEntityState!.new_state!.attributes!.media_album!" textClass="text-content" [textStyle]="textStyle" style="width: 100%"/>
       </div>
       <div *ngIf="mediaEntityState?.new_state?.attributes?.media_position && mediaEntityState?.new_state?.attributes?.media_duration &&
                       mediaEntityState?.new_state!.attributes!.media_duration! > 0"

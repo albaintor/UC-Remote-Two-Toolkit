@@ -1,11 +1,11 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation} from '@angular/core';
 import {DropdownModule} from "primeng/dropdown";
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
-import {MenuItem, Message, PrimeTemplate} from "primeng/api";
+import {MenuItem, Message, MessageService, PrimeTemplate} from "primeng/api";
 import {ProgressBarModule} from "primeng/progressbar";
 import {ScrollingTextComponent} from "../controls/scrolling-text/scrolling-text.component";
 import {TagModule} from "primeng/tag";
-import {MediaEntityState, RemoteState, RemoteWebsocketService} from "../remote-widget/remote-websocket.service";
+import {MediaEntityState, RemoteState, RemoteWebsocketService} from "../remote-websocket.service";
 import {ServerService} from "../server.service";
 import {MenubarModule} from "primeng/menubar";
 import {Activity, Entity, Remote, RemoteData} from "../interfaces";
@@ -19,6 +19,7 @@ import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplet
 import {ActivityPlayerComponent} from "../activity-player/activity-player.component";
 import {InputNumberModule} from "primeng/inputnumber";
 import {MessagesModule} from "primeng/messages";
+import {ToastModule} from "primeng/toast";
 
 @Component({
   selector: 'app-active-entities',
@@ -41,12 +42,14 @@ import {MessagesModule} from "primeng/messages";
     AutoCompleteModule,
     ActivityPlayerComponent,
     InputNumberModule,
-    MessagesModule
+    MessagesModule,
+    ToastModule
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  providers: [MessageService]
 })
 export class ActiveEntitiesComponent implements OnInit {
   remoteState: RemoteState | undefined;
@@ -68,7 +71,8 @@ export class ActiveEntitiesComponent implements OnInit {
   scale = 0.8;
   messages: Message[] = [];
 
-  constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
+  constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService,
+              private cdr:ChangeDetectorRef, private messageService: MessageService) { }
 
   ngOnInit(): void {
     const scale = localStorage.getItem("scale");
@@ -204,5 +208,20 @@ export class ActiveEntitiesComponent implements OnInit {
   handleMessage($event: Message) {
     this.messages = [$event];
     this.cdr.detectChanges();
+  }
+
+  wakeRemote($event: MouseEvent) {
+    // if (this.remoteWebsocketService.isRemoteConnected()) return;
+    if (!this.selectedRemote) return;
+    this.server.wakeRemote(this.selectedRemote).subscribe({next: results => {
+        this.messageService.add({severity:'success', summary: "Wake on lan command sent", key: 'activeEntities'});
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        this.messageService.add({severity:'error', summary: "Wake on lan command sent", key: 'activeEntities'});
+        this.cdr.detectChanges();
+      }
+    });
+    this.server.wakeRemote(this.selectedRemote, "255.255.255.0").subscribe({});
   }
 }

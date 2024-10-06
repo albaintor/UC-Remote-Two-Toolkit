@@ -16,7 +16,7 @@ import {ProgressBarModule} from "primeng/progressbar";
 import {ScrollingTextComponent} from "../controls/scrolling-text/scrolling-text.component";
 import {DropdownModule} from "primeng/dropdown";
 import {FormsModule} from "@angular/forms";
-import {MediaEntityState, RemoteState, RemoteWebsocketService} from "./remote-websocket.service";
+import {MediaEntityState, RemoteState, RemoteWebsocketService} from "../remote-websocket.service";
 import {Activity, Remote, RemoteData} from "../interfaces";
 import {MediaEntityComponent} from "../active-entities/media-entity/media-entity.component";
 import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.component";
@@ -47,6 +47,9 @@ import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.com
 })
 export class RemoteWidgetComponent implements OnInit {
   @Input() visible = true;
+  @Input() scale = 0.8;
+  protected readonly Math = Math;
+
   minimized = false;
   remoteState: RemoteState | undefined;
   mediaEntity: MediaEntityState | undefined;
@@ -57,6 +60,8 @@ export class RemoteWidgetComponent implements OnInit {
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    const scale = localStorage.getItem("scale");
+    if (scale) this.scale = Number.parseFloat(scale);
     this.remoteWebsocketService.onRemoteStateChange().subscribe(remoteState => {
       this.remoteState = remoteState;
       this.cdr.detectChanges();
@@ -114,6 +119,4 @@ export class RemoteWidgetComponent implements OnInit {
   changedMediaEntity($event: any) {
     this.remoteWebsocketService.mediaEntity = this.mediaEntity;
   }
-
-  protected readonly Math = Math;
 }

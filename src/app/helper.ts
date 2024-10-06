@@ -9,6 +9,7 @@ import {
   Remote,
   ActivityPageCommand, OrphanEntity, CommandSequence, EntityCommand, EntityCommandParameter
 } from "./interfaces";
+import {MediaEntityState} from "./remote-websocket.service";
 
 export class Helper
 {
@@ -559,5 +560,21 @@ export class Helper
 
   static setScale(scale: number) {
     localStorage.setItem("scale", scale.toString());
+  }
+
+  static checkFeature(entity: Entity|undefined, feature: string | string[]): boolean
+  {
+    const features = (Array.isArray(feature)) ? feature as string[] : [feature];
+    return entity?.features?.find(item => features.includes(item)) !== undefined;
+  }
+
+  static getNumber(number: number) {
+    if (isNaN(number)) return 0;
+    return Math.round(number);
+  }
+
+  static isMuted(volumeEntity: MediaEntityState | undefined) {
+    if (!volumeEntity?.new_state?.attributes) return false;
+    return !!volumeEntity?.new_state?.attributes.muted;
   }
 }

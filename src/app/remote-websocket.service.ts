@@ -1,9 +1,9 @@
 import {Injectable, OnDestroy, OnInit} from '@angular/core';
-import {ServerService} from "../server.service";
-import {EventMessage, RequestMessage, ResponseMessage, WebsocketService} from "../websocket.service";
-import {BatteryState, Entity, Remote} from "../interfaces";
+import {ServerService} from "./server.service";
+import {EventMessage, RequestMessage, ResponseMessage, WebsocketService} from "./websocket.service";
+import {BatteryState, Entity, Remote} from "./interfaces";
 import {BehaviorSubject, map, Observable, Observer, share, Subject, Subscription, timer} from "rxjs";
-import {Helper} from "../helper";
+import {Helper} from "./helper";
 
 export interface MediaEntityState
 {
@@ -28,6 +28,7 @@ export interface MediaEntityState
       source_list?: string[];
       sound_mode?: string;
       sound_mode_list?: string[];
+      muted?: boolean;
     }
   }
 }
@@ -112,6 +113,11 @@ export class RemoteWebsocketService implements OnDestroy {
   public get connectionStatus(): Observable<boolean>
   {
     return this.websocketService.connectionStatus$;
+  }
+
+  public isRemoteConnected(): boolean
+  {
+    return this.websocketService.isRemoteConnected();
   }
 
   initWidget()

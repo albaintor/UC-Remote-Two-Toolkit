@@ -3,8 +3,7 @@ import fs from "node:fs";
 import { readdir } from 'node:fs/promises';
 import path from "path";
 import {pipeline as streamPipeline} from 'node:stream/promises';
-import * as url from "node:url";
-import * as stream from "node:stream";
+import wakeonlan from "wake-on-lan";
 
 const SystemCommand = {
   STANDBY: 'STANDBY',
@@ -27,14 +26,16 @@ export class Remote
   remote_name;
   protocol = 'http://';
   resources_path = '';
+  mac_address;
 
 
-  constructor(address, port, user, token, api_key) {
+  constructor(address, port, user, token, api_key, mac_address) {
     this.address = address;
     this.port = port;
     this.api_key = api_key;
     this.user = user;
     this.token = token;
+    this.mac_address = mac_address;
   }
 
   async getResources(type, resources_directory) {
@@ -96,6 +97,7 @@ export class Remote
     if (this.api_key) data.api_key = this.api_key;
     if (this.api_key_name) data.api_key_name = this.api_key_name;
     if (this.valid_to) data.valid_to = this.valid_to;
+    if (this.mac_address) data.mac_address = this.mac_address;
     return data;
   }
 
@@ -143,6 +145,7 @@ export class Remote
       if (res?.body) resBody = JSON.parse(res.body);
       console.log('Get remote info :', resBody);
       this.remote_name = resBody.device_name;
+      this.mac_address = resBody.address;
       return resBody.device_name;
     } catch (err) {
       console.error('Error', err, res?.body);
@@ -543,6 +546,23 @@ export class Remote
     const url = this.getURL() + "/api/pub/status";
     let res = await got.get(url, options);
     return JSON.parse(res.body);
+  }
+
+  async wakeOnLan(broadcast = null)
+  {
+    if (!this.mac_address) {
+      console.error("Cannot wakeonlan, no mac address defined");
+      throw new Error("MAC address not defined");
+    }
+    if (broadcast)
+      await wakeonlan(this.mac_address, {ip:broadcast})
+    else {
+      await wakeonlan(this.mac_address, {ip: '0.0.0.0'});
+      try {
+        let mask = this.address.split('.').slice(0, 3).join('.')+'.0';
+        await wakeonlan(this.mac_address, {ip: mask});
+      } catch (error) {}
+    }
   }
 
   async getBackup(response)

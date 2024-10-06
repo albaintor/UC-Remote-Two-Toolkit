@@ -47,6 +47,7 @@ export class SliderComponent implements OnInit {
   private sliderSubject: Subject<number> = new Subject();
   private subscription = new Subscription();
   @Input() max: string | undefined;
+  @Input() secondaryState = false;
 
   constructor( private cdr:ChangeDetectorRef) { }
 

@@ -2,7 +2,7 @@ import {Injectable, OnDestroy, OnInit} from '@angular/core';
 import {ServerService} from "./server.service";
 import {Remote} from "./interfaces";
 import {webSocket, WebSocketSubject} from "rxjs/webSocket";
-import {BehaviorSubject, Observable, retry, Subject, timer} from "rxjs";
+import {BehaviorSubject, delay, Observable, retry, Subject, timer} from "rxjs";
 import {distinctUntilChanged, filter, map, skip, take, tap} from "rxjs/operators";
 
 export interface Message
@@ -76,6 +76,11 @@ export class WebsocketService implements OnDestroy {
     return this.remoteChanged$;
   }
 
+  isRemoteConnected() : boolean
+  {
+    return this.status$.getValue();
+  }
+
 
   getMessageEvent(): Subject<Message>
   {
@@ -139,6 +144,7 @@ export class WebsocketService implements OnDestroy {
         console.debug("Websocket disconnect, reconnecting...");
         this.initWebsocket();
       }),
+      delay(this.reconnecInterval)
     ).subscribe();
   }
 

@@ -35,12 +35,13 @@ export class ScrollingTextComponent implements AfterViewInit {
   @Input("textStyle") set _textStyle(textStyle: string | undefined)
   {
     this.textStyle = textStyle;
+    this.cdr.detectChanges();
     this.updateClass();
   }
   @ViewChild("textContainer", {static: false}) textContainer: ElementRef<HTMLDivElement> | undefined;
   @ViewChild("textContent", {static: false}) textContent: ElementRef<HTMLDivElement> | undefined;
 
-  constructor(private cdr:ChangeDetectorRef) {
+  constructor(private elementRef: ElementRef, private cdr:ChangeDetectorRef) {
   }
 
   ngAfterViewInit(): void {

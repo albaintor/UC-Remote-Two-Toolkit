@@ -2,17 +2,19 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
-  Input,
+  Component, EventEmitter,
+  Input, Output,
   ViewEncapsulation
 } from '@angular/core';
 import {ServerService} from "../../server.service";
-import {MediaEntityState, RemoteWebsocketService} from "../../remote-widget/remote-websocket.service";
+import {MediaEntityState, RemoteWebsocketService} from "../../remote-websocket.service";
 import {NgIf} from "@angular/common";
 import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-text.component";
 import {SliderComponent} from "../../controls/slider/slider.component";
 import {Helper} from "../../helper";
-import {Remote} from "../../interfaces";
+import {Command, Remote} from "../../interfaces";
+import {ButtonMode} from "../activity-buttons/activity-buttons.component";
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'app-activity-media-entity',
@@ -41,6 +43,8 @@ export class ActivityMediaEntityComponent implements AfterViewInit {
   protected readonly Helper = Helper;
   textStyle = "font-size: 1.2rem";
   @Input() size: { width: number; height: number } | undefined;
+  @Output() onSelectButton: EventEmitter<{command: Command, mode: ButtonMode, severity: "success" | "error",
+    error?: string}> = new EventEmitter();
 
   constructor(protected remoteWebsocketService: RemoteWebsocketService, private server:ServerService,
               private cdr: ChangeDetectorRef) {
@@ -116,7 +120,14 @@ export class ActivityMediaEntityComponent implements AfterViewInit {
     const body = {entity_id: mediaEntity.entity_id,
       cmd_id:"media_player.seek", params: {"media_position": newPosition}};
     console.debug("Seek", body);
-    this.server.executeRemotetCommand(this.remote, body).subscribe(
-      {error: err => console.error("Error updting position", err)});
+
+    this.server.executeRemotetCommand(this.remote, body).subscribe({next: results => {
+        this.onSelectButton.emit({command: body, mode: ButtonMode.ShortPress, severity: "success"});
+      }, error: (err: HttpErrorResponse) => {
+        console.error("Error command", err);
+        this.onSelectButton.emit({command: body, mode: ButtonMode.ShortPress, severity: "error"});
+        this.onSelectButton.emit({command:body, mode: ButtonMode.ShortPress, severity: "error",
+          error: `Error updating position : ${err.error.name} (${err.status} ${err.statusText})`});
+      }});
   }
 }

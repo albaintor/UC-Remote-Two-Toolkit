@@ -2,9 +2,16 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, HostListener,
-  Input, Pipe, PipeTransform, QueryList,
-  ViewChild, ViewChildren,
+  Component,
+  EventEmitter,
+  HostListener,
+  Input,
+  Output,
+  Pipe,
+  PipeTransform,
+  QueryList,
+  ViewChild,
+  ViewChildren,
   ViewEncapsulation
 } from '@angular/core';
 import {Helper} from "../../helper";
@@ -12,21 +19,14 @@ import {ActivityGridItemComponent} from "../activity-grid-item/activity-grid-ite
 import {ChipModule} from "primeng/chip";
 import {NgForOf, NgIf} from "@angular/common";
 import {TagModule} from "primeng/tag";
-import {
-  Activity,
-  ActivityPageCommand,
-  Command,
-  EntityCommand,
-  Remote,
-  ScreenLayout,
-  UIPage
-} from "../../interfaces";
+import {Activity, ActivityPageCommand, Command, EntityCommand, Remote, ScreenLayout, UIPage} from "../../interfaces";
 import {UiCommandEditorComponent} from "../../activity-editor/ui-command-editor/ui-command-editor.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ServerService} from "../../server.service";
 import {MessageService} from "primeng/api";
 import {ToastModule} from "primeng/toast";
 import {ActivityMediaEntityComponent} from "../actiivty-media-entity/activity-media-entity.component";
+import {ButtonMode} from "../activity-buttons/activity-buttons.component";
 
 @Pipe({name: 'as', standalone: true, pure: true})
 export class AsPipe implements PipeTransform {
@@ -85,6 +85,8 @@ export class ActivityGridComponent implements AfterViewInit {
   selection: ActivityGridItemComponent[] = [];
   @ViewChild("commandeditor", {static: false}) commandeditor: UiCommandEditorComponent | undefined;
   @ViewChildren(ActivityGridItemComponent) gridButtons:QueryList<ActivityGridItemComponent> | undefined;
+  @Output() onSelectButton: EventEmitter<{command: Command, mode: ButtonMode, severity: "success" | "error",
+    error?: string}> = new EventEmitter();
 
   configEntityCommands: EntityCommand[] | undefined;
   public Command!: Command;
@@ -229,15 +231,15 @@ export class ActivityGridComponent implements AfterViewInit {
   executeCommand(command: Command) {
     if (!this.remote) return;
     this.server.executeRemotetCommand(this.remote, command).subscribe({next: results => {
-        this.messageService.add({key: "activityGrid", summary: "Command executed",
-          severity: "success", detail: `Results : ${results.code} : ${results.message}`});
+      this.onSelectButton.emit({command, mode: ButtonMode.ShortPress, severity: "success"});
       }, error: (err: HttpErrorResponse) => {
         console.error("Error command", err);
-        this.messageService.add({key: "activityGrid", summary: "Error executing command",
-          severity: "error", detail: `Results : ${err.error.name} (${err.status} ${err.statusText})`});
+        this.onSelectButton.emit({command, mode: ButtonMode.ShortPress, severity: "error",
+          error: `${err.error.name} (${err.status} ${err.statusText})`});
       }});
     this.cdr.detectChanges();
   }
+
 
 
   addGridItem($event: ActivityGridItemComponent) {

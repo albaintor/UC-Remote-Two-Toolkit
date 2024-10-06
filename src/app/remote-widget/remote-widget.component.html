@@ -26,27 +26,25 @@
   </ng-template>
   <ng-container *ngIf="!minimized">
     <ng-container *ngIf="mediaEntity && selectedRemote">
-      <div class="flex flex-column align-items-center justify-content-center">
-      <div class="flex gap-2 align-content-center justify-content-center" style="width: 675px">
-      <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" style="width: 675px"
-                        class="flex flex-wrap gap-2 align-content-center justify-content-center ng-star-inserted"
-                        [headerTemplate]="entitySelector">
-        <ng-template #entitySelector>
-          <div class="flex align-items-center justify-content-center" style="width: 100%">
-            <p-dropdown [(ngModel)]="mediaEntity" [options]="mediaEntities" placeholder="Media entity" appendTo="body"
-                        (ngModelChange)="changedMediaEntity($event)" optionLabel="entity_id">
-              <ng-template pTemplate="selectedItem">
-                {{remoteWebsocketService.getEntityName(mediaEntity)}}
-              </ng-template>
-              <ng-template let-item pTemplate="item">
-                {{remoteWebsocketService.getEntityName(item)}}
-              </ng-template>
-            </p-dropdown>
-          </div>
-        </ng-template>
-      </app-media-entity>
-      </div>
-      </div>
+        <div class="flex gap-2 align-content-center justify-content-center" style="width: 100%">
+        <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote"
+                          class="flex flex-wrap gap-2 align-content-center justify-content-center ng-star-inserted"
+                          [headerTemplate]="entitySelector" [scale]="scale" style="width: 100%">
+          <ng-template #entitySelector>
+              <div style="position: relative; width: 100%; height: 60px;margin-left:30px"></div>
+              <p-dropdown [(ngModel)]="mediaEntity" [options]="mediaEntities" placeholder="Media entity" appendTo="body"
+                          (ngModelChange)="changedMediaEntity($event)" optionLabel="entity_id"
+                          [style]="{'scale':scale, position: 'absolute', right: 0, top:0, transform: 'translate(25%, 0%)'}">
+                <ng-template pTemplate="selectedItem">
+                  {{remoteWebsocketService.getEntityName(mediaEntity)}}
+                </ng-template>
+                <ng-template let-item pTemplate="item">
+                  {{remoteWebsocketService.getEntityName(item)}}
+                </ng-template>
+              </p-dropdown>
+          </ng-template>
+        </app-media-entity>
+        </div>
     </ng-container>
   </ng-container>
 </p-dialog>

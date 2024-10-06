@@ -328,6 +328,32 @@ app.delete('/api/config/remote/:address', async (req, res, next) => {
   }
 })
 
+
+app.post('/api/remote/:address/wake', async (req, res, next) => {
+  const address = req.params.address;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  let broadcast = req.query.broadcast;
+  const configFile = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token,
+    remoteEntry.api_key, remoteEntry.mac_address);
+  try {
+    console.log("Wake on lan", remote.mac_address);
+    await remote.wakeOnLan(broadcast);
+    res.status(200).end();
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
 app.post('/api/remote/:address/system', async (req, res, next) => {
   const address = req.params.address;
   let user = REMOTE_USER

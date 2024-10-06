@@ -8,11 +8,23 @@
   color: #fbf100;
 }
 
-.media-image
+.media-image2
 {
   display: block;
   max-width:250px;
   max-height:250px;
+  width: auto;
+  height: auto;
+  transform-origin: top left;
+  transition: all 1s ease-in-out;
+  z-index: 10;
+}
+
+.media-image
+{
+  display: block;
+  max-width:100%;
+  max-height:100%;
   width: auto;
   height: auto;
   transform-origin: top left;

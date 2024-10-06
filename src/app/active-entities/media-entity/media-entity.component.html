@@ -1,31 +1,29 @@
-<div *ngIf="mediaEntity" class="flex gap-2 justify-content-center media-card">
+<div *ngIf="mediaEntity" class="flex gap-2 justify-content-center media-card" style="width: 100%;">
 <div class="power-button" *ngIf="checkFeature(mediaEntity, 'on_off') || checkFeature(mediaEntity, 'toggle')" [style]="'scale:'+scale">
   <p-button *ngIf="!isPowerOn(mediaEntity)" icon="pi pi-power-off" [rounded]="true" (click)="powerToggle(mediaEntity)"
             size="small" pTooltip="Power toggle" severity="secondary"/>
   <p-button *ngIf="isPowerOn(mediaEntity)" icon="pi pi-power-off" [rounded]="true" (click)="powerToggle(mediaEntity)" size="small" pTooltip="Power toggle"/>
 </div>
-<div class="flex-column" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url">
+<div class="flex-column" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url" style="width: 100%">
   <div class="flex align-content-center justify-content-center card-title" [style]="'text-align:center;scale:'+scale+';margin-left:'+(38*scale)+'px'">
     <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
     <ng-container *ngIf="!headerTemplate"><h2>{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2></ng-container>
   </div>
   <div class="flex-initial flex align-items-center" [style]="'max-width:'+(scale*400)+'px; max-height: '+(300*scale)+'px'">
     <img class="media-image" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && !mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="mediaEntity.new_state!.attributes!.media_image_url!"
-         [alt]="mediaEntity.new_state!.attributes!.media_title!"
-         [style]="'max-width:'+(280*scale)+'px;max-height:'+(scale*300)+'px'"/>
+         [alt]="mediaEntity.new_state!.attributes!.media_title!"/>
     <img class="media-image" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="'/api/proxy?url='+mediaEntity.new_state!.attributes!.media_image_url!"
-         [alt]="mediaEntity.new_state!.attributes!.media_title!"
-         [style]="'max-width:'+(280*scale)+'px;max-height:'+(scale*300)+'px'"/>
+         [alt]="mediaEntity.new_state!.attributes!.media_title!"/>
   </div>
 </div>
 <div class="flex flex-column justify-content-start gap-2"
-     [style]="{'width': '100%','max-width': mediaEntity.new_state?.attributes?.media_image_url ? (300*scale)+'px' : (500*scale)+'px'}">
-  <div class="flex flex-column align-content-start justify-content-center" *ngIf="!mediaEntity?.new_state?.attributes?.media_image_url" [style]="'scale:'+scale">
+     [style]="{'width': '100%','max-width': mediaEntity.new_state?.attributes?.media_image_url ? (300*scale)+'px' : (800*scale)+'px'}">
+  <div class="flex flex-column align-content-start justify-content-center" *ngIf="!mediaEntity?.new_state?.attributes?.media_image_url" [style]="'width:100%;scale:'+scale">
     <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
     <ng-container *ngIf="!headerTemplate"><h2 [style]="'text-align:center;scale:'+scale">{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2></ng-container>
   </div>
   <div class="flex flex-column justify-content-between gap-2" style="width: 100%;height: 100%;">
-    <div class="flex align-content-center justify-content-between column-gap-2 p-2">
+    <div class="flex align-content-center justify-content-between column-gap-2 p-2" style="width: 100%">
       <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state?.attributes?.state">
         <p-tag [value]="mediaEntity.new_state!.attributes!.state!" [severity]="getStatusStyle(mediaEntity.new_state!.attributes!.state!)"
                (click)="clickState(mediaEntity)" styleClass="active-tag" pTooltip="Play / Pause"/>
@@ -102,8 +100,9 @@
                   (click)="mediaAction(mediaEntity, 'media_player.volume_up')"
                   icon="icon icon-plus" size="small" pTooltip="Volume +" [rounded]="true" [outlined]="true" class="uc-button"/>
         <app-slider [value]="Math.round(mediaEntity.new_state!.attributes!.volume!)" style="width: 100%" (valueChange)="updateVolume($event, mediaEntity)"
-                    [textValue]="'Volume '+getNumber(mediaEntity.new_state!.attributes!.volume!)+'%'"
-                    [editable]="checkFeature(mediaEntity, 'volume')"></app-slider>
+                    [textValue]="'Volume '+Helper.getNumber(mediaEntity.new_state!.attributes!.volume!)+'%'+
+                    (Helper.isMuted(mediaEntity) ? ' (muted)' : '')"
+                    [editable]="checkFeature(mediaEntity, 'volume')" [secondaryState]="Helper.isMuted(mediaEntity)"/>
       </div>
   </div>
 </div>

@@ -16,6 +16,10 @@
   padding: 5px;
 }
 
+.disconnected-state {
+  cursor: pointer;
+}
+
 .media-card-border:hover {
   background: rgba(0, 0, 0, 0.73);
   border: 2px solid rgb(30, 31, 34);
@@ -40,14 +44,15 @@
 
 .message-panel .p-message .p-message-wrapper {
   padding: 0.1rem 0.1rem;
+  height: 25px;
 }
 
 .message-panel .p-message .p-message-close {
   width: 0.9rem;
   height: 0.9rem;
+}
 
 
-  .message-panel .p-message .p-message-icon {
-    font-size: 0.9rem;
-    margin-right: 0.15rem;
-  }}
+.message-panel .p-message-icon {
+  display:none !important;
+}

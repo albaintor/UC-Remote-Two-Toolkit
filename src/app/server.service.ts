@@ -358,6 +358,21 @@ export class ServerService {
     }))
   }
 
+  wakeRemote(remote: Remote, broadcast?: string): Observable<any>
+  {
+    const body: any = {}
+    if (broadcast) {
+      let httpOptions = {params: new HttpParams({fromObject: {broadcast}})};
+      return this.http.post<any>(`/api/remote/${remote.address}/wake`, body, httpOptions).pipe(map(results => {
+        return results;
+      }))
+    }
+    else
+      return this.http.post<any>(`/api/remote/${remote.address}/wake`, body).pipe(map(results => {
+        return results;
+      }))
+  }
+
   unregisterRemote(remote: Remote): Observable<any>
   {
     return this.http.delete<any>('/api/config/remote/'+remote.address).pipe(map(results => {

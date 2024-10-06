@@ -71,3 +71,10 @@
   cursor: pointer;
 }
 
+.secondary-state .p-slider .p-slider-range {
+  background: rgba(202, 202, 202, 0.8);
+}
+
+.secondary-state .p-progressbar .p-progressbar-value{
+  background: rgba(202, 202, 202, 0.8);
+}

@@ -3,12 +3,14 @@
 This project is aimed to bring further functionalities to [Remote Two Web Configurator](https://www.unfoldedcircle.com)
 It is developed in Angular for the front-end, and NodeJS for the back-end. This project is all-in-one with the front and the back-end, so no need to add any additional components.
 
-![image](https://github.com/user-attachments/assets/67dfde04-1fd2-423b-b5ea-3b303cb42812)
+![image](https://github.com/user-attachments/assets/61c8c289-a6f9-42d3-bb4a-2f90c660c9ae)
 
+
+![image](https://github.com/user-attachments/assets/82a09018-2325-4bf9-b7d9-e29f11caaa48)
 
 
 ## Pre-requisites
-- NodeJS >= 21
+- NodeJS >= 22
 
 ## Installation
 
@@ -34,7 +36,7 @@ You can change the listening port by adding `--port <port number>` argument
 
 ### Navigation
 
-![image](https://github.com/user-attachments/assets/cb2fd8a0-bf28-4a2b-a6bf-23afc01cdbbe)
+![image](https://github.com/user-attachments/assets/61c8c289-a6f9-42d3-bb4a-2f90c660c9ae)
 
 - `Manage Remotes` : add (register) or remove a remote from registration
 - `Integrations` : review installed integrations, upload a custom driver or delete one. Review the subscribed entities per integration
@@ -43,6 +45,7 @@ You can change the listening port by adding `--port <port number>` argument
 - `Import activity` : import an activity from a file after saving it to a (json format) file or from clipboard. Activities can be imported in another remote as long as the used entities are available. If the activity already exists, it will replace it, otherwise it will create it
 - `Backup & restore` : backup the remote to a file or restore it from a saved backup. Same functionality as in the web configurator
 - `Sync activities` : synchronize activties between 2 remotes
+- `Play remote` : dashboard of active entities, virtual remotes of activities
 
 Main page :
 - You can check after all antities : orphan entities (defined in activities but not linked to any active integration), as well as unused entities

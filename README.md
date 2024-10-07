@@ -3,12 +3,14 @@
 This project is aimed to bring further functionalities to [Remote Two Web Configurator](https://www.unfoldedcircle.com)
 It is developed in Angular for the front-end, and NodeJS for the back-end. This project is all-in-one with the front and the back-end, so no need to add any additional components.
 
-![image](https://github.com/user-attachments/assets/67dfde04-1fd2-423b-b5ea-3b303cb42812)
+![image](https://github.com/user-attachments/assets/61c8c289-a6f9-42d3-bb4a-2f90c660c9ae)
 
+
+![image](https://github.com/user-attachments/assets/82a09018-2325-4bf9-b7d9-e29f11caaa48)
 
 
 ## Pre-requisites
-- NodeJS >= 21
+- NodeJS >= 22
 
 ## Installation
 
@@ -34,7 +36,7 @@ You can change the listening port by adding `--port <port number>` argument
 
 ### Navigation
 
-![image](https://github.com/user-attachments/assets/cb2fd8a0-bf28-4a2b-a6bf-23afc01cdbbe)
+![image](https://github.com/user-attachments/assets/61c8c289-a6f9-42d3-bb4a-2f90c660c9ae)
 
 - `Manage Remotes` : add (register) or remove a remote from registration
 - `Integrations` : review installed integrations, upload a custom driver or delete one. Review the subscribed entities per integration
@@ -43,6 +45,7 @@ You can change the listening port by adding `--port <port number>` argument
 - `Import activity` : import an activity from a file after saving it to a (json format) file or from clipboard. Activities can be imported in another remote as long as the used entities are available. If the activity already exists, it will replace it, otherwise it will create it
 - `Backup & restore` : backup the remote to a file or restore it from a saved backup. Same functionality as in the web configurator
 - `Sync activities` : synchronize activties between 2 remotes
+- `Play remote` : dashboard of active entities, virtual remotes of activities
 
 Main page :
 - You can check after all antities : orphan entities (defined in activities but not linked to any active integration), as well as unused entities
@@ -110,20 +113,29 @@ The integrations and entities must be configured first on the target remote, oth
 <img width="100%" alt="UI grid" src="https://github.com/user-attachments/assets/f40c524c-bc26-4ce3-b823-33fafdbb60f1">
 
 
-## Media player widget and Play Remote page
+## Media player widget
 
 When the remote is connected, a widget will be displayed in overlay and will be filled in by active media player entities. It is possible to execute media player commands based on its capabilities, or to switch to another active media player entity.
-To see more, a "Play Remote" link from the menu bar : 
-
-Remote play of any activities : from the activities drop down, a dialog will show a virtual remote that reproduces the buttons mapping and UI mapping of the activity, and even the media players.
-You can execute any buttons and UI commands.
-<img width="300px" alt="Virtual remote" src="https://github.com/user-attachments/assets/11f9ea51-c61f-4e71-bd2f-f515f576284a">
-<img width="300px" alt="Virtual remote" src="https://github.com/user-attachments/assets/7900983b-4269-49d7-ae12-3077bfee0669">
 
 Also in this page it will display all the active media entities and it is possible to execute commands on them
 
 <img width="40%" alt="UI grid" src="https://github.com/user-attachments/assets/370ca38a-ca99-4891-8b98-436e1b58ceab">
 
+If the remote is disconnected, you can click on the status to send a wake on lan packet and trigger a reconnection.
+
+
+## Dashboards and virtual remote
+
+From the `Play Remote` link, you can :
+- See dynamically the active media entities : as soon as an event occurs (media content change, button press, UI command...), the entity will appear as a card
+- Each (media) entity content is dynamically updated : title, artwork, position, volume.... and you can trigger commands from the card
+- You can add additional (media) entities from the drop down list in the menu bar
+- You can add a virtual remote of any activities
+- Each virtual remote can be added from the activity dropdown and will be displayed as a popup dialog. It can be minimized or dismissed. This virtual remote reproduces exactly the behaviour of the (physical) remote, including : button mapping (including long press if you make a long click on the button), UI mapping, UI page switching, and media entities with artwork, scrolling title/album/artist, media position and seeking, volume position and update
+
+<img width="100%" alt="UI grid" src="https://github.com/user-attachments/assets/7078a8c3-040a-4bff-99f4-ce093e60843b">
+
+You can also reorganize the cards and save the view (list of cards and list of virtual remotes) to the cache of the navigator in order to reload it later.
 
 
 ## Compilation

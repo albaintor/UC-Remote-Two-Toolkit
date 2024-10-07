@@ -1,3 +1,8 @@
+.smaller-dropdown .p-inputtext
+{
+  font-size: 0.6rem;
+}
+
 .charging-status {
   position: absolute;
   left: 50%;
@@ -61,13 +66,12 @@
 .cdk-drag-preview {
   border-radius: 20px;
   border: 2px solid rgba(255, 255, 255, 0.73);
+  background-color: black;
   position: relative;
   transition: none;
   padding: 5px;
   box-sizing: border-box;
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-  0 8px 10px 1px rgba(0, 0, 0, 0.14),
-  0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  box-shadow:  10px 5px 25px rgba(255, 255, 255, 0.5);
 }
 
 .cdk-drag-placeholder {

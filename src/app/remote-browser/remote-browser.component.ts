@@ -43,7 +43,7 @@ import {ToastModule} from "primeng/toast";
 import {DropdownModule} from "primeng/dropdown";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {Helper} from "../helper";
-import {EntityViewerComponent} from "../entity-viewer/entity-viewer.component";
+import {EntityViewerComponent} from "./entity-viewer/entity-viewer.component";
 import {MessagesModule} from "primeng/messages";
 import {DialogModule} from "primeng/dialog";
 import {MultiSelectModule} from "primeng/multiselect";

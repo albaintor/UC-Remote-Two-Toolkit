@@ -35,7 +35,7 @@ import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {ButtonEditorComponent} from "../activity-editor/button-editor/button-editor.component";
 import {from, map, Observable} from "rxjs";
 import {ActivitySequenceComponent} from "../activity-editor/activity-sequence/activity-sequence.component";
-import {ImageMapComponent} from "../image-map/image-map.component";
+import {ImageMapComponent} from "../controls/image-map/image-map.component";
 import {DividerModule} from "primeng/divider";
 import {ToolbarModule} from "primeng/toolbar";
 import {DockModule} from "primeng/dock";

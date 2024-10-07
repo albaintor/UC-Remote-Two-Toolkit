@@ -12,6 +12,7 @@ import {TooltipModule} from "primeng/tooltip";
 import {InputTextModule} from "primeng/inputtext";
 import {BlockUIModule} from "primeng/blockui";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
+import {WebsocketService} from "../websocket.service";
 
 @Component({
   selector: 'app-remote-registration',
@@ -47,7 +48,8 @@ export class RemoteRegistrationComponent {
   blockedPanel = false;
   progress = false;
 
-  constructor(private server: ServerService, private cdr: ChangeDetectorRef, private messageService: MessageService) {
+  constructor(private server: ServerService, private cdr: ChangeDetectorRef, private messageService: MessageService,
+              private websocketService: WebsocketService) {
   }
 
   refresh()
@@ -163,6 +165,7 @@ export class RemoteRegistrationComponent {
     if (!remote) return;
     this.server.wakeRemote(remote).subscribe({next: results => {
         this.messageService.add({severity:'success', summary: "Wake on lan command sent", key: 'remote'});
+        this.websocketService.connect();
         this.cdr.detectChanges();
       },
       error: error => {

@@ -19,7 +19,7 @@ import {
   RemoteModel, RemoteModels, RemoteVersion,
 } from "../../interfaces";
 import {ServerService} from "../../server.service";
-import {ImageMapComponent, MapElement} from "../../image-map/image-map.component";
+import {ImageMapComponent, MapElement} from "../../controls/image-map/image-map.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {MessageService} from "primeng/api";
 import {ToastModule} from "primeng/toast";

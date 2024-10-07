@@ -15,7 +15,7 @@ import {
 import {ButtonModule} from "primeng/button";
 import {DialogModule} from "primeng/dialog";
 import {DropdownModule} from "primeng/dropdown";
-import {IconSelectorComponent} from "../../icon-selector/icon-selector.component";
+import {IconSelectorComponent} from "../../controls/icon-selector/icon-selector.component";
 import {InputNumberModule} from "primeng/inputnumber";
 import {InputTextModule} from "primeng/inputtext";
 import {NgIf} from "@angular/common";

@@ -26,7 +26,7 @@ import {Helper} from "../../helper";
 import {NgIf} from "@angular/common";
 import {ToastModule} from "primeng/toast";
 import {DialogModule} from "primeng/dialog";
-import {IconSelectorComponent} from "../../icon-selector/icon-selector.component";
+import {IconSelectorComponent} from "../../controls/icon-selector/icon-selector.component";
 import {DropdownModule} from "primeng/dropdown";
 import {ButtonModule} from "primeng/button";
 import {ActivityGridItemComponent, GridItem} from "../../activity-viewer/activity-grid-item/activity-grid-item.component";

@@ -1,13 +1,13 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, ViewEncapsulation} from '@angular/core';
 import {OverlayPanelModule} from "primeng/overlaypanel";
 import {MessageService, SharedModule} from "primeng/api";
-import {ServerService} from "../server.service";
-import {Activity, Entity} from "../interfaces";
+import {ServerService} from "../../server.service";
+import {Activity, Entity} from "../../interfaces";
 import {DialogModule} from "primeng/dialog";
 import {CommonModule, NgForOf, NgIf} from "@angular/common";
-import {AsPipe} from "../activity-viewer/activity-viewer.component";
+import {AsPipe} from "../../activity-viewer/activity-viewer.component";
 import {ChipModule} from "primeng/chip";
-import {Helper} from "../helper";
+import {Helper} from "../../helper";
 import {TooltipModule} from "primeng/tooltip";
 
 @Component({

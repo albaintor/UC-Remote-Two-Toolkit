@@ -51,7 +51,7 @@ import {BlockUIModule} from "primeng/blockui";
 import {DividerModule} from "primeng/divider";
 import {TagModule} from "primeng/tag";
 import {ToggleButtonModule} from "primeng/togglebutton";
-import {IconSelectorComponent} from "../icon-selector/icon-selector.component";
+import {IconSelectorComponent} from "../controls/icon-selector/icon-selector.component";
 import {IconComponent} from "../controls/icon/icon.component";
 import {ToolbarModule} from "primeng/toolbar";
 

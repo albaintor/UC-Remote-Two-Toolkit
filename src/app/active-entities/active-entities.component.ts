@@ -20,6 +20,17 @@ import {ActivityPlayerComponent} from "../activity-player/activity-player.compon
 import {InputNumberModule} from "primeng/inputnumber";
 import {MessagesModule} from "primeng/messages";
 import {ToastModule} from "primeng/toast";
+import {WebsocketService} from "../websocket.service";
+import {CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray} from "@angular/cdk/drag-drop";
+import {DialogModule} from "primeng/dialog";
+import {InputTextModule} from "primeng/inputtext";
+
+interface Dashboard
+{
+  name: string;
+  dashboardEntityIds: string[];
+  popupEntitiyIds: string[];
+}
 
 @Component({
   selector: 'app-active-entities',
@@ -43,7 +54,11 @@ import {ToastModule} from "primeng/toast";
     ActivityPlayerComponent,
     InputNumberModule,
     MessagesModule,
-    ToastModule
+    ToastModule,
+    CdkDropList,
+    CdkDrag,
+    DialogModule,
+    InputTextModule
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',
@@ -70,9 +85,14 @@ export class ActiveEntitiesComponent implements OnInit {
   newActivity: Activity | undefined;
   scale = 0.8;
   messages: Message[] = [];
+  dashboards: Dashboard[] = [];
+  showDashboardDialog = false;
+  dashboardName: string | undefined;
+  selectedDashboard: Dashboard | undefined;
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService,
-              private cdr:ChangeDetectorRef, private messageService: MessageService) { }
+              private cdr:ChangeDetectorRef, private messageService: MessageService,
+              private websocketService: WebsocketService) {}
 
   ngOnInit(): void {
     const scale = localStorage.getItem("scale");
@@ -118,6 +138,55 @@ export class ActiveEntitiesComponent implements OnInit {
       }
       this.cdr.detectChanges();
     });
+    this.dashboards = this.getDashboards();
+    this.cdr.detectChanges();
+  }
+
+  getDashboards(): Dashboard[]
+  {
+    const dashboards = localStorage.getItem("dashboards");
+    if (dashboards) {
+      return JSON.parse(dashboards);
+    }
+    return [];
+  }
+
+  saveDashboard()
+  {
+    if (!this.dashboardName || this.mediaEntities.length == 0 ||this.selectedActivities.length == 0) {
+      this.messageService.add({severity: "error", summary: "No dashboard name defined or no entities selected", key: 'activeEntities'});
+      this.cdr.detectChanges();
+      return;
+    }
+    this.showDashboardDialog = false;
+    const dashboards = this.getDashboards();
+    const dashboard: Dashboard = {name: this.dashboardName, dashboardEntityIds: this.mediaEntities.map(item => item.entity_id!),
+      popupEntitiyIds: this.selectedActivities.map(item => item.entity_id!)};
+    const existingDashboard = dashboards.find(item => item.name === dashboard.name);
+    if (existingDashboard) {
+      dashboards.splice(dashboards.indexOf(existingDashboard), 1);
+    }
+    dashboards.push(dashboard);
+    localStorage.setItem("dashboards", JSON.stringify(dashboards));
+    this.dashboards = this.getDashboards();
+    this.messageService.add({severity: "success", summary: `Dashboard saved : ${this.dashboardName}`, key: 'activeEntities'});
+    this.cdr.detectChanges();
+  }
+
+  deleteDashboard(name: string)
+  {
+    const dashboards = this.getDashboards();
+    const existingDashboard = dashboards.find(item => item.name === name);
+    this.showDashboardDialog = false;
+    if (existingDashboard) {
+      dashboards.splice(dashboards.indexOf(existingDashboard), 1);
+      this.dashboards = this.getDashboards();
+      this.messageService.add({severity: "success", summary: `Dashboard deleted : ${name}`, key: 'activeEntities'});
+      this.cdr.detectChanges();
+    } else {
+      this.messageService.add({severity: "error", summary: `No dashboard found with name ${name}`, key: 'activeEntities'});
+      this.cdr.detectChanges();
+    }
   }
 
   loadActivities()
@@ -215,6 +284,7 @@ export class ActiveEntitiesComponent implements OnInit {
     if (!this.selectedRemote) return;
     this.server.wakeRemote(this.selectedRemote).subscribe({next: results => {
         this.messageService.add({severity:'success', summary: "Wake on lan command sent", key: 'activeEntities'});
+        this.websocketService.connect();
         this.cdr.detectChanges();
       },
       error: error => {
@@ -223,5 +293,34 @@ export class ActiveEntitiesComponent implements OnInit {
       }
     });
     this.server.wakeRemote(this.selectedRemote, "255.255.255.0").subscribe({});
+  }
+
+  drop($event: CdkDragDrop<MediaEntityState[]>) {
+    console.log("Drop", $event);
+    moveItemInArray(this.mediaEntities, $event.previousIndex, $event.currentIndex);
+    this.cdr.detectChanges();
+  }
+
+  selectDashboard(dashboard: Dashboard | undefined) {
+    if (!dashboard || !this.selectedRemote) return;
+    this.dashboardName = dashboard.name;
+    this.mediaEntities = [];
+    const remote = this.selectedRemote;
+    dashboard.dashboardEntityIds.forEach(entityId => {
+      let entity = this.remoteWebsocketService.mediaEntities.find(item => item.entity_id === entityId);
+      if (!entity) this.server.getRemotetEntity(remote, entityId).subscribe(entity => {
+        this.mediaEntities.push({...entity, new_state: {attributes: entity.attributes, features: entity.features }} as any);
+        this.cdr.detectChanges();
+      })
+      else this.mediaEntities.push(entity);
+    });
+    this.selectedActivities = [];
+    dashboard.popupEntitiyIds.forEach(entityId => {
+      this.server.getRemoteActivity(remote, entityId).subscribe(activity => {
+        this.selectedActivities.push(activity);
+        this.cdr.detectChanges();
+      })
+    })
+    this.cdr.detectChanges();
   }
 }

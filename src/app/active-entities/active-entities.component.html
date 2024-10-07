@@ -2,6 +2,12 @@
 <p-menubar [model]="menuItems">
   <ng-template pTemplate="end">
     <div class="flex align-items-center gap-2">
+      <p-dropdown [(ngModel)]="selectedDashboard" [options]="dashboards" placeholder="Select dashboard"
+                  (ngModelChange)="selectDashboard($event)" optionLabel="name">
+      </p-dropdown>
+      <p-button icon="pi pi-save" pTooltip="Save dashboard to browser cache"
+                label="Save dashboard" (click)="showDashboardDialog = true"/>
+      Scale :
       <p-inputNumber [(ngModel)]="scale" pTooltip="Scale elements" min="0.1" max="3" (ngModelChange)="Helper.setScale(scale)" mode="decimal"
                      [minFractionDigits]="1"
                      [maxFractionDigits]="1" [inputStyle]="{width: '40px'}"/>&nbsp;
@@ -10,7 +16,7 @@
                       [style]="{'width':'100%'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addActivity($event)"
                       pTooltip="View activity">
         <ng-template let-item pTemplate="item">
-          <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
+          <div><b>{{Helper.getEntityName(item)}}</b></div>
         </ng-template>
       </p-autoComplete>
       Add entities :
@@ -18,7 +24,7 @@
                       [style]="{'width':'100%'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addEntity($event)"
                       pTooltip="Add entity">
         <ng-template let-item pTemplate="item">
-          <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
+          <div><b>{{Helper.getEntityName(item)}}</b></div>
         </ng-template>
       </p-autoComplete>
       <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
@@ -58,13 +64,36 @@
   </div>
   <p-messages *ngIf="messages.length > 0" class="message-panel" styleClass="message-panel" [(value)]="messages" [enableService]="false" showTransitionOptions="0ms" hideTransitionOptions="0ms"/>
 </div>
-<div class="flex flex-wrap gap-3">
+<div class="flex flex-wrap gap-3" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="drop($event)">
   <div class="flex gap-2 align-content-center justify-content-center media-card-border"
-       [style]="'width:'+(600*scale)+'px'" *ngFor="let mediaEntity of mediaEntities">
+       [style]="'width:'+(600*scale)+'px'" *ngFor="let mediaEntity of mediaEntities" cdkDrag>
     <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" [style]="'width:'+(600*scale)+'px'" [scale]="scale"
                       class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"></app-media-entity>
   </div>
 </div>
 <app-activity-player *ngFor="let activity of selectedActivities" [remote]="selectedRemote" [activity]="activity" [visible]="true"
   (onClose)="removeActivity($event)" [scale]="scale" (onMessage)="handleMessage($event)"/>
-
+<p-dialog #dashboardDialog [modal]="true" position="center" [draggable]="true" appendTo="body" [(visible)]="showDashboardDialog">
+  <ng-template pTemplate="header">
+    <div class="flex align-items-start justify-content-center">
+      <h3>Save dashboard</h3>
+    </div>
+  </ng-template>
+  <div class="flex flex-column gap-3">
+    <div class="flex flex-wrap gap-3 align-items-center">
+      Name of the dashboard : <input type="text" pInputText [(ngModel)]="dashboardName" />
+    </div>
+    <div class="flex flex-wrap align-items-center gap-1">
+      Entities : <p-tag *ngFor="let mediaEntity of mediaEntities" [value]="remoteWebsocketService.getEntityName(mediaEntity)"/>
+    </div>
+    <div class="flex flex-wrap align-items-center gap-1">
+      Virtual remotes : <p-tag *ngFor="let entity of selectedActivities" [value]="Helper.getEntityName(entity)" severity="warning"/>
+    </div>
+    <div class="flex flex-wrap gap-3 align-items-center">
+      <p-button icon="pi pi-times" pTooltip="Delete this dashboard"
+                label="Delete dashboard" severity="danger" *ngIf="dashboardName" (click)="deleteDashboard(dashboardName)"/>
+      <p-button icon="pi pi-save" pTooltip="Save dashboard to browser cache"
+                label="Save dashboard" (click)="saveDashboard()"/>
+    </div>
+  </div>
+</p-dialog>

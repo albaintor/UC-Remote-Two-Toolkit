@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Output} from '@angular/core';
 import {DialogModule} from "primeng/dialog";
-import {ActivityPageCommand, Remote} from "../interfaces";
-import {ServerService} from "../server.service";
-import {Helper} from "../helper";
+import {ActivityPageCommand, Remote} from "../../interfaces";
+import {ServerService} from "../../server.service";
+import {Helper} from "../../helper";
 import {NgForOf, NgIf} from "@angular/common";
 import {TooltipModule} from "primeng/tooltip";
 

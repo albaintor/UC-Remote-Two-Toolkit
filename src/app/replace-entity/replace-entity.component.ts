@@ -32,7 +32,7 @@ import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
 import {ChipModule} from "primeng/chip";
 import {TableModule} from "primeng/table";
-import {EntityViewerComponent} from "../entity-viewer/entity-viewer.component";
+import {EntityViewerComponent} from "../remote-browser/entity-viewer/entity-viewer.component";
 import {ButtonModule} from "primeng/button";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
 import {forkJoin, from, map, mergeMap, Observable} from "rxjs";

@@ -68,6 +68,7 @@ interface Dashboard
 })
 export class ActiveEntitiesComponent implements OnInit {
   remoteState: RemoteState | undefined;
+  dashboardEntities: MediaEntityState[] = [];
   mediaEntities: MediaEntityState[] = [];
   protected readonly Math = Math;
   menuItems: MenuItem[] = [
@@ -89,6 +90,7 @@ export class ActiveEntitiesComponent implements OnInit {
   showDashboardDialog = false;
   dashboardName: string | undefined;
   selectedDashboard: Dashboard | undefined;
+  addNewStates = true;
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService,
               private cdr:ChangeDetectorRef, private messageService: MessageService,
@@ -123,7 +125,21 @@ export class ActiveEntitiesComponent implements OnInit {
       this.cdr.detectChanges();
     })
     this.remoteWebsocketService.onMediaStateChange().subscribe(remoteState => {
-      this.mediaEntities = this.remoteWebsocketService.mediaEntities;
+      if (this.dashboardEntities)
+      {
+        remoteState.forEach(mediaState => {
+          if (this.mediaEntities.includes(mediaState)) return;
+          const existingEntity = this.mediaEntities.find(item => item.entity_id === mediaState.entity_id);
+          if (existingEntity)
+          {
+            this.mediaEntities[this.mediaEntities.indexOf(existingEntity)] = mediaState;
+          }
+          else if (this.addNewStates)
+            this.mediaEntities.push(mediaState);
+        });
+      }
+      else
+        this.mediaEntities = this.remoteWebsocketService.mediaEntities;
       this.cdr.detectChanges();
     })
     this.remoteWebsocketService.onMediaPositionChange().subscribe(entities => {
@@ -305,14 +321,20 @@ export class ActiveEntitiesComponent implements OnInit {
     if (!dashboard || !this.selectedRemote) return;
     this.dashboardName = dashboard.name;
     this.mediaEntities = [];
+    this.dashboardEntities = [];
     const remote = this.selectedRemote;
     dashboard.dashboardEntityIds.forEach(entityId => {
       let entity = this.remoteWebsocketService.mediaEntities.find(item => item.entity_id === entityId);
       if (!entity) this.server.getRemotetEntity(remote, entityId).subscribe(entity => {
-        this.mediaEntities.push({...entity, new_state: {attributes: entity.attributes, features: entity.features }} as any);
+        const mediaState = {...entity, new_state: {attributes: entity.attributes, features: entity.features }} as any;
+        this.mediaEntities.push(mediaState)
+        this.dashboardEntities.push(mediaState);
         this.cdr.detectChanges();
       })
-      else this.mediaEntities.push(entity);
+      else {
+        this.mediaEntities.push(entity);
+        this.dashboardEntities.push(entity);
+      }
     });
     this.selectedActivities = [];
     dashboard.popupEntitiyIds.forEach(entityId => {

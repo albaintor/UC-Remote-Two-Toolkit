@@ -40,8 +40,8 @@
       <div><b>{{item.name}}</b> [<span [style]="{'color': getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
     </ng-template>
   </p-dropdown>
-  <p-chip *ngFor="let entity of activity?.options?.included_entities" [label]="Helper.getEntityName(entity)"
-          [style]="getStyle(Helper.getEntityName(entity))" [pTooltip]="entity.entity_id" [removable]="editMode"
+  <p-chip *ngFor="let entity of activity?.options?.included_entities" label="{{Helper.getEntityName(entity)}} ({{Helper.getEntityType(entity)}})"
+          [style]="getStyle(Helper.getEntityType(entity))" [pTooltip]="entity.entity_id" [removable]="editMode"
           (onRemove)="deleteIncludedEntity(entity, $event)"></p-chip>&nbsp;
 </p-toolbar>
 <h3>Buttons mapping and startup/stop sequences</h3>

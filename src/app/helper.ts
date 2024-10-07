@@ -323,6 +323,27 @@ export class Helper
     return "";
   }
 
+  static getEntityType(entity: any): string
+  {
+    if (!entity?.entity_type) return "";
+    switch(entity.entity_type)
+    {
+      case "media_player": return "media player";
+      case "remote": if (entity.integration && typeof entity.integration === "string") return Helper.getEntityTypeFromIntegration(entity);
+        if (entity.entity_id.startsWith("uc.main")) return "IR remote";
+        if (entity.entity_id.startsWith("uc_bt")) return "BR remote";
+        return "remote";
+      default:return entity.entity_type;
+    }
+  }
+
+  static getEntityTypeFromIntegration(entity: any): string
+  {
+    if (entity.integration === "uc.main") return "IR remote";
+    if (entity.integration === "uc_bt.main") return "BT remote";
+    return entity.entity_type;
+  }
+
   static isIntersection(rectangle1: {x: number, y: number, width: number, height:number},
                         rectangle2: {x: number, y: number, width: number, height:number}): boolean
   {

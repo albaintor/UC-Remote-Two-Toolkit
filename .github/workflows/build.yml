@@ -21,7 +21,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        node-version: [ '21.x' ]
+        node-version: [ '22.x' ]
 
     steps:
       - name: Checkout
@@ -67,7 +67,7 @@ jobs:
           cd server
           npm ci
           echo "Building NodeJS app to bundle compatible with CommonJS format for executable injection"
-          npx esbuild --format=cjs --target=node21 --platform=node --bundle --outfile=bundle.js app.js
+          npx esbuild --format=cjs --target=node22 --platform=node --bundle --outfile=bundle.js app.js
           echo "Creating blob for injection"
           node --experimental-sea-config sea-config.json
           node -e "require('fs').copyFileSync(process.execPath, 'ucrtool-server.exe')"
@@ -100,7 +100,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        node-version: [ '21.x']
+        node-version: [ '22.x']
 
     steps:
       - name: Checkout
@@ -145,7 +145,7 @@ jobs:
           cd server
           npm ci
           echo "Building NodeJS app to bundle compatible with CommonJS format for executable injection"
-          npx esbuild --format=cjs --target=node21 --platform=node --bundle --outfile=bundle.js app.js
+          npx esbuild --format=cjs --target=node22 --platform=node --bundle --outfile=bundle.js app.js
           echo "Creating blob for injection"
           node --experimental-sea-config sea-config.json
           cp $(command -v node) ucrtool-server
@@ -180,7 +180,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ '21.x']
+        node-version: [ '22.x']
 
     steps:
       - name: Checkout
@@ -225,7 +225,7 @@ jobs:
           cd server
           npm ci
           echo "Building NodeJS app to bundle compatible with CommonJS format for executable injection"
-          npx esbuild --format=cjs --target=node21 --platform=node --bundle --outfile=bundle.js app.js
+          npx esbuild --format=cjs --target=node22 --platform=node --bundle --outfile=bundle.js app.js
           echo "Creating blob for injection"
           node --experimental-sea-config sea-config.json
           cp $(command -v node) ucrtool-server

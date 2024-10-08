@@ -233,20 +233,11 @@ jobs:
           npx postject ucrtool-server NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
           node --experimental-sea-config sea-config.json
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build docker image and push
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          tags: user/app:latest
+      - name: Build docker image
+        run : |
+          docker login --username albaintor --password ${{ secrets.GH_PAT }} ghcr.io
+          docker build . --tag ghcr.io/albaintor/actions-runner-controller:latest
+          docker push ghcr.io/albaintor/actions-runner-controller:latest
 
       - name: Prepare artifacts
         shell: bash

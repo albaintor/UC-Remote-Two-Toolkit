@@ -236,8 +236,8 @@ jobs:
       - name: Build docker image
         run : |
           docker login --username albaintor --password ${{ secrets.GH_PAT }} ghcr.io
-          docker build . --tag ghcr.io/albaintor/actions-runner-controller:latest
-          docker push ghcr.io/albaintor/actions-runner-controller:latest
+          docker build . --tag ghcr.io/albaintor/ucr-tool:latest
+          docker push ghcr.io/albaintor/ucr-tool:latest
 
       - name: Prepare artifacts
         shell: bash

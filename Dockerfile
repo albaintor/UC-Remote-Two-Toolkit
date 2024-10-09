@@ -1,3 +1,6 @@
+LABEL org.opencontainers.image.source=https://github.com/albaintor/ucr-tool
+LABEL org.opencontainers.image.description="Unfolded Circle Toolkit"
+LABEL org.opencontainers.image.licenses=MIT
 FROM alpine:3.19
 
 ENV NODE_VERSION 22.9.0

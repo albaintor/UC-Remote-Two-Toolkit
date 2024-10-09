@@ -242,6 +242,15 @@ jobs:
           docker build . --tag ghcr.io/albaintor/ucr-tool:latest
           docker push ghcr.io/albaintor/ucr-tool:latest
 
+      - name: Build and push Docker image
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          file: Dockerfile
+          platforms: ${{ matrix.platforms }}
+          push: true
+          outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=Unfolded Circle Toolkit
+
       - name: Prepare artifacts
         shell: bash
         run: |

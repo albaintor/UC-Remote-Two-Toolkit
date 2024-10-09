@@ -178,6 +178,7 @@ jobs:
 
   build-ubuntu:
     runs-on: ubuntu-latest
+    environment: Ubuntu
     strategy:
       matrix:
         node-version: [ '22.x']
@@ -234,6 +235,8 @@ jobs:
           node --experimental-sea-config sea-config.json
 
       - name: Build docker image
+        env: # Or as an environment variable
+          GH_PAT: ${{ secrets.GH_PAT }}
         run : |
           docker login --username albaintor --password ${{ secrets.GH_PAT }} ghcr.io
           docker build . --tag ghcr.io/albaintor/ucr-tool:latest

@@ -21,6 +21,7 @@ The released are available for 2 systems :
 Just download the package for your system and execute the binary :
 - ucrtool-server.exe for Windows
 - ucrtool-server for Linux
+- Docker image : `docker pull albator78/uc-tool:latest`
 
 Then launch your browser to http://localhost:8000
 You can change the listening port by adding `--port <port number>` argument

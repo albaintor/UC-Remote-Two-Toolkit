@@ -246,6 +246,7 @@ jobs:
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: .
+          args: username=albaintor,password=${{ secrets.GH_PAT }}
           file: Dockerfile
           platforms: ${{ matrix.platforms }}
           push: true

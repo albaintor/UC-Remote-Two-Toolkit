@@ -252,7 +252,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: user/app:latest
+          tags: albaintor/ucr-tool:latest
 
 #      - name: Build and push Docker image
 #        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4

@@ -1,0 +1,38 @@
+<p-toast key="pages"/>
+<p-menubar [model]="menuItems">
+  <ng-template pTemplate="end">
+    <div class="flex align-items-center gap-2">
+      <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)"
+                  class="smaller-dropdown">
+        <ng-template pTemplate="selectedItem">
+          <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
+          <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
+        </ng-template>
+        <ng-template let-item pTemplate="item">
+          {{item.remote_name}} ({{item.address}})
+        </ng-template>
+      </p-dropdown>
+    </div>
+  </ng-template>
+</p-menubar>
+<app-remote-data-loader #loader [remote]="selectedRemote" (loaded)="remoteLoaded($event)"></app-remote-data-loader>
+<ul>
+  <li *ngFor="let profile of profiles">{{profile.name}}
+    <ul>
+      <li *ngFor="let page of profile.pages">{{page.name}}
+        <ul>
+          <li *ngFor="let item of page.items">
+            <ng-container *ngIf="item.entity_id">{{Helper.getEntityNameFromCatalog(item, entities)}}</ng-container>
+            <ng-container *ngIf="item.group_id">{{getGroup(item.group_id, profile).name}}
+              <ul>
+                <li *ngFor="let entity of getGroup(item.group_id, profile).entities">
+                  {{Helper.getEntityNameFromCatalog(entity, entities)}}
+                </li>
+              </ul>
+            </ng-container>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>

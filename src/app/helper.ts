@@ -323,6 +323,21 @@ export class Helper
     return "";
   }
 
+  static getEntityNameFromCatalog(entity: any, entities: Entity[]): string
+  {
+    if (!entity) return "";
+    let entityId = undefined;
+    if (typeof entity === "string") entityId = entity;
+    if (entity.entity_id) entityId = entity.entity_id;
+    if (entityId)
+    {
+      const entityContent = entities.find(item => item.entity_id === entityId);
+      if (entityContent) return Helper.getEntityName(entityContent);
+      return entityId;
+    }
+    return entity.toString();
+  }
+
   static getEntityType(entity: any): string
   {
     if (!entity?.entity_type) return "";

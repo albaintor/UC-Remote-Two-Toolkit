@@ -123,16 +123,16 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
   blockedMenu = false;
   protected readonly Math = Math;
   items: MenuItem[] = [
-    {label: 'Manage Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
+    {label: 'Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
     {label: 'Integrations', routerLink:'/integrations', icon: 'pi pi-microchip'},
-    {label: 'Load Remote', icon: 'pi pi-cloud-download',
+    {label: 'Load', icon: 'pi pi-cloud-download',
       items: [
         {label: 'Load Remote data', command: () => this.loadRemote(), icon: 'pi pi-cloud-download', block: true},
         {label: 'Load Remote resources', command: () => this.loadRemoteResources(), icon: 'pi pi-images', block: true},
       ],
       block: true},
     {label: 'Replace entities', routerLink:'/entity/rename', icon: 'pi pi-file-edit'},
-    {label: 'Import activity', icon: 'pi pi-file-import', items: [
+    {label: 'Activity', icon: 'pi pi-file-import', items: [
         {label: 'Import activity from file', routerLink:'/activity/edit', queryParams: {'source': 'file'}, icon: 'pi pi-file-import'},
         {label: 'Import activity from clipboard', routerLink:'/activity/edit', queryParams: {'source': 'clipboard'}, icon: 'pi pi-clipboard'},
       ]
@@ -142,8 +142,9 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
         {label: 'Restore backup to this remote', command: () => this.restoreRemote(), icon: 'pi pi-upload'},
       ]
     },
-    {label: 'Sync activities', routerLink:'/activities/sync', icon: 'pi pi-sync'},
-      {label: 'Play Remote', routerLink:'/status', icon: 'pi pi-play'},
+    {label: 'Synchronize', routerLink:'/activities/sync', icon: 'pi pi-sync'},
+    {label: 'Play Remote', routerLink:'/play', icon: 'pi pi-play'},
+    {label: 'Edit pages', routerLink:'/pages/edit', icon: 'pi pi-pen-to-square'},
   ]
   entityUsages: EntityUsage | null | undefined;
   localMode = true;

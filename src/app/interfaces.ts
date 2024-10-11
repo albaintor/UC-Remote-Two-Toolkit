@@ -287,8 +287,9 @@ export interface Page {
   position: number;
   items?:[
     {
-      entity_id: string;
-      position: number;
+      entity_id?: string;
+      group_id?: string;
+      pos: number;
     }
   ]
 }

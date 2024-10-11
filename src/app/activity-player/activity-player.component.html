@@ -34,7 +34,8 @@
     (onSelectButton)="handleMessage($event)"/>
     <div style="position: relative">
       <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [width]="400*scale" [height]="500*scale"
-                         [selectionMode]="false" [currentPage]="currentPage" [runMode]="true" (onSelectButton)="handleCommand($event)"/>
+                         [selectionMode]="false" [currentPage]="currentPage" [runMode]="true" (onSelectButton)="handleCommand($event)"
+                          (onPageChange)="selectPage($event)"/>
       <app-pagination *ngIf="activity?.options?.user_interface?.pages && currentPage"
         [currentIndex]="activity!.options!.user_interface!.pages!.indexOf(currentPage)"
         [numberOfPages]="activity!.options!.user_interface!.pages!.length" class="grid-pagination"

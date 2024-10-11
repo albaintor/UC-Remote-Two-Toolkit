@@ -2,7 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, ElementRef,
   EventEmitter,
   HostListener,
   Input,
@@ -28,6 +28,15 @@ import {ToastModule} from "primeng/toast";
 import {ActivityMediaEntityComponent} from "../actiivty-media-entity/activity-media-entity.component";
 import {ButtonMode} from "../activity-buttons/activity-buttons.component";
 
+
+interface SwipeInfo
+{
+  mousePressed: boolean;
+  initialUiContainerPosition: number;
+  uiContainerPosition: number;
+  uiClientX: number;
+}
+
 @Pipe({name: 'as', standalone: true, pure: true})
 export class AsPipe implements PipeTransform {
   transform<T>(input: unknown, baseItem: T | undefined): T {
@@ -46,7 +55,7 @@ export class AsPipe implements PipeTransform {
     TagModule,
     UiCommandEditorComponent,
     ToastModule,
-    ActivityMediaEntityComponent
+    ActivityMediaEntityComponent,
   ],
   templateUrl: './activity-grid.component.html',
   styleUrl: './activity-grid.component.css',
@@ -56,11 +65,28 @@ export class AsPipe implements PipeTransform {
 })
 export class ActivityGridComponent implements AfterViewInit {
   currentPage: UIPage | undefined;
-  @Input() activity: Activity | undefined;
+  activity: Activity | undefined;
+
+  @Input("activity") set _activity(activity: Activity | undefined)
+  {
+    this.activity = activity;
+    if (!this.currentPage && this.activity?.options?.user_interface?.pages)
+      this.currentPage = this.activity?.options?.user_interface?.pages?.[0];
+    // this.getGridItems();
+    this.cdr.detectChanges();
+  }
   @Input("currentPage") set _currentPage( currentPage: UIPage | undefined)
   {
     this.currentPage = currentPage;
-    this.gridCommands = this.getGridItems();
+    if (currentPage)
+    {
+      const index = this.activity?.options?.user_interface?.pages?.indexOf(currentPage);
+      if (this.uiCollection?.nativeElement && index && index >= 0)
+        this.uiCollection.nativeElement.setAttribute("style", `transform: translate3d(-${index*100}%, 0px, 0px`);
+      else if (this.uiCollection?.nativeElement)
+        this.uiCollection.nativeElement.setAttribute("style", `transform: translate3d(0%, 0px, 0px`);
+    }
+    // this.gridCommands = this.getGridItems();
     this.cdr.detectChanges();
   }
   @Input() remote: Remote | undefined;
@@ -78,12 +104,22 @@ export class ActivityGridComponent implements AfterViewInit {
   }
   @Input() editMode = false;
   @Input() selectionMode = false;
-  @Input() runMode = false;
-  gridCommands: ActivityPageCommand[] = [];
+  runMode = false;
+  @Input("runMode") set _runMode(runMode: boolean)
+  {
+    this.runMode = runMode;
+    if (this.runMode)
+      this.uiCollection?.nativeElement.classList.add("swipe");
+    else
+      this.uiCollection?.nativeElement.classList.remove("swipe");
+    this.cdr.detectChanges();
+  }
+  // gridCommands: ActivityPageCommand[] = [];
   gridItemSource: ActivityGridItemComponent | undefined;
   gridItem: ActivityGridItemComponent | undefined;
   selection: ActivityGridItemComponent[] = [];
   @ViewChild("commandeditor", {static: false}) commandeditor: UiCommandEditorComponent | undefined;
+  @ViewChild("uiCollection", {static: false}) uiCollection: ElementRef<HTMLDivElement> | undefined;
   @ViewChildren(ActivityGridItemComponent) gridButtons:QueryList<ActivityGridItemComponent> | undefined;
   @Output() onSelectButton: EventEmitter<{command: Command, mode: ButtonMode, severity: "success" | "error",
     error?: string}> = new EventEmitter();
@@ -92,6 +128,14 @@ export class ActivityGridComponent implements AfterViewInit {
   public Command!: Command;
   protected readonly Helper = Helper;
   screenLayout: ScreenLayout | undefined;
+  swipeInfo: SwipeInfo = {
+    uiClientX: 0,
+    uiContainerPosition: 0,
+    mousePressed: false,
+    initialUiContainerPosition: 0
+  }
+  @Output() onPageChange = new EventEmitter<number>();
+
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
   }
@@ -99,13 +143,6 @@ export class ActivityGridComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.width = Math.min(window.innerWidth*0.8, this.widthInit);
     this.height = Math.min(window.innerHeight*1.2, this.heightInit);
-    // const data = localStorage.getItem("remoteData");
-    // if (data) {
-    //   const remoteData: RemoteData = JSON.parse(data);
-    //   if (remoteData.configCommands) {
-    //     this.configEntityCommands = remoteData.configCommands;
-    //   }
-    // }
     this.server.configCommands$.subscribe(entityCommands => {
       this.configEntityCommands = entityCommands;
       this.cdr.detectChanges();
@@ -127,10 +164,16 @@ export class ActivityGridComponent implements AfterViewInit {
   onResize($event: any) {
     this.width = Math.min(window.innerWidth*0.8, this.widthInit);
     this.height = Math.min(window.innerHeight*1.2, this.heightInit);
-    this.updateButtonsGrid();
+    this.cdr.detectChanges();
   }
 
-  getGridItems(): ActivityPageCommand[]
+  updateCurrentPage()
+  {
+    this.getGridPageItems(this.currentPage, true);
+    this.cdr.detectChanges();
+  }
+
+  getGridPageItems(page: UIPage | undefined, reset=false): ActivityPageCommand[]
   {
     // if (this.currentPage && this.activity?.options?.user_interface?.pages?.indexOf(this.currentPage) == -1)
     // {
@@ -146,24 +189,31 @@ export class ActivityGridComponent implements AfterViewInit {
     // }
     // const width = this.currentPage?.grid?.width ? this.currentPage.grid.width : 4;
     // const height = this.currentPage?.grid?.height ? this.currentPage.grid.height : 6;
+    if (!page) return [];
 
-    const list: ActivityPageCommand[] = [];
-    for (let y=0; y<this.currentPage?.grid.height!;y++)
+    const modifiedPage = page as any;
+    if (reset || !modifiedPage?.gridCommands)
     {
-      for (let x=0; x<this.currentPage?.grid.width!;x++)
+      const list: ActivityPageCommand[] = [];
+      for (let y=0; y<page?.grid.height!;y++)
       {
-        const item = this.currentPage?.items.find(item => item.location.x == x && item.location.y == y);
-        if (item == null)
+        for (let x=0; x<page?.grid.width!;x++)
         {
-          if (!Helper.findItem(list, x, y)) list.push({type: "text", location:{x, y}, size: {width: 1, height: 1}});
-        }
-        else {
-          list.push(item);
+          const item = page?.items.find(item => item.location.x == x && item.location.y == y);
+          if (item == null)
+          {
+            if (!Helper.findItem(list, x, y)) list.push({type: "text", location:{x, y}, size: {width: 1, height: 1}});
+          }
+          else {
+            list.push(item);
+          }
         }
       }
+      modifiedPage.gridCommands = list;
+      // console.log("Grid for activity", list);
+      return list;
     }
-    // console.log("Grid for activity", list);
-    return list;
+    else return modifiedPage.gridCommands;
   }
 
   getEntityName(entityId: string | undefined): string
@@ -177,14 +227,16 @@ export class ActivityGridComponent implements AfterViewInit {
 
   updateGridItem(gridItem: ActivityGridItemComponent) {
     if (!gridItem?.item) return;
-    this.updateButtonsGrid();
+    this.getGridPageItems(this.currentPage, true);
+    this.cdr.detectChanges();
   }
 
   deleteGridItem($event: ActivityGridItemComponent) {
     if (!$event.item) return;
     const index = this.currentPage?.items.indexOf($event.item as ActivityPageCommand);
     if (index) this.currentPage?.items.splice(index, 1);
-    this.updateButtonsGrid();
+    this.getGridPageItems(this.currentPage, true);
+    this.cdr.detectChanges();
   }
 
   gridSourceSelected($event: ActivityGridItemComponent) {
@@ -193,13 +245,7 @@ export class ActivityGridComponent implements AfterViewInit {
   }
 
   gridDestinationSelected($event: ActivityGridItemComponent) {
-    this.updateButtonsGrid();
-    this.cdr.detectChanges();
-  }
-
-  updateButtonsGrid()
-  {
-    this.gridCommands = this.getGridItems();
+    this.getGridPageItems(this.currentPage, true);
     this.cdr.detectChanges();
   }
 
@@ -247,7 +293,7 @@ export class ActivityGridComponent implements AfterViewInit {
       width: $event.item.size.width, height: $event.item.size.height};
     this.currentPage?.items.push({location: {x: position.x, y: position.y},
       size: {width: 1, height: 1}, type: "text", text:"New command", command: {cmd_id: "", entity_id: ""}});
-    this.updateButtonsGrid();
+    this.getGridPageItems(this.currentPage, true);
     this.cdr.detectChanges();
     const targetGridItem = this.gridButtons?.find(gridButton =>
       gridButton.item?.location.x == position.x && gridButton.item?.location.y == position.y)
@@ -257,9 +303,9 @@ export class ActivityGridComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  getGridItemStyleSize(item: ActivityPageCommand | null): any {
-    const width = this.currentPage?.grid.width;
-    const height = this.currentPage?.grid.height;
+  getGridItemStyleSize(page: UIPage, item: ActivityPageCommand | null): any {
+    const width = page?.grid.width;
+    const height = page?.grid.height;
     const itemWidth = item?.size?.width ? item!.size.width : 1;
     const itemHeight = item?.size?.height ? item!.size.height : 1;
     if (!width || !height) return {};
@@ -275,13 +321,65 @@ export class ActivityGridComponent implements AfterViewInit {
     return style;
   }
 
-  getGridItemSize(item: ActivityPageCommand | null): {width: number; height: number} {
-    const width = this.currentPage?.grid.width;
-    const height = this.currentPage?.grid.height;
+  getGridItemSize(page: UIPage, item: ActivityPageCommand | null): {width: number; height: number} {
+    const width = page?.grid.width;
+    const height = page?.grid.height;
     const itemWidth = item?.size?.width ? item!.size.width : 1;
     const itemHeight = item?.size?.height ? item!.size.height : 1;
     if (!width || !height) return {width: 0, height: 0};
     return  {width: (itemWidth*this.width/width), height: (itemHeight!*this.height/height)};
   }
 
+  mouseDownUIPages($event: MouseEvent) {
+    if (!this.currentPage) return;
+    const index = this.activity?.options?.user_interface?.pages?.indexOf(this.currentPage);
+    if (index == undefined || index == -1) return;
+    this.swipeInfo = {
+      initialUiContainerPosition: this.width*index,
+      uiClientX: $event.clientX,
+      mousePressed: true,
+      uiContainerPosition: -this.width*index
+    }
+    $event.preventDefault();
+  }
+
+  mouseUpUIPages($event: MouseEvent) {
+
+  }
+
+  mouseMoveUIPages($event: MouseEvent) {
+    if (!this.swipeInfo.mousePressed || !this.uiCollection) return;
+    $event.preventDefault();
+    this.swipeInfo.uiContainerPosition = this.swipeInfo.initialUiContainerPosition+(this.swipeInfo.uiClientX - $event.clientX)*2;
+    this.uiCollection.nativeElement.setAttribute("style", `transform: translate3d(-${this.swipeInfo.uiContainerPosition}px, 0px, 0px`);
+    this.cdr.detectChanges();
+  }
+
+  switchCurrentPage()
+  {
+    let index = Math.round(Math.abs(this.swipeInfo.uiContainerPosition/this.width));
+    if (this.activity?.options?.user_interface?.pages && index >= this.activity.options.user_interface.pages.length)
+      index = this.activity.options?.user_interface?.pages.length - 1;
+    if (index < 0) index = 0;
+    if (!this.activity?.options?.user_interface?.pages?.[index]) return;
+    this.currentPage = this.activity.options.user_interface.pages[index];
+    if (this.uiCollection)
+      this.uiCollection.nativeElement.setAttribute("style", `transform: translate3d(-${index*100}%, 0px, 0px`);
+    this.onPageChange.emit(index);
+    this.cdr.detectChanges();
+  }
+
+  @HostListener('window:mouseup', ['$event'])
+  onMouseUp($event: MouseEvent) {
+    this.swipeInfo.mousePressed= false;
+    this.switchCurrentPage();
+    this.cdr.detectChanges();
+  }
+
+  @HostListener('touchend', ['$event'])
+  onTouchUp($event: TouchEvent) {
+    this.swipeInfo.mousePressed= false;
+    this.switchCurrentPage();
+    this.cdr.detectChanges();
+  }
 }

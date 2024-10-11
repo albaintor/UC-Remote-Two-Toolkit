@@ -1,3 +1,6 @@
-<div #griditem [class]="getClass()" [draggable]="editable && !selectionMode" [attr.aria-rowIndex]="getIndex()">
+<div #griditem [class]="getClass()" [draggable]="isDraggable()" [attr.aria-rowIndex]="getIndex()"
+  (dragstart)="handleDragStart($event)" (click)="onClick($event)" (dragover)="handleDragOver($event)"
+  (dragenter)="handleDragEnter($event)" (dragleave)="handleDragLeave($event)" (drop)="handleDrop($event)"
+  (dragend)="handleDragEnd($event)">
 <ng-content></ng-content>
 </div>

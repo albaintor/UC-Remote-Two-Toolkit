@@ -91,11 +91,11 @@
 </div>
 </p-toolbar>
 <div class="flex align-content-left flex-wrap gap-3">
-  <ng-container *ngIf="currentPage">
+  <ng-container *ngIf="activity?.options?.user_interface?.pages">
   <br>
     <div class="flex-grow-1 flex-column">
       <div class="flex align-items-center justify-content-center">
-        <div class="flex-none" *ngIf="editMode">
+        <div class="flex-none" *ngIf="editMode && currentPage">
           <div class="flex-column">
             <div class="flex align-items-center justify-content-center">
               <b>Page name</b>
@@ -106,7 +106,7 @@
         <div class="flex-grow-1">
           <p-paginator (onPageChange)="onPageChange($event)" [first]="firstPage" [rows]="1" [totalRecords]="activity?.options?.user_interface?.pages?.length"></p-paginator>
         </div>
-        <div class="flex-none" *ngIf="editMode">
+        <div class="flex-none" *ngIf="editMode && currentPage">
           <div class="flex-column">
             <div class="flex align-items-center justify-content-center">
               Grid size
@@ -122,8 +122,10 @@
           </div>
           </div>
       </div>
-      <app-activity-grid #activityGrid *ngIf="toggleGrid" [remote]="remote" [activity]="activity" [currentPage]="currentPage" [selectionMode]="selectionMode"
-                         [width]="gridPixelWidth" [height]="gridPixelHeight"  [editMode]="editMode"/>
+      <div class="flex align-items-center justify-content-center" style="width: 100%">
+        <app-activity-grid [remote]="remote" [activity]="activity" [currentPage]="currentPage" [selectionMode]="selectionMode"
+                           [width]="gridPixelWidth" [height]="gridPixelHeight"  [editMode]="editMode"  [style]="'width: '+gridPixelWidth+'px'"/>
+      </div>
     </div>
   </ng-container>
   <ng-container *ngIf="editMode">

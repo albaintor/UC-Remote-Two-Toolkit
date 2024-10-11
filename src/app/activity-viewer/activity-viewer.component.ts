@@ -134,7 +134,6 @@ export class ActivityViewerComponent  {
   gridPixelWidth = 4*185;
   gridPixelHeight = 6*185;
   protected readonly Helper = Helper;
-  toggleGrid = true;
   selectionMode = false;
   selection: ActivityGridItemComponent[] = [];
   includedEntity: Entity | undefined;
@@ -187,7 +186,7 @@ export class ActivityViewerComponent  {
 
   updateButtonsGrid()
   {
-    this.activityGrid?.updateButtonsGrid();
+    this.activityGrid?.updateCurrentPage();
     this.updateButtons();
     this.updateCurrentPage();
     this.cdr.detectChanges();
@@ -200,14 +199,11 @@ export class ActivityViewerComponent  {
 
   updateCurrentPage()
   {
-    if (this.activityGrid?.gridCommands)
-      this.gridSizeMin = Helper.getGridMinSize(this.activityGrid!.gridCommands);
+    if (this.activityGrid?.currentPage)
+      this.gridSizeMin = Helper.getGridMinSize(this.activityGrid!.getGridPageItems(this.activityGrid?.currentPage));
   }
 
   onPageChange($event: PaginatorState) {
-    this.toggleGrid = false;
-    this.cdr.detectChanges();
-    this.toggleGrid = true;
     this.firstPage = $event.page as number;
     this.currentPage = this.activity?.options?.user_interface?.pages?.[$event.page!];
     this.updateButtonsGrid();

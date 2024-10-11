@@ -47,3 +47,25 @@
   width: unset;
   height: unset
 }
+
+.ui-pages-container
+{
+  width: 100%;
+  overflow: hidden;
+}
+
+.ui-pages-collection
+{
+  display: flex;
+  flex-direction: row;
+  transition: all 1s ease;
+}
+
+.ui-page-item
+{
+  flex: 1 0 100%;
+}
+
+.swipe {
+  cursor: grab;
+}

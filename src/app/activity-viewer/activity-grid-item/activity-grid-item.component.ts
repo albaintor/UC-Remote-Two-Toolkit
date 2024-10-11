@@ -4,12 +4,11 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  HostListener,
   Input,
   Output,
   ViewChild
 } from '@angular/core';
-import {Activity, ActivityPageCommand} from "../../interfaces";
+import {ActivityPageCommand} from "../../interfaces";
 import {Helper} from "../../helper";
 
 export interface GridItem
@@ -28,13 +27,21 @@ export interface GridItem
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ActivityGridItemComponent implements AfterViewInit{
-  // @Input() items: HTMLElement[];
-  @Input() editable: boolean = true;
+  editable: boolean = true;
+  @Input("editable") set _editable(editable: boolean)
+  {
+    this.editable = editable;
+    this.initView();
+  }
   @Input({required: true}) source: ActivityGridItemComponent | undefined;
   @Input() item!: ActivityPageCommand;
-  // @Input() index!: number;
   @Input() gridCommands: ActivityPageCommand[] = [];
-  @Input() selectionMode: boolean = false;
+  selectionMode: boolean = false;
+  @Input("selectionMode") set _selectionMode(selectionMode: boolean)
+  {
+    this.selectionMode = selectionMode;
+    this.initView();
+  }
   @Input() runMode: boolean = false;
   selected = false;
   @Input('selected') set _selected(value: boolean | undefined) {
@@ -47,7 +54,7 @@ export class ActivityGridItemComponent implements AfterViewInit{
   @ViewChild("griditem", {static: false}) gridItem: ElementRef | undefined;
   @Input() grid!: { width: number; height: number };
 
-  constructor(private cdr:ChangeDetectorRef) {
+  constructor(private cdr:ChangeDetectorRef, private elRef: ElementRef) {
   }
 
   getIndex(): number
@@ -57,10 +64,16 @@ export class ActivityGridItemComponent implements AfterViewInit{
   }
 
   ngAfterViewInit(): void {
-    if (!this.editable && !this.selectionMode) return;
+    this.initView();
+  }
+
+  initView(): void {
     for (let i = 0; i < this.gridItem?.nativeElement.children?.length; i++) {
       let child = this.gridItem?.nativeElement.children[i];
-      child.style['pointer-events'] = 'none';
+      if (!this.editable && !this.selectionMode)
+        child.style['pointer-events'] = 'auto';
+      else
+        child.style['pointer-events'] = 'none';
     }
     this.cdr.detectChanges();
   }
@@ -82,7 +95,12 @@ export class ActivityGridItemComponent implements AfterViewInit{
     return 'grid-item';
   }
 
-  @HostListener('click', ['$event']) onClick(event: any) {
+  isDraggable()
+  {
+    return this.editable && !this.selectionMode && !Helper.isEmptyItem(this.item);
+  }
+
+  onClick(event: MouseEvent) {
     if (this.selectionMode) {
       if (Helper.isEmptyItem(this.item)) return;
       this.selected = !this.selected;
@@ -100,20 +118,23 @@ export class ActivityGridItemComponent implements AfterViewInit{
     this.cdr.detectChanges();
   }
 
-  @HostListener('dragstart', ['$event']) handleDragStart(event: any){
+  handleDragStart(event: DragEvent){
     if (!this.editable || Helper.isEmptyItem(this.item)) {
+      event.preventDefault();
       event.stopPropagation();
       this.cdr.detectChanges();
       return false;
     }
     this.gridItem!.nativeElement.style.opacity = '0.4';
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/html', this.gridItem!.nativeElement.innerHTML);
+    if (event.dataTransfer)
+    {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/html', this.gridItem!.nativeElement.innerHTML);
+    }
     this.sourceSelected.emit(this);
     this.cdr.detectChanges();
     return true;
   }
-
 
   checkDraggableDestination(): boolean
   {
@@ -127,41 +148,50 @@ export class ActivityGridItemComponent implements AfterViewInit{
       this.source.item.size.width, this.source.item.size.height);
   }
 
-
-  @HostListener('dragover', ['$event']) handleDragOver(event: any){
-    if (!this.source) return false;
+  handleDragOver(event: DragEvent){
+    if (!this.source || this.source == this) return false;
     if (!this.checkDraggableDestination()) return;
-    if (event.preventDefault) {
-      event.preventDefault();
-    }
-    event.dataTransfer.dropEffect = 'move';
+    if (event.dataTransfer)
+      event.dataTransfer.dropEffect = 'move';
+    event.stopPropagation();
+    event.preventDefault();
     this.cdr.detectChanges();
     return;
   }
 
-  @HostListener('dragenter', ['$event']) handleDragEnter(event: any) {
+  handleDragEnter(event: DragEvent) {
     if (!this.editable || !this.source || this.source == this) return;
     if (!this.checkDraggableDestination()) return;
     this.cdr.detectChanges();
     this.gridItem!.nativeElement.classList.add('over');
+    event.stopPropagation();
     event.preventDefault();
     this.cdr.detectChanges();
   }
 
-  @HostListener('dragleave', ['$event']) handleDragLeave(event:any) {
+  handleDragLeave(event:DragEvent) {
     if (!this.editable) return;
     this.gridItem!.nativeElement.classList.remove('over');
     this.cdr.detectChanges();
   }
 
-  @HostListener('drop', ['$event']) handleDrop(event:any) {
-    if (event.stopPropagation) {
-      event.stopPropagation(); // stops the browser from redirecting.
-    }
+  invertElements(c1:  ActivityGridItemComponent, c2:  ActivityGridItemComponent)
+  {
+    let dummy = document.createElement("span")
+    c1.elRef.nativeElement.before(dummy);
+    c2.elRef.nativeElement.before(c1.elRef.nativeElement);
+    dummy.replaceWith(c2.elRef.nativeElement);
+  }
+
+  handleDrop(event:DragEvent) {
+    event.stopPropagation(); // stops the browser from redirecting.
+
     if (!this.editable) return;
     if (this.source?.gridItem && this.source.gridItem != this.gridItem) {
-      /*this.source.gridItem.nativeElement.innerHTML = this.gridItem!.nativeElement.innerHTML;
-      this.gridItem!.nativeElement.innerHTML = event.dataTransfer.getData('text/html');*/
+      // this.source.gridItem.nativeElement.innerHTML = this.gridItem!.nativeElement.innerHTML;
+      // this.gridItem!.nativeElement.innerHTML = event.dataTransfer?.getData('text/html');
+      this.invertElements(this.source, this);
+
       this.gridItem!.nativeElement.classList.remove('over');
       console.log(`Drop ${this.source.item.location.x} ${this.source.item.location.y} => ${this.item.location.x} ${this.item.location.y}`, event);
       const x = this.item.location.x;
@@ -175,7 +205,7 @@ export class ActivityGridItemComponent implements AfterViewInit{
     return false;
   }
 
-  @HostListener('dragend', ['$event']) handleDragEnd(event:any) {
+  handleDragEnd(event:any) {
     this.gridItem!.nativeElement.style.opacity = '1';
     this.gridItem!.nativeElement.classList.remove('over');
     this.cdr.detectChanges();

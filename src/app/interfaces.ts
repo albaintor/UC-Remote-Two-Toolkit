@@ -117,7 +117,8 @@ export interface RemoteOperation
 export interface RemoteOperationResultField
 {
   fieldName: string;
-  keyName: string;
+  keyName?: string;
+  contentKey?: string;
   linkedOperation: RemoteOperation;
 }
 
@@ -278,6 +279,7 @@ export interface Profile
   filename?: string;
   foldername?: string;
   groups?: ProfileGroup[];
+  restricted?: boolean;
 }
 
 export interface PageItem {
@@ -288,6 +290,7 @@ export interface PageItem {
 
 export interface Page {
   page_id: string;
+  profile_id: string;
   name: string;
   image?: string;
   pos: number;

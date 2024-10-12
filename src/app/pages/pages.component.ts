@@ -2,12 +2,22 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   OnInit,
   ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import {MenuItem, MessageService, PrimeTemplate} from "primeng/api";
-import {Entity, Page, Profile, Remote, RemoteData, RemoteOperation} from "../interfaces";
+import {
+  Entity,
+  OperationStatus,
+  Page,
+  Profile,
+  Remote,
+  RemoteData,
+  RemoteOperation,
+  RemoteOperationResultField
+} from "../interfaces";
 import {Button} from "primeng/button";
 import {DropdownModule} from "primeng/dropdown";
 import {InputNumberModule} from "primeng/inputnumber";
@@ -27,6 +37,7 @@ import {DialogModule} from "primeng/dialog";
 import {InputTextModule} from "primeng/inputtext";
 import {TagModule} from "primeng/tag";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
+import {saveAs} from "file-saver-es";
 
 interface ModifiedPages {
   profile: Profile;
@@ -68,6 +79,7 @@ export class PagesComponent implements OnInit {
   menuItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
     {label: 'Save pages to remote', command: () => this.updateRemote(), icon: 'pi pi-cloud-upload'},
+    {label: 'Restore profile to remote', command: () => this.input_file?.nativeElement.click(), icon: 'pi pi-upload'},
   ]
   selectedRemote: Remote | undefined;
   remotes: Remote[] | undefined;
@@ -79,6 +91,7 @@ export class PagesComponent implements OnInit {
   progress = false;
   modifiedProfiles: ModifiedPages[] = [];
   @ViewChild(RemoteDataLoaderComponent) remoteLoader: RemoteDataLoaderComponent | undefined;
+  @ViewChild("input_file", {static: false}) input_file: ElementRef | undefined;
   showOperations = false;
   remoteOperations: RemoteOperation[] = [];
 
@@ -136,6 +149,8 @@ export class PagesComponent implements OnInit {
       this.entities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
       this.blockedMenu = false;
       this.progress = false;
+      this.remoteOperations = [];
+      this.modifiedProfiles = [];
       this.cdr.detectChanges();
     }
   }
@@ -177,7 +192,7 @@ export class PagesComponent implements OnInit {
     this.remoteOperations = [];
     this.modifiedProfiles.forEach(item => {
       if (!item.page.items) item.page.items = [];
-      this.remoteOperations.push({
+      this.remoteOperations.push({status: OperationStatus.Todo,
        message: `Update page ${item.page.name} from profile ${item.profile.name}`,
        method: "PATCH",
        api: `/api/profiles/${item.profile.profile_id}/pages/${item.page.page_id}`,
@@ -203,5 +218,130 @@ export class PagesComponent implements OnInit {
   operationsDone($event: RemoteOperation[]) {
     this.messageService.add({severity: "success", summary: "Pages updated", key: "pages"});
     this.cdr.detectChanges();
+  }
+
+  saveProfile(profile: Profile) {
+    if (!profile) return;
+    saveAs(new Blob([JSON.stringify(profile)], {type: "text/plain;charset=utf-8"}),
+      `profile_${profile.name}.json`);
+  }
+
+  setProfile(profile: Profile)
+  {
+    this.blockedMenu = true;
+    this.progress = true;
+    this.cdr.detectChanges();
+    this.remoteLoader?.loadRemoteData().subscribe(results => {
+      this.blockedMenu = false;
+      this.progress = false;
+      this.cdr.detectChanges();
+      if (!results) {
+        this.messageService.add({severity: "error", summary: "Unable to retrieve remote data", key: "pages", sticky: true});
+        this.cdr.detectChanges();
+        return;
+      }
+      this.profiles =results.profiles;
+      const existing = this.profiles.find(entry => entry.profile_id === profile.profile_id);
+      if (existing)
+      {
+        this.profiles.splice(this.profiles.indexOf(existing), 1);
+        this.profiles.push(profile);
+        this.cdr.detectChanges();
+      }
+      this.remoteOperations = [];
+      const mappedGroup: RemoteOperationResultField[] = [];
+      if (existing) {
+        if (existing.pages && existing.pages?.length > 0)
+          this.remoteOperations.push({ status: OperationStatus.Todo,
+            message: `Delete pages from existing profile ${profile.name}`,
+            method: "DELETE",
+            api: `/api/profiles/${profile.profile_id}/pages`,
+            body: {}});
+
+        if (existing.groups && existing.groups?.length > 0)
+          this.remoteOperations.push({status: OperationStatus.Todo,
+            message: `Delete groups from existing profile ${profile.name}`,
+            method: "DELETE",
+            api: `/api/profiles/${profile.profile_id}/groups`,
+            body: {}});
+
+        profile.groups?.forEach(group => {
+          const body = {...group};
+          delete (body as any).group_id;
+          // delete (body as any).profile_id;
+          const operation: RemoteOperation = {status: OperationStatus.Todo,
+            message: `Add group ${group.name}`,
+            method: "POST",
+            api: `/api/profiles/${profile.profile_id}/group`,
+            body};
+          this.remoteOperations.push(operation);
+          mappedGroup.push({fieldName: "group_id", contentKey: group.group_id, linkedOperation: operation});
+        });
+
+        profile.pages.forEach(page => {
+          const body = {...page};
+          delete (body as any).page_id;
+          // delete (body as any).profile_id;
+          this.remoteOperations.push({status: OperationStatus.Todo,
+            message: `Add page ${page.name}`,
+            method: "POST",
+            api: `/api/profiles/${profile.profile_id}/pages`,
+            body, resultFields: mappedGroup});
+        });
+      }
+      else {
+        const createProfileoperation: RemoteOperation = {status: OperationStatus.Todo,
+          message: `Create new profile ${profile.name}`,
+          method: "POST",
+          api: `/api/profiles/`,
+          body: {
+            name: profile.name,
+            restricted: profile.restricted
+          }};
+        this.remoteOperations.push(createProfileoperation);
+
+        profile.groups?.forEach(group => {
+          const body = {...group};
+          delete (body as any).group_id;
+          delete (body as any).profile_id;
+          group.profile_id = "<PROFILE_ID>";
+          const operation: RemoteOperation = {status: OperationStatus.Todo,
+            message: `Add group ${group.name}`,
+            method: "POST",
+            api: `/api/profiles/${profile.profile_id}/group`,
+            body,
+            resultFields: [{fieldName: "profile_id", linkedOperation: createProfileoperation, keyName: "<PROFILE_ID>"}],};
+          this.remoteOperations.push(operation);
+          mappedGroup.push({fieldName: "group_id", contentKey: group.group_id, linkedOperation: operation});
+        });
+
+        profile.pages.forEach(page => {
+          const body = {...page};
+          delete (body as any).page_id;
+          delete (body as any).profile_id;
+          page.profile_id = "<PROFILE_ID>";
+          this.remoteOperations.push({status: OperationStatus.Todo,
+            message: `Add page ${page.name}`,
+            method: "POST",
+            api: `/api/profiles/${profile.profile_id}/pages`,
+            body, resultFields: [...mappedGroup,
+              {fieldName: "profile_id", linkedOperation: createProfileoperation, keyName: "<PROFILE_ID>"}]});
+        });
+      }
+      this.showOperations = true;
+    })
+  }
+
+  loadInputFile($event: Event) {
+    const file = ($event.target as any)?.files?.[0];
+    let fileReader = new FileReader();
+    fileReader.onload = (e) => {
+      if (fileReader.result){
+        const profile: Profile = JSON.parse(fileReader.result.toString());
+        this.setProfile(profile);
+        this.cdr.detectChanges();
+      }
+    }
+    fileReader.readAsText(file);
   }
 }

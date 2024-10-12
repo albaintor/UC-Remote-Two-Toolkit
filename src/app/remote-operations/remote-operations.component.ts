@@ -155,7 +155,12 @@ export class RemoteOperationsComponent {
     operation.resultFields.forEach(resultField => {
       if (!resultField.linkedOperation.results) return;
       const value = resultField.linkedOperation.results[resultField.fieldName];
-      operation.api = operation.api.replace(resultField.keyName, value);
+      if (resultField.keyName)
+        operation.api = operation.api.replace(resultField.keyName, value);
+      if (resultField.contentKey && operation.body)
+      {
+        operation.body = JSON.parse(JSON.stringify(operation.body).replace(resultField.contentKey, value));
+      }
     });
     this.cdr.detectChanges();
   }

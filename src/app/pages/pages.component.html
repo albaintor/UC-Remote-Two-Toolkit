@@ -25,7 +25,11 @@
 </ng-container>
 <app-remote-data-loader #loader [remote]="selectedRemote" (loaded)="remoteLoaded($event)"></app-remote-data-loader>
 <ng-container *ngFor="let profile of profiles">
-  <h3>Profile {{profile.name}}</h3>
+  <div class="flex flex-wrap gap-2 align-items-center">
+    <h3>Profile {{profile.name}}</h3>
+    <p-button label="Save profile" (onClick)="saveProfile(profile)" severity="success" icon="pi pi-save" size="small"
+      pTooltip="Save this profile &quot;{{profile.name}}&quot; to disk"></p-button>
+  </div>
   <ng-container *ngIf="editable">
     <div class="flex flex-wrap gap-4" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="drop($event, profile)">
       <app-page *ngFor="let page of profile.pages" [remote]="selectedRemote" [editable]="editable"
@@ -40,6 +44,6 @@
     </div>
   </ng-container>
 </ng-container>
-
+<input #input_file type="file" style="display:none" (change)="loadInputFile($event)">
 <app-remote-operations #operations [operations]="remoteOperations" [remote]="selectedRemote"
    [(visible)]="showOperations" (operationsDone)="operationsDone($event)"></app-remote-operations>

@@ -1,0 +1,68 @@
+<div style="position: relative">
+  <ng-container *ngIf="page">
+    <p-button class="list-page-delete smaller-button" [rounded]="true" (onClick)="deletePage($event)" severity="danger" icon="pi pi-times" size="small"
+              [pTooltip]="'Delete this page '+page.name" *ngIf="editable"></p-button>
+    <p-button class="list-item-add smaller-button" [rounded]="true" (onClick)="addCommand($event)" severity="info" icon="pi pi-plus" size="small"
+              [pTooltip]="'Add a command to page '+page.name" *ngIf="editable"></p-button>
+    <p-orderList
+      [value]="page.items"
+      [listStyle]="{ 'max-height': '30rem' }"
+      [header]="'Page '+page.name"
+      [dragdrop]="editable" [stripedRows]="true" (onReorder)="updateItems($event)">
+      <ng-template let-item pTemplate="item">
+        <div class="flex flex-wrap p-2 align-items-center gap-3">
+          <i *ngIf="editable" class="pi pi-bars"></i>
+          <ng-container *ngIf="item.entity_id">
+            <app-icon [remote]="remote" [icon]="getEntity(item.entity_id)?.icon" [size]="50" [fontSize]="55" />
+            <span class="font-bold">{{ Helper.getEntityName(getEntity(item.entity_id)) }}</span>
+          </ng-container>
+          <ng-container *ngIf="item.group_id">
+            <app-expandable-content [collapsed]="true" [content]="groupContent" [collapsedTitle]="collapsedTitle">
+              <ng-template #groupContent>
+                <div class="flex flex-column">
+                  <div class="flex" *ngFor="let groupEntity of getGroupEntities(item.group_id)">
+                    <app-icon *ngIf="groupEntity" [remote]="remote" [icon]="groupEntity?.icon" [size]="50" [fontSize]="55" />
+                    <span class="font-bold">{{ Helper.getEntityName(groupEntity) }}</span>
+                  </div>
+                </div>
+              </ng-template>
+              <ng-template #collapsedTitle>
+                <div class="flex align-items-center" style="width:100%;max-height:100%">
+                  <app-icon *ngIf="getGroup(item.group_id)?.icon" [remote]="remote" [icon]="getGroup(item.group_id)?.icon" [size]="30" [fontSize]="35" />
+                  <span class="font-bold">{{getGroup(item.group_id)?.name}}</span>
+                </div>
+              </ng-template>
+            </app-expandable-content>
+          </ng-container>
+          <div *ngIf="editable" class="list-item-delete">
+            <p-button class="smaller-button" [rounded]="true" (click)="deleteItem(item)" severity="danger" icon="pi pi-times" size="small"
+                      pTooltip="Remove this item"></p-button>
+          </div>
+        </div>
+      </ng-template>
+    </p-orderList>
+  </ng-container>
+</div>
+
+<p-dialog #addPageItem [modal]="true" position="center" [draggable]="true" appendTo="body" [(visible)]="showAddPageItem"
+  [style]="{'width': '600px'}">
+  <ng-template pTemplate="header">
+    <div class="flex align-items-start justify-content-center">
+      <h3>Add entity to page {{page?.name}}</h3>
+    </div>
+  </ng-template>
+  <div class="flex flex-column gap-3" style="width: 100%">
+    <div class="flex flex-wrap align-items-center gap-1" style="width: 100%">
+      <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntities($event)" appendTo="body"
+                      [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}"  panelStyleClass="autocomplete-panel-custom" optionLabel="entity_id"
+                      pTooltip="Add entity" class="autocomplete">
+        <ng-template let-item pTemplate="item">
+          <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+    <div class="flex flex-wrap gap-3 align-items-center">
+      <p-button icon="pi pi-save" pTooltip="Add item" label="Add item" (click)="addItem($event)"/>
+    </div>
+  </div>
+</p-dialog>

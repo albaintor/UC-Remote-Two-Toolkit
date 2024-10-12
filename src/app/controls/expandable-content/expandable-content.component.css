@@ -1,0 +1,55 @@
+.collapse-arrow
+{
+  cursor: pointer;
+  transition: all 1s ease-in-out;
+}
+
+.container {
+  max-height: 0;
+  transition-property: max-height;
+  overflow: hidden;
+  -webkit-transition-property: max-height;
+  transition-delay: 1s;
+  -webkit-transition-delay: 1s;
+}
+
+.container .content{
+  z-index:5;
+  transform:translateY(-100%);
+  -webkit-transform:translateY(-100%);
+  transition:transform 1s;
+  -webkit-transition:transform 1s;
+}
+
+.container.expanded {
+  max-height:9999px; /*apparently "none" doesnt work*/
+  transition-delay: 0s;
+  -webkit-transition-delay: 0s;
+}
+.container.expanded .content {
+  transform:translateY(0);
+  -webkit-transform:translateY(0);
+}
+
+.collapsed-title
+{
+  position: absolute;
+  visibility: visible;
+  opacity: 1;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+  height:100%;
+  margin-top: 3px;
+  margin-left: 10px;
+  transition: opacity 1s linear;
+  cursor: pointer;
+}
+
+.collapsed-title.expanded
+{
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 1s, opacity 1s linear;
+}

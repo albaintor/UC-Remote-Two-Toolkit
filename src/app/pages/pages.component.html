@@ -1,7 +1,10 @@
 <p-toast key="pages"/>
+<p-blockUI [blocked]="blockedMenu"/>
+<app-remote-data-loader #loader [remote]="selectedRemote" (loaded)="remoteLoaded($event)"></app-remote-data-loader>
 <p-menubar [model]="menuItems">
   <ng-template pTemplate="end">
     <div class="flex align-items-center gap-2">
+      <i>Work in progress</i>&nbsp;
       <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)"
                   class="smaller-dropdown">
         <ng-template pTemplate="selectedItem">
@@ -15,24 +18,28 @@
     </div>
   </ng-template>
 </p-menubar>
+<br>
+<ng-container *ngIf="modifiedProfiles.length > 0">
+  <div class="flex flex-wrap gap-2">Modified profiles : <p-tag *ngFor="let item of modifiedProfiles"
+                                                         [value]="item.profile.name+' page '+item.page.name"/></div>
+</ng-container>
 <app-remote-data-loader #loader [remote]="selectedRemote" (loaded)="remoteLoaded($event)"></app-remote-data-loader>
-<ul>
-  <li *ngFor="let profile of profiles">{{profile.name}}
-    <ul>
-      <li *ngFor="let page of profile.pages">{{page.name}}
-        <ul>
-          <li *ngFor="let item of page.items">
-            <ng-container *ngIf="item.entity_id">{{Helper.getEntityNameFromCatalog(item, entities)}}</ng-container>
-            <ng-container *ngIf="item.group_id">{{getGroup(item.group_id, profile).name}}
-              <ul>
-                <li *ngFor="let entity of getGroup(item.group_id, profile).entities">
-                  {{Helper.getEntityNameFromCatalog(entity, entities)}}
-                </li>
-              </ul>
-            </ng-container>
-          </li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-</ul>
+<ng-container *ngFor="let profile of profiles">
+  <h3>Profile {{profile.name}}</h3>
+  <ng-container *ngIf="editable">
+    <div class="flex flex-wrap gap-4" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="drop($event, profile)">
+      <app-page *ngFor="let page of profile.pages" [remote]="selectedRemote" [editable]="editable"
+                [entities]="entities" (onDeletePage)="deletePage($event, profile)" (onUpdate)="updatePage($event, profile)"
+                [page]="page" [profile]="profile" class="media-card-border" cdkDrag/>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="!editable">
+    <div class="flex flex-wrap gap-4">
+      <app-page *ngFor="let page of profile.pages" [remote]="selectedRemote" [editable]="editable"
+                [entities]="entities" [page]="page" [profile]="profile" class="media-card-border"/>
+    </div>
+  </ng-container>
+</ng-container>
+
+<app-remote-operations #operations [operations]="remoteOperations" [remote]="selectedRemote"
+   [(visible)]="showOperations" (operationsDone)="operationsDone($event)"></app-remote-operations>

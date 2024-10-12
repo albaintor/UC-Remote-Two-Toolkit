@@ -1,0 +1,60 @@
+div[class="p-orderlist-controls"] {
+  display: none !important;
+}
+
+.p-orderlist {
+  min-width: 350px;
+}
+
+.list-item-add {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+
+.list-page-delete {
+  position: absolute;
+  right: 55px;
+  top: 5px;
+}
+
+.smaller-button .p-component {
+  font-size: 0.5rem !important;
+}
+
+.smaller-button .p-button {
+  width: 2rem !important;
+  height: 2rem !important;
+  padding: 0;
+}
+
+.list-item-orphan {
+  position: absolute;
+  right: 15px;
+  top: 0;
+}
+
+.list-item-delete {
+  position: absolute;
+  right: 10px;
+  top: 30%;
+  padding-right: 10px;
+  padding-left: 80px;
+  opacity:0;
+  transition: visibility 0.1s linear,opacity 0.1s linear;
+}
+
+.list-item-delete:hover {
+  visibility: visible;
+  opacity:1;
+  cursor: pointer;
+}
+
+.autocomplete {
+  width: 100%;
+}
+
+.autocomplete-panel-custom{
+  height: 400px !important;
+  max-height: 600px !important;
+}

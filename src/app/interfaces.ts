@@ -280,18 +280,18 @@ export interface Profile
   groups?: ProfileGroup[];
 }
 
+export interface PageItem {
+  entity_id?: string;
+  group_id?: string;
+  pos: number;
+}
+
 export interface Page {
   page_id: string;
   name: string;
   image?: string;
-  position: number;
-  items?:[
-    {
-      entity_id?: string;
-      group_id?: string;
-      pos: number;
-    }
-  ]
+  pos: number;
+  items?:PageItem[];
 }
 
 export interface ActivityButtonUsage

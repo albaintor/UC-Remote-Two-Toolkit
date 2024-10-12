@@ -1,0 +1,31 @@
+.media-card-border {
+  position: relative;
+  transition: all 1s ease-in-out;
+}
+
+.media-card-border:hover {
+  cursor: move;
+}
+
+.cdk-drag-preview {
+  position: relative;
+  transition: none;
+  box-sizing: border-box;
+  box-shadow:  10px 5px 25px rgba(255, 255, 255, 0.5);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drop-list-dragging .cdk-drag {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}

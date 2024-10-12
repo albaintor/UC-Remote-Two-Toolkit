@@ -25,7 +25,7 @@ export class ServerService {
   private activities: Activity[] = [];
   private profiles: Profile[] = [];
   version$ = new Subject<RemoteVersion | undefined>();
-  entities$ = new Subject<Entity[]>();
+  entities$ = new BehaviorSubject<Entity[]>([]);
   activities$ = new Subject<Activity[]>();
   profiles$: Subject<Profile[]> = new Subject<Profile[]>();
   configCommands$ = new BehaviorSubject<EntityCommand[]>([]);

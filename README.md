@@ -26,6 +26,12 @@ Just download the package for your system and execute the binary :
 Then launch your browser to http://localhost:8000
 You can change the listening port by adding `--port <port number>` argument
 
+For docker image, you can configure an external directory on your PC to store the configuration and resources files (that you won't loose when you'll update the image).
+Just configure a mounting point and define `DATA_DIR` configuration variable to this mounting directory :
+<img width="50%" alt="Docker container settings" src="https://github.com/user-attachments/assets/38ef7141-c94f-43a1-80fa-b33ca5eaaab2">
+
+
+
 ## Usage
 
 ### First : register a remote

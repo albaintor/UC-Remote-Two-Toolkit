@@ -213,6 +213,7 @@ export class RemoteWebsocketService implements OnDestroy {
   {
     if (!this.remote) return;
     this.serverService.getRemotetEntity(this.remote, entity_id).subscribe(entity => {
+      console.debug("Add new entity for tracking", entity);
       let entityEntry = this._mediaEntities.find(item =>
         item.entity_id === entity.entity_id);
       if (!entityEntry) {

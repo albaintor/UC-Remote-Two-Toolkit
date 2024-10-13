@@ -125,7 +125,7 @@ export class ActiveEntitiesComponent implements OnInit {
       this.cdr.detectChanges();
     })
     this.remoteWebsocketService.onMediaStateChange().subscribe(remoteState => {
-      if (this.dashboardEntities)
+      if (this.dashboardEntities?.length > 0)
       {
         remoteState.forEach(mediaState => {
           if (this.mediaEntities.includes(mediaState)) return;

@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -94,7 +95,7 @@ export class AsPipe implements PipeTransform {
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class ActivityViewerComponent  {
+export class ActivityViewerComponent implements AfterViewInit {
   currentPage: UIPage | undefined;
   configEntityCommands: EntityCommand[] | undefined;
   gridSizeMin: { width: number; height: number } = {width: 1, height: 1};
@@ -140,6 +141,9 @@ export class ActivityViewerComponent  {
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private confirmationService: ConfirmationService) {
+  }
+
+  ngAfterViewInit(): void {
     const data = localStorage.getItem("remoteData");
     if (data) {
       const remoteData: RemoteData = JSON.parse(data);

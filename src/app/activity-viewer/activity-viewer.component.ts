@@ -459,6 +459,15 @@ export class ActivityViewerComponent  {
     this.onPageChange({page: this.activity?.options?.user_interface?.pages?.indexOf($event.page)})
   }
 
+  pageChanged($event: number)
+  {
+    this.firstPage = $event;
+    this.currentPage = this.activity?.options?.user_interface?.pages?.[$event];
+    this.updateButtonsGrid();
+    this.updateCurrentPage();
+    this.cdr.detectChanges();
+  }
+
   deleteIncludedEntity(entity: Entity, $event: MouseEvent) {
     this.confirmationService.confirm({
       target: $event.target as EventTarget,

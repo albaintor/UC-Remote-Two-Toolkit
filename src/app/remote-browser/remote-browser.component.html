@@ -7,7 +7,7 @@
 </div>
 <p-menubar #menubar [model]="items">
   <ng-template pTemplate="end">
-    <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
+    <p-dropdown class="smaller-dropdown" [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
       <ng-template pTemplate="selectedItem">
         <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
         <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>

@@ -3,7 +3,8 @@
   <ng-template pTemplate="header">
       <div class="flex justify-content-between flex-wrap gap-3 column-gap-4" style="width: 100%">
         <div class="flex align-items-center justify-content-center">
-          <p-button icon="pi pi-window-minimize" pTooltip="Minimize" (click)="minimized = !minimized"/>
+          <p-button icon="pi pi-window-minimize" [severity]="minimized ? 'secondary' : 'info'" class="smaller-button"
+                    pTooltip="Minimize" (click)="toggleMinimized()"/>
         </div>
         <div class="flex align-items-center overflow-hidden" style="max-width: 250px">
           <app-scrolling-text [text]="remoteWebsocketService.getMediaInfo()"/>

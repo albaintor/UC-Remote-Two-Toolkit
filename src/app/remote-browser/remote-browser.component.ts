@@ -143,8 +143,8 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       ]
     },
     {label: 'Synchronize', routerLink:'/activities/sync', icon: 'pi pi-sync'},
-    {label: 'Play Remote', routerLink:'/play', icon: 'pi pi-play'},
     {label: 'Edit pages', routerLink:'/pages/edit', icon: 'pi pi-pen-to-square'},
+    {label: 'Play Remote', routerLink:'/play', icon: 'pi pi-play'},
   ]
   entityUsages: EntityUsage | null | undefined;
   localMode = true;

@@ -9,6 +9,10 @@
   transition: width 1s ease-in-out, height 1s ease-in-out, opacity 0.5s ease;
 }
 
+.widget-header .p-dialog-header {
+  padding: 0.1rem !important;
+}
+
 .widget {
   padding: 0.1rem !important;
   transition: width 1s, height 1s;
@@ -26,4 +30,14 @@
   font-size: 1.4rem;
   font-weight: bold;
   color: #fbf100;
+}
+
+.smaller-button .p-component {
+  font-size: 0.5rem !important;
+}
+
+.smaller-button .p-button {
+  width: 2rem !important;
+  height: 2rem !important;
+  padding: 0;
 }

@@ -21,6 +21,9 @@ import {Activity, Remote, RemoteData} from "../interfaces";
 import {MediaEntityComponent} from "../active-entities/media-entity/media-entity.component";
 import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.component";
 
+interface WidgetConfiguration {
+  minimized: boolean;
+}
 
 @Component({
   selector: 'app-remote-widget',
@@ -59,6 +62,12 @@ export class RemoteWidgetComponent implements OnInit {
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    const data = localStorage.getItem("remote-widget");
+    if (data)
+    {
+      const widgetConfiguration: WidgetConfiguration = JSON.parse(data);
+      this.minimized = widgetConfiguration.minimized;
+    }
     const scale = localStorage.getItem("scale");
     if (scale) this.scale = Number.parseFloat(scale);
     this.remoteWebsocketService.onRemoteStateChange().subscribe(remoteState => {
@@ -117,5 +126,12 @@ export class RemoteWidgetComponent implements OnInit {
 
   changedMediaEntity($event: any) {
     this.remoteWebsocketService.mediaEntity = this.mediaEntity;
+  }
+
+  toggleMinimized() {
+    this.minimized = !this.minimized;
+    const widgetConfiguration: WidgetConfiguration = { minimized: this.minimized};
+    localStorage.setItem("remote-widget", JSON.stringify(widgetConfiguration));
+    this.cdr.detectChanges();
   }
 }

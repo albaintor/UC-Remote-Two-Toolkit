@@ -59,3 +59,8 @@ h2 {
   background: none;
   padding: 0;
 }
+
+.smaller-dropdown .p-inputtext
+{
+  font-size: 0.8rem;
+}

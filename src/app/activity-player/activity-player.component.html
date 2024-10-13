@@ -8,7 +8,8 @@
     <div [style]="'position: absolute;top:5px;left:0;right:0;transform-origin: top;scale:'+scale*1.2">
       <div class="flex justify-content-between gap-2 column-gap-2" style="width: 100%">
         <div class="flex align-items-center justify-content-center" >
-          <p-button icon="pi pi-window-minimize" pTooltip="Minimize" (click)="minimized = !minimized"/>
+          <p-button icon="pi pi-window-minimize" pTooltip="Minimize" (click)="minimized = !minimized"
+          [severity]="minimized ? 'secondary' : 'info'" class="smaller-button"/>
         </div>
         <div class="flex flex-grow-1">
           <app-icon *ngIf="remote && activity?.icon" [remote]="remote" [icon]="activity!.icon" [size]="50"

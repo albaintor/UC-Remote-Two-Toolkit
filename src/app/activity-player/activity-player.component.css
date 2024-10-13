@@ -30,3 +30,13 @@
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+.smaller-button .p-component {
+  font-size: 0.5rem !important;
+}
+
+.smaller-button .p-button {
+  width: 2rem !important;
+  height: 2rem !important;
+  padding: 0;
+}

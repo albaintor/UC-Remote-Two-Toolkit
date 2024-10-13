@@ -4,6 +4,10 @@
             size="small" pTooltip="Power toggle" severity="secondary"/>
   <p-button *ngIf="isPowerOn(mediaEntity)" icon="pi pi-power-off" [rounded]="true" (click)="powerToggle(mediaEntity)" size="small" pTooltip="Power toggle"/>
 </div>
+<div class="close-button" *ngIf="closable" [style]="'scale:'+scale">
+  <p-button icon="pi pi-times" [rounded]="true" (click)="closeEntity(mediaEntity)"
+            size="small" pTooltip="Close" severity="secondary"/>
+</div>
 <div class="flex-column" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url" style="width: 100%">
   <div class="flex align-content-center justify-content-center card-title" [style]="'text-align:center;scale:'+scale+';margin-left:'+(38*scale)+'px'">
     <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>

@@ -487,7 +487,26 @@ export class ActivityViewerComponent implements AfterViewInit {
         const index = this.activity?.options?.included_entities?.indexOf(entity);
         if (index && index >= 0)
             this.activity!.options!.included_entities!.splice(index, 1);
-          this.cdr.detectChanges();
+        this.activity!.options?.user_interface?.pages?.forEach(page => {
+          const items = page.items.filter(item =>
+            (item.command && (item.command as any)?.entity_id === entity.entity_id
+              || item.media_player_id && item.media_player_id === entity.entity_id));
+          items.forEach(item => {
+            page.items.splice(page.items.indexOf(item), 1);
+          })
+        });
+        this.activity.options?.button_mapping?.forEach(button => {
+          if (button?.short_press?.entity_id === entity.entity_id) delete button.short_press;
+          if (button?.long_press?.entity_id === entity.entity_id) delete button.long_press;
+          if (button?.double_press?.entity_id === entity.entity_id) delete button.double_press;
+        });
+        ['on', 'off'].forEach(type => {
+          const items = this.activity?.options?.sequences?.[type]?.filter(item => item.command && item.command.entity_id === entity.entity_id);
+          items?.forEach(item => {
+            this.activity?.options?.sequences?.[type]?.splice(this.activity?.options?.sequences?.[type].indexOf(item), 1);
+          })
+        })
+        this.cdr.detectChanges();
       },
       reject: () => {
         if (!this.activity?.options?.included_entities?.find(item => item.entity_id === entity.entity_id))

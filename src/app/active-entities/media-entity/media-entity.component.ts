@@ -44,6 +44,9 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
   @Input() remote: Remote | undefined;
   @Input() headerTemplate : TemplateRef<HTMLAreaElement> | undefined;
   @Input() scale = 1;
+  @Input() closable: boolean = false;
+  protected readonly Helper = Helper;
+
   textStyle = "font-size: 1.2rem";
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
@@ -205,5 +208,10 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
       cmd_id}).subscribe();
   }
 
-  protected readonly Helper = Helper;
+  closeEntity(mediaEntity: MediaEntityState) {
+    if (!this.mediaEntity) return;
+    const index = this.remoteWebsocketService.mediaEntities.indexOf(this.mediaEntity);
+    if (index && index > -1) this.remoteWebsocketService.mediaEntities.splice(index, 1);
+    this.cdr.detectChanges();
+  }
 }

@@ -69,7 +69,8 @@
   <div class="flex gap-2 align-content-center justify-content-center media-card-border"
        [style]="'width:'+(600*scale)+'px'" *ngFor="let mediaEntity of mediaEntities" cdkDrag>
     <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" [style]="'width:'+(600*scale)+'px'" [scale]="scale"
-                      class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"></app-media-entity>
+                      class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
+      [closable]="true"></app-media-entity>
   </div>
 </div>
 <app-activity-player *ngFor="let activity of selectedActivities" [remote]="selectedRemote" [activity]="activity" [visible]="true"

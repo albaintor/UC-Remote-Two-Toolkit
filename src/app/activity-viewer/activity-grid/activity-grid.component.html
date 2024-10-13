@@ -6,7 +6,8 @@
 
 <div class="ui-pages-container">
   <div #uiCollection class="ui-pages-collection" *ngIf="activity?.options?.user_interface?.pages" [style]="{'width': width+'px', 'height': height+'px'}"
-       (mousedown)="mouseDownUIPages($event)" (mousemove)="mouseMoveUIPages($event)" (mouseup)="mouseUpUIPages($event)">
+       (mousedown)="mouseDownUIPages($event)" (mousemove)="mouseMoveUIPages($event)" (mouseup)="mouseUpUIPages($event)"
+        (touchstart)="mouseDownUIPages($event)" (touchmove)="mouseMoveUIPages($event)" (touchend)="mouseUpUIPages($event)">
     <div class="ui-page-item" *ngFor="let page of activity!.options!.user_interface!.pages!">
       <div class="grid-container"
            [style]="{'grid-template-columns': 'auto '.repeat(page.grid.width), 'width': width+'px', 'height': height+'px'}">

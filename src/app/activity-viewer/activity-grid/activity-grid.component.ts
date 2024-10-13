@@ -330,27 +330,34 @@ export class ActivityGridComponent implements AfterViewInit {
     return  {width: (itemWidth*this.width/width), height: (itemHeight!*this.height/height)};
   }
 
-  mouseDownUIPages($event: MouseEvent) {
-    if (!this.currentPage) return;
+  mouseDownUIPages($event: MouseEvent | TouchEvent) {
+    if (!this.currentPage || !this.runMode) return;
+    let x = 0;
+    if ($event instanceof MouseEvent) x = $event.clientX;
+    else if ($event instanceof TouchEvent) x =$event.touches[0].clientX;
+
     const index = this.activity?.options?.user_interface?.pages?.indexOf(this.currentPage);
     if (index == undefined || index == -1) return;
     this.swipeInfo = {
       initialUiContainerPosition: this.width*index,
-      uiClientX: $event.clientX,
+      uiClientX: x,
       mousePressed: true,
       uiContainerPosition: -this.width*index
     }
     $event.preventDefault();
   }
 
-  mouseUpUIPages($event: MouseEvent) {
+  mouseUpUIPages($event: MouseEvent | TouchEvent) {
 
   }
 
-  mouseMoveUIPages($event: MouseEvent) {
-    if (!this.swipeInfo.mousePressed || !this.uiCollection) return;
+  mouseMoveUIPages($event: MouseEvent | TouchEvent) {
+    if (!this.swipeInfo.mousePressed || !this.uiCollection || !this.runMode) return;
     $event.preventDefault();
-    this.swipeInfo.uiContainerPosition = this.swipeInfo.initialUiContainerPosition+(this.swipeInfo.uiClientX - $event.clientX)*2;
+    let x = 0;
+    if ($event instanceof MouseEvent) x = $event.clientX;
+    else if ($event instanceof TouchEvent) x =$event.touches[0].clientX;
+    this.swipeInfo.uiContainerPosition = this.swipeInfo.initialUiContainerPosition+(this.swipeInfo.uiClientX - x)*2;
     this.uiCollection.nativeElement.setAttribute("style", `transform: translate3d(-${this.swipeInfo.uiContainerPosition}px, 0px, 0px`);
     this.cdr.detectChanges();
   }

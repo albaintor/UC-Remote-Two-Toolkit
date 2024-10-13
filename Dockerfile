@@ -110,9 +110,12 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
   && yarn --version \
   && rm -rf /tmp/*
 
+ARG UCTOOL_PORT=8000
+ARG DATA_DIR=/data
+ENV DATA_DIR=$DATA_DIR
+ENV UCTOOL_PORT=$UCTOOL_PORT
+
 ADD ./server /data
-#WORKDIR /data
 WORKDIR /data
-#RUN npm install
-EXPOSE 8000
-ENTRYPOINT ["/bin/sh", "-c", "cd /data;npm start"]
+EXPOSE $UCTOOL_PORT
+ENTRYPOINT ["/bin/sh", "-c", "cd /data;node app.js -p $UCTOOL_PORT"]

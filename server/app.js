@@ -19,8 +19,9 @@ import cors from 'cors';
 // import expressws from 'express-ws';
 
 let LISTEN_PORT = "8000";
-const UPLOAD_DIR = './uploads';
-const RESOURCES_DIR = './resources';
+const DATA_DIR = process.env.DATA_DIR || '.';
+const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
+const RESOURCES_DIR = path.join(DATA_DIR, 'resources');
 const app = express();
 // const expressWs = expressws(app);
 const storage = multer.diskStorage({

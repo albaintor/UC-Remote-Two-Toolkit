@@ -46,6 +46,7 @@ You can change the listening port by adding `--port <port number>` argument
 - `Import activity` : import an activity from a file after saving it to a (json format) file or from clipboard. Activities can be imported in another remote as long as the used entities are available. If the activity already exists, it will replace it, otherwise it will create it
 - `Backup & restore` : backup the remote to a file or restore it from a saved backup. Same functionality as in the web configurator
 - `Sync activities` : synchronize activties between 2 remotes
+- `Edit pages` : edit global UI pages (profiles with pages)
 - `Play remote` : dashboard of active entities, virtual remotes of activities
 
 Main page :
@@ -137,6 +138,18 @@ From the `Play Remote` link, you can :
 <img width="100%" alt="UI grid" src="https://github.com/user-attachments/assets/7078a8c3-040a-4bff-99f4-ce093e60843b">
 
 You can also reorganize the cards and save the view (list of cards and list of virtual remotes) to the cache of the navigator in order to reload it later.
+
+
+## Edit UI pages
+
+It is possible to edit UI pages from the `Edit pages` menu link.
+You can :
+- Reorder entities or groups within pages
+- Remove or add entities or groups to pages
+- Reorder pages within a given profile
+- Backup and restore a profile (with all pages and groups) to and from a file
+
+<img width="100%" alt="Edit UI pages" src="https://github.com/user-attachments/assets/6b62c105-2381-42e2-b837-d521b6e83542">
 
 
 ## Compilation

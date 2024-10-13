@@ -67,6 +67,9 @@ const TEMP_FOLDER = 'temp';
 const REMOTE_USER = 'web-configurator';
 let rc2Model = new RC2Model();
 
+// Against 304
+// app.disable('etag');
+
 app.get('/server/api', (req, res, next) => {
   let url = req.headers.destinationurl;
   let headers = {}
@@ -150,6 +153,7 @@ app.post('/server/api', (req, res, next) => {
     } catch (err) {
       console.error('Error parsing response', err, proxyres?.body);
     }
+    console.log('Proxy post answer', url, resBody);
     res.status(200).json(resBody);
   }).catch(error => {
     errorHandler(error, req, res, next);

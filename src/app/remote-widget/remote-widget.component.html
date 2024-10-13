@@ -25,9 +25,9 @@
     </div>
   </ng-template>
   <ng-container *ngIf="!minimized">
-    <ng-container *ngIf="mediaEntity && selectedRemote">
+    <ng-container *ngIf="mediaEntity && remote">
         <div class="flex gap-2 align-content-center justify-content-center" style="width: 100%">
-        <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote"
+        <app-media-entity [mediaEntity]="mediaEntity" [remote]="remote"
                           class="flex flex-wrap gap-2 align-content-center justify-content-center ng-star-inserted"
                           [headerTemplate]="entitySelector" [scale]="scale" style="width: 100%">
           <ng-template #entitySelector>

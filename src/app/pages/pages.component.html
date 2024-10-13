@@ -1,4 +1,5 @@
 <p-toast key="pages"/>
+<app-remote-widget [minimized]="true" [remote]="selectedRemote"/>
 <p-blockUI [blocked]="blockedMenu"/>
 <app-remote-data-loader #loader [remote]="selectedRemote" (loaded)="remoteLoaded($event)"></app-remote-data-loader>
 <p-menubar [model]="menuItems">

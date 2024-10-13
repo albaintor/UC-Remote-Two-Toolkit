@@ -296,32 +296,27 @@ export class ServerService {
 
   getRemoteProfiles(remote: Remote): Observable<Profile[]>
   {
-    const profiles: Profile[] = [];
-    let obs = this.http.get<Profile[]>(`/api/remote/${remote.address}/profiles`).pipe(
+    return this.http.get<Profile[]>(`/api/remote/${remote.address}/profiles`).pipe(
       mergeMap(profiles => {
-      return from(profiles);
-    }),
-      mergeMap(profile => {
-        return forkJoin([
-          this.http.get<Page[]>(`/api/remote/${remote.address}/profiles/${profile.profile_id}/pages`).pipe(map(pages => {
-            profile.pages = pages;
-          })),
-          this.http.get<ProfileGroup[]>(`/api/remote/${remote.address}/profiles/${profile.profile_id}/groups`).pipe(map(groups => {
-            profile.groups = groups;
-          })),
-        ]).pipe(map(groups => {
-          return profile;
+        console.log("Profiles", profiles);
+        return from(profiles).pipe(mergeMap(profile => {
+          return forkJoin([
+            this.http.get<Page[]>(`/api/remote/${remote.address}/profiles/${profile.profile_id}/pages`).pipe(map(pages => {
+              profile.pages = pages;
+            })),
+            this.http.get<ProfileGroup[]>(`/api/remote/${remote.address}/profiles/${profile.profile_id}/groups`).pipe(map(groups => {
+              profile.groups = groups;
+            })),
+          ]).pipe(map(groups => {
+            console.log("Update profile", profile);
+            return profiles;
+          }))
         }))
-      }),
-      map(profileData => {
-        profiles.push(profileData);
-        return profileData;
-      }))
-    return forkJoin([obs]).pipe(map(results => {
+      })).pipe(map(profiles => {
       this.profiles = profiles;
       this.profiles$.next(profiles);
-      return results;
-    }))
+      return profiles;
+    }));
   }
 
   getRemoteMacros(remote: Remote): Observable<Macro[]>

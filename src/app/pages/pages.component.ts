@@ -38,10 +38,20 @@ import {InputTextModule} from "primeng/inputtext";
 import {TagModule} from "primeng/tag";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
 import {saveAs} from "file-saver-es";
+import {RemoteWidgetComponent} from "../remote-widget/remote-widget.component";
+
+
+enum ModificationType {
+  ModifyPage,
+  DeletePage,
+  AddPage
+}
+
 
 interface ModifiedPages {
   profile: Profile;
   page: Page;
+  type: ModificationType;
 }
 
 @Component({
@@ -67,7 +77,8 @@ interface ModifiedPages {
     DialogModule,
     InputTextModule,
     TagModule,
-    RemoteOperationsComponent
+    RemoteOperationsComponent,
+    RemoteWidgetComponent
   ],
   templateUrl: './pages.component.html',
   styleUrl: './pages.component.css',
@@ -78,6 +89,7 @@ interface ModifiedPages {
 export class PagesComponent implements OnInit {
   menuItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
+    {label: 'Load Remote data', command: () => this.loadRemote(), icon: 'pi pi-cloud-download', block: true},
     {label: 'Save pages to remote', command: () => this.updateRemote(), icon: 'pi pi-cloud-upload'},
     {label: 'Restore profile to remote', command: () => this.input_file?.nativeElement.click(), icon: 'pi pi-upload'},
   ]
@@ -174,7 +186,7 @@ export class PagesComponent implements OnInit {
     const entry = this.modifiedProfiles.find(item => item.profile.profile_id === profile.profile_id
       && item.page.page_id === page.page_id);
     if (!entry) {
-      this.modifiedProfiles.push({profile, page});
+      this.modifiedProfiles.push({profile, page, type: ModificationType.ModifyPage});
       this.cdr.detectChanges();
     }
   }
@@ -183,7 +195,7 @@ export class PagesComponent implements OnInit {
     const index = profile.pages.indexOf($event);
     if (index && index > -1) {
       profile.pages.splice(index, 1);
-      this.updatePendingModifications(profile,$event);
+      this.modifiedProfiles.push({profile, page: $event, type: ModificationType.DeletePage});
       this.cdr.detectChanges();
     }
   }
@@ -191,6 +203,16 @@ export class PagesComponent implements OnInit {
   private updateRemote() {
     this.remoteOperations = [];
     this.modifiedProfiles.forEach(item => {
+      if (item.type === ModificationType.DeletePage)
+      {
+        this.remoteOperations.push({status: OperationStatus.Todo,
+          message: `Delete page ${item.page.name} from profile ${item.profile.name}`,
+          method: "DELETE",
+          api: `/api/profiles/${item.profile.profile_id}/pages/${item.page.page_id}`,
+          body: {}
+          });
+        return;
+      }
       if (!item.page.items) item.page.items = [];
       this.remoteOperations.push({status: OperationStatus.Todo,
        message: `Update page ${item.page.name} from profile ${item.profile.name}`,
@@ -207,6 +229,9 @@ export class PagesComponent implements OnInit {
     });
     if (this.remoteOperations.length > 0)
       this.showOperations = true;
+    else {
+      this.messageService.add({severity: "warn", summary: "No pending operations", key: "pages"});
+    }
     this.cdr.detectChanges();
   }
 
@@ -272,7 +297,7 @@ export class PagesComponent implements OnInit {
           const operation: RemoteOperation = {status: OperationStatus.Todo,
             message: `Add group ${group.name}`,
             method: "POST",
-            api: `/api/profiles/${profile.profile_id}/group`,
+            api: `/api/profiles/${profile.profile_id}/groups`,
             body};
           this.remoteOperations.push(operation);
           mappedGroup.push({fieldName: "group_id", contentKey: group.group_id, linkedOperation: operation});
@@ -293,7 +318,7 @@ export class PagesComponent implements OnInit {
         const createProfileoperation: RemoteOperation = {status: OperationStatus.Todo,
           message: `Create new profile ${profile.name}`,
           method: "POST",
-          api: `/api/profiles/`,
+          api: `/api/profiles`,
           body: {
             name: profile.name,
             restricted: profile.restricted
@@ -304,13 +329,15 @@ export class PagesComponent implements OnInit {
           const body = {...group};
           delete (body as any).group_id;
           delete (body as any).profile_id;
-          group.profile_id = "<PROFILE_ID>";
+          body.profile_id = "<PROFILE_ID>";
           const operation: RemoteOperation = {status: OperationStatus.Todo,
             message: `Add group ${group.name}`,
             method: "POST",
-            api: `/api/profiles/${profile.profile_id}/group`,
+            api: `/api/profiles/<PROFILE_ID>/groups`,
             body,
-            resultFields: [{fieldName: "profile_id", linkedOperation: createProfileoperation, keyName: "<PROFILE_ID>"}],};
+            resultFields: [{fieldName: "profile_id", linkedOperation: createProfileoperation, keyName: "<PROFILE_ID>"},
+              {fieldName: "profile_id", contentKey: '<PROFILE_ID>', linkedOperation: createProfileoperation}
+            ],};
           this.remoteOperations.push(operation);
           mappedGroup.push({fieldName: "group_id", contentKey: group.group_id, linkedOperation: operation});
         });
@@ -319,12 +346,13 @@ export class PagesComponent implements OnInit {
           const body = {...page};
           delete (body as any).page_id;
           delete (body as any).profile_id;
-          page.profile_id = "<PROFILE_ID>";
+          body.profile_id = "<PROFILE_ID>";
           this.remoteOperations.push({status: OperationStatus.Todo,
             message: `Add page ${page.name}`,
             method: "POST",
-            api: `/api/profiles/${profile.profile_id}/pages`,
+            api: `/api/profiles/<PROFILE_ID>/pages`,
             body, resultFields: [...mappedGroup,
+              {fieldName: "profile_id", contentKey: '<PROFILE_ID>', linkedOperation: createProfileoperation},
               {fieldName: "profile_id", linkedOperation: createProfileoperation, keyName: "<PROFILE_ID>"}]});
         });
       }
@@ -343,5 +371,26 @@ export class PagesComponent implements OnInit {
       }
     }
     fileReader.readAsText(file);
+  }
+
+  loadRemote()
+  {
+    if (!this.remoteLoader) return;
+    this.blockedMenu = true;
+    this.progress = true;
+    this.cdr.detectChanges();
+    this.remoteLoader.loadRemoteData().subscribe({next: value => {
+        this.blockedMenu = false;
+        this.progress = false;
+        // if (value?.profiles)
+        //   this.profiles = value.profiles;
+        this.cdr.detectChanges();
+      }, error: error => {
+        console.error("Error during remote extraction", error);
+        this.blockedMenu = false;
+        this.progress = false;
+        this.messageService.add({severity:'error', summary:'Error during remote extraction'});
+        this.cdr.detectChanges();
+      }});
   }
 }

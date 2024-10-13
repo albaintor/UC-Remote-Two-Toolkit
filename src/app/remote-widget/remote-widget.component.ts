@@ -48,14 +48,13 @@ import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.com
 export class RemoteWidgetComponent implements OnInit {
   @Input() visible = true;
   @Input() scale = 0.8;
-  protected readonly Math = Math;
-
-  minimized = false;
+  @Input() minimized = false;
+  @Input() remote: Remote | undefined;
   remoteState: RemoteState | undefined;
   mediaEntity: MediaEntityState | undefined;
   mediaEntities: MediaEntityState[] = [];
-  selectedRemote: Remote | undefined;
   activities: Activity[] = [];
+  protected readonly Math = Math;
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
 
@@ -76,8 +75,8 @@ export class RemoteWidgetComponent implements OnInit {
       this.cdr.detectChanges();
     });
     this.server.remote$.subscribe(remote => {
-      this.selectedRemote = remote;
-      this.server.getRemoteBattery(this.selectedRemote).subscribe(batteryInfo => {
+      this.remote = remote;
+      this.server.getRemoteBattery(this.remote).subscribe(batteryInfo => {
         this.remoteState = {batteryInfo};
         this.cdr.detectChanges();
       })
@@ -88,14 +87,14 @@ export class RemoteWidgetComponent implements OnInit {
 
   loadActivities()
   {
-    if (!this.selectedRemote) return;
-    this.server.getRemoteActivities(this.selectedRemote).subscribe(activities => {
+    if (!this.remote) return;
+    this.server.getRemoteActivities(this.remote).subscribe(activities => {
       this.activities = activities;
       activities.forEach(activity => {
         if (activity.attributes?.state && activity.attributes.state === "ON"
-          && this.selectedRemote && activity.entity_id)
+          && this.remote && activity.entity_id)
         {
-          this.server.getRemoteActivity(this.selectedRemote, activity.entity_id).subscribe(activity => {
+          this.server.getRemoteActivity(this.remote, activity.entity_id).subscribe(activity => {
             const existingActivity = this.activities.find(item => item.entity_id === activity.entity_id);
             if (!existingActivity)
               this.activities.push(activity);
@@ -105,7 +104,7 @@ export class RemoteWidgetComponent implements OnInit {
             activity.options?.included_entities?.forEach(entity => {
               if (entity.entity_type !== "media_player") return; //TODO add other entities
               if (this.mediaEntities.find(item => item.entity_id === entity.entity_id)) return;
-              if (this.selectedRemote && entity.entity_id)
+              if (this.remote && entity.entity_id)
               {
                 this.remoteWebsocketService.updateEntity(entity.entity_id);
               }

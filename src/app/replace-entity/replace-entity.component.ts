@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -79,7 +80,7 @@ class Message {
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class ReplaceEntityComponent implements OnInit{
+export class ReplaceEntityComponent implements OnInit, AfterViewInit {
   remoteOperations: RemoteOperation[] = [];
   config: Config | undefined;
   remotes: Remote[] | undefined;
@@ -111,16 +112,12 @@ export class ReplaceEntityComponent implements OnInit{
   availableEntities: Entity[] = [];
   macros: Macro[] = [];
 
-  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {}
+  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
+    this.server.getConfig().subscribe(config => {});
+  }
 
   ngOnInit(): void {
     this.initMenu();
-    this.server.getConfig().subscribe(config => {
-      this.updateRemote(config);
-      this.server.config$.subscribe(config => {
-        this.updateRemote(config);
-      })
-    })
     const data = localStorage.getItem("remoteData");
     if (data) {
       const remoteData: RemoteData = JSON.parse(data);
@@ -141,6 +138,12 @@ export class ReplaceEntityComponent implements OnInit{
       this.availableEntities = [...this.entities];
       this.cdr.detectChanges();
     }
+  }
+
+  ngAfterViewInit() {
+    this.server.config$.subscribe(config => {
+      if (config) this.updateRemote(config);
+    })
   }
 
   initMenu()

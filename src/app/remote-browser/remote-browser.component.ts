@@ -4,7 +4,6 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  OnInit,
   ViewChild,
   ViewEncapsulation
 } from '@angular/core';
@@ -29,12 +28,10 @@ import {
   EntityUsage,
   OrphanEntity,
   Profile,
-  Profiles,
   Remote, RemoteData
 } from "../interfaces";
 import {ServerService} from "../server.service";
-import {catchError, forkJoin, from, map, mergeMap, Observable, of} from "rxjs";
-import { HttpErrorResponse, HttpEventType } from "@angular/common/http";
+import {catchError, forkJoin, from, map, mergeMap, of} from "rxjs";
 import {FormsModule} from "@angular/forms";
 import {InputTextModule} from "primeng/inputtext";
 import {TooltipModule} from "primeng/tooltip";
@@ -101,7 +98,7 @@ interface FileProgress
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class RemoteBrowserComponent implements OnInit, AfterViewInit {
+export class RemoteBrowserComponent implements AfterViewInit {
   @ViewChild("fileUpload", {static: false}) fileUpload: ElementRef | undefined;
   @ViewChild(UploadedFilesComponent) uploadedFilesComponent: UploadedFilesComponent | undefined;
   @ViewChild(RemoteRegistrationComponent) remoteComponent: RemoteRegistrationComponent | undefined;
@@ -159,18 +156,14 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private confirmationService: ConfirmationService) {
-  }
-
-  ngOnInit(): void {
-    this.server.getConfig().subscribe(config => {
-      this.updateRemote(config);
-      this.server.config$.subscribe(config => {
-        this.updateRemote(config);
-      })
-    })
+    this.server.getConfig().subscribe(config => {});
   }
 
   ngAfterViewInit(): void {
+    this.server.config$.subscribe(config => {
+      console.log("Updated config", config);
+      if (config) this.updateRemote(config);
+    })
     const data = localStorage.getItem("remoteData");
     if (data) {
       const remoteData: RemoteData = JSON.parse(data);
@@ -246,7 +239,6 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       }});
   }
 
-
   updateRemote(config: Config): void
   {
     this.config = config;
@@ -264,13 +256,6 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     this.cdr.detectChanges();
     if (!this.context || this.context.remote_ip !== `${remote.address}:${remote.port}`)
       this.remoteLoader?.load();
-  }
-
-  viewBackups(): void
-  {
-    this.uploadedFilesComponent?.loadFiles();
-    this.uploadedFilesComponent!.visible = true;
-    this.cdr.detectChanges();
   }
 
   selectRemote(): void
@@ -347,20 +332,6 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
     return `hsl(${stringUniqueHash % 360}, 95%, 40%)`;
   }
 
-  stringToColor(value: string): string
-  {
-    let hash = 0;
-    value.split('').forEach(char => {
-      hash = char.charCodeAt(0) + ((hash << 5) - hash)
-    })
-    let colour = '#'
-    for (let i = 0; i < 3; i++) {
-      const value = (hash >> (i * 8)) & 0xff
-      colour += value.toString(16).padStart(2, '0')
-    }
-    return colour
-  }
-
   removeEntities(entities: Entity[])
   {
     if (!this.selectedRemote) return;
@@ -401,49 +372,6 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
       this.remoteProgress = 0;
       this.cdr.detectChanges();
     })
-  }
-
-  uploadSelectedFile(file: FileProgress)
-  {
-    const formData = new FormData();
-    formData.append('file', file.data);
-    const filename = file.data.name;
-    file.inProgress = true;
-    this.server.upload(formData).pipe(map(event => {
-        switch (event.type) {
-          case HttpEventType.UploadProgress:
-            file.progress = Math.round(event.loaded * 100 / event.total!);
-            break;
-          case HttpEventType.Response:
-            return event;
-        }
-        return event;
-      }),
-      catchError((error: HttpErrorResponse) => {
-        file.inProgress = false;
-        this.messageService.add({severity: 'error', summary: `File ${filename} upload failed`});
-        this.cdr.detectChanges();
-        return of(`${file.data.name} upload failed.`);
-      })).subscribe((event: any) => {
-      if (event?.body != undefined)
-      {
-        console.log(event.body);
-        this.currentFile = undefined;
-        this.messageService.add({severity: 'success', summary: `File ${filename} uploaded successfully`});
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  uploadFile() {
-    const fileUpload = this.fileUpload!.nativeElement;
-    fileUpload.onchange = () => {
-      const file = fileUpload.files[0];
-      this.currentFile = {data: file, progress: 0, inProgress: false};
-      this.uploadSelectedFile(this.currentFile);
-      this.cdr.detectChanges();
-    }
-    fileUpload.click();
   }
 
   updateConfiguration() {
@@ -570,5 +498,14 @@ export class RemoteBrowserComponent implements OnInit, AfterViewInit {
 
   private restoreRemote() {
     return undefined;
+  }
+
+  setLanguage(languageCode: string) {
+    if (!this.config) return;
+    this.config.language = languageCode;
+    this.server.setConfig(this.config).subscribe({next: results => {
+        this.messageService.add({severity: "success", summary: `Language changed to "${languageCode}" and saved`});
+        this.cdr.detectChanges();
+      }});
   }
 }

@@ -1161,12 +1161,6 @@ app.delete('/api/uploaded_files/:filename', (req, res, next) => {
   }
 })
 
-// app.ws('/ws', (ws, req) => {
-//   ws.on('message', function(msg) {
-//     console.log(msg);
-//   });
-// })
-
 app.all('*', function (req, res, next) {
   res.status(200).sendFile(`/`, {root: 'public/browser'});
 });

@@ -1,3 +1,4 @@
+<p-toast key="widget"/>
 <p-dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
           contentStyleClass="widget-dialog" class="widget" styleClass="widget-header" appendTo="body">
   <ng-template pTemplate="header">
@@ -21,7 +22,9 @@
         </div>
         <div class="flex align-items-center justify-content-center">
           <p-tag [value]="(remoteWebsocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
-                 [severity]="(remoteWebsocketService.connectionStatus  | async) ? 'success' : 'warning'"/>
+                 [severity]="(remoteWebsocketService.connectionStatus  | async) ? 'success' : 'warning'"
+                 pTooltip="Click to wake up the remote"
+                 (click)="wakeRemote($event)" [style]="{'cursor': 'pointer'}"/>
         </div>
     </div>
   </ng-template>

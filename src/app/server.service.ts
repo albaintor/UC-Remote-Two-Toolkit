@@ -4,13 +4,13 @@ import {BehaviorSubject, forkJoin, from, map, mergeMap, Observable, of, Subject}
 import {
   Activity, BatteryState, Command,
   Config,
-  Context, Driver,
-  Entity, EntityCommand, EntityFeature,
-  Integration, Macro, Page, Profile, ProfileGroup,
-  Profiles,
+  Driver,
+  Entity, EntityCommand,
+  Integration, LanguageCode, Macro, Page, Profile, ProfileGroup,
   Remote, RemoteMap, RemoteModels, RemoteRegistration, RemoteStatus, RemoteVersion, ScreenLayout
 } from "./interfaces";
 import { DomHandler } from 'primeng/dom';
+import {Helper} from "./helper";
 
 @Injectable({
   providedIn: 'root'
@@ -18,12 +18,10 @@ import { DomHandler } from 'primeng/dom';
 export class ServerService {
 
   API_KEY_NAME = "UCWebTool";
-  config$ = new Subject<Config>();
+  config: Config | undefined = undefined;
+  config$ = new BehaviorSubject<Config|undefined>(this.config);
   remote$ = new Subject<Remote>();
-  config: Config | undefined;
   private entities: Entity[] = [];
-  private activities: Activity[] = [];
-  private profiles: Profile[] = [];
   version$ = new Subject<RemoteVersion | undefined>();
   entities$ = new BehaviorSubject<Entity[]>([]);
   activities$ = new Subject<Activity[]>();
@@ -61,21 +59,12 @@ export class ServerService {
     return this.entities;
   }
 
-  getCachedActivities(): Activity[] {
-    return this.activities;
-  }
-
-  getCachedProfiles(): Profile[] {
-    return this.profiles;
-  }
-
   setEntities(entities: Entity[]): void {
     this.entities = entities;
     this.entities$.next(entities);
   }
 
   setActivities(activities: Activity[]): void {
-    this.activities = activities;
     this.activities$.next(activities);
   }
 
@@ -84,7 +73,6 @@ export class ServerService {
   }
 
   setProfiles(profiles: Profile[]): void {
-    this.profiles = profiles;
     this.profiles$.next(profiles);
   }
 
@@ -113,20 +101,23 @@ export class ServerService {
     }))
   }
 
-  getFeaturesMap(): Observable<EntityFeature[]>
-  {
-    return this.http.get<EntityFeature[]>('/assets/remote/features-map.json').pipe(map(results => {
-      return results;
-    }))
-  }
-
   getConfig(): Observable<Config>
   {
     return this.http.get<Config>('/api/config').pipe(map(results => {
-      if (!results.language) results.language = 'fr';
+      if (!results.language) results.language = 'en';
+      Helper.setLanguageName(results.language as LanguageCode);
       this.config = results;
       this.config$.next(this.config);
       return this.config;
+    }))
+  }
+
+  setConfig(config: Config): Observable<any>
+  {
+    return this.http.post<Config>('/api/config', config).pipe(map(results => {
+      this.config = config;
+      this.config$.next(this.config);
+      return results;
     }))
   }
 
@@ -144,14 +135,6 @@ export class ServerService {
       return results;
     }))
   }
-
-
-  // setConfig(config: Config): Observable<any>
-  // {
-  //   return this.http.post<Config>('/api/config', config).pipe(map(results => {
-  //     return results;
-  //   }))
-  // }
 
   loadResources(remote: Remote, type: string): Observable<any>
   {
@@ -181,13 +164,6 @@ export class ServerService {
       return results;
     }))
   }
-
-  // getResource(remote: Remote, type: string, id: string): Observable<any>
-  // {
-  //   return this.http.get<any>(`/api/remote/${remote.address}/resources/${type}/${id}`).pipe(map(results => {
-  //     return results;
-  //   }))
-  // }
 
   getObjectName(object: any): string
   {
@@ -233,7 +209,6 @@ export class ServerService {
       activities.forEach(entity => {
         entity.name = this.getObjectName(entity);
       })
-      this.activities = activities;
       return activities;
     }))
   }
@@ -307,13 +282,12 @@ export class ServerService {
             this.http.get<ProfileGroup[]>(`/api/remote/${remote.address}/profiles/${profile.profile_id}/groups`).pipe(map(groups => {
               profile.groups = groups;
             })),
-          ]).pipe(map(groups => {
+          ]).pipe(map(() => {
             console.log("Update profile", profile);
             return profiles;
           }))
         }))
       })).pipe(map(profiles => {
-      this.profiles = profiles;
       this.profiles$.next(profiles);
       return profiles;
     }));
@@ -410,16 +384,16 @@ export class ServerService {
     }))
   }
 
-  remoteGet(remote: Remote, url: string,
-            params?:{[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}): Observable<any>
-  {
-    const httpOptions: {headers: HttpHeaders, params?: HttpParams} = ServerService.getHttpOptions(remote, url);
-    if (params)
-      httpOptions['params'] = new HttpParams({fromObject: params});
-    return this.http.get<any>('/server/api',httpOptions).pipe(map(results => {
-      return results;
-    }))
-  }
+  // remoteGet(remote: Remote, url: string,
+  //           params?:{[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}): Observable<any>
+  // {
+  //   const httpOptions: {headers: HttpHeaders, params?: HttpParams} = ServerService.getHttpOptions(remote, url);
+  //   if (params)
+  //     httpOptions['params'] = new HttpParams({fromObject: params});
+  //   return this.http.get<any>('/server/api',httpOptions).pipe(map(results => {
+  //     return results;
+  //   }))
+  // }
 
   remotePost(remote: Remote, url: string, data: any,
             params?:{[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}): Observable<any>
@@ -465,38 +439,9 @@ export class ServerService {
     }))
   }
 
-
-  getContext(): Observable<Context>
-  {
-    return this.http.get<Context>('/api/context').pipe(map(results => {
-      return results;
-    }))
-  }
-
   getBackup(url: string): Observable<any>
   {
     return this.http.get<any>('/download/'+url, {responseType: 'blob' as 'json'})
-  }
-
-  getActivitiesFromBackup(): Observable<Activity[]>
-  {
-    return this.http.get<Activity[]>('/api/activities').pipe(map(results => {
-      return results;
-    }))
-  }
-
-  getEntitiesFromBackup(): Observable<Entity[]>
-  {
-    return this.http.get<Entity[]>('/api/entities').pipe(map(results => {
-      return results;
-    }))
-  }
-
-  getProfilesFromBackup(): Observable<Profiles>
-  {
-    return this.http.get<Profiles>('/api/profiles').pipe(map(results => {
-      return results;
-    }))
   }
 
   findEntities(query: string): Observable<Entity[]>
@@ -525,13 +470,6 @@ export class ServerService {
     return this.http.post<any>('/api/load/path/'+fileName, {}, {}).pipe(map(results => {
       return results;
     }))
-  }
-
-  upload(formData: any) {
-    return this.http.post<any>('/upload', formData, {
-      reportProgress: true,
-      observe: 'events'
-    });
   }
 
   getUCIconsMap(): Observable<{name: string, icon: string}[]>

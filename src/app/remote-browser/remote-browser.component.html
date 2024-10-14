@@ -7,6 +7,8 @@
 </div>
 <p-menubar #menubar [model]="items">
   <ng-template pTemplate="end">
+    <p-dropdown class="smaller-dropdown" [ngModel]="config?.language" [options]="Helper.getLanguages()" placeholder="Select language"
+                (ngModelChange)="setLanguage($event)" optionLabel="label" optionValue="value" pTooltip="Switch language for entity names"/>
     <p-dropdown class="smaller-dropdown" [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
       <ng-template pTemplate="selectedItem">
         <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>

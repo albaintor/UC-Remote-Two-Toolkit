@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -118,7 +119,7 @@ interface OrphanEntity
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class ActivitySyncComponent implements OnInit {
+export class ActivitySyncComponent implements AfterViewInit {
   blockedMenu = false;
   progress = false;
   items: MenuItem[] = [
@@ -153,14 +154,12 @@ export class ActivitySyncComponent implements OnInit {
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private confirmationService: ConfirmationService) {
+    this.server.getConfig().subscribe(config => {});
   }
 
-  ngOnInit(): void {
-    this.server.getConfig().subscribe(config => {
-      this.updateRemote(config);
-      this.server.config$.subscribe(config => {
-        this.updateRemote(config);
-      })
+  ngAfterViewInit(): void {
+    this.server.config$.subscribe(config => {
+      if (config) this.updateRemote(config);
     });
     this.server.getRemoteModels().subscribe(remoteModels => {
       this.remoteModels = remoteModels;
@@ -186,11 +185,11 @@ export class ActivitySyncComponent implements OnInit {
   {
     if (!entity) return "";
     console.debug(entity);
-    if (entity?.['en']) return entity['en'];
+    if (entity?.[Helper.getLanguageName()]) return entity[Helper.getLanguageName()];
     if (typeof entity === "string") return entity;
     if (typeof entity.name === "string") return entity.name;
+    if (entity.name?.[Helper.getLanguageName()]) return entity.name[Helper.getLanguageName()];
     if (entity.name?.['en']) return entity.name['en'];
-    if (entity.name?.['fr']) return entity.name['fr'];
     return "";
   }
 

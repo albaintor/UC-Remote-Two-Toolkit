@@ -7,12 +7,33 @@ import {
   ButtonMapping,
   UIPage,
   Remote,
-  ActivityPageCommand, OrphanEntity, CommandSequence, EntityCommand, EntityCommandParameter
+  ActivityPageCommand, OrphanEntity, CommandSequence, EntityCommand, EntityCommandParameter, LanguageCode
 } from "./interfaces";
 import {MediaEntityState} from "./remote-websocket.service";
 
 export class Helper
 {
+  static languageName: LanguageCode = 'en';
+
+  static getLanguageName(): LanguageCode
+  {
+    return Helper.languageName;
+  }
+
+  static getLanguages()
+  {
+    return [
+      {label:'English', value:'en'},
+      {label:'Français', value:'fr'},
+      {label:'Deutsch', value:'de'},
+    ]
+  }
+
+  static setLanguageName(languageCode: LanguageCode)
+  {
+    Helper.languageName = languageCode;
+  }
+
   static getStyle(value: string): any
   {
     try {
@@ -316,10 +337,11 @@ export class Helper
   static getEntityName(entity: any): string
   {
     if (!entity) return "";
-    if (entity?.['en']) return entity['en'];
+    if (entity?.[Helper.getLanguageName()]) return entity[Helper.getLanguageName()];
+    else if (entity?.['en']) return entity['en'];
     if (typeof entity.name === "string") return entity.name;
+    if (entity.name?.[Helper.getLanguageName()]) return entity.name[Helper.getLanguageName()];
     if (entity.name?.['en']) return entity.name['en'];
-    if (entity.name?.['fr']) return entity.name['fr'];
     return "";
   }
 

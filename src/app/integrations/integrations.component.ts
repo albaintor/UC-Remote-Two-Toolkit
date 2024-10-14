@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -75,7 +76,7 @@ interface IntegrationsDrivers {
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class IntegrationsComponent implements OnInit, OnDestroy {
+export class IntegrationsComponent implements AfterViewInit, OnDestroy {
   menuItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
   ]
@@ -92,17 +93,17 @@ export class IntegrationsComponent implements OnInit, OnDestroy {
   @ViewChild(FileUpload) fileUpload: FileUpload | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
-              private confirmationService: ConfirmationService) {}
+              private confirmationService: ConfirmationService) {
+    this.server.getConfig().subscribe(config => {});
+  }
 
 
-  ngOnInit(): void {
-    this.server.getConfig().subscribe(config => {
-      this.updateRemote(config);
-      this.startUpdateTask();
-      this.server.config$.subscribe(config => {
+  ngAfterViewInit(): void {
+    this.server.config$.subscribe(config => {
+      if (config) {
         this.updateRemote(config);
-        // this.startUpdateTask();
-      })
+        this.startUpdateTask();
+      }
     })
   }
 

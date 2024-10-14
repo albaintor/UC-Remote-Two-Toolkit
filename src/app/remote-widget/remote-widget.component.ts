@@ -20,6 +20,9 @@ import {MediaEntityState, RemoteState, RemoteWebsocketService} from "../remote-w
 import {Activity, Remote, RemoteData} from "../interfaces";
 import {MediaEntityComponent} from "../active-entities/media-entity/media-entity.component";
 import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.component";
+import {WebsocketService} from "../websocket.service";
+import {ToastModule} from "primeng/toast";
+import {MessageService} from "primeng/api";
 
 interface WidgetConfiguration {
   minimized: boolean;
@@ -41,10 +44,12 @@ interface WidgetConfiguration {
     DropdownModule,
     FormsModule,
     MediaEntityComponent,
-    DropdownOverComponent
+    DropdownOverComponent,
+    ToastModule
   ],
   templateUrl: './remote-widget.component.html',
   styleUrl: './remote-widget.component.css',
+  providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
@@ -59,7 +64,9 @@ export class RemoteWidgetComponent implements OnInit {
   activities: Activity[] = [];
   protected readonly Math = Math;
 
-  constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
+  constructor(private server:ServerService, private websocketService: WebsocketService,
+              protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef,
+              private messageService: MessageService,) { }
 
   ngOnInit(): void {
     const data = localStorage.getItem("remote-widget");
@@ -133,5 +140,21 @@ export class RemoteWidgetComponent implements OnInit {
     const widgetConfiguration: WidgetConfiguration = { minimized: this.minimized};
     localStorage.setItem("remote-widget", JSON.stringify(widgetConfiguration));
     this.cdr.detectChanges();
+  }
+
+  wakeRemote($event: MouseEvent) {
+    if (!this.remote) return;
+    this.server.wakeRemote(this.remote).subscribe({next: results => {
+        this.messageService.add({severity:'success', summary: "Wake on lan command sent", key: 'widget'});
+        this.websocketService.connect();
+        this.cdr.detectChanges();
+      },
+      error: error => {
+        console.error(error);
+        this.messageService.add({severity:'error', summary: "Error while sending wake on lan command", key: 'widget'});
+        this.cdr.detectChanges();
+      }
+    });
+    this.server.wakeRemote(this.remote, "255.255.255.0").subscribe({});
   }
 }

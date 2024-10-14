@@ -318,7 +318,8 @@ export class ActiveEntitiesComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: error => {
-        this.messageService.add({severity:'error', summary: "Wake on lan command sent", key: 'activeEntities'});
+        console.error(error);
+        this.messageService.add({severity:'error', summary: "Error while sending wake on lan command", key: 'activeEntities'});
         this.cdr.detectChanges();
       }
     });

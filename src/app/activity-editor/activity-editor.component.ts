@@ -169,13 +169,6 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       this.buttonsMap = butonsMap;
       this.cdr.detectChanges();
     })
-
-    this.server.getConfig().subscribe(config => {
-      this.updateRemote(config).subscribe();
-      this.server.config$.subscribe(config => {
-        this.updateRemote(config).subscribe(config => this.buildData());
-      })
-    })
     this.server.getTemplateRemoteMap().subscribe(templates => {
       this.templates = templates;
       if (!this.lockOperations) this.remoteOperations = this.buildData();
@@ -200,6 +193,9 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    this.server.config$.subscribe(config => {
+      if (config) this.updateRemote(config).subscribe(config => this.buildData());
+    })
     this.activatedRoute.queryParams.subscribe(param => {
       const source = param['source'];
       if (source)

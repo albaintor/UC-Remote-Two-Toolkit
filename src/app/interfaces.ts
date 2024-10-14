@@ -401,8 +401,10 @@ export interface Macro {
   device_class?: string;
 }
 
+export type LanguageCode = 'en' |'fr'|'de';
+
 export interface LanguageName {
-  [key: 'en' | 'fr' | 'de' | string]: string;
+  [key: LanguageCode | string]: string;
 }
 
 export interface OrphanEntity extends Entity

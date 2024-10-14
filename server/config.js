@@ -8,7 +8,7 @@ const CONFIG_FILE = 'config.json';
 export function writeConfigFile(config)
 {
   const filepath = path.join(CONFIG_FOLDER, CONFIG_FILE);
-  console.log('Write config', filepath, config);
+  console.log('Write config', filepath);
   fs.writeFileSync(filepath, JSON.stringify(config));
 }
 

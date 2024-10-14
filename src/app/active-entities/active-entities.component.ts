@@ -183,7 +183,7 @@ export class ActiveEntitiesComponent implements OnInit {
 
   saveDashboard()
   {
-    if (!this.dashboardName || this.mediaEntities.length == 0 ||this.selectedActivities.length == 0) {
+    if (!this.dashboardName || (this.mediaEntities.length == 0 && this.selectedActivities.length == 0)) {
       this.messageService.add({severity: "error", summary: "No dashboard name defined or no entities selected", key: 'activeEntities'});
       this.cdr.detectChanges();
       return;
@@ -332,8 +332,18 @@ export class ActiveEntitiesComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  replaceMediaEntity(entity: Entity, mediaStates: MediaEntityState[]) {
+    const existing = mediaStates.find(item => item.entity_id === entity.entity_id);
+    if (existing)
+    {
+      this.selectedActivities.splice(this.mediaEntities.indexOf(existing), 1);
+    }
+    mediaStates.push({...entity, new_state: {attributes: entity.attributes, features: entity.features}} as any);
+  }
+
   selectDashboard(dashboard: Dashboard | undefined) {
     if (!dashboard || !this.selectedRemote) return;
+    console.debug("Load dashboard", dashboard);
     this.dashboardName = dashboard.name;
     this.mediaEntities = [];
     this.dashboardEntities = [];
@@ -350,10 +360,10 @@ export class ActiveEntitiesComponent implements OnInit {
           const existing = this.mediaEntities.find(item => item.entity_id === entityId);
           if (existing)
           {
-            this.selectedActivities.splice(this.mediaEntities.indexOf(existing), 1);
+            this.mediaEntities.splice(this.mediaEntities.indexOf(existing), 1);
           }
           const mediaState = {...entity, new_state: {attributes: entity.attributes, features: entity.features}} as any;
-          this.mediaEntities.push(mediaState)
+          this.mediaEntities.push(mediaState);
           this.dashboardEntities.push(mediaState);
           this.cdr.detectChanges();
         });

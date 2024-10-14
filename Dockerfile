@@ -3,7 +3,7 @@
 #LABEL org.opencontainers.image.licenses=MIT
 FROM alpine:3.19
 
-ENV NODE_VERSION 22.9.0
+ENV NODE_VERSION="22.9.0"
 
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \
@@ -84,7 +84,7 @@ RUN addgroup -g 1000 node \
   && node --version \
   && npm --version
 
-ENV YARN_VERSION 1.22.22
+ENV YARN_VERSION="1.22.22"
 
 RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
   # use pre-existing gpg directory, see https://github.com/nodejs/docker-node/pull/1895#issuecomment-1550389150

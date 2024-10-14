@@ -48,4 +48,6 @@ Thumbs.db
 /server/resources
 /server/bundle.js
 /server/sea-prep.blob
-/server/r2tool-server*
+/server/ucrtool-server*
+
+/conf

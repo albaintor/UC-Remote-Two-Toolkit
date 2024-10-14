@@ -618,7 +618,7 @@ app.get('/api/remote/:address/resources/:type/:id', async (req, res, next) => {
   try {
     res.set({'Content-Type': 'image/'+path.extname(resource_id).replace('.', '')});
     console.log('Get file', path.join(RESOURCES_DIR, address, type, resource_id))
-    await res.sendFile(path.join(RESOURCES_DIR, address, type, resource_id), { root: '.' });
+    await res.sendFile(path.join(RESOURCES_DIR, address, type, resource_id));
   } catch (error)
   {
     errorHandler(error, req, res, next);

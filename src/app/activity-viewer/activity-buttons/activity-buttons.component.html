@@ -2,7 +2,7 @@
 <div class="flex flex-column" style="position:relative">
   <div class="flex align-items-start justify-content-center"
        [style]="{width: 400*scale+'px', height: 400*scale+'px'}"></div>
-  <div class="flex align-items-start justify-content-center" *ngIf="getRemoteModel()?.model == 'UCR2'"
+  <div class="flex align-items-start justify-content-center" *ngIf="getRemoteModel()?.model != 'UCR3'"
        [style]="'position: absolute;top:0;left:0;right:0;text-align: center;transform-origin: top;scale:'+scale">
     <app-image-map image="assets/remote/remote-two.png" [imageSize]="{width: 400, height: 400}" (overElement)="buttonOver($event)"
                    (mouseLongPress)="selectButton($event, true)"

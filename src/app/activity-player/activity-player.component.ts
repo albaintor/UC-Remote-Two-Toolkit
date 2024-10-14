@@ -3,7 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
-  Input,
+  Input, OnInit,
   Output,
   ViewEncapsulation
 } from '@angular/core';
@@ -27,6 +27,7 @@ import {PaginationComponent} from "../controls/pagination/pagination.component";
 import {RouterLink} from "@angular/router";
 import {IconComponent} from "../controls/icon/icon.component";
 import {SliderComponent} from "../controls/slider/slider.component";
+import {BreakpointObserver, Breakpoints} from "@angular/cdk/layout";
 
 @Component({
   selector: 'app-activity-player',
@@ -53,9 +54,10 @@ import {SliderComponent} from "../controls/slider/slider.component";
   encapsulation: ViewEncapsulation.None,
   providers: [MessageService]
 })
-export class ActivityPlayerComponent {
+export class ActivityPlayerComponent implements OnInit {
   remote: Remote | undefined;
   configEntityCommands: EntityCommand[] | undefined;
+  smallSizeMode = false;
   @Input('remote') set _remote(value: Remote | undefined) {
     this.remote = value;
     if (this.remote) {
@@ -83,9 +85,11 @@ export class ActivityPlayerComponent {
   progress = 0;
   progressDetail: string | undefined;
   volumeEntity: MediaEntityState | undefined;
+  protected readonly Math = Math;
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService,
-              private cdr:ChangeDetectorRef, private messageService: MessageService) {
+              private cdr:ChangeDetectorRef, private messageService: MessageService,
+              private responsive: BreakpointObserver) {
     this.remoteWebsocketService.onMediaStateChange().subscribe(mediaStates => {
       if (!this.volumeEntity) return;
       const state = mediaStates.find(item => item.entity_id === this.volumeEntity!.entity_id!);
@@ -94,6 +98,18 @@ export class ActivityPlayerComponent {
         this.cdr.detectChanges();
       }
     })
+  }
+
+  ngOnInit(): void {
+    this.responsive.observe([
+      Breakpoints.HandsetLandscape,
+      Breakpoints.HandsetPortrait,
+      Breakpoints.TabletPortrait
+    ])
+      .subscribe(result => {
+        this.smallSizeMode = result.matches;
+        this.cdr.detectChanges();
+      });
   }
 
   update() {
@@ -244,6 +260,4 @@ export class ActivityPlayerComponent {
           detail: `Error volume set ${name} : ${volume}% (${err.toString()})`})
       });
   }
-
-  protected readonly Math = Math;
 }

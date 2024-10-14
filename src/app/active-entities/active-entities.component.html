@@ -1,7 +1,7 @@
 <p-toast key="activeEntities"/>
 <p-menubar [model]="menuItems">
   <ng-template pTemplate="end">
-    <div class="flex align-items-center gap-2">
+    <div class="flex flex-wrap align-items-center gap-2">
       <p-dropdown [(ngModel)]="selectedDashboard" [options]="dashboards" placeholder="Select dashboard"
                   (ngModelChange)="selectDashboard($event)" optionLabel="name" class="smaller-dropdown">
       </p-dropdown>
@@ -65,7 +65,15 @@
   </div>
   <p-messages *ngIf="messages.length > 0" class="message-panel" styleClass="message-panel" [(value)]="messages" [enableService]="false" showTransitionOptions="0ms" hideTransitionOptions="0ms"/>
 </div>
-<div class="flex flex-wrap gap-3" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="drop($event)">
+<div class="flex flex-wrap gap-3" *ngIf="smallSizeMode">
+  <div class="flex gap-2 align-content-center justify-content-center media-card-border"
+       [style]="'width:'+(600*scale*0.8)+'px'" *ngFor="let mediaEntity of mediaEntities">
+    <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" [style]="'width:'+(600*scale*0.8)+'px'" [scale]="scale*0.8"
+                      class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
+                      [closable]="true"></app-media-entity>
+  </div>
+</div>
+<div class="flex flex-wrap gap-3" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="drop($event)" *ngIf="!smallSizeMode">
   <div class="flex gap-2 align-content-center justify-content-center media-card-border"
        [style]="'width:'+(600*scale)+'px'" *ngFor="let mediaEntity of mediaEntities" cdkDrag>
     <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" [style]="'width:'+(600*scale)+'px'" [scale]="scale"
@@ -75,7 +83,7 @@
 </div>
 <app-activity-player *ngFor="let activity of selectedActivities" [remote]="selectedRemote" [activity]="activity" [visible]="true"
   (onClose)="removeActivity($event)" [scale]="scale" (onMessage)="handleMessage($event)"/>
-<p-dialog #dashboardDialog [modal]="true" position="center" [draggable]="true" appendTo="body" [(visible)]="showDashboardDialog">
+<p-dialog [modal]="true" position="center" [draggable]="true" appendTo="body" [(visible)]="showDashboardDialog">
   <ng-template pTemplate="header">
     <div class="flex align-items-start justify-content-center">
       <h3>Save dashboard</h3>

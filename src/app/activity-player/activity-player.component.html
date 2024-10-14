@@ -1,5 +1,5 @@
 <p-toast key="activityPlayer"/>
-<p-dialog #dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
+<p-dialog *ngIf="!smallSizeMode" #dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
           contentStyleClass="widget-dialog" class="widget" styleClass="widget-header" appendTo="body"
           (close)="closeDialog($event);dialog.close($event)" [style]="{'width': (scale*400+30)+'px', 'max-height': 'calc(100vh - 20px)'}">
   <ng-template pTemplate="header">
@@ -52,6 +52,57 @@
     </div>
   </ng-container>
 </p-dialog>
+<div *ngIf="smallSizeMode" style="position: relative; text-align: center;width: 100%">
+  <ng-container style="width:100%">
+    <div class="flex align-items-start justify-content-center"
+         [style]="{width: '100%', height: 50*scale+'px'}"></div>
+    <div [style]="'position: absolute;top:5px;left:0;right:0;transform-origin: top;scale:'+scale*1.2">
+      <div class="flex justify-content-between gap-2 column-gap-2" style="width: 100%">
+        <div class="flex align-items-center justify-content-center" >
+          <p-button icon="pi pi-window-minimize" pTooltip="Minimize" (click)="minimized = !minimized"
+                    [severity]="minimized ? 'secondary' : 'info'" class="smaller-button"/>
+        </div>
+        <div class="flex flex-grow-1">
+          <app-icon *ngIf="remote && activity?.icon" [remote]="remote" [icon]="activity!.icon" [size]="40"
+                    style="pointer-events: none"/>&nbsp;
+          <h3>{{Helper.getEntityName(activity)}}</h3>
+        </div>
+      </div>
+    </div>
+    <div [style]="'position: absolute;right:0; top:0;scale:'+scale">
+      <p-button icon="pi pi-times" pTooltip="Close window" (click)="closeDialog($event)" [rounded]="true" [outlined]="true"/>
+    </div>
+  </ng-container>
+  <div *ngIf="!minimized" class="flex-initial flex align-items-center justify-content-center gap-4" [style]="'scale:'+scale">
+    <p-button icon="pi pi-stop" [rounded]="true" pTooltip="Stop activity" (click)="executeActivity('activity.off')" severity="danger"/>
+    <p-button icon="pi pi-play" [rounded]="true" pTooltip="Start activity" (click)="executeActivity('activity.on')" severity="success"/>
+    <p-button icon="pi pi-hammer" [rounded]="true" pTooltip="Fix states to turn off" (click)="executeSequence('off')" severity="danger"/>
+    <p-button icon="pi pi-hammer" [rounded]="true" pTooltip="Fix states to turn on" (click)="executeSequence('on')" severity="success"/>
+    <p-button icon="pi pi-cog" [rounded]="true" pTooltip="Edit activity" [routerLink]="'/activity/edit/'+activity?.entity_id" />
+  </div>
+  <ng-container *ngIf="!minimized" style="width: 100%; text-align: center">
+    <app-activity-buttons [remote]="remote" [activity]="activity" [editMode]="false" [scale]="scale" [hideButtonsInfo]="true"
+                          (onSelectButton)="handleMessage($event)"/>
+    <div style="position: relative; text-align: center">
+      <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [width]="400*scale" [height]="500*scale"
+                         [selectionMode]="false" [currentPage]="currentPage" [runMode]="true" (onSelectButton)="handleCommand($event)"
+                         (onPageChange)="selectPage($event)"/>
+      <app-pagination *ngIf="activity?.options?.user_interface?.pages && currentPage"
+                      [currentIndex]="activity!.options!.user_interface!.pages!.indexOf(currentPage)"
+                      [numberOfPages]="activity!.options!.user_interface!.pages!.length" class="grid-pagination"
+                      (onIndexChange)="selectPage($event)"/>
+      <div class="flex align-items-center justify-content-center gap-2" [style]="'width: 100%;scale:'+scale"
+           *ngIf="volumeEntity?.new_state?.attributes?.volume">
+        <app-slider [value]="Math.round(volumeEntity!.new_state!.attributes!.volume!)" style="width: 100%"
+                    (valueChange)="updateVolume($event, volumeEntity!.entity_id!)"
+                    [textValue]="'Volume '+Helper.getNumber(volumeEntity!.new_state!.attributes!.volume!)+'%'+
+                    (Helper.isMuted(volumeEntity) ? ' (muted)' : '')"
+                    [secondaryState]="Helper.isMuted(volumeEntity)"></app-slider>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
 <p-dialog [modal]="true" position="center" [showHeader]="false"
           [closable]="true" [visible]="progressDetail !== undefined" [draggable]="true" appendTo="body">
   <div class="flex flex-column align-items-center">

@@ -23,6 +23,7 @@ import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.com
 import {WebsocketService} from "../websocket.service";
 import {ToastModule} from "primeng/toast";
 import {MessageService} from "primeng/api";
+import {Helper} from "../helper";
 
 interface WidgetConfiguration {
   minimized: boolean;

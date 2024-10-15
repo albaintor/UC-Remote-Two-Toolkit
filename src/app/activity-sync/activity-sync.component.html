@@ -266,20 +266,20 @@
   <ng-template pTemplate="content">
     <div class="grid" *ngIf="selectedActivity1 && selectedActivity2">
       <div class="col-6">
-        <h3>Activity {{selectedActivity1.name}} from remote {{selectedRemote1?.remote_name}}</h3>
+        <h3>Activity {{Helper.getEntityName(selectedActivity1)}} from remote {{selectedRemote1?.remote_name}}</h3>
         <app-activity-viewer [remote]="selectedRemote1" [editMode]="false" [activity]="selectedActivity1"></app-activity-viewer>
       </div>
       <div class="col-6">
-        <h3>Activity {{selectedActivity2.name}} from remote {{selectedRemote2?.remote_name}}</h3>
+        <h3>Activity {{Helper.getEntityName(selectedActivity2)}} from remote {{selectedRemote2?.remote_name}}</h3>
         <app-activity-viewer [remote]="selectedRemote2" [editMode]="false" [activity]="selectedActivity2"></app-activity-viewer>
       </div>
     </div>
     <ng-container *ngIf="selectedActivity1 && !selectedActivity2">
-      <h3>Activity {{selectedActivity1.name}} from remote {{selectedRemote1?.remote_name}}</h3>
+      <h3>Activity {{Helper.getEntityName(selectedActivity1)}} from remote {{selectedRemote1?.remote_name}}</h3>
       <app-activity-viewer [remote]="selectedRemote1" [editMode]="false" [activity]="selectedActivity1"></app-activity-viewer>
     </ng-container>
     <ng-container *ngIf="!selectedActivity1 && selectedActivity2">
-      <h3>Activity {{selectedActivity2.name}} from remote {{selectedRemote2?.remote_name}}</h3>
+      <h3>Activity {{Helper.getEntityName(selectedActivity2)}} from remote {{selectedRemote2?.remote_name}}</h3>
       <app-activity-viewer [remote]="selectedRemote2" [editMode]="false" [activity]="selectedActivity2"></app-activity-viewer>
     </ng-container>
   </ng-template>

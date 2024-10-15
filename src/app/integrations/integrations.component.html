@@ -68,7 +68,17 @@
         <th pResizableColumn>Features</th>
       </tr>
       <tr>
-        <th><p-columnFilter type="text" field="name" [matchMode]="'contains'"></p-columnFilter></th>
+        <th><p-columnFilter field="name" matchMode="in" [showMenu]="false">
+          <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+            <p-multiSelect
+              [ngModel]="value"
+              [options]="Helper.getItemsConverted(entities, 'name', Helper.getEntityName)"
+              placeholder="Name"
+              (onChange)="filter($event.value)"
+              optionLabel="name" optionValue="value" appendTo="body">
+            </p-multiSelect>
+          </ng-template>
+        </p-columnFilter></th>
         <th><p-columnFilter type="text" field="entity_id" [matchMode]="'contains'"></p-columnFilter></th>
         <th><p-columnFilter field="entity_type" matchMode="in" [showMenu]="false">
           <ng-template pTemplate="filter" let-value let-filter="filterCallback">
@@ -108,7 +118,7 @@
 
             </div>
             <div class="flex-initial flex align-items-center justify-content-center">
-              &nbsp;<p-chip [label]="entity.name" [style]="Helper.getStyle(entity.name)" class="link-element"></p-chip>
+              &nbsp;<p-chip [label]="Helper.getEntityName(entity)" [style]="Helper.getStyle(Helper.getEntityName(entity))" class="link-element"></p-chip>
             </div>
           </div>
         </td>

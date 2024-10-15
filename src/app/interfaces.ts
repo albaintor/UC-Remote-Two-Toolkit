@@ -174,10 +174,18 @@ export interface RemoteMap
   };
 }
 
+export interface Dashboard
+{
+  name: string;
+  dashboardEntityIds: string[];
+  popupEntitiyIds: string[];
+}
+
 export interface Config
 {
   language: string;
   remotes?: Remote[];
+  dashboards?: Dashboard[];
 }
 export interface Remote
 {
@@ -202,13 +210,13 @@ export interface Context
 }
 
 export interface EntityIntegration {
-  name?: string | LanguageName;
+  name?: LanguageName;
   icon?: string;
 }
 
 export interface Entity
 {
-  name?: string | LanguageName;
+  name?: LanguageName;
   icon?: string;
   entity_id?: string;
   entity_type: string;
@@ -225,11 +233,6 @@ export interface Entity
   foldername?: string;
   filename?: string;
   entity_commands?: string[];
-}
-
-export interface EntitiesUsage
-{
-  [entity_id: string] : EntityUsage;
 }
 
 export interface ActivityEntityUsage
@@ -377,7 +380,7 @@ export interface ActivityOption
 
 export interface Activity {
   entity_id?: string;
-  name: string;
+  name: LanguageName;
   icon?: string;
   description?: any;
   options?: ActivityOption;

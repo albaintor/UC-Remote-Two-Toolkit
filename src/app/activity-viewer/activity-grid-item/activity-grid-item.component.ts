@@ -6,7 +6,7 @@ import {
   EventEmitter,
   Input,
   Output,
-  ViewChild
+  ViewChild, ViewEncapsulation
 } from '@angular/core';
 import {ActivityPageCommand} from "../../interfaces";
 import {Helper} from "../../helper";
@@ -24,7 +24,8 @@ export interface GridItem
   imports: [],
   templateUrl: './activity-grid-item.component.html',
   styleUrl: './activity-grid-item.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class ActivityGridItemComponent implements AfterViewInit{
   editable: boolean = true;
@@ -51,7 +52,7 @@ export class ActivityGridItemComponent implements AfterViewInit{
   @Output() sourceSelected = new EventEmitter<ActivityGridItemComponent>();
   @Output() destinationSelected = new EventEmitter<ActivityGridItemComponent>();
   @Output() itemClicked = new EventEmitter<ActivityGridItemComponent>();
-  @ViewChild("griditem", {static: false}) gridItem: ElementRef | undefined;
+  @ViewChild("griditem", {static: false}) gridItem: ElementRef<HTMLDivElement> | undefined;
   @Input() grid!: { width: number; height: number };
 
   constructor(private cdr:ChangeDetectorRef, private elRef: ElementRef) {
@@ -68,12 +69,13 @@ export class ActivityGridItemComponent implements AfterViewInit{
   }
 
   initView(): void {
-    for (let i = 0; i < this.gridItem?.nativeElement.children?.length; i++) {
-      let child = this.gridItem?.nativeElement.children[i];
+    if (this.gridItem?.nativeElement?.children)
+    for (let i = 0; i < this.gridItem.nativeElement.children?.length; i++) {
+      let child = this.gridItem?.nativeElement.children[i] as HTMLElement;
       if (!this.editable && !this.selectionMode)
-        child.style['pointer-events'] = 'auto';
+        child.style.pointerEvents = 'auto';
       else
-        child.style['pointer-events'] = 'none';
+        child.style.pointerEvents = 'none';
     }
     this.cdr.detectChanges();
   }
@@ -100,7 +102,7 @@ export class ActivityGridItemComponent implements AfterViewInit{
     return this.editable && !this.selectionMode && !Helper.isEmptyItem(this.item);
   }
 
-  onClick(event: MouseEvent) {
+  clickItem(event: MouseEvent) {
     if (this.selectionMode) {
       if (Helper.isEmptyItem(this.item)) return;
       this.selected = !this.selected;
@@ -125,7 +127,7 @@ export class ActivityGridItemComponent implements AfterViewInit{
       this.cdr.detectChanges();
       return false;
     }
-    this.gridItem!.nativeElement.style.opacity = '0.4';
+    this.gridItem!.nativeElement.classList.add('grid-item-dragging');
     if (event.dataTransfer)
     {
       event.dataTransfer.effectAllowed = 'move';
@@ -206,8 +208,11 @@ export class ActivityGridItemComponent implements AfterViewInit{
   }
 
   handleDragEnd(event:any) {
-    this.gridItem!.nativeElement.style.opacity = '1';
-    this.gridItem!.nativeElement.classList.remove('over');
-    this.cdr.detectChanges();
+    if (this.gridItem?.nativeElement)
+    {
+      this.gridItem.nativeElement.classList.remove('over');
+      this.gridItem.nativeElement.classList.remove('grid-item-dragging');
+      this.cdr.detectChanges();
+    }
   }
 }

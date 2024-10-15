@@ -23,7 +23,7 @@ import {
   ActivityPageCommand, ButtonMapping,
   Command,
   Config,
-  Entity,
+  Entity, LanguageCode,
   OperationStatus,
   Remote, RemoteData,
   RemoteMap, RemoteModel, RemoteModels,
@@ -157,10 +157,10 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   lockOperations = false;
   version: RemoteVersion | undefined;
   remoteModels: RemoteModels | undefined;
+  currentLanguage: LanguageCode = Helper.getLanguageName();
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private activatedRoute: ActivatedRoute, private confirmationService: ConfirmationService) {
-
   }
 
   ngOnInit(): void {
@@ -183,19 +183,31 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       this.server.setEntities(this.entities);
       this.server.setActivities(this.activities);
       this.remoteOperations = this.buildData();
-      // this.cdr.detectChanges();
+      this.cdr.detectChanges();
     }
     this.server.getRemoteModels().subscribe(remoteModels => {
       this.remoteModels = remoteModels;
       this.buildData();
       this.cdr.detectChanges();
     })
+
   }
 
   ngAfterViewInit(): void {
-    this.server.config$.subscribe(config => {
+    this.server.getConfig().subscribe(config => {
       if (config) this.updateRemote(config).subscribe(config => this.buildData());
+      if (config?.language) {
+        this.currentLanguage = config.language as LanguageCode;
+        this.cdr.detectChanges();
+      }
     })
+    this.server.config$.subscribe(config => {
+      if (config) {
+        this.updateRemote(config).subscribe(config => this.buildData());
+        if (config.language) this.currentLanguage = config.language as LanguageCode;
+      }
+    })
+
     this.activatedRoute.queryParams.subscribe(param => {
       const source = param['source'];
       if (source)
@@ -338,7 +350,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     if (this.mode != OperationMode.Undefined) return;
     if (this.activities.find(activity => activity.entity_id === this.updatedActivity?.entity_id)) {
       this.confirmationService.confirm({key: "confirmEditor",
-        header: `Activity "${this.updatedActivity?.name}" to import already exists`,
+        header: `Activity "${Helper.getEntityName(this.updatedActivity)}" to import already exists`,
         message: 'Do you want to replace it ?',
         acceptIcon: 'pi pi-check mr-2',
         rejectIcon: 'pi pi-times mr-2',
@@ -372,7 +384,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     {
       if (!this.orphanEntities.find(item => item.oldEntity?.entity_id === entityId))
       {
-        this.orphanEntities.push({oldEntity: {entity_id:entityId, entity_type: "", name: ""}, newEntity: undefined});
+        this.orphanEntities.push({oldEntity: {entity_id:entityId, entity_type: "", name: Helper.buildName("")}, newEntity: undefined});
       }
     }
     if (!entity) entity = {entity_id: entityId} as any;
@@ -399,7 +411,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     {
       this.updatedActivity = {
         entity_id: this.activity.entity_id,
-        name: Helper.getEntityName(this.activity),
+        name: JSON.parse(JSON.stringify(this.activity.name)),
         description: this.activity.description,
         icon: this.activity.icon,
         options: {//activity_group: this.activity.options?.activity_group, sequences: this.activity.options?.sequences,
@@ -475,9 +487,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
     let resultField: RemoteOperationResultField | undefined = undefined;
     const body: any = {
-      name: {
-        en: Helper.getEntityName(this.updatedActivity),
-      },
+      name: this.updatedActivity.name,
       options: {}
     }
     if (this.updatedActivity.icon)
@@ -499,25 +509,25 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
         activity.options?.button_mapping?.forEach(button => {
           if (this.updatedActivity?.options?.button_mapping?.find(button2 => button2.button === button.button))
             return;
-          remoteOperations.push({name: `Delete button ${button.button} ${this.updatedActivity!.name}`,
+          remoteOperations.push({name: `Delete button ${button.button} ${Helper.getEntityName(this.updatedActivity)}`,
             method: "DELETE", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
             body: {}, status: OperationStatus.Todo});
         })
       }
       activity.options?.user_interface?.pages?.forEach(page => {
         if (page.page_id)
-          remoteOperations.push({name: `Delete page ${page.name} ${this.updatedActivity!.name}`,
+          remoteOperations.push({name: `Delete page ${page.name} ${Helper.getEntityName(this.updatedActivity)}`,
             method: "DELETE", api: `/api/activities/${activity.entity_id}/ui/pages/${page.page_id}`,
             body: {}, status: OperationStatus.Todo});
       });
-      remoteOperations.push({name: `Update activity ${this.updatedActivity!.name}`, method: "PATCH",
+      remoteOperations.push({name: `Update activity ${Helper.getEntityName(this.updatedActivity)}`, method: "PATCH",
         api: `/api/activities/${activity.entity_id}`, body, status: OperationStatus.Todo});
     }
     else
     {
       this.existingActivity = false;
       console.log("Activity to import does not exist, we will create it", body);
-      let createOperation: RemoteOperation = {name: `Create activity ${this.updatedActivity!.name}`, method: "POST", api: `/api/activities`,
+      let createOperation: RemoteOperation = {name: `Create activity ${Helper.getEntityName(this.updatedActivity)}`, method: "POST", api: `/api/activities`,
         body, status: OperationStatus.Todo};
       remoteOperations.push(createOperation);
       resultField = {fieldName: "entity_id", linkedOperation: createOperation, keyName: NEW_ACTIVITY_ID_KEY};
@@ -603,7 +613,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     const entity = this.entities.find(entity => entity.entity_id === this.selectedEntity?.entity_id);
     if (!entity)
     {
-      this.messageService.add({severity: "error", summary: `This entity ${this.selectedEntity.name} (${this.selectedEntity.entity_id}) is not referenced`})
+      this.messageService.add({severity: "error", summary: `This entity ${Helper.getEntityName(this.selectedEntity)} (${this.selectedEntity.entity_id}) is not referenced`})
       this.cdr.detectChanges();
       return;
     }
@@ -781,6 +791,8 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     this.config = config;
     this.remotes = config.remotes!;
     this.targetRemote  = Helper.getSelectedRemote(this.remotes);
+    if (this.targetRemote)
+      this.server.remote$.next(this.targetRemote);
     return this.server.getRemoteVersion(this.targetRemote!).pipe(map(version => {
         this.version = version;
         this.buildData();
@@ -888,8 +900,9 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   saveActivity()
   {
     if (!this.activity) return;
+    console.debug("Save activity to file", Helper.getEntityName(this.activity), this.activity);
     saveAs(new Blob([JSON.stringify(this.activity)], {type: "text/plain;charset=utf-8"}),
-      `${this.activity.name}.json`);
+      `${Helper.getEntityName(this.activity)}.json`);
   }
 
   importActivity() {

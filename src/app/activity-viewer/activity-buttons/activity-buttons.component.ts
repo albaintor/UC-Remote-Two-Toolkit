@@ -2,7 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, EventEmitter,
+  Component, ElementRef, EventEmitter,
   Input, Output, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
@@ -95,6 +95,7 @@ export class ActivityButtonsComponent implements AfterViewInit {
   @Input() hideButtonsInfo = false;
   executeButton: ButtonMapping | undefined;
   @ViewChild("executeButtonPanel") executeButtonPanel: OverlayPanel | undefined;
+  @ViewChild("buttonsInfo", {static: false}) buttonsInfo: ElementRef<HTMLDivElement> | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,) {
     const data = localStorage.getItem("remoteData");
@@ -199,6 +200,10 @@ export class ActivityButtonsComponent implements AfterViewInit {
     if (!buttonId) return;
     this.mouseOverButtonName = this.buttonsMap[buttonId];
     this.mouseoverButton = this.activity?.options?.button_mapping?.find(button => button.button === this.mouseOverButtonName);
+    if (this.buttonsInfo?.nativeElement) {
+      this.buttonsInfo.nativeElement.style.width = '400px';
+      this.buttonsInfo.nativeElement.style.height = '150px';
+    }
     $event.event.stopPropagation();
     this.cdr.detectChanges();
   }

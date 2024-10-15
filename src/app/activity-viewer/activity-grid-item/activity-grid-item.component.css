@@ -27,6 +27,13 @@
   pointer-events: all;
 }
 
+.grid-item-dragging {
+  border: 2px solid rgb(255, 255, 255);
+  background: rgba(0, 0, 0, 1);
+  box-sizing: border-box;
+  box-shadow:  10px 5px 25px rgba(255, 255, 255, 0.8);
+}
+
 .grid-item-run {
   padding: 1px;
   text-align: center;
@@ -50,7 +57,6 @@
 {
   background-color: rgba(142, 132, 132, 0.56);
 }
-
 
 .grid-item-selection {
   border: 1px solid rgb(255, 255, 255);

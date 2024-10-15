@@ -1,4 +1,11 @@
-<p-dialog [header]="'Entity '+entity?.name" [(visible)]="visible" [style]="panelStyle">
+<p-dialog [header]="'Entity '+Helper.getEntityName(entity)" [(visible)]="visible" [style]="panelStyle">
+  <div class="flex flex-wrap" *ngIf="entity">
+    <div class="flex align-items-center justify-content-center ml-1">
+      <ng-container *ngFor="let name of Helper.getEntityNames(entity);last as last">
+        <h3>{{name.languageName}}</h3> : {{name.name}}{{last ? '' : ',&nbsp;&nbsp;'}}
+      </ng-container>
+    </div>
+  </div>
   <h3>{{entity?.entity_id}}</h3>
   <h3>Type : <span [style]="Helper.getFrontStyle(entity?.entity_type!)">{{entity?.entity_type}}</span></h3>
   <div class="flex flex-wrap" *ngIf="entity?.features">

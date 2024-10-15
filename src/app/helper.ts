@@ -7,9 +7,22 @@ import {
   ButtonMapping,
   UIPage,
   Remote,
-  ActivityPageCommand, OrphanEntity, CommandSequence, EntityCommand, EntityCommandParameter, LanguageCode
+  ActivityPageCommand,
+  OrphanEntity,
+  CommandSequence,
+  EntityCommand,
+  EntityCommandParameter,
+  LanguageCode,
+  LanguageName,
+  Macro, Integration, Driver, EntityIntegration
 } from "./interfaces";
 import {MediaEntityState} from "./remote-websocket.service";
+
+export interface LocalizedName {
+  languageCode: LanguageCode;
+  languageName: string;
+  name: string;
+}
 
 export class Helper
 {
@@ -27,6 +40,17 @@ export class Helper
       {label:'Français', value:'fr'},
       {label:'Deutsch', value:'de'},
     ]
+  }
+
+  static getLanguageNameFromCode(code: LanguageCode)
+  {
+    switch(code)
+    {
+      case "en": return "English";
+      case "fr": return "Français";
+      case "de": return "Deutsch";
+      default: return "Unknown";
+    }
   }
 
   static setLanguageName(languageCode: LanguageCode)
@@ -188,7 +212,7 @@ export class Helper
     })
     if (suggestions.length == 0)
     {
-      return [{entity_id: query, name: query, entity_type: ""}];
+      return [{entity_id: query, ...Helper.buildName(query), entity_type: ""}];
     }
     return suggestions;
   }
@@ -334,6 +358,14 @@ export class Helper
     return config.params?.find(item => item.param === param);
   }
 
+  static buildName(name: string): LanguageName
+  {
+    if (Helper.getLanguageName() === 'en') return {'en': name};
+    let obj: any = {'en': name};
+    obj[Helper.getLanguageName()] = name;
+    return obj;
+  }
+
   static getEntityName(entity: any): string
   {
     if (!entity) return "";
@@ -343,6 +375,19 @@ export class Helper
     if (entity.name?.[Helper.getLanguageName()]) return entity.name[Helper.getLanguageName()];
     if (entity.name?.['en']) return entity.name['en'];
     return "";
+  }
+
+  static getEntityNames(entity: Entity | Activity | Macro | Integration | Driver | EntityIntegration): LocalizedName[]
+  {
+    if (!entity || !entity.name) return [];
+    const names: LocalizedName[] = []
+    for (let languageCode in entity.name)
+    {
+      names.push({languageCode: languageCode as LanguageCode,
+        languageName: Helper.getLanguageNameFromCode(languageCode as LanguageCode),
+        name: entity.name[languageCode]})
+    }
+    return names;
   }
 
   static getEntityNameFromCatalog(entity: any, entities: Entity[]): string

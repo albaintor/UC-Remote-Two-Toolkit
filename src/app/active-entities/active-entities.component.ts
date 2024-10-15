@@ -8,7 +8,7 @@ import {TagModule} from "primeng/tag";
 import {MediaEntityState, RemoteState, RemoteWebsocketService} from "../remote-websocket.service";
 import {ServerService} from "../server.service";
 import {MenubarModule} from "primeng/menubar";
-import {Activity, Entity, Remote, RemoteData} from "../interfaces";
+import {Activity, Config, Dashboard, Entity, Remote, RemoteData} from "../interfaces";
 import {FormsModule} from "@angular/forms";
 import {Helper} from "../helper";
 import {SliderComponent} from "../controls/slider/slider.component";
@@ -25,13 +25,6 @@ import {CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray} from "@angular/cdk/d
 import {DialogModule} from "primeng/dialog";
 import {InputTextModule} from "primeng/inputtext";
 import {BreakpointObserver, Breakpoints} from "@angular/cdk/layout";
-
-interface Dashboard
-{
-  name: string;
-  dashboardEntityIds: string[];
-  popupEntitiyIds: string[];
-}
 
 @Component({
   selector: 'app-active-entities',
@@ -87,12 +80,12 @@ export class ActiveEntitiesComponent implements OnInit {
   newActivity: Activity | undefined;
   scale = 0.8;
   messages: Message[] = [];
-  dashboards: Dashboard[] = [];
   showDashboardDialog = false;
   dashboardName: string | undefined;
   selectedDashboard: Dashboard | undefined;
   addNewStates = true;
   smallSizeMode = false;
+  config: Config | undefined;
 
   constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService,
               private cdr:ChangeDetectorRef, private messageService: MessageService,
@@ -159,7 +152,12 @@ export class ActiveEntitiesComponent implements OnInit {
       }
       this.cdr.detectChanges();
     });
-    this.dashboards = this.getDashboards();
+    this.server.getConfig().subscribe(config => {
+      this.config = config;
+      this.server.config$.subscribe(config => {
+        this.config = config;
+      })
+    })
     this.cdr.detectChanges();
     this.responsive.observe([
       Breakpoints.HandsetLandscape,
@@ -172,15 +170,6 @@ export class ActiveEntitiesComponent implements OnInit {
       });
   }
 
-  getDashboards(): Dashboard[]
-  {
-    const dashboards = localStorage.getItem("dashboards");
-    if (dashboards) {
-      return JSON.parse(dashboards);
-    }
-    return [];
-  }
-
   saveDashboard()
   {
     if (!this.dashboardName || (this.mediaEntities.length == 0 && this.selectedActivities.length == 0)) {
@@ -188,8 +177,13 @@ export class ActiveEntitiesComponent implements OnInit {
       this.cdr.detectChanges();
       return;
     }
+    if (!this.config) return;
     this.showDashboardDialog = false;
-    const dashboards = this.getDashboards();
+    let dashboards = this.config.dashboards;
+    if (!dashboards) {
+      dashboards = [];
+      this.config.dashboards = dashboards;
+    }
     const dashboard: Dashboard = {name: this.dashboardName, dashboardEntityIds: this.mediaEntities.map(item => item.entity_id!),
       popupEntitiyIds: this.selectedActivities.map(item => item.entity_id!)};
     const existingDashboard = dashboards.find(item => item.name === dashboard.name);
@@ -197,21 +191,26 @@ export class ActiveEntitiesComponent implements OnInit {
       dashboards.splice(dashboards.indexOf(existingDashboard), 1);
     }
     dashboards.push(dashboard);
-    localStorage.setItem("dashboards", JSON.stringify(dashboards));
-    this.dashboards = this.getDashboards();
-    this.messageService.add({severity: "success", summary: `Dashboard saved : ${this.dashboardName}`, key: 'activeEntities'});
+    this.server.setConfig(this.config).subscribe(() => {
+      this.messageService.add({severity: "success", summary: `Dashboard saved : ${this.dashboardName}`, key: 'activeEntities'});
+      this.cdr.detectChanges();
+    });
     this.cdr.detectChanges();
   }
 
   deleteDashboard(name: string)
   {
-    const dashboards = this.getDashboards();
+    if (!this.config) return;
+    const dashboards = this.config.dashboards;
+    if (!dashboards) return;
     const existingDashboard = dashboards.find(item => item.name === name);
     this.showDashboardDialog = false;
     if (existingDashboard) {
       dashboards.splice(dashboards.indexOf(existingDashboard), 1);
-      this.dashboards = this.getDashboards();
-      this.messageService.add({severity: "success", summary: `Dashboard deleted : ${name}`, key: 'activeEntities'});
+      this.server.setConfig(this.config).subscribe(() => {
+        this.messageService.add({severity: "success", summary: `Dashboard deleted : ${name}}`, key: 'activeEntities'});
+        this.cdr.detectChanges();
+      });
       this.cdr.detectChanges();
     } else {
       this.messageService.add({severity: "error", summary: `No dashboard found with name ${name}`, key: 'activeEntities'});
@@ -330,15 +329,6 @@ export class ActiveEntitiesComponent implements OnInit {
     console.log("Drop", $event);
     moveItemInArray(this.mediaEntities, $event.previousIndex, $event.currentIndex);
     this.cdr.detectChanges();
-  }
-
-  replaceMediaEntity(entity: Entity, mediaStates: MediaEntityState[]) {
-    const existing = mediaStates.find(item => item.entity_id === entity.entity_id);
-    if (existing)
-    {
-      this.selectedActivities.splice(this.mediaEntities.indexOf(existing), 1);
-    }
-    mediaStates.push({...entity, new_state: {attributes: entity.attributes, features: entity.features}} as any);
   }
 
   selectDashboard(dashboard: Dashboard | undefined) {

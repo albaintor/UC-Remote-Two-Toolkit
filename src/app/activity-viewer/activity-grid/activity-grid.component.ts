@@ -72,7 +72,6 @@ export class ActivityGridComponent implements AfterViewInit {
     this.activity = activity;
     if (!this.currentPage && this.activity?.options?.user_interface?.pages)
       this.currentPage = this.activity?.options?.user_interface?.pages?.[0];
-    // this.getGridItems();
     this.cdr.detectChanges();
   }
   @Input("currentPage") set _currentPage( currentPage: UIPage | undefined)
@@ -175,22 +174,7 @@ export class ActivityGridComponent implements AfterViewInit {
 
   getGridPageItems(page: UIPage | undefined, reset=false): ActivityPageCommand[]
   {
-    // if (this.currentPage && this.activity?.options?.user_interface?.pages?.indexOf(this.currentPage) == -1)
-    // {
-    //   if (this.firstPage >= this.activity.options.user_interface.pages.length)
-    //     this.firstPage = this.activity.options.user_interface.pages.length -1;
-    //   if (this.activity.options.user_interface.pages.length > 0)
-    //   {
-    //     this.currentPage = this.activity.options.user_interface.pages[this.firstPage];
-    //   }
-    //   this.toggleGrid = false;
-    //   this.cdr.detectChanges();
-    //   this.toggleGrid = true;
-    // }
-    // const width = this.currentPage?.grid?.width ? this.currentPage.grid.width : 4;
-    // const height = this.currentPage?.grid?.height ? this.currentPage.grid.height : 6;
     if (!page) return [];
-
     const modifiedPage = page as any;
     if (reset || !modifiedPage?.gridCommands)
     {
@@ -210,7 +194,6 @@ export class ActivityGridComponent implements AfterViewInit {
         }
       }
       modifiedPage.gridCommands = list;
-      // console.log("Grid for activity", list);
       return list;
     }
     else return modifiedPage.gridCommands;
@@ -331,7 +314,10 @@ export class ActivityGridComponent implements AfterViewInit {
   }
 
   mouseDownUIPages($event: MouseEvent | TouchEvent) {
-    if (!this.currentPage || !this.runMode) return;
+    if (!this.currentPage || !this.runMode)
+    {
+      return;
+    }
     let x = 0;
     if ($event instanceof MouseEvent) x = $event.clientX;
     else if ($event instanceof TouchEvent) x =$event.touches[0].clientX;
@@ -378,7 +364,9 @@ export class ActivityGridComponent implements AfterViewInit {
 
   @HostListener('window:mouseup', ['$event'])
   onMouseUp($event: MouseEvent) {
-    this.swipeInfo.mousePressed= false;
+    if (!this.currentPage || !this.runMode || !this.swipeInfo.mousePressed)
+      return;
+    this.swipeInfo.mousePressed = false;
     this.switchCurrentPage();
     this.cdr.detectChanges();
   }

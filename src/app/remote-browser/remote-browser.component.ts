@@ -25,7 +25,7 @@ import {
   Context,
   Entity,
   EntityCommand,
-  EntityUsage,
+  EntityUsage, LanguageCode,
   OrphanEntity,
   Profile,
   Remote, RemoteData
@@ -439,7 +439,7 @@ export class RemoteBrowserComponent implements AfterViewInit {
       activityeditor.view(this.activities!
         .find(item => item.entity_id === (activity as ActivityEntityUsage).activity_id)!, false);
     else
-      activityeditor.view(activity, false);
+      activityeditor.view(activity as Activity, false);
     this.viewerVisible = true;
     this.cdr.detectChanges();
   }
@@ -500,11 +500,11 @@ export class RemoteBrowserComponent implements AfterViewInit {
     return undefined;
   }
 
-  setLanguage(languageCode: string) {
+  setLanguage(languageCode: LanguageCode) {
     if (!this.config) return;
     this.config.language = languageCode;
     this.server.setConfig(this.config).subscribe({next: results => {
-        this.messageService.add({severity: "success", summary: `Language changed to "${languageCode}" and saved`});
+        this.messageService.add({severity: "success", summary: `Language switched to "${Helper.getLanguageNameFromCode(languageCode)}"`});
         this.cdr.detectChanges();
       }});
   }

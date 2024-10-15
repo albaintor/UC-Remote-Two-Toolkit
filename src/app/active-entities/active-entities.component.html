@@ -2,7 +2,7 @@
 <p-menubar [model]="menuItems">
   <ng-template pTemplate="end">
     <div class="flex flex-wrap align-items-center gap-2">
-      <p-dropdown [(ngModel)]="selectedDashboard" [options]="dashboards" placeholder="Select dashboard"
+      <p-dropdown *ngIf="config?.dashboards" [(ngModel)]="selectedDashboard" [options]="config!.dashboards!" placeholder="Select dashboard"
                   (ngModelChange)="selectDashboard($event)" optionLabel="name" class="smaller-dropdown">
       </p-dropdown>
       <p-button icon="pi pi-save" pTooltip="Save dashboard to browser cache"

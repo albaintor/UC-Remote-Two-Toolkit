@@ -62,11 +62,13 @@
     </app-image-map>
   </div>
 </div>
-<div class="grid align-content-start" *ngIf="!hideButtonsInfo && mouseoverButton" style="width:400px; height: 150px">
-  <div class="col-12 text-center">
-    <h3>{{mouseOverButtonName!}}</h3>
-  </div>
-  <ng-container [ngTemplateOutlet]="buttonTemplate" [ngTemplateOutletContext]="{button:mouseoverButton}"/>
+<div #buttonsInfo class="grid align-content-start buttons-info" *ngIf="!hideButtonsInfo" style="width:0; height:0">
+  <ng-container *ngIf="mouseoverButton">
+    <div class="col-12 text-center">
+      <h3>{{mouseOverButtonName!}}</h3>
+    </div>
+    <ng-container [ngTemplateOutlet]="buttonTemplate" [ngTemplateOutletContext]="{button:mouseoverButton}"/>
+  </ng-container>
 </div>
 <app-button-editor [activity]="activity" [remote]="remote" [button]="selectedButton" (buttonChanged)="buttonChanged($event)"></app-button-editor>
 <p-overlayPanel #executeButtonPanel [showCloseIcon]="true" appendTo="body" [style]="{width: '450px'}">
@@ -84,7 +86,7 @@
     </div>
     <div class="col-3 button-action" (click)="executeCommand(button, ButtonMode.ShortPress)">
       <p-chip [label]="getEntityName(button.short_press.entity_id)"
-              [style]="Helper.getStyle(Helper.getEntityName(button.short_press.entity_id))"
+              [style]="Helper.getStyle(button.short_press.entity_id)"
               [pTooltip]="button.short_press.entity_id"></p-chip>&nbsp;
     </div>
     <div class="col-3 button-action" (click)="executeCommand(button, ButtonMode.ShortPress)">
@@ -108,7 +110,7 @@
     </div>
     <div class="col-3 button-action" (click)="executeCommand(button, ButtonMode.LongPress)">
       <p-chip [label]="getEntityName(button.long_press.entity_id)"
-              [style]="Helper.getStyle(Helper.getEntityName(button.long_press.entity_id))"
+              [style]="Helper.getStyle(button.long_press.entity_id)"
               [pTooltip]="button.long_press.entity_id"></p-chip>&nbsp;
     </div>
     <div class="col-3 button-action" (click)="executeCommand(button, ButtonMode.LongPress)">

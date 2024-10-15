@@ -217,7 +217,7 @@ export class ActivitySyncComponent implements AfterViewInit {
     {
       if (!orphanEntities.find(item => item.oldEntity?.entity_id === entityId))
       {
-        orphanEntities.push({oldEntity: {entity_id:entityId, entity_type: "", name: ""}, newEntity: undefined,
+        orphanEntities.push({oldEntity: {entity_id:entityId, entity_type: "", name: Helper.buildName("")}, newEntity: undefined,
         origin, activity});
       }
     }
@@ -247,7 +247,7 @@ export class ActivitySyncComponent implements AfterViewInit {
     const remoteModel = this.getRemoteModel();
 
     const updatedActivity: Activity = {
-      name: Helper.getEntityName(activity1),
+      name: JSON.parse(JSON.stringify(activity1.name)),
       description: activity1.description,
       icon: activity1.icon,
       options: {//TODO activity_group: activity1.options?.activity_group
@@ -331,9 +331,7 @@ export class ActivitySyncComponent implements AfterViewInit {
 
     let resultField: RemoteOperationResultField | undefined = undefined;
     const body: any = {
-      name: {
-        en: updatedActivity.name,
-      },
+      name: updatedActivity.name,
       options: {}
     }
     if (updatedActivity.icon)
@@ -351,23 +349,23 @@ export class ActivitySyncComponent implements AfterViewInit {
       console.log("Activity to import exists, we will update it", body);
       activity2.options?.button_mapping?.forEach(button => {
         if (updatedActivity.options?.button_mapping?.find(button2 => button2.button === button.button)) return;
-        activityOperations.remoteOperations.push({activity:  updatedActivity, name: `Delete button ${button.button} ${updatedActivity!.name}`,
+        activityOperations.remoteOperations.push({activity:  updatedActivity, name: `Delete button ${button.button} ${Helper.getEntityName(updatedActivity)}`,
           method: "DELETE", api: `/api/activities/${activity2.entity_id}/buttons/${button.button}`,
           body: {}, status: OperationStatus.Todo});
       })
       activity2.options?.user_interface?.pages?.forEach(page => {
         if (page.page_id)
-          activityOperations.remoteOperations.push({activity:  updatedActivity, name: `Delete page ${page.name} ${updatedActivity!.name}`,
+          activityOperations.remoteOperations.push({activity:  updatedActivity, name: `Delete page ${page.name} ${Helper.getEntityName(updatedActivity)}`,
             method: "DELETE", api: `/api/activities/${activity2.entity_id}/ui/pages/${page.page_id}`,
             body: {}, status: OperationStatus.Todo});
       });
-      activityOperations.remoteOperations.push({activity:  updatedActivity, name: `Update activity ${updatedActivity!.name}`, method: "PATCH",
+      activityOperations.remoteOperations.push({activity:  updatedActivity, name: `Update activity ${Helper.getEntityName(updatedActivity)}`, method: "PATCH",
         api: `/api/activities/${activity2.entity_id}`, body, status: OperationStatus.Todo});
     }
     else
     {
       console.log("Activity to import does not exist, we will create it", body);
-      let createOperation: RemoteOperation = {activity:  updatedActivity, name: `Create activity ${updatedActivity!.name}`, method: "POST", api: `/api/activities`,
+      let createOperation: RemoteOperation = {activity:  updatedActivity, name: `Create activity ${Helper.getEntityName(updatedActivity)}`, method: "POST", api: `/api/activities`,
         body, status: OperationStatus.Todo};
       activityOperations.remoteOperations.push(createOperation);
       resultField = {fieldName: "entity_id", linkedOperation: createOperation, keyName: NEW_ACTIVITY_ID_KEY};
@@ -470,7 +468,8 @@ export class ActivitySyncComponent implements AfterViewInit {
     let activitiesDiff = [];
     for (let activity1 of activities1)
     {
-      const activity2 = activities2.find(activity2 => activity2.name == activity1.name);
+      const activity2 = activities2.find(activity2 =>
+        Helper.getEntityName(activity2) == Helper.getEntityName(activity1));
       if (!activity2) {
         activitiesDiff.push({activity1: activity1, status: ActivityStatus.Missing});
         continue;
@@ -597,7 +596,8 @@ export class ActivitySyncComponent implements AfterViewInit {
       if (diff.sequences || diff.pages || diff.buttons) diff.status = ActivityStatus.Different;
     }
     for (let activity2 of activities2) {
-      const activity1 = activities1.find(activity1 => activity2.name == activity1.name);
+      const activity1 = activities1.find(activity1 =>
+        Helper.getEntityName(activity2) === Helper.getEntityName(activity1));
       if (!activity1) {
         activitiesDiff.push({activity2: activity2, status: ActivityStatus.Missing});
       }

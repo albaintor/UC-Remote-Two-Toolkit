@@ -133,9 +133,7 @@ export class RemoteDataLoaderComponent {
             map(activityDetails => {
               // console.debug("Get remote activity details", remote, activityDetails);
               this.progressDetail = Helper.getEntityName(activity);
-              const name = activity.name;
               Object.assign(activity, activityDetails);
-              activity.name = name;
               if ((activityDetails as any).options?.included_entities)
                 (activity as any).entities = (activityDetails as any).options.included_entities;
               this.remoteProgress += 100/this.activities.length;
@@ -247,7 +245,6 @@ export class RemoteDataLoaderComponent {
         }
       }
       this.activities.push(activityDetails);
-      activityDetails.name = Helper.getEntityName(activityDetails);
       this.cdr.detectChanges();
       return activityDetails;
     })));

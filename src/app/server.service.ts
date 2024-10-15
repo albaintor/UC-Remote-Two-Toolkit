@@ -177,9 +177,9 @@ export class ServerService {
   {
     const httpOptions = {params: new HttpParams({fromObject: {filter}})};
     return this.http.get<Entity[]>(`/api/remote/${remote.address}/intg/instances/${integrationId}/entities`, httpOptions).pipe(map(entities => {
-      entities.forEach(entity => {
-        entity.name = this.getObjectName(entity);
-      })
+      // entities.forEach(entity => {
+      //   entity.name = this.getObjectName(entity);
+      // })
       this.entities = entities;
       return entities;
     }))
@@ -188,9 +188,9 @@ export class ServerService {
   getRemoteEntities(remote: Remote): Observable<Entity[]>
   {
     return this.http.get<Entity[]>(`/api/remote/${remote.address}/entities`).pipe(map(entities => {
-      entities.forEach(entity => {
+      /*entities.forEach(entity => {
         entity.name = this.getObjectName(entity);
-      })
+      })*/
       this.entities = entities;
       return entities;
     }))
@@ -206,9 +206,9 @@ export class ServerService {
   getRemoteActivities(remote: Remote): Observable<Activity[]>
   {
     return this.http.get<Activity[]>(`/api/remote/${remote.address}/activities`).pipe(map(activities => {
-      activities.forEach(entity => {
-        entity.name = this.getObjectName(entity);
-      })
+      // activities.forEach(entity => {
+      //   entity.name = this.getObjectName(entity);
+      // })
       return activities;
     }))
   }

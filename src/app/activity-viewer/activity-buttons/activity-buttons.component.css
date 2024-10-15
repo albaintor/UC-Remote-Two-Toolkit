@@ -16,3 +16,8 @@
 .button-action {
   cursor: pointer;
 }
+
+.buttons-info {
+  transition: all 0.5s linear;
+  padding: 3px;
+  }

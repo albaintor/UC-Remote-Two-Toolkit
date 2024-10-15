@@ -132,7 +132,6 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
       this.orphanEntities = Helper.getOrphans(this.activities, this.entities)
       this.entities.push(...this.orphanEntities.map(entity => {
         const item = {...entity};
-        item.name = Helper.getEntityName(entity);
         return item;
       }));
       this.availableEntities = [...this.entities];
@@ -187,7 +186,6 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
       this.context = $event.context;
       this.entities.push(...this.orphanEntities.map(entity => {
         const item = {...entity};
-        item.name = Helper.getEntityName(entity);
         return item;
       }));
       this.activities.sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
@@ -281,7 +279,7 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
               {
                 console.warn("This entity is orphan in the sequence", sequence);
                 this.messages.push({title: "This entity is orphan in the sequence",
-                  message: `${sequence.command!.entity_id!}  will be removed from sequence in activity ${activity.name} (${activity.entity_id})`});
+                  message: `${sequence.command!.entity_id!}  will be removed from sequence in activity ${Helper.getEntityName(activity)} (${activity.entity_id})`});
                 this.cdr.detectChanges();
               }
               else
@@ -291,7 +289,7 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
           }
         })
 
-        this.remoteOperations.push({name: `${activity.name}`,method: "PATCH", api: `/api/activities/${activity.entity_id}`,
+        this.remoteOperations.push({name: Helper.getEntityName(activity),method: "PATCH", api: `/api/activities/${activity.entity_id}`,
           body: {
             options: {
               entity_ids,
@@ -303,7 +301,7 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
           let item = replaceEntities.find(entity => entity.oldEntity!.entity_id === button.short_press?.entity_id);
           if (item) {
             button.short_press!.entity_id = item.newEntity!.entity_id!;
-            this.remoteOperations.push({name: `${activity.name} (buttons)`,method: "PATCH", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
+            this.remoteOperations.push({name: `${Helper.getEntityName(activity)} (buttons)`,method: "PATCH", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
               body: {
                 short_press: {...button.short_press}
               }, status: OperationStatus.Todo})
@@ -311,7 +309,7 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
           item = replaceEntities.find(entity => entity.oldEntity!.entity_id === button.long_press?.entity_id);
           if (item) {
             button.long_press!.entity_id = item.newEntity!.entity_id!;
-            this.remoteOperations.push({name: `${activity.name} (buttons)`, method: "PATCH", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
+            this.remoteOperations.push({name: `${Helper.getEntityName(activity)} (buttons)`, method: "PATCH", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
               body: {
                 long_press: {...button.long_press}
               }, status: OperationStatus.Todo})
@@ -319,7 +317,7 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
           item = replaceEntities.find(entity => entity.oldEntity!.entity_id === button.double_press?.entity_id);
           if (item) {
             button.double_press!.entity_id = item.newEntity!.entity_id!;
-            this.remoteOperations.push({name: `${activity.name} (buttons)`, method: "PATCH", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
+            this.remoteOperations.push({name: `${Helper.getEntityName(activity)} (buttons)`, method: "PATCH", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
               body: {
                 double_press: {...button.double_press}
               }, status: OperationStatus.Todo})
@@ -359,7 +357,7 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
               {
                 console.warn("This entity is orphan in the UI", item);
                 this.messages.push({title: "This entity is orphan in the UI",
-                  message: `${(item.command as Command)!.entity_id!}  will be removed from UI page ${page.name} in activity ${activity.name} (${activity.entity_id})`})
+                  message: `${(item.command as Command)!.entity_id!}  will be removed from UI page ${page.name} in activity ${Helper.getEntityName(activity)} (${activity.entity_id})`})
                 delete item['command'];
                 this.cdr.detectChanges();
               } else if (item.media_player_id && this.orphanEntities.find(entity =>
@@ -367,7 +365,7 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
               {
                 console.warn("This entity is orphan in the UI", item);
                 this.messages.push({title: "This entity is orphan in the UI",
-                  message: `${item.media_player_id}  will be removed from UI page ${page.name} in activity ${activity.name} (${activity.entity_id})`})
+                  message: `${item.media_player_id}  will be removed from UI page ${page.name} in activity ${Helper.getEntityName(activity)} (${activity.entity_id})`})
                 delete item['media_player_id'];
                 this.cdr.detectChanges();
               }
@@ -375,7 +373,7 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
             let method: "PUT" | "POST" | "DELETE" | "PATCH" = "PATCH";
             let api = `/api/activities/${activity.entity_id}/ui/pages/${page.page_id}`;
 
-            this.remoteOperations.push({name: `${activity.name} (page ${page.name})`,method , api,
+            this.remoteOperations.push({name: `${Helper.getEntityName(activity)} (page ${page.name})`,method , api,
               body: {
                 ...page
               }, status: OperationStatus.Todo})

@@ -18,7 +18,7 @@
     <p-button label="Edit" [routerLink]="['/activity/edit', activity?.entity_id]" severity="warning" icon="pi pi-pen-to-square" size="small"></p-button>&nbsp;&nbsp;
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-button label="Copy to clipboard" (onClick)="copyToClipboard(activity, 'Activity '+activity?.name+' copied to clipboard')" icon="pi pi-copy" size="small"></p-button>
+    <p-button label="Copy to clipboard" (onClick)="copyToClipboard(activity, 'Activity '+Helper.getEntityName(activity)+' copied to clipboard')" icon="pi pi-copy" size="small"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-button label="Clone" [routerLink]="['/activity/clone', activity?.entity_id]" severity="warning" icon="pi pi-clone" size="small"></p-button>
@@ -34,10 +34,10 @@
 <p-toolbar styleClass="toolbar-included-entities"><h3>Included entities</h3>
   <p-dropdown *ngIf="editMode" [options]="entities" [(ngModel)]="includedEntity" (ngModelChange)="addIncludedEntity($event)" placeholder="Add entity">
     <ng-template let-item pTemplate="item">
-      <div><b>{{item.name}}</b> [<span [style]="{'color': getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
+      <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
     </ng-template>
     <ng-template let-item pTemplate="selectedItem">
-      <div><b>{{item.name}}</b> [<span [style]="{'color': getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
+      <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
     </ng-template>
   </p-dropdown>
   <p-chip *ngFor="let entity of activity?.options?.included_entities" label="{{Helper.getEntityName(entity)}} ({{Helper.getEntityType(entity)}})"

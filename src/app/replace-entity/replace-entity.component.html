@@ -110,7 +110,7 @@
         <td><a (click)="selectEntity(entity)" [routerLink]="[]">{{entity.entity_id}}</a></td>
         <td><ng-container *ngIf="entity.activities">
           <ng-container *ngFor="let activity of entity.activities">
-            <p-chip [label]="activity.name" [style]="getStyle(activity.name)" [pTooltip]="activity.entity_id"></p-chip>
+            <p-chip [label]="Helper.getEntityName(activity)" [style]="getStyle(Helper.getEntityName(activity))" [pTooltip]="activity.entity_id"></p-chip>
           </ng-container>
         </ng-container></td>
       </tr>
@@ -134,7 +134,7 @@
         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
           <p-multiSelect
             [ngModel]="value"
-            [options]="Helper.getItems(availableEntities, 'name')"
+            [options]="Helper.getItemsConverted(availableEntities, 'name', Helper.getEntityName)"
             placeholder="Name"
             (onChange)="filter($event.value)"
             optionLabel="name" optionValue="value" appendTo="body">

@@ -23,7 +23,6 @@
             <ng-container *ngIf="Helper.isCustomIcon(item?.icon)">
               <img [src]="Helper.getIconURL(remote!, item?.icon)" [alt]="item?.icon" width="70" height="70" class="grid-icon">
             </ng-container>
-
             <ng-container *ngIf="item?.text">
               <b>{{item?.text}}</b>
             </ng-container>
@@ -55,52 +54,8 @@
         </grid-button>
       </div>
     </div>
-
   </div>
 </div>
-<!--<div class="grid-container" *ngIf="currentPage"-->
-<!--     [style]="{'grid-template-columns': 'auto '.repeat(currentPage.grid.width), 'width': width+'px', 'height': height+'px'}">-->
-<!--  <grid-button [editable]="editMode" *ngFor="let item of getGridPageItems(currentPage); let index=index" [source]="gridItemSource" [item]="item" [grid]="currentPage.grid" [style]="getGridItemStyleSize(item)"-->
-<!--               (sourceSelected)="gridSourceSelected($event)" (destinationSelected)="gridDestinationSelected($event)" [gridCommands]="gridCommands"-->
-<!--               (itemClicked)="gridItemClicked($event)" [selectionMode]="selectionMode" [runMode]="runMode" class="grid-item">-->
-<!--    <div class="flex flex-column align-items-center justify-content-center" style="width:100%;height:100%">-->
-<!--    <ng-container *ngIf="Helper.isStandardIcon(item?.icon)">-->
-<!--        <span [class]="Helper.getIconClass(item?.icon)"></span>-->
-<!--    </ng-container>-->
-<!--    <ng-container *ngIf="Helper.isCustomIcon(item?.icon)">-->
-<!--        <img [src]="Helper.getIconURL(remote!, item?.icon)" [alt]="item?.icon" width="70" height="70" class="grid-icon">-->
-<!--    </ng-container>-->
-
-<!--    <ng-container *ngIf="item?.text">-->
-<!--      <b>{{item?.text}}</b>-->
-<!--    </ng-container>-->
-<!--    <ng-container *ngIf="!runMode && item && item.command != undefined">-->
-<!--      <p-chip [label]="getEntityName((item.command | as : Command)?.entity_id!)"-->
-<!--              [style]="Helper.getStyle(getEntityName((item.command | as : Command)?.entity_id!))"></p-chip>-->
-<!--      <p-tag [value]="Helper.getCommandName(item.command, configEntityCommands)" severity="secondary"></p-tag>-->
-<!--    </ng-container>-->
-<!--    <span *ngIf="item?.media_player_id" style="text-align: center;width:100%;height: 100%">-->
-<!--        <p-chip *ngIf="!runMode" [label]="getEntityName(item?.media_player_id!)"-->
-<!--                [style]="Helper.getStyle(getEntityName(item?.media_player_id!))"></p-chip>-->
-<!--        <div style="position: relative; width: 100%;height: 100%">-->
-<!--          <img *ngIf="!runMode" src="/assets/icons/media_player.svg" alt="Media player" class="media_player_icon">-->
-<!--          <ng-container *ngIf="runMode">-->
-<!--            <app-activity-media-entity [entityId]="item.media_player_id" [remote]="remote" [size]="getGridItemSize(item)"-->
-<!--            (onSelectButton)="onSelectButton.emit($event)"/>-->
-<!--          </ng-container>-->
-<!--        </div>-->
-<!--      </span>-->
-<!--    <ng-container *ngIf="!runMode">-->
-<!--      <ng-container *ngFor="let param of Helper.getParams(item?.command)">-->
-<!--        <ng-container *ngIf="Helper.getParam(item?.command, param, configEntityCommands)">-->
-<!--          {{Helper.getEntityName(Helper.getParam(item?.command, param, configEntityCommands))}} :-->
-<!--          {{Helper.getParamValue(item?.command, param)}}-->
-<!--        </ng-container>-->
-<!--      </ng-container>-->
-<!--    </ng-container>-->
-<!--    </div>-->
-<!--  </grid-button>-->
-<!--</div>-->
 <app-ui-command-editor #commandeditor (updateItem)="updateGridItem($event)"
     (addItem)="addGridItem($event)" (deleteItem)="deleteGridItem($event)"
     [remote]="remote" [activity]="activity" [gridItem]="gridItem" [gridCommands]="getGridPageItems(currentPage)" [grid]="currentPage?.grid"></app-ui-command-editor>

@@ -66,7 +66,11 @@
       Activity name :
     </div>
     <div class="flex align-items-center justify-content-center">
-      <input type="text" pInputText [(ngModel)]="updatedActivity.name" />
+      <p-dropdown class="smaller-dropdown" [(ngModel)]="currentLanguage" [options]="Helper.getLanguages()" placeholder="Select language"
+          optionLabel="label" optionValue="value" pTooltip="Switch language for entity names"/>
+    </div>
+    <div class="flex align-items-center justify-content-center">
+      <input type="text" pInputText [(ngModel)]="updatedActivity.name[currentLanguage]" />
     </div>
   </ng-container>
   <div class="flex align-items-center justify-content-center">
@@ -132,7 +136,7 @@
 </ng-container>
 <p-divider />
 <h3>Apply a predefined mapping from a given entity</h3>
-<div *ngIf="selectedEntity"><b>{{selectedEntity.name}}</b> ({{selectedEntity.entity_id}})</div>
+<div *ngIf="selectedEntity"><b>{{Helper.getEntityName(selectedEntity)}}</b> ({{selectedEntity.entity_id}})</div>
 <div class="formgroup-inline">
   <ng-container *ngFor="let template of templates">
     <div class="field" *ngIf="!selectedEntity">

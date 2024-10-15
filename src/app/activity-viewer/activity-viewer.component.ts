@@ -382,7 +382,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   {
     if (!this.activity) return;
     saveAs(new Blob([JSON.stringify(this.activity)], {type: "text/plain;charset=utf-8"}),
-      `${this.activity.name}.json`);
+      `${Helper.getEntityName(this.activity)}.json`);
   }
 
   savePage()
@@ -390,7 +390,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     if (!this.currentPage ||!this.activity) return;
     const fileName = this.currentPage?.name ? this.currentPage.name : "Page";
     saveAs(new Blob([JSON.stringify(this.currentPage)], {type: "text/plain;charset=utf-8"}),
-      `${this.activity.name}_${fileName}.json`);
+      `${Helper.getEntityName(this.activity)}_${fileName}.json`);
   }
 
   importPage() {
@@ -427,7 +427,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.confirmationService.confirm({
       target: $event.target as EventTarget,
       key: "activityViewerDialog",
-      message: `Are you sure that you want to delete the activity "${this.activity?.name}" ?`,
+      message: `Are you sure that you want to delete the activity "${Helper.getEntityName(this.activity)}" ?`,
       header: 'Confirmation',
       icon: 'pi pi-exclamation-triangle',
       acceptIcon:"none",
@@ -439,7 +439,7 @@ export class ActivityViewerComponent implements AfterViewInit {
           {
             this.messageService.add({
               severity: 'success',
-              summary: `Activity "${this.activity?.name}" successfully deleted`
+              summary: `Activity "${Helper.getEntityName(this.activity)}" successfully deleted`
             });
             this.onChange.emit();
             this.cdr.detectChanges();
@@ -447,7 +447,7 @@ export class ActivityViewerComponent implements AfterViewInit {
           error: (error) => {
             this.messageService.add({
               severity: 'error',
-              summary: `Error while deleting activity "${this.activity?.name}"`
+              summary: `Error while deleting activity "${Helper.getEntityName(this.activity)}"`
             });
             this.cdr.detectChanges();
           }

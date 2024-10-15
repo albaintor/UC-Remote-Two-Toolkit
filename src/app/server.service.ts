@@ -116,6 +116,9 @@ export class ServerService {
   {
     return this.http.post<Config>('/api/config', config).pipe(map(results => {
       this.config = config;
+      if (results.language) {
+        Helper.setLanguageName(results.language as LanguageCode);
+      }
       this.config$.next(this.config);
       return results;
     }))
@@ -127,7 +130,6 @@ export class ServerService {
       return results;
     }))
   }
-
 
   getRemoteBattery(remote: Remote): Observable<BatteryState>
   {

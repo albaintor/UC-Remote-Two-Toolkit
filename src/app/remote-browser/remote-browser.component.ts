@@ -195,6 +195,23 @@ export class RemoteBrowserComponent implements AfterViewInit {
       this.init();
   }
 
+  triggerReload()
+  {
+    const entities = this.entities;
+    const activities = this.activities;
+    const profiles = this.profiles;
+    const orphanEntities = this.orphanEntities;
+    const unusedEntities = this.unusedEntities;
+    this.entities = []; this.activities = []; this.profiles = []; this.orphanEntities = []; this.unusedEntities = [];
+    this.cdr.detectChanges();
+    this.entities = entities;
+    this.activities = activities;
+    this.profiles = profiles;
+    this.orphanEntities = orphanEntities;
+    this.unusedEntities = unusedEntities;
+    this.cdr.detectChanges();
+  }
+
   checkCache(): boolean
   {
     if (!this.selectedRemote || !this.context) return true;
@@ -505,7 +522,7 @@ export class RemoteBrowserComponent implements AfterViewInit {
     this.config.language = languageCode;
     this.server.setConfig(this.config).subscribe({next: results => {
         this.messageService.add({severity: "success", summary: `Language switched to "${Helper.getLanguageNameFromCode(languageCode)}"`});
-        this.cdr.detectChanges();
+        this.triggerReload();
       }});
   }
 }

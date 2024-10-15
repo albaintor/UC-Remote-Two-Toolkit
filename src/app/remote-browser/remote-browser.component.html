@@ -116,7 +116,7 @@
             <td>{{entity.entity_id}}</td>
             <td><ng-container *ngIf="entity.activities">
               <ng-container *ngFor="let activity of entity.activities">
-                <p-chip [label]="activity.name" [style]="getStyle(activity.name)" [pTooltip]="activity.entity_id"
+                <p-chip [label]="Helper.getEntityName(activity)" [style]="getStyle(Helper.getEntityName(activity))" [pTooltip]="activity.entity_id"
                   (click)="viewActivity(activityeditor, activity)" class="link-element"></p-chip>
               </ng-container>
             </ng-container></td>

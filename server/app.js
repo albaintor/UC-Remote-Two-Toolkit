@@ -235,7 +235,7 @@ app.get('/api/config', (req, res, next) => {
 app.post('/api/config', (req, res, next) => {
   try {
     writeConfigFile(req.body)
-    res.status(200).end();
+    res.status(200).json(getConfigFile());
   } catch(error) {
     next(error);
   }

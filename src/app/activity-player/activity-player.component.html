@@ -53,9 +53,8 @@
   </ng-container>
 </p-dialog>
 <div *ngIf="smallSizeMode" style="position: relative; text-align: center;width: 100%">
-  <ng-container style="width:100%">
     <div class="flex align-items-start justify-content-center"
-         [style]="{width: '100%', height: 50*scale+'px'}"></div>
+         [style]="{width: '100%', height: '50px'}"></div>
     <div [style]="'position: absolute;top:5px;left:0;right:0;transform-origin: top;scale:'+scale*1.2">
       <div class="flex justify-content-between gap-2 column-gap-2" style="width: 100%">
         <div class="flex align-items-center justify-content-center" >
@@ -72,8 +71,7 @@
     <div [style]="'position: absolute;right:0; top:0;scale:'+scale">
       <p-button icon="pi pi-times" pTooltip="Close window" (click)="closeDialog($event)" [rounded]="true" [outlined]="true"/>
     </div>
-  </ng-container>
-  <div *ngIf="!minimized" class="flex-initial flex align-items-center justify-content-center gap-4" [style]="'scale:'+scale">
+  <div *ngIf="!minimized" class="flex-initial flex align-items-center justify-content-between" [style]="'scale:'+scale">
     <p-button icon="pi pi-stop" [rounded]="true" pTooltip="Stop activity" (click)="executeActivity('activity.off')" severity="danger"/>
     <p-button icon="pi pi-play" [rounded]="true" pTooltip="Start activity" (click)="executeActivity('activity.on')" severity="success"/>
     <p-button icon="pi pi-hammer" [rounded]="true" pTooltip="Fix states to turn off" (click)="executeSequence('off')" severity="danger"/>
@@ -82,9 +80,9 @@
   </div>
   <ng-container *ngIf="!minimized" style="width: 100%; text-align: center">
     <app-activity-buttons [remote]="remote" [activity]="activity" [editMode]="false" [scale]="scale" [hideButtonsInfo]="true"
-                          (onSelectButton)="handleMessage($event)"/>
+                          (onSelectButton)="handleMessage($event)" style="width:100%"/>
     <div style="position: relative; text-align: center">
-      <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [width]="400*scale" [height]="500*scale"
+      <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [width]="400*scale" [fitScreen]="true" [height]="500*scale"
                          [selectionMode]="false" [currentPage]="currentPage" [runMode]="true" (onSelectButton)="handleCommand($event)"
                          (onPageChange)="selectPage($event)"/>
       <app-pagination *ngIf="activity?.options?.user_interface?.pages && currentPage"

@@ -65,10 +65,12 @@
   </div>
   <p-messages *ngIf="messages.length > 0" class="message-panel" styleClass="message-panel" [(value)]="messages" [enableService]="false" showTransitionOptions="0ms" hideTransitionOptions="0ms"/>
 </div>
+<app-activity-player *ngFor="let activity of selectedActivities" [remote]="selectedRemote" [activity]="activity" [visible]="true"
+                     (onClose)="removeActivity($event)" [scale]="scale" (onMessage)="handleMessage($event)" style="width:100%"/>
 <div class="flex flex-wrap gap-3" *ngIf="smallSizeMode">
   <div class="flex gap-2 align-content-center justify-content-center media-card-border"
-       [style]="'width:'+(600*scale*0.8)+'px'" *ngFor="let mediaEntity of mediaEntities">
-    <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" [style]="'width:'+(600*scale*0.8)+'px'" [scale]="scale*0.8"
+       [style]="'width:100%'" *ngFor="let mediaEntity of mediaEntities">
+    <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" [style]="'width:100%'" [scale]="scale*0.8"
                       class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
                       [closable]="true"></app-media-entity>
   </div>
@@ -81,8 +83,6 @@
       [closable]="true"></app-media-entity>
   </div>
 </div>
-<app-activity-player *ngFor="let activity of selectedActivities" [remote]="selectedRemote" [activity]="activity" [visible]="true"
-  (onClose)="removeActivity($event)" [scale]="scale" (onMessage)="handleMessage($event)"/>
 <p-dialog [modal]="true" position="center" [draggable]="true" appendTo="body" [(visible)]="showDashboardDialog">
   <ng-template pTemplate="header">
     <div class="flex align-items-start justify-content-center">

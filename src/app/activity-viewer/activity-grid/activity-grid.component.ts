@@ -113,6 +113,12 @@ export class ActivityGridComponent implements AfterViewInit {
       this.uiCollection?.nativeElement.classList.remove("swipe");
     this.cdr.detectChanges();
   }
+  fitScreen = false;
+  @Input("fitScreen") set _fitScreen (fitScreen: boolean)
+  {
+    this.fitScreen = fitScreen;
+    this.cdr.detectChanges();
+  }
   // gridCommands: ActivityPageCommand[] = [];
   gridItemSource: ActivityGridItemComponent | undefined;
   gridItem: ActivityGridItemComponent | undefined;
@@ -140,8 +146,14 @@ export class ActivityGridComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.width = Math.min(window.innerWidth*0.8, this.widthInit);
-    this.height = Math.min(window.innerHeight*1.2, this.heightInit);
+    if (this.fitScreen) {
+      this.width = window.innerWidth - 35;
+      this.height = (window.innerWidth - 35)*500/400;
+    }
+    else {
+      this.width = Math.min(window.innerWidth * 0.8, this.widthInit);
+      this.height = Math.min(window.innerHeight * 1.2, this.heightInit)
+    };
     this.server.configCommands$.subscribe(entityCommands => {
       this.configEntityCommands = entityCommands;
       this.cdr.detectChanges();

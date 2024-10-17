@@ -79,10 +79,10 @@
     <p-button icon="pi pi-cog" [rounded]="true" pTooltip="Edit activity" [routerLink]="'/activity/edit/'+activity?.entity_id" />
   </div>
   <ng-container *ngIf="!minimized" style="width: 100%; text-align: center">
-    <app-activity-buttons [remote]="remote" [activity]="activity" [editMode]="false" [scale]="scale" [hideButtonsInfo]="true"
+    <app-activity-buttons [remote]="remote" [activity]="activity" [editMode]="false" [scale]="1" [hideButtonsInfo]="true"
                           (onSelectButton)="handleMessage($event)" style="width:100%"/>
     <div style="position: relative; text-align: center">
-      <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [width]="400*scale" [fitScreen]="true" [height]="500*scale"
+      <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [width]="400" [fitScreen]="true" [height]="500"
                          [selectionMode]="false" [currentPage]="currentPage" [runMode]="true" (onSelectButton)="handleCommand($event)"
                          (onPageChange)="selectPage($event)"/>
       <app-pagination *ngIf="activity?.options?.user_interface?.pages && currentPage"

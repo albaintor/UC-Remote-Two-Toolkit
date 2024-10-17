@@ -173,8 +173,14 @@ export class ActivityGridComponent implements AfterViewInit {
 
   @HostListener('window:resize', ['$event'])
   onResize($event: any) {
-    this.width = Math.min(window.innerWidth*0.8, this.widthInit);
-    this.height = Math.min(window.innerHeight*1.2, this.heightInit);
+    if (this.fitScreen) {
+      this.width = window.innerWidth - 35;
+      this.height = (window.innerWidth - 35)*500/400;
+    }
+    else {
+      this.width = Math.min(window.innerWidth * 0.8, this.widthInit);
+      this.height = Math.min(window.innerHeight * 1.2, this.heightInit)
+    }
     this.cdr.detectChanges();
   }
 

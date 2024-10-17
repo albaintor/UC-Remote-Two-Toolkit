@@ -70,7 +70,7 @@
 <div class="flex flex-wrap gap-3" *ngIf="smallSizeMode">
   <div class="flex gap-2 align-content-center justify-content-center media-card-border"
        [style]="'width:100%'" *ngFor="let mediaEntity of mediaEntities">
-    <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" [style]="'width:100%'" [scale]="scale*0.8"
+    <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" [style]="'width:100%'" [scale]="1"
                       class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
                       [closable]="true"></app-media-entity>
   </div>

@@ -2,44 +2,76 @@
 <p-menubar [model]="menuItems">
   <ng-template pTemplate="end">
     <div class="flex flex-wrap align-items-center gap-2">
-      <p-dropdown *ngIf="config?.dashboards" [(ngModel)]="selectedDashboard" [options]="config!.dashboards!" placeholder="Select dashboard"
-                  (ngModelChange)="selectDashboard($event)" optionLabel="name" class="smaller-dropdown">
-      </p-dropdown>
-      <p-button icon="pi pi-save" pTooltip="Save dashboard to browser cache"
-                label="Save dashboard" (click)="showDashboardDialog = true"/>
-      Scale :
-      <p-inputNumber [(ngModel)]="scale" pTooltip="Scale elements" min="0.1" max="3" (ngModelChange)="Helper.setScale(scale)" mode="decimal"
-                     [minFractionDigits]="1"
-                     [maxFractionDigits]="1" [inputStyle]="{width: '40px'}"/>&nbsp;
-      Activities :
-      <p-autoComplete [(ngModel)]="newActivity" [dropdown]="true" [suggestions]="suggestedActivities" (completeMethod)="searchActivities($event)" appendTo="body"
-                      [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addActivity($event)"
-                      pTooltip="View activity">
-        <ng-template let-item pTemplate="item">
-          <div><b>{{Helper.getEntityName(item)}}</b></div>
-        </ng-template>
-      </p-autoComplete>
-      Entities :
-      <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntities($event)" appendTo="body"
-                      [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addEntity($event)"
-                      pTooltip="Add entity">
-        <ng-template let-item pTemplate="item">
-          <div><b>{{Helper.getEntityName(item)}}</b></div>
-        </ng-template>
-      </p-autoComplete>
-      <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)"
-        class="smaller-dropdown">
-        <ng-template pTemplate="selectedItem">
-          <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
-          <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
-        </ng-template>
-        <ng-template let-item pTemplate="item">
-          {{item.remote_name}} ({{item.address}})
-        </ng-template>
-      </p-dropdown>
+      <ng-container *ngIf="!smallSizeMode">
+        <p-dropdown *ngIf="config?.dashboards" [(ngModel)]="selectedDashboard" [options]="config!.dashboards!" placeholder="Select dashboard"
+                    (ngModelChange)="selectDashboard($event)" optionLabel="name" class="smaller-dropdown">
+        </p-dropdown>
+        <p-button icon="pi pi-save" pTooltip="Save dashboard to browser cache"
+                  label="Save dashboard" (click)="showDashboardDialog = true"/>
+        Scale :
+        <p-inputNumber [(ngModel)]="scale" pTooltip="Scale elements" min="0.1" max="3" (ngModelChange)="Helper.setScale(scale)" mode="decimal"
+                       [minFractionDigits]="1"
+                       [maxFractionDigits]="1" [inputStyle]="{width: '40px'}"/>&nbsp;
+        Activities :
+        <p-autoComplete [(ngModel)]="newActivity" [dropdown]="true" [suggestions]="suggestedActivities" (completeMethod)="searchActivities($event)" appendTo="body"
+                        [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addActivity($event)"
+                        pTooltip="View activity">
+          <ng-template let-item pTemplate="item">
+            <div><b>{{Helper.getEntityName(item)}}</b></div>
+          </ng-template>
+        </p-autoComplete>
+        Entities :
+        <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntities($event)" appendTo="body"
+                        [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addEntity($event)"
+                        pTooltip="Add entity">
+          <ng-template let-item pTemplate="item">
+            <div><b>{{Helper.getEntityName(item)}}</b></div>
+          </ng-template>
+        </p-autoComplete>
+        <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)"
+                    class="smaller-dropdown">
+          <ng-template pTemplate="selectedItem">
+            <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
+            <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
+          </ng-template>
+          <ng-template let-item pTemplate="item">
+            {{item.remote_name}} ({{item.address}})
+          </ng-template>
+        </p-dropdown>
+      </ng-container>
+      <ng-container *ngIf="smallSizeMode">
+        <p-dropdown *ngIf="config?.dashboards" [(ngModel)]="selectedDashboard" [options]="config!.dashboards!" placeholder="Dashboard"
+                    (ngModelChange)="selectDashboard($event)" optionLabel="name" class="smaller-dropdown">
+        </p-dropdown>
+        <p-button icon="pi pi-save" (click)="showDashboardDialog = true"/>
+        <p-autoComplete [(ngModel)]="newActivity" [dropdown]="true" [suggestions]="suggestedActivities" (completeMethod)="searchActivities($event)" appendTo="body"
+                        [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addActivity($event)"
+                        placeholder="Activity">
+          <ng-template let-item pTemplate="item">
+            <div><b>{{Helper.getEntityName(item)}}</b></div>
+          </ng-template>
+        </p-autoComplete>
+        <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntities($event)" appendTo="body"
+                        [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addEntity($event)"
+                        placeholder="Entity">
+          <ng-template let-item pTemplate="item">
+            <div><b>{{Helper.getEntityName(item)}}</b></div>
+          </ng-template>
+        </p-autoComplete>
+        <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Remote" (ngModelChange)="setRemote(selectedRemote!)"
+                    class="smaller-dropdown">
+          <ng-template pTemplate="selectedItem">
+            <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}}</ng-container>
+            <ng-container *ngIf="!selectedRemote">No remote</ng-container>
+          </ng-template>
+          <ng-template let-item pTemplate="item">
+            {{item.remote_name}} ({{item.address}})
+          </ng-template>
+        </p-dropdown>
+      </ng-container>
       <ng-container *ngFor="let activity of activities">
         <ng-container *ngIf="activity.attributes?.state === 'ON'">
-          <p-button icon="pi pi-play" pTooltip="Play activity" (click)="playActivity(activity)"
+          <p-button icon="pi pi-play" (click)="playActivity(activity)"
                     [label]="Helper.getEntityName(activity)"/>
         </ng-container>
       </ng-container>

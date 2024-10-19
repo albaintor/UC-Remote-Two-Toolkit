@@ -41,7 +41,7 @@
 }
 
 .card-title {
-
+  overflow: hidden;
 }
 
 .media-card {

@@ -8,7 +8,6 @@ import {
   TemplateRef,
   ViewEncapsulation
 } from '@angular/core';
-import {MediaEntityState, RemoteWebsocketService} from "../../remote-websocket.service";
 import {Remote} from "../../interfaces";
 import {ServerService} from "../../server.service";
 import {Button} from "primeng/button";
@@ -19,6 +18,8 @@ import {SliderComponent} from "../../controls/slider/slider.component";
 import {TagModule} from "primeng/tag";
 import {TooltipModule} from "primeng/tooltip";
 import {Helper} from "../../helper";
+import {MediaEntityState} from "../../websocket/remote-websocket-media";
+import {WebsocketService} from "../../websocket/websocket.service";
 
 @Component({
   selector: 'app-media-entity',
@@ -49,13 +50,13 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
 
   textStyle = "font-size: 1.2rem";
 
-  constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef) { }
+  constructor(private server:ServerService, protected websocketService: WebsocketService, private cdr:ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    this.remoteWebsocketService.onMediaStateChange().subscribe(remoteState => {
+    this.websocketService.onMediaStateChange().subscribe(remoteState => {
       this.cdr.detectChanges();
     })
-    this.remoteWebsocketService.onMediaPositionChange().subscribe(entities => {
+    this.websocketService.onMediaPositionChange().subscribe(entities => {
       this.cdr.detectChanges();
     });
   }
@@ -210,8 +211,8 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
 
   closeEntity(mediaEntity: MediaEntityState) {
     if (!this.mediaEntity) return;
-    const index = this.remoteWebsocketService.mediaEntities.indexOf(this.mediaEntity);
-    if (index && index > -1) this.remoteWebsocketService.mediaEntities.splice(index, 1);
+    const index = this.websocketService.mediaEntities.indexOf(this.mediaEntity);
+    if (index && index > -1) this.websocketService.mediaEntities.splice(index, 1);
     this.cdr.detectChanges();
   }
 }

@@ -1,24 +1,24 @@
 .control-edit {
   display: none;
   position:absolute;
-  width: 100%;
+  /*width: 100%;*/
   height: 100%;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   opacity: 0;
-  min-width: 150px;
+  min-width: 50px;
   transition: all 0.5s ease;
 }
 
 .control-wrapper {
-  min-width: 150px;
+  min-width: 50px;
   /*height: 40px;*/
 }
 
 .control-wrapper:hover .control-text
 {
-  display:none;
+  opacity: 0;
 }
 
 .control-wrapper:hover .control-edit
@@ -35,9 +35,14 @@
   height: 100%;
   position: relative;
   text-align: center;
+  opacity: 1;
 }
 
 .control-text:hover {
   cursor: pointer;
 }
 
+.smaller-dropdown .p-inputtext
+{
+  font-size: 0.6rem;
+}

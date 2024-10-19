@@ -11,7 +11,7 @@
 <div class="flex-column" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url" style="width: 100%">
   <div class="flex align-content-center justify-content-center card-title" [style]="'text-align:center;scale:'+scale+';margin-left:'+(38*scale)+'px'">
     <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
-    <ng-container *ngIf="!headerTemplate"><h2>{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2></ng-container>
+    <ng-container *ngIf="!headerTemplate"><h2>{{websocketService.getEntityName(mediaEntity)}}</h2></ng-container>
   </div>
   <div class="flex-initial flex align-items-center" [style]="'max-width:'+(scale*400)+'px; max-height: '+(300*scale)+'px'">
     <img class="media-image" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && !mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="mediaEntity.new_state!.attributes!.media_image_url!"
@@ -24,13 +24,13 @@
      [style]="{'width': '100%','max-width': mediaEntity.new_state?.attributes?.media_image_url ? (300*scale)+'px' : (800*scale)+'px'}">
   <div class="flex flex-column align-content-start justify-content-center" *ngIf="!mediaEntity?.new_state?.attributes?.media_image_url" [style]="'width:100%;scale:'+scale">
     <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
-    <ng-container *ngIf="!headerTemplate"><h2 [style]="'text-align:center;scale:'+scale">{{remoteWebsocketService.getEntityName(mediaEntity)}}</h2></ng-container>
+    <ng-container *ngIf="!headerTemplate"><h2 [style]="'text-align:center;scale:'+scale">{{websocketService.getEntityName(mediaEntity)}}</h2></ng-container>
   </div>
-  <div class="flex flex-column justify-content-between gap-2" style="width: 100%;height: 100%;">
-    <div class="flex align-content-center justify-content-between column-gap-2 p-2" style="width: 100%">
+  <div class="flex flex-column justify-content-between gap-1" [style]="'width: 100%;height: 100%;margin-top:'+55*scale+'px'">
+    <div class="flex flex-wrap align-content-center justify-content-between column-gap-1" style="width: 100%">
       <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state?.attributes?.state">
         <p-tag [value]="mediaEntity.new_state!.attributes!.state!" [severity]="getStatusStyle(mediaEntity.new_state!.attributes!.state!)"
-               (click)="clickState(mediaEntity)" styleClass="active-tag" pTooltip="Play / Pause"/>
+               (click)="clickState(mediaEntity)" styleClass="active-tag" pTooltip="Play / Pause" [style]="{'scale': scale}"/>
       </div>
       <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state!.attributes!.source" [style]="'scale:'+scale">
         <app-dropdown-over [value]="mediaEntity.new_state!.attributes!.source!" [options]="mediaEntity.new_state?.attributes?.source_list"
@@ -77,14 +77,14 @@
       <div *ngIf="mediaEntity.new_state?.attributes?.media_position && mediaEntity.new_state?.attributes?.media_duration &&
                       mediaEntity.new_state!.attributes!.media_duration! > 0"
            class="flex align-items-center justify-content-center" style="width: 100%; height: 100%">
-        <app-slider [value]="Math.round(remoteWebsocketService.getMediaPosition(mediaEntity)*100/mediaEntity.new_state!.attributes!.media_duration!)"
+        <app-slider [value]="Math.round(websocketService.getMediaPosition(mediaEntity)*100/mediaEntity.new_state!.attributes!.media_duration!)"
                     style="width: 100%; height: 100%" (valueChange)="updatePosition($event, mediaEntity)"
-                    [textValue]="formatDuration(remoteWebsocketService.getMediaPosition(mediaEntity))"
+                    [textValue]="formatDuration(websocketService.getMediaPosition(mediaEntity))"
                     [editable]="checkFeature(mediaEntity, 'seek')" [max]="formatDuration(mediaEntity.new_state!.attributes!.media_duration!)"></app-slider>
         <b *ngIf="mediaEntity.new_state?.attributes?.media_position &&
             (!mediaEntity.new_state?.attributes?.media_duration ||
                       mediaEntity.new_state!.attributes!.media_duration! == 0)">
-          {{formatDuration(remoteWebsocketService.getMediaPosition(mediaEntity))}}</b>
+          {{formatDuration(websocketService.getMediaPosition(mediaEntity))}}</b>
       </div>
     </div>
       <div class="flex align-items-center justify-content-center gap-2" [style]="'width: 100%;scale:'+scale"

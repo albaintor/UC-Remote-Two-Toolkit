@@ -28,7 +28,7 @@
             <div><b>{{Helper.getEntityName(item)}}</b></div>
           </ng-template>
         </p-autoComplete>
-        <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)"
+        <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="loader.loadRemote(selectedRemote)"
                     class="smaller-dropdown">
           <ng-template pTemplate="selectedItem">
             <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
@@ -58,7 +58,7 @@
             <div><b>{{Helper.getEntityName(item)}}</b></div>
           </ng-template>
         </p-autoComplete>
-        <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Remote" (ngModelChange)="setRemote(selectedRemote!)"
+        <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Remote" (ngModelChange)="loader.loadRemote(selectedRemote)"
                     class="smaller-dropdown">
           <ng-template pTemplate="selectedItem">
             <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}}</ng-container>
@@ -78,6 +78,11 @@
     </div>
   </ng-template>
 </p-menubar>
+<div class="progress-spinner" *ngIf="progress">
+  <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+</div>
+<app-remote-data-loader #loader [remote]="selectedRemote" (loaded)="remoteLoaded($event)"></app-remote-data-loader>
+<p-blockUI [blocked]="loader.progress"></p-blockUI>
 <div class="flex align-content-center flex-wrap gap-3 column-gap-4" style="width: 100%">
   <div class="flex align-items-center justify-content-center" *ngIf="remoteState?.batteryInfo?.capacity" style="width: 160px">
     <div class="flex align-items-center justify-content-center">{{remoteState!.batteryInfo!.capacity!}}%</div>
@@ -89,15 +94,15 @@
     </div>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-tag [value]="(remoteWebsocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
-           [severity]="(remoteWebsocketService.connectionStatus  | async) ? 'success' : 'warning'"
+    <p-tag [value]="(websocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
+           [severity]="(websocketService.connectionStatus  | async) ? 'success' : 'warning'"
            [class]="'disconnected-state'"
             pTooltip="Click to wake up the remote"
             (click)="wakeRemote($event)"/>
   </div>
   <p-messages *ngIf="messages.length > 0" class="message-panel" styleClass="message-panel" [(value)]="messages" [enableService]="false" showTransitionOptions="0ms" hideTransitionOptions="0ms"/>
 </div>
-<app-activity-player *ngFor="let activity of selectedActivities" [remote]="selectedRemote" [activity]="activity" [visible]="true"
+<app-activity-player *ngFor="let activity of selectedActivities" [activity]="activity" [visible]="true"
                      (onClose)="removeActivity($event)" [scale]="scale" (onMessage)="handleMessage($event)" style="width:100%"/>
 <div class="flex flex-wrap gap-3" *ngIf="smallSizeMode">
   <div class="flex gap-2 align-content-center justify-content-center media-card-border"
@@ -126,7 +131,7 @@
       Name of the dashboard : <input type="text" pInputText [(ngModel)]="dashboardName" />
     </div>
     <div class="flex flex-wrap align-items-center gap-1">
-      Entities : <p-tag *ngFor="let mediaEntity of mediaEntities" [value]="remoteWebsocketService.getEntityName(mediaEntity)"/>
+      Entities : <p-tag *ngFor="let mediaEntity of mediaEntities" [value]="websocketService.getEntityName(mediaEntity)"/>
     </div>
     <div class="flex flex-wrap align-items-center gap-1">
       Virtual remotes : <p-tag *ngFor="let entity of selectedActivities" [value]="Helper.getEntityName(entity)" severity="warning"/>

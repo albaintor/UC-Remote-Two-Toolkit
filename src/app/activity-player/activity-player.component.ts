@@ -11,8 +11,7 @@ import {DialogModule} from "primeng/dialog";
 import {Message, MessageService, PrimeTemplate} from "primeng/api";
 import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
 import {ServerService} from "../server.service";
-import {MediaEntityState, RemoteWebsocketService} from "../remote-websocket.service";
-import {Activity, ButtonMapping, Command, Entity, EntityCommand, Remote, UIPage} from "../interfaces";
+import {Activity, ButtonMapping, Command, Entity, EntityCommand, Remote, RemoteActivity, UIPage} from "../interfaces";
 import {Helper} from "../helper";
 import {Button} from "primeng/button";
 import {TooltipModule} from "primeng/tooltip";
@@ -28,6 +27,8 @@ import {RouterLink} from "@angular/router";
 import {IconComponent} from "../controls/icon/icon.component";
 import {SliderComponent} from "../controls/slider/slider.component";
 import {BreakpointObserver, Breakpoints} from "@angular/cdk/layout";
+import {MediaEntityState} from "../websocket/remote-websocket-media";
+import {WebsocketService} from "../websocket/websocket.service";
 
 @Component({
   selector: 'app-activity-player',
@@ -60,17 +61,15 @@ export class ActivityPlayerComponent implements OnInit {
   smallSizeMode = false;
   @Input('remote') set _remote(value: Remote | undefined) {
     this.remote = value;
-    if (this.remote) {
-      this.server.getConfigEntityCommands(this.remote).subscribe(entityCommands => {
-        this.configEntityCommands = entityCommands;
-        this.cdr.detectChanges();
-      });
-      this.update();
-    }
+    this.loadRemoteConfig();
   }
-  activity: Activity | undefined;
-  @Input("activity") set _activity (activity: Activity | undefined) {
+  activity: Activity | RemoteActivity | undefined;
+  @Input("activity") set _activity (activity: Activity | RemoteActivity | undefined) {
     this.activity = activity;
+    if ((activity as RemoteActivity)?.remote) {
+      this.remote = (activity as RemoteActivity).remote;
+      this.loadRemoteConfig();
+    }
     console.log("Play activity", this.activity);
     this.currentPage = activity?.options?.user_interface?.pages?.[0];
     this.update();
@@ -87,10 +86,10 @@ export class ActivityPlayerComponent implements OnInit {
   volumeEntity: MediaEntityState | undefined;
   protected readonly Math = Math;
 
-  constructor(private server:ServerService, protected remoteWebsocketService: RemoteWebsocketService,
+  constructor(private server:ServerService, protected websocketService: WebsocketService,
               private cdr:ChangeDetectorRef, private messageService: MessageService,
               private responsive: BreakpointObserver) {
-    this.remoteWebsocketService.onMediaStateChange().subscribe(mediaStates => {
+    this.websocketService.onMediaStateChange().subscribe(mediaStates => {
       if (!this.volumeEntity) return;
       const state = mediaStates.find(item => item.entity_id === this.volumeEntity!.entity_id!);
       if (state) {
@@ -110,6 +109,17 @@ export class ActivityPlayerComponent implements OnInit {
         this.smallSizeMode = result.matches;
         this.cdr.detectChanges();
       });
+  }
+
+  loadRemoteConfig()
+  {
+    if (this.remote) {
+      this.server.getConfigEntityCommands(this.remote).subscribe(entityCommands => {
+        this.configEntityCommands = entityCommands;
+        this.cdr.detectChanges();
+      });
+      this.update();
+    }
   }
 
   update() {

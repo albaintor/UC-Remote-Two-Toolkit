@@ -12,7 +12,7 @@ import {TooltipModule} from "primeng/tooltip";
 import {InputTextModule} from "primeng/inputtext";
 import {BlockUIModule} from "primeng/blockui";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
-import {WebsocketService} from "../websocket.service";
+import {WebsocketService} from "../websocket/websocket.service";
 
 @Component({
   selector: 'app-remote-registration',

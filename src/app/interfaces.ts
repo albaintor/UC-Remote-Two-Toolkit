@@ -174,11 +174,16 @@ export interface RemoteMap
   };
 }
 
+export interface DashboardEntity {
+  entity_id: string;
+  remote_name: string;
+}
+
 export interface Dashboard
 {
   name: string;
-  dashboardEntityIds: string[];
-  popupEntitiyIds: string[];
+  dashboardEntityIds: DashboardEntity[];
+  popupEntitiyIds: DashboardEntity[];
 }
 
 export interface Config
@@ -496,4 +501,8 @@ export interface BatteryState {
   status?: "CHARGING" | "DISCHARGING" | "NOT_CHARGING" | "FULL";
   capacity?: number;
   power_supply?: boolean;
+}
+
+export interface RemoteActivity extends Activity {
+  remote: Remote;
 }

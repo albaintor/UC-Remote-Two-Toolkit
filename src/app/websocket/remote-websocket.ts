@@ -1,9 +1,8 @@
-import {Injectable, OnDestroy, OnInit} from '@angular/core';
-import {ServerService} from "./server.service";
-import {Remote} from "./interfaces";
+import {OnDestroy} from '@angular/core';
 import {webSocket, WebSocketSubject} from "rxjs/webSocket";
 import {BehaviorSubject, delay, Observable, retry, Subject, timer} from "rxjs";
 import {distinctUntilChanged, filter, map, skip, take, tap} from "rxjs/operators";
+import {Remote} from "../interfaces";
 
 export interface Message
 {
@@ -31,49 +30,26 @@ export interface EventMessage extends Message {
 
 const RECONNECT_INTERVAL = 5000;
 
-
-@Injectable({
-  providedIn: 'root'
-})
-export class WebsocketService implements OnDestroy {
-  get remote(): Remote | undefined {
-    return this._remote;
-  }
-  private _remote: Remote | undefined;
-  key: string | undefined;
+export class RemoteWebsocket  {
+  private remote: Remote | undefined;
+  private key: string | undefined;
   websocket:  WebSocketSubject<Message> | undefined;
   messageEvent: Subject<Message> = new Subject();
   messageId = 0;
   reconnecInterval = RECONNECT_INTERVAL;
   status$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  remoteChanged$:BehaviorSubject<Remote | undefined> = new BehaviorSubject<Remote | undefined>(this.remote);
 
-  constructor(private serverService: ServerService) {
-    this.init();
+  constructor(remote: Remote, key: string) {
+    this.remote = remote;
+    this.key = key;
   }
 
-  init(): void
-  {
-    this.serverService.remote$.subscribe(remote => {
-      if (remote?.address == this.remote?.address) return;
-      this._remote = remote;
-      this.remoteChanged$.next(remote);
-      if (remote) {
-        this.serverService.getRemoteKey(remote).subscribe(key => {
-          this.key = key;
-          this.connect();
-        });
-      }
-    });
+  public getRemote(): Remote | undefined {
+    return this.remote;
   }
 
   public get connectionStatus$(): Observable<boolean> {
     return this.status$.pipe(distinctUntilChanged());
-  }
-
-  public onRemoteChanged():BehaviorSubject<Remote | undefined>
-  {
-    return this.remoteChanged$;
   }
 
   isRemoteConnected() : boolean
@@ -186,7 +162,7 @@ export class WebsocketService implements OnDestroy {
       }});
   }
 
-  ngOnDestroy(): void {
+  destroy(): void {
     console.log("Disconnect websocket");
     if (this.websocket) {
       this.websocket.unsubscribe();

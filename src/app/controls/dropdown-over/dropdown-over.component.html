@@ -4,7 +4,7 @@
   </div>
   <div class="flex flex-column align-items-center justify-content-center control-edit" *ngIf="editable" style="width: 100%">
     <p-dropdown [ngModel]="selectedValue" [options]="formattedOptions" (ngModelChange)="valueUpdate($event)"
-                [style]="{'min-width':'150px','width': '100%'}" appendTo="body" optionLabel="label">
+                appendTo="body" optionLabel="label" class="smaller-dropdown">
     </p-dropdown>
   </div>
 </div>

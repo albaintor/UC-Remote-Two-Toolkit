@@ -56,15 +56,16 @@
 .power-button {
   cursor: pointer;
   position: absolute;
-  top: 4px;
-  left: 4px;
+  top: 0;
+  left: 0;
 }
 
 .close-button {
   cursor: pointer;
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 0;
+  right: 0;
+  z-index: 10;
 }
 
 .uc-button .p-button-icon {

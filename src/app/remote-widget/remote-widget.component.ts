@@ -16,14 +16,13 @@ import {ProgressBarModule} from "primeng/progressbar";
 import {ScrollingTextComponent} from "../controls/scrolling-text/scrolling-text.component";
 import {DropdownModule} from "primeng/dropdown";
 import {FormsModule} from "@angular/forms";
-import {MediaEntityState, RemoteState, RemoteWebsocketService} from "../remote-websocket.service";
-import {Activity, Remote, RemoteData} from "../interfaces";
+import {Activity, Remote} from "../interfaces";
 import {MediaEntityComponent} from "../active-entities/media-entity/media-entity.component";
 import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.component";
-import {WebsocketService} from "../websocket.service";
+import {WebsocketService} from "../websocket/websocket.service";
 import {ToastModule} from "primeng/toast";
 import {MessageService} from "primeng/api";
-import {Helper} from "../helper";
+import {MediaEntityState, RemoteState} from "../websocket/remote-websocket-media";
 
 interface WidgetConfiguration {
   minimized: boolean;
@@ -65,8 +64,7 @@ export class RemoteWidgetComponent implements OnInit {
   activities: Activity[] = [];
   protected readonly Math = Math;
 
-  constructor(private server:ServerService, private websocketService: WebsocketService,
-              protected remoteWebsocketService: RemoteWebsocketService, private cdr:ChangeDetectorRef,
+  constructor(private server:ServerService, protected websocketService: WebsocketService, private cdr:ChangeDetectorRef,
               private messageService: MessageService,) { }
 
   ngOnInit(): void {
@@ -78,17 +76,17 @@ export class RemoteWidgetComponent implements OnInit {
     }
     const scale = localStorage.getItem("scale");
     if (scale) this.scale = Number.parseFloat(scale);
-    this.remoteWebsocketService.onRemoteStateChange().subscribe(remoteState => {
+    this.websocketService.onRemoteStateChange().subscribe(remoteState => {
       this.remoteState = remoteState;
       this.cdr.detectChanges();
     })
-    this.remoteWebsocketService.onMediaStateChange().subscribe(remoteState => {
-      this.mediaEntity = this.remoteWebsocketService.mediaEntity;
-      this.mediaEntities = this.remoteWebsocketService.mediaEntities;
+    this.websocketService.onMediaStateChange().subscribe(remoteState => {
+      this.mediaEntity = this.websocketService.mediaEntity;
+      this.mediaEntities = this.websocketService.mediaEntities;
       console.log("Media entities updated", this.mediaEntity, this.mediaEntities);
       this.cdr.detectChanges();
     })
-    this.remoteWebsocketService.onMediaPositionChange().subscribe(entities => {
+    this.websocketService.onMediaPositionChange().subscribe(entities => {
       this.cdr.detectChanges();
     });
     this.server.remote$.subscribe(remote => {
@@ -123,7 +121,7 @@ export class RemoteWidgetComponent implements OnInit {
               if (this.mediaEntities.find(item => item.entity_id === entity.entity_id)) return;
               if (this.remote && entity.entity_id)
               {
-                this.remoteWebsocketService.updateEntity(entity.entity_id);
+                this.websocketService.updateEntity(entity.entity_id);
               }
             })
           })
@@ -133,7 +131,7 @@ export class RemoteWidgetComponent implements OnInit {
   }
 
   changedMediaEntity($event: any) {
-    this.remoteWebsocketService.mediaEntity = this.mediaEntity;
+    this.websocketService.mediaEntity = this.mediaEntity;
   }
 
   toggleMinimized() {

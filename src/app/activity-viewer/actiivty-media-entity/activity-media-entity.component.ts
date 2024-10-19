@@ -7,7 +7,6 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {ServerService} from "../../server.service";
-import {MediaEntityState, RemoteWebsocketService} from "../../remote-websocket.service";
 import {NgIf} from "@angular/common";
 import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-text.component";
 import {SliderComponent} from "../../controls/slider/slider.component";
@@ -15,6 +14,8 @@ import {Helper} from "../../helper";
 import {Command, Remote} from "../../interfaces";
 import {ButtonMode} from "../activity-buttons/activity-buttons.component";
 import {HttpErrorResponse} from "@angular/common/http";
+import {MediaEntityState} from "../../websocket/remote-websocket-media";
+import {WebsocketService} from "../../websocket/websocket.service";
 
 @Component({
   selector: 'app-activity-media-entity',
@@ -36,7 +37,7 @@ export class ActivityMediaEntityComponent implements AfterViewInit {
   @Input("entityId") set _entityId(entityId: string | undefined)
   {
     this.entityId = entityId;
-    this.updateEntity(this.remoteWebsocketService.mediaEntities);
+    this.updateEntity(this.websocketService.mediaEntities);
   }
   @Input() remote: Remote | undefined;
   protected readonly Math = Math;
@@ -46,15 +47,15 @@ export class ActivityMediaEntityComponent implements AfterViewInit {
   @Output() onSelectButton: EventEmitter<{command: Command, mode: ButtonMode, severity: "success" | "error",
     error?: string}> = new EventEmitter();
 
-  constructor(protected remoteWebsocketService: RemoteWebsocketService, private server:ServerService,
+  constructor(protected websocketService: WebsocketService, private server:ServerService,
               private cdr: ChangeDetectorRef) {
   }
 
   ngAfterViewInit(): void {
-    this.remoteWebsocketService.onMediaStateChange().subscribe(mediaStates => {
+    this.websocketService.onMediaStateChange().subscribe(mediaStates => {
       this.updateEntity(mediaStates);
     })
-    this.remoteWebsocketService.onMediaPositionChange().subscribe(entities => {
+    this.websocketService.onMediaPositionChange().subscribe(entities => {
       this.updatePosition(entities);
     })
     if (this.size?.height)

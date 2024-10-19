@@ -8,7 +8,7 @@
                     pTooltip="Minimize" (click)="toggleMinimized()"/>
         </div>
         <div class="flex align-items-center overflow-hidden" style="max-width: 250px">
-          <app-scrolling-text [text]="remoteWebsocketService.getMediaInfo()"/>
+          <app-scrolling-text [text]="websocketService.getMediaInfo()"/>
         </div>
         <div class="flex align-items-center justify-content-center" *ngIf="remoteState?.batteryInfo?.capacity" style="width:40px">
           <div class="flex align-items-center justify-content-center">{{remoteState!.batteryInfo!.capacity!}}%</div>
@@ -21,8 +21,8 @@
 
         </div>
         <div class="flex align-items-center justify-content-center">
-          <p-tag [value]="(remoteWebsocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
-                 [severity]="(remoteWebsocketService.connectionStatus  | async) ? 'success' : 'warning'"
+          <p-tag [value]="(websocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
+                 [severity]="(websocketService.connectionStatus  | async) ? 'success' : 'warning'"
                  pTooltip="Click to wake up the remote"
                  (click)="wakeRemote($event)" [style]="{'cursor': 'pointer'}"/>
         </div>
@@ -40,10 +40,10 @@
                           (ngModelChange)="changedMediaEntity($event)" optionLabel="entity_id"
                           [style]="{'scale':scale, position: 'absolute', right: 0, top:0, transform: 'translate(25%, 0%)'}">
                 <ng-template pTemplate="selectedItem">
-                  {{remoteWebsocketService.getEntityName(mediaEntity)}}
+                  {{websocketService.getEntityName(mediaEntity)}}
                 </ng-template>
                 <ng-template let-item pTemplate="item">
-                  {{remoteWebsocketService.getEntityName(item)}}
+                  {{websocketService.getEntityName(item)}}
                 </ng-template>
               </p-dropdown>
           </ng-template>

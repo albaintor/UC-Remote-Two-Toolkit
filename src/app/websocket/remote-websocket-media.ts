@@ -1,12 +1,12 @@
-import {Injectable, OnDestroy, OnInit} from '@angular/core';
-import {ServerService} from "./server.service";
-import {EventMessage, RequestMessage, ResponseMessage, WebsocketService} from "./websocket.service";
-import {BatteryState, Entity, Remote} from "./interfaces";
+import {ServerService} from "../server.service";
+import {BatteryState, Entity, Remote} from "../interfaces";
 import {BehaviorSubject, map, Observable, Observer, share, Subject, Subscription, timer} from "rxjs";
-import {Helper} from "./helper";
+import {Helper} from "../helper";
+import {EventMessage, RemoteWebsocket, RequestMessage, ResponseMessage} from "./remote-websocket";
 
 export interface MediaEntityState
 {
+  remote: Remote;
   entity_id: string;
   entity_type: string;
   event_type: string;
@@ -37,10 +37,7 @@ export interface RemoteState {
   batteryInfo?: BatteryState;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
-export class RemoteWebsocketService implements OnDestroy {
+export class RemoteWebsocketMedia {
   get mediaEntity(): MediaEntityState | undefined {
     return this._mediaEntity;
   }
@@ -59,9 +56,8 @@ export class RemoteWebsocketService implements OnDestroy {
   mediaUpdated$ = new BehaviorSubject<MediaEntityState[]>(this.mediaEntities);
   remoteStateUpdated$ = new BehaviorSubject<RemoteState>({});
   mediaPositionUpdated$ = new BehaviorSubject<MediaEntityState[]>([]);
-  private remote: Remote | undefined;
 
-  constructor(private serverService: ServerService, private websocketService: WebsocketService) {
+  constructor(private serverService: ServerService, private websocketService: RemoteWebsocket) {
     this.init();
   }
 
@@ -72,15 +68,14 @@ export class RemoteWebsocketService implements OnDestroy {
       this.mediaUpdated$.next(this.mediaEntities);
     });
     this.initWidget();
-    this.websocketService.onRemoteChanged().subscribe(remote => {
-      this.remote = remote;
-      this.reset();
-      this.mediaUpdated$.next(this._mediaEntities);
-      this.remoteStateUpdated$.next({batteryInfo: this.batteryState});
-    })
   }
 
-  ngOnDestroy(): void {
+  getRemote()
+  {
+    return this.websocketService.getRemote();
+  }
+
+  destroy(): void {
     if (this.mediaPositionTask) {
       this.mediaPositionTask.unsubscribe();
       this.mediaPositionTask = undefined;
@@ -108,16 +103,6 @@ export class RemoteWebsocketService implements OnDestroy {
     this._mediaEntity = undefined;
     this.batteryState = undefined;
     this.mediaUpdated$.next(this._mediaEntities);
-  }
-
-  public get connectionStatus(): Observable<boolean>
-  {
-    return this.websocketService.connectionStatus$;
-  }
-
-  public isRemoteConnected(): boolean
-  {
-    return this.websocketService.isRemoteConnected();
   }
 
   initWidget()
@@ -176,8 +161,8 @@ export class RemoteWebsocketService implements OnDestroy {
         }),
         share()
       ).subscribe();
-    if (this.remote)
-      this.serverService.getRemoteBattery(this.remote).subscribe(batteryInfo => {
+    if (this.websocketService.getRemote())
+      this.serverService.getRemoteBattery(this.websocketService.getRemote()!).subscribe(batteryInfo => {
         this.batteryState = batteryInfo;
         this.remoteStateUpdated$.next({batteryInfo: this.batteryState})
       })
@@ -211,13 +196,13 @@ export class RemoteWebsocketService implements OnDestroy {
 
   updateEntity(entity_id: string)
   {
-    if (!this.remote) return;
-    this.serverService.getRemotetEntity(this.remote, entity_id).subscribe(entity => {
+    if (!this.websocketService.getRemote()) return;
+    this.serverService.getRemotetEntity(this.websocketService.getRemote()!, entity_id).subscribe(entity => {
       console.debug("Add new entity for tracking", entity);
       let entityEntry = this._mediaEntities.find(item =>
         item.entity_id === entity.entity_id);
       if (!entityEntry) {
-        this._mediaEntities.push({entity_id, entity_type:entity.entity_type, event_type: "", new_state: {...entity}});
+        this._mediaEntities.push({remote: this.getRemote()!, entity_id, entity_type:entity.entity_type, event_type: "", new_state: {...entity}});
         entityEntry = this._mediaEntities.find(item => item.entity_id === entity.entity_id);
       }
       this.fillEntityFields(entityEntry, entity);
@@ -256,17 +241,17 @@ export class RemoteWebsocketService implements OnDestroy {
 
   initEntities()
   {
-    if (this.remote) {
-      const remote = this.remote;
+    if (this.websocketService.getRemote()) {
+      const remote = this.websocketService.getRemote()!;
       this._mediaEntities.forEach(entity => {
-        const entityEntry = this._mediaEntities.find(item =>
-          item.entity_id === entity.entity_id);
-        if (!entityEntry || entityEntry.new_state?.features) return;
-        this.serverService.getRemotetEntity(remote, entity.entity_id).subscribe(entity => {
           const entityEntry = this._mediaEntities.find(item =>
             item.entity_id === entity.entity_id);
-          this.fillEntityFields(entityEntry, entity);
-        })
+          if (!entityEntry || entityEntry.new_state?.features) return;
+          this.serverService.getRemotetEntity(remote, entity.entity_id).subscribe(entity => {
+            const entityEntry = this._mediaEntities.find(item =>
+              item.entity_id === entity.entity_id);
+            this.fillEntityFields(entityEntry, entity);
+          })
         }
       )
     }
@@ -327,7 +312,7 @@ export class RemoteWebsocketService implements OnDestroy {
   getMediaPosition(mediaEntity: MediaEntityState): number {
     if (!mediaEntity.new_state?.attributes?.media_position) return 0;
     if ((mediaEntity.new_state?.attributes?.state &&
-      ["UNAVAILABLE", "UNKNOWN", "ON", "OFF", "PAUSED", "STANDBY"].includes(mediaEntity.new_state.attributes.state)) ||
+        ["UNAVAILABLE", "UNKNOWN", "ON", "OFF", "PAUSED", "STANDBY"].includes(mediaEntity.new_state.attributes.state)) ||
       !mediaEntity.new_state?.attributes?.last_update_time)
     {
       return mediaEntity.new_state.attributes.media_position;

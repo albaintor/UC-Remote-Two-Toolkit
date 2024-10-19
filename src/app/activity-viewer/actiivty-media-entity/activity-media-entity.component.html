@@ -15,14 +15,14 @@
       <div *ngIf="mediaEntityState?.new_state?.attributes?.media_position && mediaEntityState?.new_state?.attributes?.media_duration &&
                       mediaEntityState?.new_state!.attributes!.media_duration! > 0"
            class="flex align-items-center justify-content-center" style="width: 100%; height: 100%">
-        <app-slider [value]="Math.round(remoteWebsocketService.getMediaPosition(mediaEntityState!)*100/mediaEntityState!.new_state!.attributes!.media_duration!)"
+        <app-slider [value]="Math.round(websocketService.getMediaPosition(mediaEntityState!)*100/mediaEntityState!.new_state!.attributes!.media_duration!)"
                     style="width: 100%; height: 100%" (valueChange)="setPosition($event, mediaEntityState!)"
-                    [textValue]="Helper.formatDuration(remoteWebsocketService.getMediaPosition(mediaEntityState!))"
+                    [textValue]="Helper.formatDuration(websocketService.getMediaPosition(mediaEntityState!))"
                     [editable]="checkFeature(mediaEntityState!, 'seek')" [max]="Helper.formatDuration(mediaEntityState!.new_state!.attributes!.media_duration!)"></app-slider>
         <b *ngIf="mediaEntityState?.new_state?.attributes?.media_position &&
             (!mediaEntityState?.new_state?.attributes?.media_duration ||
                       mediaEntityState?.new_state!.attributes!.media_duration! == 0)">
-          {{Helper.formatDuration(remoteWebsocketService.getMediaPosition(mediaEntityState!))}}</b>
+          {{Helper.formatDuration(websocketService.getMediaPosition(mediaEntityState!))}}</b>
       </div>
     </div>
   </div>

@@ -206,6 +206,7 @@ export class RemoteWebsocketMedia {
         entityEntry = this._mediaEntities.find(item => item.entity_id === entity.entity_id);
       }
       this.fillEntityFields(entityEntry, entity);
+      this.mediaUpdated$.next([entityEntry!]);
     });
   }
 

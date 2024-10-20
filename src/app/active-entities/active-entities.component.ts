@@ -277,11 +277,6 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
     });
   }
 
-  setRemote(remote: Remote) {
-    this.server.remote$.next(remote);
-    this.cdr.detectChanges();
-  }
-
   searchEntities($event: AutoCompleteCompleteEvent) {
     if (!$event.query) this.suggestions = [...this.entities];
     this.suggestions = this.entities.filter(entity =>

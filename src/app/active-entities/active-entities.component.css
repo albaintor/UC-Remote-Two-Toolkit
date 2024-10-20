@@ -19,6 +19,7 @@
   position: relative;
   transition: all 1s ease-in-out;
   padding: 3px;
+  overflow: hidden;
 }
 
 .disconnected-state {

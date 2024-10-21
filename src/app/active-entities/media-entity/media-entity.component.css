@@ -42,6 +42,7 @@
 
 .card-title {
   overflow: hidden;
+  cursor: move;
 }
 
 .media-card {

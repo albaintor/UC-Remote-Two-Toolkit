@@ -140,6 +140,7 @@ export class ActivityGridComponent implements AfterViewInit {
     initialUiContainerPosition: 0
   }
   @Output() onPageChange = new EventEmitter<number>();
+  swipeAcceleration = 2;
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
@@ -153,7 +154,7 @@ export class ActivityGridComponent implements AfterViewInit {
     else {
       this.width = Math.min(window.innerWidth * 0.8, this.widthInit);
       this.height = Math.min(window.innerHeight * 1.2, this.heightInit)
-    };
+    }
     this.server.configCommands$.subscribe(entityCommands => {
       this.configEntityCommands = entityCommands;
       this.cdr.detectChanges();
@@ -169,6 +170,7 @@ export class ActivityGridComponent implements AfterViewInit {
         this.cdr.detectChanges();
       });
     }
+    console.log("WIDTH", this.width);
   }
 
   @HostListener('window:resize', ['$event'])
@@ -181,6 +183,7 @@ export class ActivityGridComponent implements AfterViewInit {
       this.width = Math.min(window.innerWidth * 0.8, this.widthInit);
       this.height = Math.min(window.innerHeight * 1.2, this.heightInit)
     }
+    console.log("WIDTH2", this.width);
     this.cdr.detectChanges();
   }
 
@@ -287,8 +290,6 @@ export class ActivityGridComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-
-
   addGridItem($event: ActivityGridItemComponent) {
     const position = {x: $event.item.location.x, y: $event.item.location.y,
       width: $event.item.size.width, height: $event.item.size.height};
@@ -352,7 +353,7 @@ export class ActivityGridComponent implements AfterViewInit {
   }
 
   mouseUpUIPages($event: MouseEvent | TouchEvent) {
-
+    console.log("WIDTH2", this.width);
   }
 
   mouseMoveUIPages($event: MouseEvent | TouchEvent) {
@@ -361,7 +362,7 @@ export class ActivityGridComponent implements AfterViewInit {
     let x = 0;
     if ($event instanceof MouseEvent) x = $event.clientX;
     else if ($event instanceof TouchEvent) x =$event.touches[0].clientX;
-    this.swipeInfo.uiContainerPosition = this.swipeInfo.initialUiContainerPosition+(this.swipeInfo.uiClientX - x)*2;
+    this.swipeInfo.uiContainerPosition = this.swipeInfo.initialUiContainerPosition+(this.swipeInfo.uiClientX - x)*this.swipeAcceleration;
     this.uiCollection.nativeElement.setAttribute("style", `transform: translate3d(-${this.swipeInfo.uiContainerPosition}px, 0px, 0px`);
     this.cdr.detectChanges();
   }

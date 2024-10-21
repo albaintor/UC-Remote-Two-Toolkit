@@ -20,6 +20,7 @@ import {TooltipModule} from "primeng/tooltip";
 import {Helper} from "../../helper";
 import {MediaEntityState} from "../../websocket/remote-websocket-media";
 import {WebsocketService} from "../../websocket/websocket.service";
+import {CdkDragHandle} from "@angular/cdk/drag-drop";
 
 @Component({
   selector: 'app-media-entity',
@@ -32,7 +33,8 @@ import {WebsocketService} from "../../websocket/websocket.service";
     SliderComponent,
     TagModule,
     TooltipModule,
-    NgTemplateOutlet
+    NgTemplateOutlet,
+    CdkDragHandle
   ],
   templateUrl: './media-entity.component.html',
   styleUrl: './media-entity.component.css',

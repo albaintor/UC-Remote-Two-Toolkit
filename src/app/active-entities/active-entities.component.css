@@ -29,7 +29,6 @@
 .media-card-border:hover {
   background: rgba(0, 0, 0, 0.73);
   border: 2px solid rgb(30, 31, 34);
-  cursor: move;
 }
 
 .active-tag {

@@ -32,7 +32,7 @@
   </div>
   <ng-container *ngIf="!minimized">
     <app-activity-buttons [remote]="remote" [activity]="activity" [editMode]="false" [scale]="scale" [hideButtonsInfo]="true"
-    (onSelectButton)="handleMessage($event)"/>
+    (onSelectButton)="handleMessage($event)" (onSelectUnassignedButton)="handleEmptyButton($event)"/>
     <div style="position: relative">
       <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [width]="400*scale" [height]="500*scale"
                          [selectionMode]="false" [currentPage]="currentPage" [runMode]="true" (onSelectButton)="handleCommand($event)"
@@ -80,7 +80,7 @@
   </div>
   <ng-container *ngIf="!minimized" style="width: 100%; text-align: center">
     <app-activity-buttons [remote]="remote" [activity]="activity" [editMode]="false" [scale]="1" [hideButtonsInfo]="true"
-                          (onSelectButton)="handleMessage($event)" style="width:100%"/>
+                          (onSelectButton)="handleMessage($event)"  (onSelectUnassignedButton)="handleEmptyButton($event)" style="width:100%"/>
     <div style="position: relative; text-align: center">
       <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [width]="400" [fitScreen]="true" [height]="500"
                          [selectionMode]="false" [currentPage]="currentPage" [runMode]="true" (onSelectButton)="handleCommand($event)"

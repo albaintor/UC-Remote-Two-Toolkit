@@ -92,6 +92,7 @@ export class ActivityButtonsComponent implements AfterViewInit {
   mappedButtons: string[] | undefined;
   @Output() onSelectButton: EventEmitter<{button: ButtonMapping, mode: ButtonMode, severity: "success" | "error",
     error?: string}> = new EventEmitter();
+  @Output() onSelectUnassignedButton: EventEmitter<{button: ButtonMapping, mode: ButtonMode}> = new EventEmitter();
   @Input() hideButtonsInfo = false;
   executeButton: ButtonMapping | undefined;
   @ViewChild("executeButtonPanel") executeButtonPanel: OverlayPanel | undefined;
@@ -147,6 +148,7 @@ export class ActivityButtonsComponent implements AfterViewInit {
   selectButton($event: MapElement, longPress = false) {
     if (!$event.tag) return;
     const buttonId = $event.tag;
+    const selectedButton = this.buttonsMap[buttonId];
     const button = this.activity?.options?.button_mapping?.find(button => button.button === this.buttonsMap[buttonId]);
     if (!this.editMode)
     {
@@ -172,6 +174,9 @@ export class ActivityButtonsComponent implements AfterViewInit {
         else if (button?.double_press) {
           this.executeCommand(button, ButtonMode.DoublePress);
         }
+      }
+      if (!button?.long_press && !button?.short_press && !button?.double_press) {
+        this.onSelectUnassignedButton.emit({button: {button: selectedButton}, mode: ButtonMode.ShortPress});
       }
       return;
     }

@@ -270,4 +270,18 @@ export class ActivityPlayerComponent implements OnInit {
           detail: `Error volume set ${name} : ${volume}% (${err.toString()})`})
       });
   }
+
+  handleEmptyButton($event: { button: ButtonMapping; mode: ButtonMode }) {
+    if ($event.button.button === "POWER" && this.remote && this.activity?.entity_id)
+    {
+      this.server.getRemoteActivity(this.remote, this.activity.entity_id).subscribe({next: (activity) => {
+        this.activity = activity;
+        if (this.activity.attributes?.state === 'OFF')
+          this.executeActivity("activity.on");
+        else
+          this.executeActivity("activity.off");
+        this.cdr.detectChanges();
+        }})
+    }
+  }
 }

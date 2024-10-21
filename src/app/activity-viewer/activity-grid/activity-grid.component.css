@@ -5,7 +5,8 @@
   row-gap: 0;
   background-color: rgba(0, 0, 0, 1);
   padding: 0;
-  margin: auto;
+  margin: 0;
+  /*margin: auto;*/
   width: 50%;
 }
 

@@ -5,12 +5,12 @@
                        [gridCommands]="getGridPageItems(currentPage)" [grid]="currentPage?.grid"></app-ui-command-editor>
 
 <div class="ui-pages-container">
-  <div #uiCollection class="ui-pages-collection" *ngIf="activity?.options?.user_interface?.pages" [style]="{'width': width+'px', 'height': height+'px'}"
+  <div #uiCollection class="ui-pages-collection" *ngIf="activity?.options?.user_interface?.pages"
        (mousedown)="mouseDownUIPages($event)" (mousemove)="mouseMoveUIPages($event)" (mouseup)="mouseUpUIPages($event)"
         (touchstart)="mouseDownUIPages($event)" (touchmove)="mouseMoveUIPages($event)" (touchend)="mouseUpUIPages($event)">
     <div class="ui-page-item" *ngFor="let page of activity!.options!.user_interface!.pages!">
       <div class="grid-container"
-           [style]="{'grid-template-columns': 'auto '.repeat(page.grid.width), 'width': width+'px', 'height': height+'px'}">
+           [style]="{'grid-template-columns': 'auto '.repeat(page.grid.width),'width':'100%'}">
         <grid-button [editable]="editMode" *ngFor="let item of getGridPageItems(page) as gridItems; let index=index" [source]="gridItemSource" [item]="item"
                      [grid]="page.grid" [style]="getGridItemStyleSize(page, item)"
                      (sourceSelected)="gridSourceSelected($event)" (destinationSelected)="gridDestinationSelected($event)"

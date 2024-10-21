@@ -93,10 +93,10 @@
           <p-button *ngIf="!checkFeature(mediaEntity, 'mute_toggle') && checkFeature(mediaEntity, 'unmute')"
                     (click)="mediaAction(mediaEntity, 'media_player.unmute')"
                     icon="icon icon-mute" size="small" pTooltip="Unmute" [rounded]="true" [outlined]="true" class="uc-button"/>
-          <p-button *ngIf="!checkFeature(mediaEntity, 'volume') && checkFeature(mediaEntity, 'volume_up_down')"
+          <p-button *ngIf="checkFeature(mediaEntity, 'volume_up_down')"
                     (click)="mediaAction(mediaEntity, 'media_player.volume_down')"
                     icon="icon icon-minus" size="small" pTooltip="Volume -" [rounded]="true" [outlined]="true" class="uc-button"/>
-          <p-button *ngIf="!checkFeature(mediaEntity, 'volume') && checkFeature(mediaEntity, 'volume_up_down')"
+          <p-button *ngIf="checkFeature(mediaEntity, 'volume_up_down')"
                     (click)="mediaAction(mediaEntity, 'media_player.volume_up')"
                     icon="icon icon-plus" size="small" pTooltip="Volume +" [rounded]="true" [outlined]="true" class="uc-button"/>
           <app-slider [value]="Math.round(mediaEntity.new_state!.attributes!.volume!)" style="width: 100%" (valueChange)="updateVolume($event, mediaEntity)"

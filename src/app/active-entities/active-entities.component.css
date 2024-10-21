@@ -14,8 +14,8 @@
 }
 
 .media-card-border {
-  border-radius: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.73);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.73);
   position: relative;
   transition: all 1s ease-in-out;
   padding: 3px;
@@ -28,7 +28,7 @@
 
 .media-card-border:hover {
   background: rgba(0, 0, 0, 0.73);
-  border: 2px solid rgb(30, 31, 34);
+  border: 1px solid rgb(30, 31, 34);
 }
 
 .active-tag {

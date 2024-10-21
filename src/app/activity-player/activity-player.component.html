@@ -26,8 +26,8 @@
   <div *ngIf="!minimized" class="flex-initial flex align-items-center justify-content-center gap-4" [style]="'scale:'+scale">
     <p-button icon="pi pi-stop" [rounded]="true" pTooltip="Stop activity" (click)="executeActivity('activity.off')" severity="danger"/>
     <p-button icon="pi pi-play" [rounded]="true" pTooltip="Start activity" (click)="executeActivity('activity.on')" severity="success"/>
-    <p-button icon="pi pi-hammer" [rounded]="true" pTooltip="Fix states to turn off" (click)="executeSequence('off')" severity="danger"/>
-    <p-button icon="pi pi-hammer" [rounded]="true" pTooltip="Fix states to turn on" (click)="executeSequence('on')" severity="success"/>
+    <p-button icon="pi pi-hammer" [outlined]="true" [rounded]="true" pTooltip="Fix states to turn off" (click)="executeSequence('off')" severity="danger"/>
+    <p-button icon="pi pi-hammer" [outlined]="true" [rounded]="true" pTooltip="Fix states to turn on" (click)="executeSequence('on')" severity="success"/>
     <p-button icon="pi pi-cog" [rounded]="true" pTooltip="Edit activity" [routerLink]="'/activity/edit/'+activity?.entity_id" />
   </div>
   <ng-container *ngIf="!minimized">
@@ -74,8 +74,8 @@
   <div *ngIf="!minimized" class="flex-initial flex align-items-center justify-content-between" [style]="'scale:'+scale">
     <p-button icon="pi pi-stop" [rounded]="true" pTooltip="Stop activity" (click)="executeActivity('activity.off')" severity="danger"/>
     <p-button icon="pi pi-play" [rounded]="true" pTooltip="Start activity" (click)="executeActivity('activity.on')" severity="success"/>
-    <p-button icon="pi pi-hammer" [rounded]="true" pTooltip="Fix states to turn off" (click)="executeSequence('off')" severity="danger"/>
-    <p-button icon="pi pi-hammer" [rounded]="true" pTooltip="Fix states to turn on" (click)="executeSequence('on')" severity="success"/>
+    <p-button icon="pi pi-hammer" [outlined]="true" [rounded]="true" pTooltip="Fix states to turn off" (click)="executeSequence('off')" severity="danger"/>
+    <p-button icon="pi pi-hammer" [outlined]="true" [rounded]="true" pTooltip="Fix states to turn on" (click)="executeSequence('on')" severity="success"/>
     <p-button icon="pi pi-cog" [rounded]="true" pTooltip="Edit activity" [routerLink]="'/activity/edit/'+activity?.entity_id" />
   </div>
   <ng-container *ngIf="!minimized" style="width: 100%; text-align: center">

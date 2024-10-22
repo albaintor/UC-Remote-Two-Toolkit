@@ -1,14 +1,15 @@
 import {Injectable, OnDestroy} from '@angular/core';
 import {ServerService} from "../server.service";
-import {Remote} from "../interfaces";
-import {webSocket, WebSocketSubject} from "rxjs/webSocket";
-import {BehaviorSubject, delay, Observable, retry, Subject, timer} from "rxjs";
-import {distinctUntilChanged, filter, map, skip, take, tap} from "rxjs/operators";
+import {Entity, Remote} from "../interfaces";
+import {BehaviorSubject,Observable, Subject} from "rxjs";
+import {distinctUntilChanged} from "rxjs/operators";
 import {Message, RemoteWebsocket} from "./remote-websocket";
-import {MediaEntityState, RemoteState, RemoteWebsocketMedia} from "./remote-websocket-media";
-
-
-const RECONNECT_INTERVAL = 5000;
+import {
+  ActivityState, EntityState, LightEntityState,
+  MediaEntityState,
+  RemoteState,
+  RemoteWebsocketInstance
+} from "./remote-websocket-instance";
 
 
 @Injectable({
@@ -25,7 +26,7 @@ export class WebsocketService implements OnDestroy {
   status$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   messageEvent$: Subject<Message> = new Subject();
   doConnect = false;
-  private mediaWebsocket: RemoteWebsocketMedia | undefined;
+  private mediaWebsocket: RemoteWebsocketInstance | undefined;
   get mediaEntity(): MediaEntityState | undefined {
     return this.mediaWebsocket?.mediaEntity;
   }
@@ -39,9 +40,16 @@ export class WebsocketService implements OnDestroy {
   mediaUpdated$ = new BehaviorSubject<MediaEntityState[]>(this.mediaEntities);
   remoteStateUpdated$ = new BehaviorSubject<RemoteState>({});
   mediaPositionUpdated$ = new BehaviorSubject<MediaEntityState[]>([]);
+  activityChanged$ = new BehaviorSubject<ActivityState[]>([]);
+  lightChanged$ = new BehaviorSubject<LightEntityState[]>([]);
 
   constructor(private serverService: ServerService) {
     this.init();
+  }
+
+
+  get lightEntities(): LightEntityState[] {
+    return this.mediaWebsocket?.lightEntities ? this.mediaWebsocket?.lightEntities : [];
   }
 
   init(): void
@@ -75,7 +83,7 @@ export class WebsocketService implements OnDestroy {
     this.remoteWebsocket$.subscribe(websocket => {
       if (this.mediaWebsocket) this.mediaWebsocket.destroy();
       this.reset();
-      if (websocket) this.mediaWebsocket = new RemoteWebsocketMedia(this.serverService, websocket);
+      if (websocket) this.mediaWebsocket = new RemoteWebsocketInstance(this.serverService, websocket);
       this.initEvents();
     })
   }
@@ -95,6 +103,8 @@ export class WebsocketService implements OnDestroy {
     this.mediaWebsocket.onRemoteStateChange().subscribe(state => { this.remoteStateUpdated$.next(state)});
     this.mediaWebsocket.onMediaPositionChange().subscribe(state => { this.mediaPositionUpdated$.next(state)});
     this.mediaUpdated$.next(this.mediaWebsocket.mediaEntities);
+    this.mediaWebsocket.onActivityChange().subscribe(state => {this.activityChanged$.next(state)});
+    this.mediaWebsocket.onLightChange().subscribe(state => {this.lightChanged$.next(state)});
     this.remoteStateUpdated$.next({batteryInfo: this.mediaWebsocket.batteryState});
   }
 
@@ -135,14 +145,24 @@ export class WebsocketService implements OnDestroy {
     return this.mediaPositionUpdated$;
   }
 
-  updateEntity(entity_id: string)
+  public onActivityChange()
   {
-    this.mediaWebsocket?.updateEntity(entity_id);
+    return this.activityChanged$;
   }
 
-  getEntityName(mediaEntity:  MediaEntityState | undefined): string
+  public onLightChange()
   {
-    return this.mediaWebsocket ? this.mediaWebsocket?.getEntityName(mediaEntity) : "";
+    return this.lightChanged$;
+  }
+
+  updateEntity(entity: Entity)
+  {
+    this.mediaWebsocket?.addEntity(entity);
+  }
+
+  getEntityName(entityState:  EntityState | undefined): string
+  {
+    return this.mediaWebsocket ? this.mediaWebsocket?.getEntityName(entityState) : "";
   }
 
   getMediaInfo(): string | undefined

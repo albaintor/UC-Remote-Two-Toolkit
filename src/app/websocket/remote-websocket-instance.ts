@@ -1,15 +1,19 @@
 import {ServerService} from "../server.service";
-import {BatteryState, Entity, Remote} from "../interfaces";
-import {BehaviorSubject, map, Observable, Observer, share, Subject, Subscription, timer} from "rxjs";
+import {BatteryState, Entity, Remote, Activity} from "../interfaces";
+import {BehaviorSubject, map, share, Subject, Subscription, timer} from "rxjs";
 import {Helper} from "../helper";
 import {EventMessage, RemoteWebsocket, RequestMessage, ResponseMessage} from "./remote-websocket";
 
-export interface MediaEntityState
-{
+export interface EntityState {
   remote: Remote;
   entity_id: string;
   entity_type: string;
   event_type: string;
+  new_state?: any;
+}
+
+export interface MediaEntityState extends EntityState
+{
   new_state?: {
     features?: string[];
     attributes?: {
@@ -33,11 +37,50 @@ export interface MediaEntityState
   }
 }
 
+// export interface ActivityEntityState extends EntityState {
+//   new_state?: {
+//     ignore_errors?: boolean;
+//     skip_missing_entities?: boolean;
+//     attributes?: {
+//       state?: string;
+//       step?: any;
+//       timeout?: number;
+//       total_steps?: number;
+//       enabled?: boolean;
+//     }
+//   }
+// }
+
+export interface ActivityState extends Activity {
+  remote: Remote;
+  attributes?: {
+    state?: string;
+    step?: any;
+    timeout?: number;
+    total_steps?: number;
+    enabled?: boolean;
+  };
+  ignore_errors?: boolean;
+  skip_missing_entities?: boolean;
+}
+
+export interface LightEntityState extends EntityState {
+  new_state?: {
+    attributes?: {
+      brightness?: number;
+      hue?: number;
+      saturation?: number;
+      state?: string;
+    }
+    features?: string[];
+  }
+}
+
 export interface RemoteState {
   batteryInfo?: BatteryState;
 }
 
-export class RemoteWebsocketMedia {
+export class RemoteWebsocketInstance {
   get mediaEntity(): MediaEntityState | undefined {
     return this._mediaEntity;
   }
@@ -50,15 +93,23 @@ export class RemoteWebsocketMedia {
   }
   private _mediaEntity : MediaEntityState | undefined;
   private _mediaEntities: MediaEntityState[] = [];
+  private _activities: ActivityState[] = [];
   batteryState: BatteryState | undefined;
   private mediaPositionTask: Subscription | undefined;
   entities: Entity[] = [];
   mediaUpdated$ = new BehaviorSubject<MediaEntityState[]>(this.mediaEntities);
   remoteStateUpdated$ = new BehaviorSubject<RemoteState>({});
   mediaPositionUpdated$ = new BehaviorSubject<MediaEntityState[]>([]);
+  private _lightEntities: LightEntityState[] = [];
+  lightEntitiesUpdated$ = new BehaviorSubject<LightEntityState[]>([]);
+  activityEntitiesUpdated$ = new BehaviorSubject<ActivityState[]>([]);
 
-  constructor(private serverService: ServerService, private websocketService: RemoteWebsocket) {
+  constructor(private serverService: ServerService, private remoteWebsocket: RemoteWebsocket) {
     this.init();
+  }
+
+  get lightEntities(): LightEntityState[] {
+    return this._lightEntities;
   }
 
   init(): void {
@@ -67,12 +118,12 @@ export class RemoteWebsocketMedia {
       this.entities = entities;
       this.mediaUpdated$.next(this.mediaEntities);
     });
-    this.initWidget();
+    this.subscribeEvents();
   }
 
   getRemote()
   {
-    return this.websocketService.getRemote();
+    return this.remoteWebsocket.getRemote();
   }
 
   destroy(): void {
@@ -97,6 +148,16 @@ export class RemoteWebsocketMedia {
     return this.mediaPositionUpdated$;
   }
 
+  public onActivityChange()
+  {
+    return this.activityEntitiesUpdated$;
+  }
+
+  public onLightChange()
+  {
+    return this.lightEntitiesUpdated$;
+  }
+
   reset()
   {
     this._mediaEntities = [];
@@ -105,26 +166,33 @@ export class RemoteWebsocketMedia {
     this.mediaUpdated$.next(this._mediaEntities);
   }
 
-  initWidget()
+  subscribeEvents()
   {
     if (!this._mediaEntity && this._mediaEntities?.length > 0) {
       this._mediaEntity = this._mediaEntities[0];
-      console.debug("Init media entity", this._mediaEntity);
+      console.debug("Init media entities", this._mediaEntity);
       this.mediaUpdated$.next([this._mediaEntity!]);
     }
-    this.websocketService.getMessageEvent().subscribe(message => {
+    this.remoteWebsocket.getMessageEvent().subscribe(message => {
       if (message.kind === "event")
       {
         const eventMessage = message as EventMessage;
-        if (eventMessage.msg == "entity_change" &&
-          eventMessage.msg_data?.entity_type === "media_player")
+        if (eventMessage.msg == "entity_change")
         {
-          this.handleMediaPlayerEvent(eventMessage);
-        } else if (eventMessage.msg == "battery_status")
+          switch(eventMessage.msg_data?.entity_type) {
+            case "activity": this.handleActivityEvent(eventMessage); break;
+            case "media_player": this.handleMediaPlayerEvent(eventMessage); break;
+            case "light": this.handleLightEvent(eventMessage); break;
+            default: console.debug("Unhandled entity event message", message);
+          }
+        }
+        else if (eventMessage.msg == "battery_status")
         {
           this.handleBatteryEvent(eventMessage);
         }
-
+        else {
+          console.debug("Unhandled message", message);
+        }
       }
       else if (message.kind === "req")
       {
@@ -134,8 +202,8 @@ export class RemoteWebsocketMedia {
       {
         const responseMessage = message as ResponseMessage;
         if (responseMessage.msg === "authentication" && responseMessage.code == 200) {
-          this.websocketService.subscribeEvents(["entity_activity", "entity_media_player", "software_updates",
-            "battery_status"]);
+          this.remoteWebsocket.subscribeEvents(["entity_activity", "entity_media_player", "software_updates",
+            "battery_status", "entity_climate", "entity_cover", "entity_light", "entity_sensor"]);
         }
       }
     });
@@ -161,18 +229,18 @@ export class RemoteWebsocketMedia {
         }),
         share()
       ).subscribe();
-    if (this.websocketService.getRemote())
-      this.serverService.getRemoteBattery(this.websocketService.getRemote()!).subscribe(batteryInfo => {
+    if (this.remoteWebsocket.getRemote())
+      this.serverService.getRemoteBattery(this.remoteWebsocket.getRemote()!).subscribe(batteryInfo => {
         this.batteryState = batteryInfo;
         this.remoteStateUpdated$.next({batteryInfo: this.batteryState})
       })
   }
 
-  getEntityName(mediaEntity:  MediaEntityState | undefined): string
+  getEntityName(entityState:  EntityState | undefined): string
   {
-    if (!mediaEntity) return "";
-    const entity = this.entities.find(item => item.entity_id === mediaEntity?.entity_id);
-    if (!entity) return mediaEntity.entity_id;
+    if (!entityState) return "";
+    const entity = this.entities.find(item => item.entity_id === entityState?.entity_id);
+    if (!entity) return entityState.entity_id;
     return Helper.getEntityName(entity);
   }
 
@@ -194,23 +262,53 @@ export class RemoteWebsocketMedia {
     }
   }
 
-  updateEntity(entity_id: string)
+  addEntity(entity: Entity)
   {
-    if (!this.websocketService.getRemote()) return;
-    this.serverService.getRemotetEntity(this.websocketService.getRemote()!, entity_id).subscribe(entity => {
+    switch(entity.entity_type)
+    {
+      case 'media_player':this.updateEntity(entity.entity_id!, this._mediaEntities, this.mediaUpdated$);break;
+      case 'light': this.updateEntity(entity.entity_id!, this._lightEntities, this.lightEntitiesUpdated$);break;
+      default: console.warn("Unsupported entity", entity.entity_type);
+    }
+  }
+
+  updateEntity(entity_id: string, entityStates: EntityState[], entitySubject: Subject<EntityState[]>)
+  {
+    if (!this.remoteWebsocket.getRemote()) return;
+    this.serverService.getRemotetEntity(this.remoteWebsocket.getRemote()!, entity_id).subscribe(entity => {
       console.debug("Add new entity for tracking", entity);
-      let entityEntry = this._mediaEntities.find(item =>
+      let entityEntry = entityStates.find(item =>
         item.entity_id === entity.entity_id);
       if (!entityEntry) {
-        this._mediaEntities.push({remote: this.getRemote()!, entity_id, entity_type:entity.entity_type, event_type: "", new_state: {...entity}});
-        entityEntry = this._mediaEntities.find(item => item.entity_id === entity.entity_id);
+        entityStates.push({remote: this.getRemote()!, entity_id, entity_type:entity.entity_type, event_type: "", new_state: {...entity}});
+        entityEntry = entityStates.find(item => item.entity_id === entity.entity_id);
       }
       this.fillEntityFields(entityEntry, entity);
-      this.mediaUpdated$.next([entityEntry!]);
+      entitySubject.next([entityEntry!]);
     });
   }
 
-  updateEntityFromEvent(message: EventMessage): void {
+  updateActivity(entity_id: string, activityStates: ActivityState[], activities: Subject<ActivityState[]>)
+  {
+    if (!this.remoteWebsocket.getRemote()) return;
+    this.serverService.getRemoteActivity(this.remoteWebsocket.getRemote()!, entity_id).subscribe(activity => {
+      console.debug("Add new activity for tracking", activity);
+      let entityEntry = activityStates.find(item =>
+        item.entity_id === activity.entity_id);
+      if (entityEntry == undefined) {
+        activityStates.push({remote: this.getRemote()!, ...activity});
+        entityEntry = activityStates.find(item => item.entity_id === activity.entity_id);
+      }
+      else {
+        activityStates[activityStates.indexOf(entityEntry)] = {remote: this.remoteWebsocket.getRemote()!, ...activity};
+      }
+      // this.fillEntityFields(entityEntry, activity);
+      activities.next([entityEntry!]);
+    });
+  }
+
+
+  updateMediaEntityFromEvent(message: EventMessage): void {
     if (!message.msg_data?.entity_id) return;
     let entity = this._mediaEntities.find(item => item.entity_id === message.msg_data.entity_id);
     if (!entity)
@@ -219,7 +317,7 @@ export class RemoteWebsocketMedia {
         message.msg_data.new_state.attributes.last_update_time = Date.now();
       entity = message.msg_data as MediaEntityState;
       this._mediaEntities.push(entity);
-      this.updateEntity(entity.entity_id);
+      this.updateEntity(entity.entity_id, this.mediaEntities, this.mediaUpdated$);
     }
     else {
       this.checkEntityImage(entity, message.msg_data.new_state.attributes);
@@ -235,34 +333,16 @@ export class RemoteWebsocketMedia {
         if (!entity.new_state.attributes) entity.new_state.attributes = {};
         entity.new_state.attributes.last_update_time = Date.now();
       }
+      this.mediaUpdated$.next([entity]);
     }
-    this.initEntities();
     console.debug("Media entities", this._mediaEntities);
-  }
-
-  initEntities()
-  {
-    if (this.websocketService.getRemote()) {
-      const remote = this.websocketService.getRemote()!;
-      this._mediaEntities.forEach(entity => {
-          const entityEntry = this._mediaEntities.find(item =>
-            item.entity_id === entity.entity_id);
-          if (!entityEntry || entityEntry.new_state?.features) return;
-          this.serverService.getRemotetEntity(remote, entity.entity_id).subscribe(entity => {
-            const entityEntry = this._mediaEntities.find(item =>
-              item.entity_id === entity.entity_id);
-            this.fillEntityFields(entityEntry, entity);
-          })
-        }
-      )
-    }
   }
 
   handleMediaPlayerEvent(message: EventMessage)
   {
     if (message.msg_data?.new_state?.attributes)
     {
-      this.updateEntityFromEvent(message);
+      this.updateMediaEntityFromEvent(message);
       const entity = this._mediaEntities.find(item => item.entity_id === message.msg_data.entity_id);
       if (!this._mediaEntity) {
         this._mediaEntity = entity;
@@ -281,7 +361,65 @@ export class RemoteWebsocketMedia {
       }
       console.debug("Updated entity", entity);
     }
+  }
 
+  updateEntityState(message: EventMessage, entityStates: EntityState[], entityStateUpdater: Subject<EntityState[]>)
+  {
+    let entity = entityStates.find(item => item.entity_id === message.msg_data.entity_id);
+    if (!entity)
+    {
+      entity = message.msg_data as EntityState;
+      entityStates.push(entity);
+      this.updateEntity(entity.entity_id, entityStates, entityStateUpdater);
+    }
+    else {
+      for (const [key, value] of Object.entries(message.msg_data.new_state.attributes))
+      {
+        if (!entity.new_state) entity.new_state = {};
+        if (!entity.new_state.attributes) entity.new_state.attributes = {};
+        (entity.new_state.attributes as any)[key] = value;
+      }
+      entityStateUpdater.next([entity]);
+    }
+  }
+
+  updateActivityState(message: EventMessage, activityStates: ActivityState[], activityStateUpdater: Subject<ActivityState[]>)
+  {
+    let activityState = activityStates.find(item => item.entity_id === message.msg_data.entity_id);
+    if (!activityState)
+    {
+      activityState = message.msg_data;
+      activityStates.push(activityState as any);
+      this.updateActivity(message.msg_data.entity_id, activityStates, activityStateUpdater);
+    }
+    else {
+      for (const [key, value] of Object.entries(message.msg_data.new_state.attributes))
+      {
+        if (!activityState.attributes) activityState.attributes = {};
+        (activityState.attributes as any)[key] = value;
+      }
+      activityStateUpdater.next([activityState]);
+    }
+  }
+
+  private handleActivityEvent(eventMessage: EventMessage) {
+    console.debug("Updated activity event", eventMessage);
+    this.updateActivityState(eventMessage, this._activities, this.activityEntitiesUpdated$);
+
+    let entity = this._activities.find(item => item.entity_id === eventMessage.msg_data.entity_id);
+    if (entity) {
+      Object.assign(entity, eventMessage.msg_data);
+      this.activityEntitiesUpdated$.next([entity]);
+    }
+    else {
+      this._activities.push(eventMessage.msg_data);
+      this.activityEntitiesUpdated$.next([eventMessage.msg_data]);
+    }
+  }
+
+  private handleLightEvent(eventMessage: EventMessage) {
+    this.updateEntityState(eventMessage, this._lightEntities, this.lightEntitiesUpdated$);
+    console.debug("Updated light entity", this._lightEntities);
   }
 
   getMediaInfo(): string | undefined
@@ -321,8 +459,8 @@ export class RemoteWebsocketMedia {
     return Math.floor(mediaEntity.new_state.attributes.media_position + Math.abs(Date.now() - mediaEntity.new_state?.attributes?.last_update_time)/1000);
   }
 
-  private fillEntityFields(entityEntry: MediaEntityState | undefined, entity: Entity) {
-    if (entityEntry)
+  private fillEntityFields(entityEntry: EntityState | undefined, entity: Entity | Activity) {
+    if (entityEntry !== undefined)
     {
       this.checkEntityImage(entityEntry, entity.attributes);
       for (const [key, value] of Object.entries(entity.attributes))

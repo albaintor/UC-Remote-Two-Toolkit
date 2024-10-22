@@ -16,7 +16,7 @@ import {
   LanguageName,
   Macro, Integration, Driver, EntityIntegration
 } from "./interfaces";
-import {MediaEntityState} from "./websocket/remote-websocket-media";
+import {MediaEntityState} from "./websocket/remote-websocket-instance";
 
 export interface LocalizedName {
   languageCode: LanguageCode;

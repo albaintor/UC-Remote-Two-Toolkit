@@ -18,7 +18,7 @@ import {SliderComponent} from "../../controls/slider/slider.component";
 import {TagModule} from "primeng/tag";
 import {TooltipModule} from "primeng/tooltip";
 import {Helper} from "../../helper";
-import {MediaEntityState} from "../../websocket/remote-websocket-media";
+import {MediaEntityState} from "../../websocket/remote-websocket-instance";
 import {WebsocketService} from "../../websocket/websocket.service";
 import {CdkDragHandle} from "@angular/cdk/drag-drop";
 

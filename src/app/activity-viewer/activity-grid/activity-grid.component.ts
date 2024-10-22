@@ -170,7 +170,6 @@ export class ActivityGridComponent implements AfterViewInit {
         this.cdr.detectChanges();
       });
     }
-    console.log("WIDTH", this.width);
   }
 
   @HostListener('window:resize', ['$event'])
@@ -183,7 +182,6 @@ export class ActivityGridComponent implements AfterViewInit {
       this.width = Math.min(window.innerWidth * 0.8, this.widthInit);
       this.height = Math.min(window.innerHeight * 1.2, this.heightInit)
     }
-    console.log("WIDTH2", this.width);
     this.cdr.detectChanges();
   }
 

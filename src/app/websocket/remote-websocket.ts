@@ -78,13 +78,13 @@ export class RemoteWebsocket  {
 
   private receivedMessage(message: Message)
   {
-    console.log("Websocket message", message);
+    // console.debug("Websocket message", message);
     if (message.kind === "event")
     {
       const eventMessage = message as EventMessage;
       if (eventMessage.msg === "auth_required")
       {
-        console.debug("Websocket authentication");
+        // console.debug("Websocket authentication");
         this.sendMessage({kind: "req", id: this.generateNewId(), msg: "auth",
           msg_data: {token: this.key}} as RequestMessage);
         return;

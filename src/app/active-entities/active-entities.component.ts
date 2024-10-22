@@ -32,11 +32,17 @@ import {DialogModule} from "primeng/dialog";
 import {InputTextModule} from "primeng/inputtext";
 import {BreakpointObserver, Breakpoints} from "@angular/cdk/layout";
 import {RemoteWebsocket} from "../websocket/remote-websocket";
-import {MediaEntityState, RemoteState, RemoteWebsocketMedia} from "../websocket/remote-websocket-media";
+import {
+  LightEntityState,
+  MediaEntityState,
+  RemoteState,
+  RemoteWebsocketInstance
+} from "../websocket/remote-websocket-instance";
 import {firstValueFrom} from "rxjs";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {BlockUIModule} from "primeng/blockui";
 import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
+import {LightEntityComponent} from "./light-entity/light-entity.component";
 
 
 @Component({
@@ -68,7 +74,8 @@ import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loade
     InputTextModule,
     ProgressSpinnerModule,
     BlockUIModule,
-    RemoteDataLoaderComponent
+    RemoteDataLoaderComponent,
+    LightEntityComponent
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',
@@ -79,6 +86,7 @@ import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loade
 export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   remoteState: RemoteState | undefined;
   mediaEntities: MediaEntityState[] = [];
+  lightEntities: LightEntityState[] = [];
   protected readonly Math = Math;
   menuItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
@@ -102,8 +110,9 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   smallSizeMode = false;
   config: Config | undefined;
   additionalWebsockets: RemoteWebsocket[] = [];
-  additionalWebsocketMedias: RemoteWebsocketMedia[] = [];
+  additionalWebsocketMedias: RemoteWebsocketInstance[] = [];
   progress = false;
+  supported_entity_types = ['media_player', 'light'];
 
 
   constructor(private server:ServerService,
@@ -117,7 +126,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
     const data = localStorage.getItem("remoteData");
     if (data) {
       const remoteData: RemoteData = JSON.parse(data);
-      this.entities = remoteData.entities.filter(item => item.entity_type === 'media_player')
+      this.entities = remoteData.entities.filter(item => this.supported_entity_types.includes(item.entity_type))
         .sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
       if (this.activities.length == 0)
         this.activities = remoteData.activities.map(activity => {
@@ -126,7 +135,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
       this.server.setEntities(remoteData.entities);
     }
     this.server.entities$.subscribe(entities => {
-      this.entities = entities.filter(item => item.entity_type === 'media_player')
+      this.entities = entities.filter(item => this.supported_entity_types.includes(item.entity_type))
         .sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
       this.cdr.detectChanges();
     });
@@ -161,9 +170,31 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
         this.mediaEntities = this.websocketService.mediaEntities;
       this.cdr.detectChanges();
     })
+    this.websocketService.onActivityChange().subscribe(activities => {
+      if (activities.length == 0) return;
+      console.debug("Activity changes", activities);
+      activities.forEach(activity => {
+        const existing = this.activities.find(item => item.entity_id === activity.entity_id);
+        if (existing) this.activities[this.activities.indexOf(existing)] = activity;
+        else this.activities.push(activity);
+      });
+      this.cdr.detectChanges();
+    });
     this.websocketService.onMediaPositionChange().subscribe(entities => {
       this.cdr.detectChanges();
     });
+    this.websocketService.onLightChange().subscribe(entities => {
+      entities.forEach(entityState => {
+        const existingEntity = this.lightEntities.find(item => item.entity_id === entityState.entity_id);
+        if (existingEntity)
+        {
+          this.lightEntities[this.lightEntities.indexOf(existingEntity)] = entityState;
+        }
+        else if (this.addNewStates)
+          this.lightEntities.push(entityState);
+      });
+      this.cdr.detectChanges();
+    })
     this.server.getConfig().subscribe(config => {
       this.remotes = config.remotes!;
       this.selectedRemote  = Helper.getSelectedRemote(this.remotes);
@@ -268,7 +299,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
               if (this.mediaEntities.find(item => item.entity_id === entity.entity_id)) return;
               if (this.selectedRemote && entity.entity_id)
               {
-                this.websocketService.updateEntity(entity.entity_id);
+                this.websocketService.updateEntity(entity);
               }
             })
           })
@@ -277,17 +308,18 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
     });
   }
 
-  searchEntities($event: AutoCompleteCompleteEvent) {
+  searchEntities($event: AutoCompleteCompleteEvent, entityType?: string) {
     if (!$event.query) this.suggestions = [...this.entities];
     this.suggestions = this.entities.filter(entity =>
       !this.mediaEntities.find(item => item.entity_id === entity.entity_id) &&
       Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()));
+    if (entityType) this.suggestions = this.suggestions.filter(item => item.entity_type === entityType);
   }
 
-  addEntity($event: Entity) {
-    if ($event?.entity_id)
+  addEntity(entity: Entity) {
+    if (entity?.entity_id)
     {
-      this.websocketService.updateEntity($event.entity_id);
+      this.websocketService.updateEntity(entity);
       this.newEntity = undefined;
       this.cdr.detectChanges();
     }
@@ -377,7 +409,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
     {
       const websocket = await this.getWebsocket(remoteName);
       if (!websocket) return undefined;
-      websocketMedia = new RemoteWebsocketMedia(this.server, websocket);
+      websocketMedia = new RemoteWebsocketInstance(this.server, websocket);
       this.additionalWebsocketMedias.push(websocketMedia);
       websocketMedia.onMediaStateChange().subscribe(remoteState => {
         if (this.selectedDashboard)
@@ -429,7 +461,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
         const websocketMedia = await this.getWebsocketMedia(remoteName);
         const mediaState = {remote, entity_id: entityId, new_state: {}} as any;
         if (!this.mediaEntities.find(item => item.entity_id === entityId)) this.mediaEntities.push(mediaState);
-        websocketMedia?.updateEntity(entityId!);
+        websocketMedia?.updateEntity(entityId!, websocketMedia?.mediaEntities, websocketMedia?.mediaUpdated$);
         continue;
       }
       let entity = this.websocketService.mediaEntities.find(item => item.entity_id === entityId);

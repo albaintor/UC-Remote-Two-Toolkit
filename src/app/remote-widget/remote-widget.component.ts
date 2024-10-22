@@ -22,7 +22,7 @@ import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.com
 import {WebsocketService} from "../websocket/websocket.service";
 import {ToastModule} from "primeng/toast";
 import {MessageService} from "primeng/api";
-import {MediaEntityState, RemoteState} from "../websocket/remote-websocket-media";
+import {MediaEntityState, RemoteState} from "../websocket/remote-websocket-instance";
 
 interface WidgetConfiguration {
   minimized: boolean;
@@ -121,7 +121,7 @@ export class RemoteWidgetComponent implements OnInit {
               if (this.mediaEntities.find(item => item.entity_id === entity.entity_id)) return;
               if (this.remote && entity.entity_id)
               {
-                this.websocketService.updateEntity(entity.entity_id);
+                this.websocketService.updateEntity(entity);
               }
             })
           })

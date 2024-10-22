@@ -25,7 +25,7 @@
                         [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addEntity($event)"
                         pTooltip="Add entity">
           <ng-template let-item pTemplate="item">
-            <div><b>{{Helper.getEntityName(item)}}</b></div>
+            <div><b>{{Helper.getEntityName(item)}}</b>&nbsp;<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span></div>
           </ng-template>
         </p-autoComplete>
         <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="loader.loadRemote(selectedRemote)"
@@ -111,6 +111,12 @@
                       class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
                       [closable]="true"></app-media-entity>
   </div>
+  <div class="flex gap-2 align-content-center justify-content-center media-card-border"
+       [style]="'width:100%'" *ngFor="let lightEntity of lightEntities">
+    <app-light-entity [lightEntity]="lightEntity" [remote]="selectedRemote" [style]="'width:100%'" [scale]="1"
+                      class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
+                      [closable]="true"></app-light-entity>
+  </div>
 </div>
 <div class="flex flex-wrap gap-3" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="drop($event)" *ngIf="!smallSizeMode">
   <div class="flex gap-2 align-content-center justify-content-center media-card-border"
@@ -118,6 +124,12 @@
     <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" [style]="'width:'+(600*scale)+'px'" [scale]="scale"
                       class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
       [closable]="true"></app-media-entity>
+  </div>
+  <div class="flex gap-2 align-content-center justify-content-center media-card-border"
+       [style]="'width:'+(300*scale)+'px'" *ngFor="let lightEntity of lightEntities" cdkDrag>
+    <app-light-entity [lightEntity]="lightEntity" [remote]="selectedRemote" [style]="'width:'+(300*scale)+'px'" [scale]="scale"
+                      class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
+                      [closable]="true"></app-light-entity>
   </div>
 </div>
 <p-dialog [modal]="true" position="center" [draggable]="true" appendTo="body" [(visible)]="showDashboardDialog">

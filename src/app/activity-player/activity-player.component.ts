@@ -27,7 +27,7 @@ import {RouterLink} from "@angular/router";
 import {IconComponent} from "../controls/icon/icon.component";
 import {SliderComponent} from "../controls/slider/slider.component";
 import {BreakpointObserver, Breakpoints} from "@angular/cdk/layout";
-import {MediaEntityState} from "../websocket/remote-websocket-media";
+import {MediaEntityState} from "../websocket/remote-websocket-instance";
 import {WebsocketService} from "../websocket/websocket.service";
 
 @Component({

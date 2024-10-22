@@ -14,7 +14,7 @@ import {Helper} from "../../helper";
 import {Command, Remote} from "../../interfaces";
 import {ButtonMode} from "../activity-buttons/activity-buttons.component";
 import {HttpErrorResponse} from "@angular/common/http";
-import {MediaEntityState} from "../../websocket/remote-websocket-media";
+import {MediaEntityState} from "../../websocket/remote-websocket-instance";
 import {WebsocketService} from "../../websocket/websocket.service";
 
 @Component({
@@ -76,8 +76,8 @@ export class ActivityMediaEntityComponent implements AfterViewInit {
       return;
     }
     const mediaEntityState = mediaStates.find(item => item.entity_id === this.entityId);
-    console.debug("Media Entity update", mediaEntityState);
     if (!mediaEntityState) return;
+    console.debug("Media Entity update", mediaEntityState);
     if (this.mediaEntityState != mediaEntityState)
     {
       this.mediaEntityState = mediaEntityState;

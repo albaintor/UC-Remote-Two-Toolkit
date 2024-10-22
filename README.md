@@ -14,13 +14,15 @@ It is developed in Angular for the front-end, and NodeJS for the back-end. This 
 
 ## Installation
 
-The released are available for 2 systems :
+The releases are available for 4 systems :
 - Windows
 - Ubuntu
+- MacOS (with an ARM CPU)
+- Docker image
 
 Just download the package for your system and execute the binary :
 - ucrtool-server.exe for Windows
-- ucrtool-server for Linux
+- ucrtool-server for Linux or MacOS
 - Docker image : `docker pull albator78/uc-tool:latest`
 
 Then launch your browser to http://localhost:8000
@@ -53,7 +55,7 @@ Just configure a mounting point and define `DATA_DIR` configuration variable to 
 - `Backup & restore` : backup the remote to a file or restore it from a saved backup. Same functionality as in the web configurator
 - `Sync activities` : synchronize activties between 2 remotes
 - `Edit pages` : edit global UI pages (profiles with pages)
-- `Play remote` : dashboard of active entities, virtual remotes of activities
+- `Play remote` : display and configure and play dashboards of active entities (media players, lights and covers) with virtual remotes of activities as if you were holding the physical remote.
 
 Main page :
 - You can check after all antities : orphan entities (defined in activities but not linked to any active integration), as well as unused entities
@@ -137,9 +139,9 @@ If the remote is disconnected, you can click on the status to send a wake on lan
 From the `Play Remote` link, you can :
 - See dynamically the active media entities : as soon as an event occurs (media content change, button press, UI command...), the entity will appear as a card
 - Each (media) entity content is dynamically updated : title, artwork, position, volume.... and you can trigger commands from the card
-- You can add additional (media) entities from the drop down list in the menu bar
-- You can add a virtual remote of any activities
-- Each virtual remote can be added from the activity dropdown and will be displayed as a popup dialog. It can be minimized or dismissed. This virtual remote reproduces exactly the behaviour of the (physical) remote, including : button mapping (including long press if you make a long click on the button), UI mapping, UI page switching, and media entities with artwork, scrolling title/album/artist, media position and seeking, volume position and update
+- You can add additional (media players, lights, covers) entities from the drop down list in the menu bar
+- You can also add virtual remotes of any activities. Any running activity will be displayed as a button in the menu bar and clicking on it will raise its virtual remote.
+- Each virtual remote can be added from the activity dropdown and will be displayed as a popup dialog. It can be minimized or dismissed. This virtual remote will reproduce the exacct same behaviour of the (physical) remote, including : button mapping (including long press if you make a long click on the button), UI mapping, UI page switching, and media entities with artwork, scrolling title/album/artist, media position and seeking, volume position and update
 
 <img width="100%" alt="UI grid" src="https://github.com/user-attachments/assets/7078a8c3-040a-4bff-99f4-ce093e60843b">
 

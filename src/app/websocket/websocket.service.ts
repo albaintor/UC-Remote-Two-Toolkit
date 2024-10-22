@@ -26,16 +26,16 @@ export class WebsocketService implements OnDestroy {
   status$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   messageEvent$: Subject<Message> = new Subject();
   doConnect = false;
-  private mediaWebsocket: RemoteWebsocketInstance | undefined;
+  private websocketInstance: RemoteWebsocketInstance | undefined;
   get mediaEntity(): MediaEntityState | undefined {
-    return this.mediaWebsocket?.mediaEntity;
+    return this.websocketInstance?.mediaEntity;
   }
   set mediaEntity(mediaEntity: MediaEntityState | undefined) {
-    if (this.mediaWebsocket) this.mediaWebsocket.mediaEntity = mediaEntity;
+    if (this.websocketInstance) this.websocketInstance.mediaEntity = mediaEntity;
   }
 
   get mediaEntities(): MediaEntityState[] {
-    return this.mediaWebsocket?.mediaEntities ? this.mediaWebsocket?.mediaEntities : [];
+    return this.websocketInstance?.mediaEntities ? this.websocketInstance?.mediaEntities : [];
   }
   mediaUpdated$ = new BehaviorSubject<MediaEntityState[]>(this.mediaEntities);
   remoteStateUpdated$ = new BehaviorSubject<RemoteState>({});
@@ -47,9 +47,22 @@ export class WebsocketService implements OnDestroy {
     this.init();
   }
 
+  getEntityStates(): EntityState[]
+  {
+    return this.websocketInstance ? this.websocketInstance?.getEntityStates() : [];
+  }
+
+  removeEntityState(entity_id: string)
+  {
+    if (this.websocketInstance)
+    {
+      this.websocketInstance.removeEntityState(entity_id);
+    }
+  }
+
 
   get lightEntities(): LightEntityState[] {
-    return this.mediaWebsocket?.lightEntities ? this.mediaWebsocket?.lightEntities : [];
+    return this.websocketInstance?.lightEntities ? this.websocketInstance?.lightEntities : [];
   }
 
   init(): void
@@ -81,9 +94,9 @@ export class WebsocketService implements OnDestroy {
       }
     });
     this.remoteWebsocket$.subscribe(websocket => {
-      if (this.mediaWebsocket) this.mediaWebsocket.destroy();
+      if (this.websocketInstance) this.websocketInstance.destroy();
       this.reset();
-      if (websocket) this.mediaWebsocket = new RemoteWebsocketInstance(this.serverService, websocket);
+      if (websocket) this.websocketInstance = new RemoteWebsocketInstance(this.serverService, websocket);
       this.initEvents();
     })
   }
@@ -93,19 +106,19 @@ export class WebsocketService implements OnDestroy {
     // this._mediaEntities = [];
     // this._mediaEntity = undefined;
     // this.batteryState = undefined;
-    if (this.mediaWebsocket) this.mediaUpdated$.next(this.mediaWebsocket.mediaEntities);
+    if (this.websocketInstance) this.mediaUpdated$.next(this.websocketInstance.mediaEntities);
   }
 
   initEvents()
   {
-    if (!this.mediaWebsocket) return;
-    this.mediaWebsocket.onMediaStateChange().subscribe(state => { this.mediaUpdated$.next(state)});
-    this.mediaWebsocket.onRemoteStateChange().subscribe(state => { this.remoteStateUpdated$.next(state)});
-    this.mediaWebsocket.onMediaPositionChange().subscribe(state => { this.mediaPositionUpdated$.next(state)});
-    this.mediaUpdated$.next(this.mediaWebsocket.mediaEntities);
-    this.mediaWebsocket.onActivityChange().subscribe(state => {this.activityChanged$.next(state)});
-    this.mediaWebsocket.onLightChange().subscribe(state => {this.lightChanged$.next(state)});
-    this.remoteStateUpdated$.next({batteryInfo: this.mediaWebsocket.batteryState});
+    if (!this.websocketInstance) return;
+    this.websocketInstance.onMediaStateChange().subscribe(state => { this.mediaUpdated$.next(state)});
+    this.websocketInstance.onRemoteStateChange().subscribe(state => { this.remoteStateUpdated$.next(state)});
+    this.websocketInstance.onMediaPositionChange().subscribe(state => { this.mediaPositionUpdated$.next(state)});
+    this.mediaUpdated$.next(this.websocketInstance.mediaEntities);
+    this.websocketInstance.onActivityChange().subscribe(state => {this.activityChanged$.next(state)});
+    this.websocketInstance.onLightChange().subscribe(state => {this.lightChanged$.next(state)});
+    this.remoteStateUpdated$.next({batteryInfo: this.websocketInstance.batteryState});
   }
 
   getWebsocket(): BehaviorSubject<RemoteWebsocket|undefined>
@@ -127,7 +140,7 @@ export class WebsocketService implements OnDestroy {
       this.remoteWebsocket.destroy();
       delete this.remoteWebsocket;
     }
-    if (this.mediaWebsocket) this.mediaWebsocket.destroy();
+    if (this.websocketInstance) this.websocketInstance.destroy();
   }
 
   public onRemoteStateChange()
@@ -157,20 +170,20 @@ export class WebsocketService implements OnDestroy {
 
   updateEntity(entity: Entity)
   {
-    this.mediaWebsocket?.addEntity(entity);
+    this.websocketInstance?.addEntity(entity.entity_id!, entity.entity_type);
   }
 
   getEntityName(entityState:  EntityState | undefined): string
   {
-    return this.mediaWebsocket ? this.mediaWebsocket?.getEntityName(entityState) : "";
+    return this.websocketInstance ? this.websocketInstance?.getEntityName(entityState) : "";
   }
 
   getMediaInfo(): string | undefined
   {
-    return this.mediaWebsocket?.getMediaInfo();
+    return this.websocketInstance?.getMediaInfo();
   }
 
   getMediaPosition(mediaEntity: MediaEntityState): number {
-    return this.mediaWebsocket ? this.mediaWebsocket?.getMediaPosition(mediaEntity) : 0;
+    return this.websocketInstance ? this.websocketInstance?.getMediaPosition(mediaEntity) : 0;
   }
 }

@@ -177,6 +177,7 @@ export interface RemoteMap
 export interface DashboardEntity {
   entity_id: string;
   remote_name: string;
+  entity_type?: string;
 }
 
 export interface Dashboard

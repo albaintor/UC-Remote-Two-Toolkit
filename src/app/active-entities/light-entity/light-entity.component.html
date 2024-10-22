@@ -1,9 +1,9 @@
 <div *ngIf="lightEntity" class="flex gap-2 justify-content-center media-card" style="width: 100%;">
   <div class="power-button" [style]="'scale:'+scale" *ngIf="checkFeature(lightEntity, 'toggle')">
-    <p-button *ngIf="!isOn()" icon="pi pi-power-off"
+    <p-button *ngIf="!isOn()" icon="pi pi-lightbulb"
               [rounded]="true" (click)="powerToggle(lightEntity)"
               size="small" pTooltip="Power toggle" severity="secondary"/>
-    <p-button *ngIf="isOn()" icon="pi pi-power-off" [rounded]="true"
+    <p-button *ngIf="isOn()" icon="pi pi-lightbulb" [rounded]="true"
               (click)="powerToggle(lightEntity)" size="small" pTooltip="Power toggle"/>
   </div>
   <div class="close-button" *ngIf="closable" [style]="'scale:'+scale">

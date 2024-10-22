@@ -1,8 +1,9 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, EventEmitter,
   Input, OnInit,
+  Output,
   TemplateRef,
   ViewEncapsulation
 } from '@angular/core';
@@ -39,6 +40,7 @@ export class LightEntityComponent implements OnInit {
   @Input() headerTemplate : TemplateRef<HTMLAreaElement> | undefined;
   @Input() scale = 1;
   @Input() closable: boolean = false;
+  @Output() onClose: EventEmitter<LightEntityState> = new EventEmitter();
   protected readonly Helper = Helper;
 
   constructor(private server:ServerService, protected websocketService: WebsocketService, private cdr:ChangeDetectorRef) { }
@@ -84,8 +86,7 @@ export class LightEntityComponent implements OnInit {
 
   closeEntity() {
     if (!this.lightEntity) return;
-    const index = this.websocketService.lightEntities.indexOf(this.lightEntity);
-    if (index && index > -1) this.websocketService.lightEntities.splice(index, 1);
+    this.onClose.emit(this.lightEntity);
     this.cdr.detectChanges();
   }
 

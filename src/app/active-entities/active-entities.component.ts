@@ -7,14 +7,14 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {DropdownModule} from "primeng/dropdown";
-import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
+import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase} from "@angular/common";
 import {MenuItem, Message, MessageService, PrimeTemplate} from "primeng/api";
 import {ProgressBarModule} from "primeng/progressbar";
 import {ScrollingTextComponent} from "../controls/scrolling-text/scrolling-text.component";
 import {TagModule} from "primeng/tag";
 import {ServerService} from "../server.service";
 import {MenubarModule} from "primeng/menubar";
-import {Activity, Config, Dashboard, Entity, Remote, RemoteActivity, RemoteData} from "../interfaces";
+import {Config, Dashboard, Entity, Remote, RemoteActivity, RemoteData} from "../interfaces";
 import {FormsModule} from "@angular/forms";
 import {Helper} from "../helper";
 import {SliderComponent} from "../controls/slider/slider.component";
@@ -33,7 +33,7 @@ import {InputTextModule} from "primeng/inputtext";
 import {BreakpointObserver, Breakpoints} from "@angular/cdk/layout";
 import {RemoteWebsocket} from "../websocket/remote-websocket";
 import {
-  LightEntityState,
+  EntityState,
   MediaEntityState,
   RemoteState,
   RemoteWebsocketInstance
@@ -75,7 +75,9 @@ import {LightEntityComponent} from "./light-entity/light-entity.component";
     ProgressSpinnerModule,
     BlockUIModule,
     RemoteDataLoaderComponent,
-    LightEntityComponent
+    LightEntityComponent,
+    NgSwitch,
+    NgSwitchCase
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',
@@ -85,8 +87,7 @@ import {LightEntityComponent} from "./light-entity/light-entity.component";
 })
 export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   remoteState: RemoteState | undefined;
-  mediaEntities: MediaEntityState[] = [];
-  lightEntities: LightEntityState[] = [];
+  entityStates: EntityState[] = [];
   protected readonly Math = Math;
   menuItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
@@ -156,18 +157,18 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
       if (this.selectedDashboard)
       {
         remoteState.forEach(mediaState => {
-          if (this.mediaEntities.includes(mediaState)) return;
-          const existingEntity = this.mediaEntities.find(item => item.entity_id === mediaState.entity_id);
+          if (this.entityStates.includes(mediaState)) return;
+          const existingEntity = this.entityStates.find(item => item.entity_id === mediaState.entity_id);
           if (existingEntity)
           {
-            this.mediaEntities[this.mediaEntities.indexOf(existingEntity)] = mediaState;
+            this.entityStates[this.entityStates.indexOf(existingEntity)] = mediaState;
           }
           else if (this.addNewStates)
-            this.mediaEntities.push(mediaState);
+            this.entityStates.push(mediaState);
         });
       }
       else
-        this.mediaEntities = this.websocketService.mediaEntities;
+        this.entityStates = this.websocketService.getEntityStates();
       this.cdr.detectChanges();
     })
     this.websocketService.onActivityChange().subscribe(activities => {
@@ -185,13 +186,13 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
     });
     this.websocketService.onLightChange().subscribe(entities => {
       entities.forEach(entityState => {
-        const existingEntity = this.lightEntities.find(item => item.entity_id === entityState.entity_id);
+        const existingEntity = this.entityStates.find(item => item.entity_id === entityState.entity_id);
         if (existingEntity)
         {
-          this.lightEntities[this.lightEntities.indexOf(existingEntity)] = entityState;
+          this.entityStates[this.entityStates.indexOf(existingEntity)] = entityState;
         }
         else if (this.addNewStates)
-          this.lightEntities.push(entityState);
+          this.entityStates.push(entityState);
       });
       this.cdr.detectChanges();
     })
@@ -224,7 +225,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
 
   saveDashboard()
   {
-    if (!this.selectedRemote || !this.dashboardName || (this.mediaEntities.length == 0 && this.selectedActivities.length == 0)) {
+    if (!this.selectedRemote || !this.dashboardName || (this.entityStates.length == 0 && this.selectedActivities.length == 0)) {
       this.messageService.add({severity: "error", summary: "No dashboard name defined or no entities selected", key: 'activeEntities'});
       this.cdr.detectChanges();
       return;
@@ -237,12 +238,12 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
       this.config.dashboards = dashboards;
     }
     const dashboard: Dashboard = {name: this.dashboardName,
-      dashboardEntityIds: this.mediaEntities.map(item =>
+      dashboardEntityIds: this.entityStates.map(item =>
       {
-        return {entity_id: item.entity_id!, remote_name: this.selectedRemote!.remote_name!}
+        return {entity_id: item.entity_id!, entity_type: item.entity_type, remote_name: this.selectedRemote!.remote_name!}
       }),
       popupEntitiyIds: this.selectedActivities.map(item => {
-        return {entity_id: item.entity_id!, remote_name: this.selectedRemote!.remote_name!}
+        return {entity_id: item.entity_id!, entity_type: 'activity', remote_name: this.selectedRemote!.remote_name!}
       })};
     const existingDashboard = dashboards.find(item => item.name === dashboard.name);
     if (existingDashboard) {
@@ -296,7 +297,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
             activity.options?.included_entities?.forEach(entity => {
               if (entity.entity_type !== "media_player") return; //TODO add other entities
-              if (this.mediaEntities.find(item => item.entity_id === entity.entity_id)) return;
+              if (this.entityStates.find(item => item.entity_id === entity.entity_id)) return;
               if (this.selectedRemote && entity.entity_id)
               {
                 this.websocketService.updateEntity(entity);
@@ -311,7 +312,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   searchEntities($event: AutoCompleteCompleteEvent, entityType?: string) {
     if (!$event.query) this.suggestions = [...this.entities];
     this.suggestions = this.entities.filter(entity =>
-      !this.mediaEntities.find(item => item.entity_id === entity.entity_id) &&
+      !this.entityStates.find(item => item.entity_id === entity.entity_id) &&
       Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()));
     if (entityType) this.suggestions = this.suggestions.filter(item => item.entity_type === entityType);
   }
@@ -383,7 +384,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
 
   drop($event: CdkDragDrop<MediaEntityState[]>) {
     console.log("Drop", $event);
-    moveItemInArray(this.mediaEntities, $event.previousIndex, $event.currentIndex);
+    moveItemInArray(this.entityStates, $event.previousIndex, $event.currentIndex);
     this.cdr.detectChanges();
   }
 
@@ -402,7 +403,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
     return websocket;
   }
 
-  async getWebsocketMedia(remoteName: string)
+  async getWebsocketInstance(remoteName: string)
   {
     let websocketMedia = this.additionalWebsocketMedias.find(item => item.getRemote()?.remote_name === remoteName);
     if (!websocketMedia)
@@ -415,18 +416,18 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
         if (this.selectedDashboard)
         {
           remoteState.forEach(mediaState => {
-            if (this.mediaEntities.includes(mediaState)) return;
-            const existingEntity = this.mediaEntities.find(item => item.entity_id === mediaState.entity_id);
+            if (this.entityStates.includes(mediaState)) return;
+            const existingEntity = this.entityStates.find(item => item.entity_id === mediaState.entity_id);
             if (existingEntity)
             {
-              this.mediaEntities[this.mediaEntities.indexOf(existingEntity)] = mediaState;
+              this.entityStates[this.entityStates.indexOf(existingEntity)] = mediaState;
             }
             else if (this.addNewStates)
-              this.mediaEntities.push(mediaState);
+              this.entityStates.push(mediaState);
           });
         }
         else //TODO not sure about that
-          this.mediaEntities.push(...this.websocketService.mediaEntities);
+          this.entityStates.push(...this.websocketService.getEntityStates());
         this.cdr.detectChanges();
       })
       websocketMedia.onMediaPositionChange().subscribe(entities => {
@@ -436,54 +437,62 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
     return websocketMedia;
   }
 
+  initDashboardEntity(entityId: string, entityType: string)
+  {
+
+  }
+
 
   async selectDashboard(dashboard: Dashboard | undefined) {
     if (!dashboard || !this.selectedRemote) return;
     console.debug("Load dashboard", dashboard);
     this.dashboardName = dashboard.name;
-    this.mediaEntities = [];
+    this.entityStates = [];
     let remote = this.selectedRemote;
     for (let dashboardItem of dashboard.dashboardEntityIds)
     {
       let entityId: string | undefined;
       let remoteName = this.selectedRemote!.remote_name;
+      let entity_type = "media_player";
       // Compatibility mode
       if (typeof (dashboardItem as any) === 'string')
         entityId = dashboardItem as any;
       else {
         entityId = dashboardItem.entity_id;
         remoteName = dashboardItem.remote_name;
+        entity_type = dashboardItem.entity_type ? dashboardItem.entity_type : 'media_player';
       }
       let remote = this.remotes?.find(item => item.remote_name === remoteName);
       if (!remote) continue;
       if (remoteName && remoteName !== this.selectedRemote!.remote_name)
       {
-        const websocketMedia = await this.getWebsocketMedia(remoteName);
+        const websocketInstance = await this.getWebsocketInstance(remoteName);
+        //TODO
         const mediaState = {remote, entity_id: entityId, new_state: {}} as any;
-        if (!this.mediaEntities.find(item => item.entity_id === entityId)) this.mediaEntities.push(mediaState);
-        websocketMedia?.updateEntity(entityId!, websocketMedia?.mediaEntities, websocketMedia?.mediaUpdated$);
+        if (!this.entityStates.find(item => item.entity_id === entityId)) this.entityStates.push(mediaState);
+        websocketInstance?.addEntity(entityId!, entity_type);
         continue;
       }
-      let entity = this.websocketService.mediaEntities.find(item => item.entity_id === entityId);
+      let entity = this.websocketService.getEntityStates().find(item => item.entity_id === entityId);
       if (!entity) {
-        if (!this.mediaEntities.find(item => item.entity_id === entityId)) {
+        if (!this.entityStates.find(item => item.entity_id === entityId)) {
           const existing = this.entities.find(item => item.entity_id === entityId);
-          if (existing) this.mediaEntities.push({remote: this.selectedRemote,entity_id: existing.entity_id!, entity_type: existing.entity_type,
+          if (existing) this.entityStates.push({remote: this.selectedRemote,entity_id: existing.entity_id!, entity_type: existing.entity_type,
             event_type:"", new_state: {attributes: existing.attributes, features: existing.features, ...existing?.options}});
         }
         this.server.getRemotetEntity(remote, entityId!).subscribe(entity => {
-          const existing = this.mediaEntities.find(item => item.entity_id === entityId);
+          const existing = this.entityStates.find(item => item.entity_id === entityId);
           if (existing)
           {
-            this.mediaEntities.splice(this.mediaEntities.indexOf(existing), 1);
+            this.entityStates.splice(this.entityStates.indexOf(existing), 1);
           }
           const mediaState = {...entity, new_state: {attributes: entity.attributes, features: entity.features}} as any;
-          this.mediaEntities.push(mediaState);
+          this.entityStates.push(mediaState);
           this.cdr.detectChanges();
         });
       }
       else {
-        this.mediaEntities.push(entity);
+        this.entityStates.push(entity);
       }
     }
     this.selectedActivities = [];
@@ -502,7 +511,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
       if (!remote) continue;
       if (remoteName && remoteName !== this.selectedRemote!.remote_name)
       {
-        const websocketMedia = await this.getWebsocketMedia(remoteName);
+        const websocketMedia = await this.getWebsocketInstance(remoteName);
         // websocketMedia?.updateEntity(entityId!);
       }
       if (!this.selectedActivities.find(item => item.entity_id === entityId))
@@ -536,6 +545,11 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
     this.activities = remoteData.activities.map(activity => {
       return {...activity, remote: remoteData.remote};
     });
+    this.cdr.detectChanges();
+  }
+
+  removeEntityState(entityState: EntityState) {
+    this.entityStates.splice(this.entityStates.indexOf(entityState), 1);
     this.cdr.detectChanges();
   }
 }

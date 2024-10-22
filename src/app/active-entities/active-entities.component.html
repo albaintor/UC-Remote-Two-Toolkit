@@ -22,7 +22,8 @@
         </p-autoComplete>
         Entities :
         <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntities($event)" appendTo="body"
-                        [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addEntity($event)"
+                        [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}"
+                        optionLabel="entity_id" (ngModelChange)="addEntity($event)"
                         pTooltip="Add entity">
           <ng-template let-item pTemplate="item">
             <div><b>{{Helper.getEntityName(item)}}</b>&nbsp;<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span></div>
@@ -106,31 +107,31 @@
                      (onClose)="removeActivity($event)" [scale]="scale" (onMessage)="handleMessage($event)" style="width:100%"/>
 <div class="flex flex-wrap gap-3" *ngIf="smallSizeMode">
   <div class="flex gap-2 align-content-center justify-content-center media-card-border"
-       [style]="'width:100%'" *ngFor="let mediaEntity of mediaEntities">
-    <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" [style]="'width:100%'" [scale]="1"
+       [style]="'width:100%'" *ngFor="let entityState of entityStates" [ngSwitch]="entityState.entity_type">
+    <app-media-entity *ngSwitchCase="'media_player'" [mediaEntity]="entityState" [remote]="selectedRemote" [style]="'width:100%'" [scale]="1"
                       class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
-                      [closable]="true"></app-media-entity>
-  </div>
-  <div class="flex gap-2 align-content-center justify-content-center media-card-border"
-       [style]="'width:100%'" *ngFor="let lightEntity of lightEntities">
-    <app-light-entity [lightEntity]="lightEntity" [remote]="selectedRemote" [style]="'width:100%'" [scale]="1"
+                      [closable]="true" (onClose)="removeEntityState(entityState)"></app-media-entity>
+    <app-light-entity *ngSwitchCase="'light'" [lightEntity]="entityState" [remote]="selectedRemote" [style]="'width:100%'" [scale]="1"
                       class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
-                      [closable]="true"></app-light-entity>
+                      [closable]="true" (onClose)="removeEntityState(entityState)"></app-light-entity>
   </div>
 </div>
 <div class="flex flex-wrap gap-3" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="drop($event)" *ngIf="!smallSizeMode">
-  <div class="flex gap-2 align-content-center justify-content-center media-card-border"
-       [style]="'width:'+(600*scale)+'px'" *ngFor="let mediaEntity of mediaEntities" cdkDrag>
-    <app-media-entity [mediaEntity]="mediaEntity" [remote]="selectedRemote" [style]="'width:'+(600*scale)+'px'" [scale]="scale"
-                      class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
-      [closable]="true"></app-media-entity>
-  </div>
-  <div class="flex gap-2 align-content-center justify-content-center media-card-border"
-       [style]="'width:'+(300*scale)+'px'" *ngFor="let lightEntity of lightEntities" cdkDrag>
-    <app-light-entity [lightEntity]="lightEntity" [remote]="selectedRemote" [style]="'width:'+(300*scale)+'px'" [scale]="scale"
-                      class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
-                      [closable]="true"></app-light-entity>
-  </div>
+  <ng-container *ngFor="let entityState of entityStates" [ngSwitch]="entityState.entity_type">
+    <div *ngSwitchCase="'media_player'" class="flex gap-2 align-content-center justify-content-center media-card-border"
+         [style]="'width:'+(600*scale)+'px'" cdkDrag>
+      <app-media-entity [mediaEntity]="entityState" [remote]="selectedRemote" [style]="'width:'+(600*scale)+'px'" [scale]="scale"
+                        class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
+                        [closable]="true" (onClose)="removeEntityState(entityState)"></app-media-entity>
+    </div>
+    <div *ngSwitchCase="'light'" class="flex gap-2 align-content-center justify-content-center media-card-border"
+         [style]="'width:'+(290*scale)+'px'" cdkDrag>
+      <app-light-entity [lightEntity]="entityState" [remote]="selectedRemote" [style]="'width:'+(290*scale)+'px'" [scale]="scale"
+                        class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
+                        [closable]="true" (onClose)="removeEntityState(entityState)"></app-light-entity>
+    </div>
+  </ng-container>
+
 </div>
 <p-dialog [modal]="true" position="center" [draggable]="true" appendTo="body" [(visible)]="showDashboardDialog">
   <ng-template pTemplate="header">
@@ -143,7 +144,7 @@
       Name of the dashboard : <input type="text" pInputText [(ngModel)]="dashboardName" />
     </div>
     <div class="flex flex-wrap align-items-center gap-1">
-      Entities : <p-tag *ngFor="let mediaEntity of mediaEntities" [value]="websocketService.getEntityName(mediaEntity)"/>
+      Entities : <p-tag *ngFor="let entityState of entityStates" [value]="websocketService.getEntityName(entityState)"/>
     </div>
     <div class="flex flex-wrap align-items-center gap-1">
       Virtual remotes : <p-tag *ngFor="let entity of selectedActivities" [value]="Helper.getEntityName(entity)" severity="warning"/>

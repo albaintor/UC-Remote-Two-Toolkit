@@ -133,6 +133,25 @@ export class RemoteWebsocketInstance {
     }
   }
 
+  getEntityStates(): EntityState[]
+  {
+    return [...this._mediaEntities, ...this._lightEntities];
+  }
+
+  removeEntityState(entityId: string): void
+  {
+    const item = this.getEntityStates().find(item => item.entity_id === entityId);
+    if (item) {
+      this.getEntityStates().splice(this.getEntityStates().indexOf(item), 1);
+      switch(item.entity_type)
+      {
+        case "media_player": this.mediaUpdated$.next(this._mediaEntities);break;
+        case "light": this.lightEntitiesUpdated$.next(this._lightEntities);break;
+        default: console.warn("Not supported entity", entityId);
+      }
+    }
+  }
+
   public onRemoteStateChange()
   {
     return this.remoteStateUpdated$;
@@ -262,13 +281,13 @@ export class RemoteWebsocketInstance {
     }
   }
 
-  addEntity(entity: Entity)
+  addEntity(entity_id: string, entity_type: string)
   {
-    switch(entity.entity_type)
+    switch(entity_type)
     {
-      case 'media_player':this.updateEntity(entity.entity_id!, this._mediaEntities, this.mediaUpdated$);break;
-      case 'light': this.updateEntity(entity.entity_id!, this._lightEntities, this.lightEntitiesUpdated$);break;
-      default: console.warn("Unsupported entity", entity.entity_type);
+      case 'media_player':this.updateEntity(entity_id, this._mediaEntities, this.mediaUpdated$);break;
+      case 'light': this.updateEntity(entity_id, this._lightEntities, this.lightEntitiesUpdated$);break;
+      default: console.warn("Unsupported entity", entity_type);
     }
   }
 

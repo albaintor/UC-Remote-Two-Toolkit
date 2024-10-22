@@ -2,9 +2,9 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, EventEmitter,
   Input,
-  OnInit,
+  OnInit, Output,
   TemplateRef,
   ViewEncapsulation
 } from '@angular/core';
@@ -48,6 +48,7 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
   @Input() headerTemplate : TemplateRef<HTMLAreaElement> | undefined;
   @Input() scale = 1;
   @Input() closable: boolean = false;
+  @Output() onClose: EventEmitter<MediaEntityState> = new EventEmitter();
   protected readonly Helper = Helper;
 
   textStyle = "font-size: 1.2rem";
@@ -213,8 +214,7 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
 
   closeEntity(mediaEntity: MediaEntityState) {
     if (!this.mediaEntity) return;
-    const index = this.websocketService.mediaEntities.indexOf(this.mediaEntity);
-    if (index && index > -1) this.websocketService.mediaEntities.splice(index, 1);
+    this.onClose.emit(this.mediaEntity);
     this.cdr.detectChanges();
   }
 }

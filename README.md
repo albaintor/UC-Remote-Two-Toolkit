@@ -10,7 +10,8 @@ It is developed in Angular for the front-end, and NodeJS for the back-end. This 
 
 
 ## Pre-requisites
-- NodeJS >= 22
+- NodeJS >= 22 if your are running the pre-compiled binary or wants to compile it
+- Docker if you want to run the docker image (from a NAS, PC, Raspberry....)
 
 ## Installation
 

@@ -1,6 +1,6 @@
 <p-toast key="activityPlayer"/>
 <p-dialog *ngIf="!smallSizeMode" #dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
-          contentStyleClass="widget-dialog" class="widget" styleClass="widget-header" appendTo="body"
+          contentStyleClass="activity-player-dialog" class="activity-player" styleClass="activity-player-header" appendTo="body"
           (close)="closeDialog($event);dialog.close($event)" [style]="{'width': (scale*400+30)+'px', 'max-height': 'calc(100vh - 20px)'}">
   <ng-template pTemplate="header">
     <div class="flex align-items-start justify-content-center"

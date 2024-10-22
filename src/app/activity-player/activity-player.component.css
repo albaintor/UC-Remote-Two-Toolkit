@@ -1,29 +1,49 @@
-.widget-dialog {
-  padding: 0 !important;
-  transition: width 1s, height 1s;
-}
-
-.widget-header {
+.activity-player-header {
   padding: 0 !important;
   opacity: 0.7;
-  transition: width 1s ease-in-out, height 1s ease-in-out, opacity 0.5s ease;
+  transition: width 1s ease-in-out, height 1s ease-in-out, opacity 0.5s ease, background-color 0.5s ease;
   transition-delay: 5s;
+  animation: blur-out 500ms 0s forwards;
 }
 
-.widget-header .p-dialog-header
+.activity-player-header:hover {
+  opacity: 1;
+  transition-delay: 0s;
+  animation: blur-in 500ms 0s forwards;
+}
+
+.activity-player-dialog {
+  padding: 0 !important;
+  transition: width 1s ease-in-out, height 1s ease-in-out, opacity 0.5s ease, background-color 0.5s ease;
+  animation: blur-out 500ms 0s forwards;
+}
+
+.activity-player-dialog:hover {
+  opacity: 1;
+  transition-delay: 0s;
+  background: transparent !important;
+  animation: blur-in 500ms 0s forwards;
+}
+
+.activity-player-header > div {
+  background: rgba(31, 41, 55, 0.7);
+}
+
+.activity-player-header:hover > div {
+  background: rgba(0, 0, 0, 0);
+}
+
+.activity-player-header .p-dialog-header
 {
   padding: 6px !important;
 }
 
-.widget {
+.activity-player {
   padding: 0.1rem !important;
   transition: width 1s, height 1s;
 }
 
-.widget-header:hover {
-  opacity: 1;
-  transition-delay: 0s;
-}
+
 
 .grid-pagination {
   position: absolute;
@@ -41,4 +61,23 @@
   width: 2rem !important;
   height: 2rem !important;
   padding: 0;
+}
+
+
+@keyframes blur-in {
+  from {
+    backdrop-filter: blur(0px);
+  }
+  to {
+    backdrop-filter: blur(30px);
+  }
+}
+
+@keyframes blur-out {
+  from {
+    backdrop-filter: blur(30px);
+  }
+  to {
+    backdrop-filter: blur(0px);
+  }
 }

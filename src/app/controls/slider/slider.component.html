@@ -1,4 +1,6 @@
-<div style="position: relative; width: 100%; height: 40px" [class]="editable ? 'slider-wrapper' : 'slider-wrapper-noedit'">
+<div [style.--height]="scale*25+'px'" [style.--font-size]="scale*16+'px'" [style.--font-size-smaller]="scale*13+'px'"
+     [style.--progress-background]="backgroundStyle"
+  [style]="'position: relative; width: 100%; height: '+scale*30+'px'" [class]="editable ? 'slider-wrapper' : 'slider-wrapper-noedit'">
   <div [class]="editable ?  'slider-progress' : 'slider-progress-noedit'">
     <p-progressBar [style]="{'width': '100%'}" [value]="value" [class]="secondaryState ? 'secondary-state' : ''">
       <ng-template pTemplate="content"></ng-template>

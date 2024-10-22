@@ -22,10 +22,10 @@
                   size="small" pTooltip="Open cover"/>
       </div>
     </div>
-    <div *ngIf="checkFeature(coverEntity, 'position')" [style]="'width:100%;align-content: center;scale:'+scale">
+    <div *ngIf="checkFeature(coverEntity, 'position')" style="width:100%;align-content: center">
       <div *ngIf="coverEntity.new_state?.attributes?.position"
            class="flex align-items-center justify-content-center" style="width: 100%; height: 100%">
-        <app-slider [value]="coverEntity!.new_state!.attributes!.position!"
+        <app-slider [value]="coverEntity!.new_state!.attributes!.position!" [scale]="scale"
                     [textValue]="'Position '+ coverEntity!.new_state!.attributes!.position! + '%'"
                     style="width: 100%; height: 100%" (valueChange)="setPosition($event)"
                     [editable]="true"></app-slider>

@@ -69,37 +69,38 @@
           <p-button *ngIf="checkFeature(mediaEntity, 'channel_switcher')" (click)="mediaAction(mediaEntity, 'media_player.channel_down')" icon="icon icon-down-arrow" size="small" pTooltip="Previous channel" [rounded]="true" [outlined]="true" class="uc-button"/>
           <p-button *ngIf="checkFeature(mediaEntity, 'channel_switcher')" (click)="mediaAction(mediaEntity, 'media_player.channel_up')" icon="icon icon-up-arrow" size="small" pTooltip="Next channel" [rounded]="true" [outlined]="true" class="uc-button"/>
         </div>
-        <div class="flex flex-column" [style]="'width: 100%;scale:'+scale">
+        <div class="flex flex-column" style="width: 100%">
           <div *ngIf="mediaEntity.new_state?.attributes?.media_position && mediaEntity.new_state?.attributes?.media_duration &&
                       mediaEntity.new_state!.attributes!.media_duration! > 0"
                class="flex align-items-center justify-content-center" style="width: 100%; height: 100%">
             <app-slider [value]="Math.round(websocketService.getMediaPosition(mediaEntity)*100/mediaEntity.new_state!.attributes!.media_duration!)"
                         style="width: 100%; height: 100%" (valueChange)="updatePosition($event, mediaEntity)"
-                        [textValue]="formatDuration(websocketService.getMediaPosition(mediaEntity))"
+                        [textValue]="formatDuration(websocketService.getMediaPosition(mediaEntity))" [scale]="scale"
                         [editable]="checkFeature(mediaEntity, 'seek')" [max]="formatDuration(mediaEntity.new_state!.attributes!.media_duration!)"></app-slider>
-            <b *ngIf="mediaEntity.new_state?.attributes?.media_position &&
+            <b [style]="'font-size:'+scale*11" *ngIf="mediaEntity.new_state?.attributes?.media_position &&
             (!mediaEntity.new_state?.attributes?.media_duration ||
                       mediaEntity.new_state!.attributes!.media_duration! == 0)">
               {{formatDuration(websocketService.getMediaPosition(mediaEntity))}}</b>
           </div>
         </div>
-        <div class="flex align-items-center justify-content-center gap-2" [style]="'width: 100%;scale:'+scale"
+        <div class="flex align-items-center justify-content-center gap-2" [style]="'width: 100%'"
              *ngIf="checkFeature(mediaEntity, ['volume', 'volume_up_down', 'mute_toggle', 'mute'])">
           <p-button *ngIf="checkFeature(mediaEntity, 'mute_toggle')" (click)="mediaAction(mediaEntity, 'media_player.mute_toggle')"
-                    icon="icon icon-mute" size="small" pTooltip="Mute" [rounded]="true" [outlined]="true" class="uc-button"/>
+                    icon="icon icon-mute" size="small" pTooltip="Mute" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
           <p-button *ngIf="!checkFeature(mediaEntity, 'mute_toggle') && checkFeature(mediaEntity, 'mute')"
                     (click)="mediaAction(mediaEntity, 'media_player.mute')"
-                    icon="icon icon-mute" size="small" pTooltip="Mute" [rounded]="true" [outlined]="true" class="uc-button"/>
+                    icon="icon icon-mute" size="small" pTooltip="Mute" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
           <p-button *ngIf="!checkFeature(mediaEntity, 'mute_toggle') && checkFeature(mediaEntity, 'unmute')"
                     (click)="mediaAction(mediaEntity, 'media_player.unmute')"
-                    icon="icon icon-mute" size="small" pTooltip="Unmute" [rounded]="true" [outlined]="true" class="uc-button"/>
+                    icon="icon icon-mute" size="small" pTooltip="Unmute" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
           <p-button *ngIf="checkFeature(mediaEntity, 'volume_up_down')"
                     (click)="mediaAction(mediaEntity, 'media_player.volume_down')"
-                    icon="icon icon-minus" size="small" pTooltip="Volume -" [rounded]="true" [outlined]="true" class="uc-button"/>
+                    icon="icon icon-minus" size="small" pTooltip="Volume -" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
           <p-button *ngIf="checkFeature(mediaEntity, 'volume_up_down')"
                     (click)="mediaAction(mediaEntity, 'media_player.volume_up')"
-                    icon="icon icon-plus" size="small" pTooltip="Volume +" [rounded]="true" [outlined]="true" class="uc-button"/>
+                    icon="icon icon-plus" size="small" pTooltip="Volume +" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
           <app-slider [value]="Math.round(mediaEntity.new_state!.attributes!.volume!)" style="width: 100%" (valueChange)="updateVolume($event, mediaEntity)"
+                      [scale]="scale" [backgroundStyle]="'linear-gradient(90deg, rgba(122,122,122,1) 0%, rgba(255,82,0,1) 71%)'"
                       [textValue]="'Volume '+Helper.getNumber(mediaEntity.new_state!.attributes!.volume!)+'%'+
                     (Helper.isMuted(mediaEntity) ? ' (muted)' : '')"
                       [editable]="checkFeature(mediaEntity, 'volume')" [secondaryState]="Helper.isMuted(mediaEntity)"/>

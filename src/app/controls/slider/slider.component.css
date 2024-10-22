@@ -1,3 +1,10 @@
+:root {
+  --height: 30px;
+  --font-size: 11px;
+  --font-size-smaller: 8px;
+  --progress-background: #60a5fa;
+}
+
 .slider-edit {
   display: none;
   position:absolute;
@@ -8,6 +15,7 @@
   transform: translate(-50%, -50%);
   opacity: 0;
   padding-left: 4px;
+  padding-right: 4px;
   transition: all 0.5s ease;
 }
 
@@ -16,10 +24,29 @@
   width: 100%;
   top: 50%;
   left: 50%;
+  font-size: var(--font-size);
   transform: translate(-50%, -50%);
   transition: all 0.5s ease;
   color: white;
   font-weight: bolder;
+}
+
+.p-progressbar {
+  height: var(--height);
+}
+
+.p-slider-range {
+  background: var(--progress-background);
+}
+
+.p-slider-handle
+{
+  background: var(--progress-background);
+}
+
+.p-progressbar-value
+{
+  background: var(--progress-background);
 }
 
 .progress-max {
@@ -29,7 +56,7 @@
   transform: translate(0%, 0%);
   transition: all 0.5s ease-in-out;
   color: white;
-  font-size: smaller;
+  font-size: var(--font-size-smaller);
 }
 
 .slider-wrapper-noedit {
@@ -51,6 +78,7 @@
 {
   display:block;
   opacity: 1;
+  font-size: var(--font-size);
 }
 
 .slider-progress-noedit {

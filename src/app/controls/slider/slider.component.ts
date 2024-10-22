@@ -48,8 +48,15 @@ export class SliderComponent implements OnInit {
   private subscription = new Subscription();
   @Input() max: string | undefined;
   @Input() secondaryState = false;
+  @Input() backgroundStyle = "#60a5fa";
+  scale: number = 1;
+  @Input("scale") set _scale(scale: number)
+  {
+    this.scale = scale;
+    this.cdr.detectChanges();
+  }
 
-  constructor( private cdr:ChangeDetectorRef) { }
+  constructor(private cdr:ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.subscription.add(

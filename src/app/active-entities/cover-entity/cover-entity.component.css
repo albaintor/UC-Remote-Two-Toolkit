@@ -1,0 +1,19 @@
+.media-card {
+  position: relative;
+  width: 100%;
+}
+
+.power-button {
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.close-button {
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+}

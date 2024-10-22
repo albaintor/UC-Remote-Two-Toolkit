@@ -5,7 +5,7 @@ import {BehaviorSubject,Observable, Subject} from "rxjs";
 import {distinctUntilChanged} from "rxjs/operators";
 import {Message, RemoteWebsocket} from "./remote-websocket";
 import {
-  ActivityState, EntityState, LightEntityState,
+  ActivityState, CoverEntityState, EntityState, LightEntityState,
   MediaEntityState,
   RemoteState,
   RemoteWebsocketInstance
@@ -42,6 +42,7 @@ export class WebsocketService implements OnDestroy {
   mediaPositionUpdated$ = new BehaviorSubject<MediaEntityState[]>([]);
   activityChanged$ = new BehaviorSubject<ActivityState[]>([]);
   lightChanged$ = new BehaviorSubject<LightEntityState[]>([]);
+  coverChanged$ = new BehaviorSubject<CoverEntityState[]>([]);
 
   constructor(private serverService: ServerService) {
     this.init();
@@ -118,6 +119,7 @@ export class WebsocketService implements OnDestroy {
     this.mediaUpdated$.next(this.websocketInstance.mediaEntities);
     this.websocketInstance.onActivityChange().subscribe(state => {this.activityChanged$.next(state)});
     this.websocketInstance.onLightChange().subscribe(state => {this.lightChanged$.next(state)});
+    this.websocketInstance.onCoverChange().subscribe(state => {this.coverChanged$.next(state)});
     this.remoteStateUpdated$.next({batteryInfo: this.websocketInstance.batteryState});
   }
 
@@ -166,6 +168,11 @@ export class WebsocketService implements OnDestroy {
   public onLightChange()
   {
     return this.lightChanged$;
+  }
+
+  public onCoverChange()
+  {
+    return this.coverChanged$;
   }
 
   updateEntity(entity: Entity)

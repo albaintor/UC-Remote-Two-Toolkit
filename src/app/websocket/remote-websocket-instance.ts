@@ -37,20 +37,6 @@ export interface MediaEntityState extends EntityState
   }
 }
 
-// export interface ActivityEntityState extends EntityState {
-//   new_state?: {
-//     ignore_errors?: boolean;
-//     skip_missing_entities?: boolean;
-//     attributes?: {
-//       state?: string;
-//       step?: any;
-//       timeout?: number;
-//       total_steps?: number;
-//       enabled?: boolean;
-//     }
-//   }
-// }
-
 export interface ActivityState extends Activity {
   remote: Remote;
   attributes?: {
@@ -72,6 +58,13 @@ export interface LightEntityState extends EntityState {
       saturation?: number;
       state?: string;
     }
+    features?: string[];
+  }
+}
+
+export interface CoverEntityState extends EntityState {
+  new_state?: {
+    attributes?: any;
     features?: string[];
   }
 }
@@ -102,6 +95,8 @@ export class RemoteWebsocketInstance {
   mediaPositionUpdated$ = new BehaviorSubject<MediaEntityState[]>([]);
   private _lightEntities: LightEntityState[] = [];
   lightEntitiesUpdated$ = new BehaviorSubject<LightEntityState[]>([]);
+  private _coverEntities: CoverEntityState[] = [];
+  coverEntitiesUpdated$ = new BehaviorSubject<CoverEntityState[]>([]);
   activityEntitiesUpdated$ = new BehaviorSubject<ActivityState[]>([]);
 
   constructor(private serverService: ServerService, private remoteWebsocket: RemoteWebsocket) {
@@ -147,6 +142,7 @@ export class RemoteWebsocketInstance {
       {
         case "media_player": this.mediaUpdated$.next(this._mediaEntities);break;
         case "light": this.lightEntitiesUpdated$.next(this._lightEntities);break;
+        case "cover": this.coverEntitiesUpdated$.next(this._coverEntities);break;
         default: console.warn("Not supported entity", entityId);
       }
     }
@@ -177,6 +173,11 @@ export class RemoteWebsocketInstance {
     return this.lightEntitiesUpdated$;
   }
 
+  public onCoverChange()
+  {
+    return this.coverEntitiesUpdated$;
+  }
+
   reset()
   {
     this._mediaEntities = [];
@@ -202,6 +203,7 @@ export class RemoteWebsocketInstance {
             case "activity": this.handleActivityEvent(eventMessage); break;
             case "media_player": this.handleMediaPlayerEvent(eventMessage); break;
             case "light": this.handleLightEvent(eventMessage); break;
+            case "cover": this.handleCoverEvent(eventMessage); break;
             default: console.debug("Unhandled entity event message", message);
           }
         }
@@ -287,6 +289,7 @@ export class RemoteWebsocketInstance {
     {
       case 'media_player':this.updateEntity(entity_id, this._mediaEntities, this.mediaUpdated$);break;
       case 'light': this.updateEntity(entity_id, this._lightEntities, this.lightEntitiesUpdated$);break;
+      case 'cover': this.updateEntity(entity_id, this._coverEntities, this.coverEntitiesUpdated$);break;
       default: console.warn("Unsupported entity", entity_type);
     }
   }
@@ -439,6 +442,11 @@ export class RemoteWebsocketInstance {
   private handleLightEvent(eventMessage: EventMessage) {
     this.updateEntityState(eventMessage, this._lightEntities, this.lightEntitiesUpdated$);
     console.debug("Updated light entity", this._lightEntities);
+  }
+
+  private handleCoverEvent(eventMessage: EventMessage) {
+    this.updateEntityState(eventMessage, this._coverEntities, this.coverEntitiesUpdated$);
+    console.debug("Updated cover entity", this._coverEntities);
   }
 
   getMediaInfo(): string | undefined

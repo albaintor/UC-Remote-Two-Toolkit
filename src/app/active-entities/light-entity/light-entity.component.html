@@ -3,7 +3,7 @@
     <p-button *ngIf="!isOn()" icon="pi pi-lightbulb"
               [rounded]="true" (click)="powerToggle(lightEntity)"
               size="small" pTooltip="Power toggle" severity="secondary"/>
-    <p-button *ngIf="isOn()" icon="pi pi-lightbulb" [rounded]="true"
+    <p-button *ngIf="isOn()" icon="pi pi-lightbulb" [rounded]="true" severity="warning"
               (click)="powerToggle(lightEntity)" size="small" pTooltip="Power toggle"/>
   </div>
   <div class="close-button" *ngIf="closable" [style]="'scale:'+scale">

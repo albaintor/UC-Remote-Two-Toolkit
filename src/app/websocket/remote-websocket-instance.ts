@@ -70,6 +70,27 @@ export interface CoverEntityState extends EntityState {
   }
 }
 
+export interface ClimateEntityState extends EntityState {
+  new_state?: {
+    attributes?: {
+      current_temperature?: number;
+      target_temperature?: number;
+      target_temperature_low?: number;
+      target_temperature_high?: number;
+      fan_mode?: any;
+      state?: string;
+    }
+    features?: string[];
+    options?: {
+      temperature_unit?: any;
+      target_temperature_step?: number;
+      min_temperature?: number;
+      max_temperature?: number;
+      fan_modes?: any;
+    }
+  }
+}
+
 export interface RemoteState {
   batteryInfo?: BatteryState;
 }
@@ -98,6 +119,8 @@ export class RemoteWebsocketInstance {
   lightEntitiesUpdated$ = new BehaviorSubject<LightEntityState[]>([]);
   private _coverEntities: CoverEntityState[] = [];
   coverEntitiesUpdated$ = new BehaviorSubject<CoverEntityState[]>([]);
+  private _climateEntities: ClimateEntityState[] = [];
+  climateEntitiesUpdated$ = new BehaviorSubject<ClimateEntityState[]>([]);
   activityEntitiesUpdated$ = new BehaviorSubject<ActivityState[]>([]);
 
   constructor(private serverService: ServerService, private remoteWebsocket: RemoteWebsocket) {
@@ -144,6 +167,7 @@ export class RemoteWebsocketInstance {
         case "media_player": this.mediaUpdated$.next(this._mediaEntities);break;
         case "light": this.lightEntitiesUpdated$.next(this._lightEntities);break;
         case "cover": this.coverEntitiesUpdated$.next(this._coverEntities);break;
+        case "climate": this.climateEntitiesUpdated$.next(this._climateEntities);break;
         default: console.warn("Not supported entity", entityId);
       }
     }
@@ -179,6 +203,11 @@ export class RemoteWebsocketInstance {
     return this.coverEntitiesUpdated$;
   }
 
+  public onClimateChange()
+  {
+    return this.climateEntitiesUpdated$;
+  }
+
   reset()
   {
     this._mediaEntities = [];
@@ -205,6 +234,7 @@ export class RemoteWebsocketInstance {
             case "media_player": this.handleMediaPlayerEvent(eventMessage); break;
             case "light": this.handleLightEvent(eventMessage); break;
             case "cover": this.handleCoverEvent(eventMessage); break;
+            case "climate": this.handleClimateEvent(eventMessage); break;
             default: console.debug("Unhandled entity event message", message);
           }
         }
@@ -291,6 +321,7 @@ export class RemoteWebsocketInstance {
       case 'media_player':this.updateEntity(entity_id, this._mediaEntities, this.mediaUpdated$);break;
       case 'light': this.updateEntity(entity_id, this._lightEntities, this.lightEntitiesUpdated$);break;
       case 'cover': this.updateEntity(entity_id, this._coverEntities, this.coverEntitiesUpdated$);break;
+      case 'climate': this.updateEntity(entity_id, this._climateEntities, this.climateEntitiesUpdated$);break;
       default: console.warn("Unsupported entity", entity_type);
     }
   }
@@ -448,6 +479,11 @@ export class RemoteWebsocketInstance {
   private handleCoverEvent(eventMessage: EventMessage) {
     this.updateEntityState(eventMessage, this._coverEntities, this.coverEntitiesUpdated$);
     console.debug("Updated cover entity", this._coverEntities);
+  }
+
+  private handleClimateEvent(eventMessage: EventMessage) {
+    this.updateEntityState(eventMessage, this._climateEntities, this.climateEntitiesUpdated$);
+    console.debug("Updated climate entity", this._climateEntities);
   }
 
   getMediaInfo(): string | undefined

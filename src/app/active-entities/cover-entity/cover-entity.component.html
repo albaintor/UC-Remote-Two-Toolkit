@@ -8,7 +8,7 @@
       <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
       <ng-container *ngIf="!headerTemplate"><h2>{{websocketService.getEntityName(coverEntity)}}</h2></ng-container>
     </div>
-    <div class="flex flex-column justify-content-around" style="height: 100%">
+    <div class="flex flex-column gap-2">
       <div class="flex align-content-center justify-content-between" style="width: 100%">
         <div *ngIf="checkFeature(coverEntity, 'close')" [style]="'align-content: center;scale:'+scale">
           <p-button icon="pi pi-arrow-down" (click)="executeCommand('cover.close')"

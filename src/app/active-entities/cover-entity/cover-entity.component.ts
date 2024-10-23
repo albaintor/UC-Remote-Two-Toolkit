@@ -8,7 +8,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {Remote} from "../../interfaces";
-import {CoverEntityState, LightEntityState} from "../../websocket/remote-websocket-instance";
+import {CoverEntityState} from "../../websocket/remote-websocket-instance";
 import {ServerService} from "../../server.service";
 import {WebsocketService} from "../../websocket/websocket.service";
 import {Helper} from "../../helper";
@@ -46,9 +46,12 @@ export class CoverEntityComponent implements OnInit {
   constructor(private server:ServerService, protected websocketService: WebsocketService, private cdr:ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    this.websocketService.onCoverChange().subscribe(states => {
-      console.debug("Cover updated", states);
-      this.cdr.detectChanges();
+    this.websocketService.onCoverChange().subscribe(state => {
+      if (state.find(item => item.entity_id === this.coverEntity?.entity_id))
+      {
+        console.debug("Changed cover", this.coverEntity);
+        this.cdr.detectChanges();
+      }
     })
   }
 

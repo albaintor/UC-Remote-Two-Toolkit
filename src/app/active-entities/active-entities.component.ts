@@ -44,6 +44,7 @@ import {BlockUIModule} from "primeng/blockui";
 import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 import {LightEntityComponent} from "./light-entity/light-entity.component";
 import {CoverEntityComponent} from "./cover-entity/cover-entity.component";
+import {ClimateEntityComponent} from "./climate-entity/climate-entity.component";
 
 
 @Component({
@@ -79,7 +80,8 @@ import {CoverEntityComponent} from "./cover-entity/cover-entity.component";
     LightEntityComponent,
     NgSwitch,
     NgSwitchCase,
-    CoverEntityComponent
+    CoverEntityComponent,
+    ClimateEntityComponent
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',
@@ -115,7 +117,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   additionalWebsockets: RemoteWebsocket[] = [];
   additionalWebsocketMedias: RemoteWebsocketInstance[] = [];
   progress = false;
-  supported_entity_types = ['media_player', 'light', 'cover'];
+  supported_entity_types = ['media_player', 'light', 'cover', 'climate'];
 
 
   constructor(private server:ServerService,
@@ -199,6 +201,18 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     })
     this.websocketService.onCoverChange().subscribe(entities => {
+      entities.forEach(entityState => {
+        const existingEntity = this.entityStates.find(item => item.entity_id === entityState.entity_id);
+        if (existingEntity)
+        {
+          this.entityStates[this.entityStates.indexOf(existingEntity)] = entityState;
+        }
+        else if (this.addNewStates)
+          this.entityStates.push(entityState);
+      });
+      this.cdr.detectChanges();
+    })
+    this.websocketService.onClimateChange().subscribe(entities => {
       entities.forEach(entityState => {
         const existingEntity = this.entityStates.find(item => item.entity_id === entityState.entity_id);
         if (existingEntity)

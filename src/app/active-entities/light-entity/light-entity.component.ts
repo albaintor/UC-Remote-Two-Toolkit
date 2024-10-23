@@ -43,7 +43,7 @@ export class LightEntityComponent implements OnInit {
   @Input("lightEntity") set _lightEntity( lightEntity: LightEntityState | undefined)
   {
     this.lightEntity = lightEntity;
-    if (this.lightEntity) this.updateColor();
+    if (this.lightEntity) this.updateLightAttributes();
   }
   @Input() remote: Remote | undefined;
   @Input() headerTemplate : TemplateRef<HTMLAreaElement> | undefined;
@@ -61,15 +61,24 @@ export class LightEntityComponent implements OnInit {
       if (remoteState.find(item => item.entity_id === this.lightEntity?.entity_id))
       {
         console.debug("Changed light", this.lightEntity);
-        this.updateColor();
+        this.updateLightAttributes();
         this.cdr.detectChanges();
       }
     })
   }
 
-  updateColor()
+  updateLightAttributes()
   {
-    if (this.lightEntity && this.checkFeature(this.lightEntity, "color"))
+    if (!this.lightEntity) return;
+    if (!this.lightEntity.new_state) this.lightEntity.new_state = {};
+    if (!this.lightEntity.new_state.attributes) this.lightEntity.new_state.attributes = {};
+
+    if (this.checkFeature(this.lightEntity, "brightness") && !this.lightEntity?.new_state?.attributes?.brightness)
+      this.lightEntity.new_state.attributes.brightness = 100;
+    if (this.checkFeature(this.lightEntity, "color_temperature") && !this.lightEntity?.new_state?.attributes?.color_temperature)
+      this.lightEntity.new_state.attributes.color_temperature = 100;
+
+    if (this.checkFeature(this.lightEntity, "color"))
     {
       const h = this.lightEntity?.new_state?.attributes?.hue ? this.lightEntity.new_state.attributes.hue : 0;
       const s = this.lightEntity?.new_state?.attributes?.saturation ? this.lightEntity.new_state.attributes.saturation : 0;

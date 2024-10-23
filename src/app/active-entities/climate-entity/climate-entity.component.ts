@@ -201,7 +201,7 @@ export class ClimateEntityComponent implements OnInit {
   }
 
   isOn(): boolean {
-    return this.climateEntity?.new_state?.attributes?.state === 'ON';
+    return this.climateEntity?.new_state?.attributes?.state !== 'OFF';
   }
 
   protected readonly Math = Math;

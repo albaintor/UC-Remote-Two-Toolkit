@@ -126,7 +126,6 @@ export class ActivityPlayerComponent implements OnInit {
     if (!this.remote || !this.activity) return;
     this.getVolumeEntity().subscribe(mediaState => {
       if (!mediaState) return;
-      console.log("Volume entity", mediaState);
       this.volumeEntity = mediaState;
       this.cdr.detectChanges();
     })

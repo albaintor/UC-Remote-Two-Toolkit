@@ -80,13 +80,31 @@ export class LightEntityComponent implements OnInit {
 
     if (this.checkFeature(this.lightEntity, "color"))
     {
-      const h = this.lightEntity?.new_state?.attributes?.hue ? this.lightEntity.new_state.attributes.hue : 0;
-      const s = this.lightEntity?.new_state?.attributes?.saturation ? this.lightEntity.new_state.attributes.saturation : 0;
-      const b = this.lightEntity?.new_state?.attributes?.brightness ? this.lightEntity.new_state.attributes.brightness : 100;
+      const h = Math.round(this.lightEntity?.new_state?.attributes?.hue ? this.lightEntity.new_state.attributes.hue : 0);
+      const s = Math.round(this.lightEntity?.new_state?.attributes?.saturation ? this.lightEntity.new_state.attributes.saturation/255*100 : 100);
+      const b = Math.round(this.lightEntity?.new_state?.attributes?.brightness ? this.lightEntity.new_state.attributes.brightness/255*100 : 100);
       this.lightColor = {h, s, b};
       console.debug(`Color ${this.lightEntity?.entity_id}`, this.lightColor);
       this.cdr.detectChanges();
     }
+  }
+
+  getColor()
+  {
+    if (!this.lightEntity) return "white";
+    if (this.checkFeature(this.lightEntity, "color")) {
+      const h = Math.round(this.lightEntity?.new_state?.attributes?.hue ? this.lightEntity.new_state.attributes.hue : 0);
+      const s = Math.round(this.lightEntity?.new_state?.attributes?.saturation ? this.lightEntity.new_state.attributes.saturation / 255 * 100 : 100);
+      const b = Math.round(this.lightEntity?.new_state?.attributes?.brightness ? this.lightEntity.new_state.attributes.brightness / 255 * 100 : 100);
+      console.debug(this.lightEntity.entity_id, `hsl(${h},${s}%,${b}%)`)
+      return `hsl(${h},${s}%,60%)`;
+    }
+    return "white";
+  }
+
+  getStyleColor()
+  {
+    return `color:${this.getColor()}`;
   }
 
   checkFeature(lightEntityState: LightEntityState, feature: string | string[]): boolean
@@ -160,14 +178,15 @@ export class LightEntityComponent implements OnInit {
   }
 
   setColor($event: any) {
+    console.debug("Set", this.lightColor);
     if (this.remote && this.lightEntity && this.lightColor) {
       this.server.executeRemotetCommand(this.remote, {
         entity_id: this.lightEntity.entity_id,
         cmd_id: "light.on",
         params: {
           hue: Math.round(this.lightColor.h),
-          saturation: Math.round(this.lightColor.s),
-          brightness: Math.round(this.lightColor.b)
+          saturation: Math.round(255*this.lightColor.s/100),
+          brightness: Math.round(255*this.lightColor.b/100)
         }
       }).subscribe();
     }

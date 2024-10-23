@@ -185,6 +185,7 @@ export interface Dashboard
   name: string;
   dashboardEntityIds: DashboardEntity[];
   popupEntitiyIds: DashboardEntity[];
+  lockDashboard?: boolean;
 }
 
 export interface Config

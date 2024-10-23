@@ -45,6 +45,7 @@ import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loade
 import {LightEntityComponent} from "./light-entity/light-entity.component";
 import {CoverEntityComponent} from "./cover-entity/cover-entity.component";
 import {ClimateEntityComponent} from "./climate-entity/climate-entity.component";
+import {ToggleButtonModule} from "primeng/togglebutton";
 
 
 @Component({
@@ -81,7 +82,8 @@ import {ClimateEntityComponent} from "./climate-entity/climate-entity.component"
     NgSwitch,
     NgSwitchCase,
     CoverEntityComponent,
-    ClimateEntityComponent
+    ClimateEntityComponent,
+    ToggleButtonModule
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',
@@ -111,7 +113,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   showDashboardDialog = false;
   dashboardName: string | undefined;
   selectedDashboard: Dashboard | undefined;
-  addNewStates = true;
+  lockDashboard = false;
   smallSizeMode = false;
   config: Config | undefined;
   additionalWebsockets: RemoteWebsocket[] = [];
@@ -167,7 +169,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
           {
             this.entityStates[this.entityStates.indexOf(existingEntity)] = mediaState;
           }
-          else if (this.addNewStates)
+          else if (!this.lockDashboard)
             this.entityStates.push(mediaState);
         });
       }
@@ -195,7 +197,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
         {
           this.entityStates[this.entityStates.indexOf(existingEntity)] = entityState;
         }
-        else if (this.addNewStates)
+        else if (!this.lockDashboard)
           this.entityStates.push(entityState);
       });
       this.cdr.detectChanges();
@@ -207,7 +209,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
         {
           this.entityStates[this.entityStates.indexOf(existingEntity)] = entityState;
         }
-        else if (this.addNewStates)
+        else if (!this.lockDashboard)
           this.entityStates.push(entityState);
       });
       this.cdr.detectChanges();
@@ -219,7 +221,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
         {
           this.entityStates[this.entityStates.indexOf(existingEntity)] = entityState;
         }
-        else if (this.addNewStates)
+        else if (!this.lockDashboard)
           this.entityStates.push(entityState);
       });
       this.cdr.detectChanges();
@@ -272,7 +274,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
       }),
       popupEntitiyIds: this.selectedActivities.map(item => {
         return {entity_id: item.entity_id!, entity_type: 'activity', remote_name: this.selectedRemote!.remote_name!}
-      })};
+      }), lockDashboard: this.lockDashboard};
     const existingDashboard = dashboards.find(item => item.name === dashboard.name);
     if (existingDashboard) {
       dashboards.splice(dashboards.indexOf(existingDashboard), 1);
@@ -450,7 +452,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
             {
               this.entityStates[this.entityStates.indexOf(existingEntity)] = mediaState;
             }
-            else if (this.addNewStates)
+            else if (!this.lockDashboard)
               this.entityStates.push(mediaState);
           });
         }
@@ -476,6 +478,8 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
     console.debug("Load dashboard", dashboard);
     this.dashboardName = dashboard.name;
     this.entityStates = [];
+    this.lockDashboard = !!dashboard.lockDashboard;
+
     let remote = this.selectedRemote;
     for (let dashboardItem of dashboard.dashboardEntityIds)
     {

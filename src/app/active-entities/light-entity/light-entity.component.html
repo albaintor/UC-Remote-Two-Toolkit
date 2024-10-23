@@ -15,13 +15,23 @@
       <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
       <ng-container *ngIf="!headerTemplate"><h2>{{websocketService.getEntityName(lightEntity)}}</h2></ng-container>
     </div>
-    <div class="flex flex-column" [style]="'width: 100%'" *ngIf="isOn() && checkFeature(lightEntity, 'dim')">
-      <div *ngIf="lightEntity.new_state?.attributes?.brightness"
+    <div class="flex flex-column" [style]="'width: 100%'">
+      <div *ngIf="lightEntity.new_state?.attributes?.brightness && checkFeature(lightEntity, 'dim')"
            class="flex align-items-center justify-content-center" style="width: 100%; height: 100%">
         <app-slider [value]="Math.round(lightEntity!.new_state!.attributes!.brightness!*100/255)" [scale]="scale"
                     [textValue]="'Brightness '+ Math.round(lightEntity!.new_state!.attributes!.brightness!*100/255) + '%'"
                     style="width: 100%; height: 100%" (valueChange)="updateBrightness($event, lightEntity)"
+                    [editable]="true" [backgroundStyle]="'linear-gradient(90deg, rgba(38,22,5,0.8596230728619573) 0%, rgba(255,252,224,1) 76%)'"></app-slider>
+      </div>
+      <div *ngIf="checkFeature(lightEntity, 'color_temperature')"
+           class="flex align-items-center justify-content-center" style="width: 100%; height: 100%">
+        <app-slider [value]="Math.round(lightEntity!.new_state!.attributes!.color_temperature!)" [scale]="scale"
+                    [textValue]="'Temperature '+ Math.round(lightEntity!.new_state!.attributes!.color_temperature!) + '%'"
+                    style="width: 100%; height: 100%" (valueChange)="updateColorTemperature($event, lightEntity)"
                     [editable]="true" [backgroundStyle]="'linear-gradient(90deg, rgba(34,193,195,1) 0%, rgba(253,187,45,1) 100%)'"></app-slider>
+      </div>
+      <div *ngIf="checkFeature(lightEntity, 'color')">
+        <p-colorPicker [(ngModel)]="lightColor" [inline]="true" format="hsb" (ngModelChange)="setColor($event)"/>
       </div>
     </div>
   </div>

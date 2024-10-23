@@ -17,3 +17,12 @@
   right: 0;
   z-index: 10;
 }
+
+.p-colorpicker-panel .p-colorpicker-color {
+  background: transparent url("/assets/images/custom-color.png") no-repeat left top !important;
+}
+
+
+.p-colorpicker-panel .p-colorpicker-hue {
+  background: transparent url("/assets/images/custom-hue.png") no-repeat left top !important;
+}

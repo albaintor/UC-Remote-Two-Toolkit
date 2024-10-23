@@ -56,6 +56,7 @@ export interface LightEntityState extends EntityState {
       brightness?: number;
       hue?: number;
       saturation?: number;
+      color_temperature?: number;
       state?: string;
     }
     features?: string[];

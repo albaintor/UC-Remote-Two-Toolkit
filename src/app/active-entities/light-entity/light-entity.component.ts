@@ -17,6 +17,8 @@ import {Button} from "primeng/button";
 import {TooltipModule} from "primeng/tooltip";
 import {CdkDragHandle} from "@angular/cdk/drag-drop";
 import {SliderComponent} from "../../controls/slider/slider.component";
+import {ColorPickerModule} from "primeng/colorpicker";
+import {FormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-light-entity',
@@ -27,7 +29,9 @@ import {SliderComponent} from "../../controls/slider/slider.component";
     TooltipModule,
     CdkDragHandle,
     NgTemplateOutlet,
-    SliderComponent
+    SliderComponent,
+    ColorPickerModule,
+    FormsModule
   ],
   templateUrl: './light-entity.component.html',
   styleUrl: './light-entity.component.css',
@@ -35,21 +39,45 @@ import {SliderComponent} from "../../controls/slider/slider.component";
   encapsulation: ViewEncapsulation.None
 })
 export class LightEntityComponent implements OnInit {
-  @Input() lightEntity: LightEntityState | undefined;
+  lightEntity: LightEntityState | undefined;
+  @Input("lightEntity") set _lightEntity( lightEntity: LightEntityState | undefined)
+  {
+    this.lightEntity = lightEntity;
+    if (this.lightEntity) this.updateColor();
+  }
   @Input() remote: Remote | undefined;
   @Input() headerTemplate : TemplateRef<HTMLAreaElement> | undefined;
   @Input() scale = 1;
   @Input() closable: boolean = false;
   @Output() onClose: EventEmitter<LightEntityState> = new EventEmitter();
   protected readonly Helper = Helper;
+  protected readonly Math = Math;
+  lightColor: {h: number; s: number; b: number} | undefined;
 
   constructor(private server:ServerService, protected websocketService: WebsocketService, private cdr:ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.websocketService.onLightChange().subscribe(remoteState => {
-      console.debug("Changed light", this.lightEntity);
-      this.cdr.detectChanges();
+      if (remoteState.find(item => item.entity_id === this.lightEntity?.entity_id))
+      {
+        console.debug("Changed light", this.lightEntity);
+        this.updateColor();
+        this.cdr.detectChanges();
+      }
     })
+  }
+
+  updateColor()
+  {
+    if (this.lightEntity && this.checkFeature(this.lightEntity, "color"))
+    {
+      const h = this.lightEntity?.new_state?.attributes?.hue ? this.lightEntity.new_state.attributes.hue : 0;
+      const s = this.lightEntity?.new_state?.attributes?.saturation ? this.lightEntity.new_state.attributes.saturation : 0;
+      const b = this.lightEntity?.new_state?.attributes?.brightness ? this.lightEntity.new_state.attributes.brightness : 100;
+      this.lightColor = {h, s, b};
+      console.debug(`Color ${this.lightEntity?.entity_id}`, this.lightColor);
+      this.cdr.detectChanges();
+    }
   }
 
   checkFeature(lightEntityState: LightEntityState, feature: string | string[]): boolean
@@ -90,8 +118,6 @@ export class LightEntityComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  protected readonly Math = Math;
-
   updateBrightness(value: number, lightEntity: LightEntityState) {
     if (this.remote) {
       if (value == 0)
@@ -104,7 +130,37 @@ export class LightEntityComponent implements OnInit {
         cmd_id: "light.on",
         params: {brightness: Math.round(value * 255 / 100)}
       }).subscribe();
-      console.debug("Set brightness", lightEntity, value);
+      // console.debug("Set brightness", lightEntity, value);
+    }
+  }
+
+  updateColorTemperature(value: number, lightEntity: LightEntityState) {
+    if (this.remote) {
+      if (value == 0)
+        this.server.executeRemotetCommand(this.remote, {
+          entity_id: lightEntity.entity_id,
+          cmd_id: "light.off"
+        }).subscribe();
+      else this.server.executeRemotetCommand(this.remote, {
+        entity_id: lightEntity.entity_id,
+        cmd_id: "light.on",
+        params: {color_temperature: Math.round(value)}
+      }).subscribe();
+      // console.debug("Set saturation", lightEntity, value);
+    }
+  }
+
+  setColor($event: any) {
+    if (this.remote && this.lightEntity && this.lightColor) {
+      this.server.executeRemotetCommand(this.remote, {
+        entity_id: this.lightEntity.entity_id,
+        cmd_id: "light.on",
+        params: {
+          hue: Math.round(this.lightColor.h),
+          saturation: Math.round(this.lightColor.s),
+          brightness: Math.round(this.lightColor.b)
+        }
+      }).subscribe();
     }
   }
 }

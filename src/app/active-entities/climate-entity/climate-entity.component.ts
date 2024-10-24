@@ -221,6 +221,7 @@ export class ClimateEntityComponent implements OnInit {
   setTemperature($event: any) {
     if (!this.remote || !this.climateEntity) return;
     if (!this.checkFeature(this.climateEntity, 'target_temperature')) return;
+    console.debug("Set temperature", this.climateEntity.entity_id, $event);
     this.server.executeRemotetCommand(this.remote, {
       entity_id: this.climateEntity.entity_id,
       cmd_id: "climate.target_temperature",

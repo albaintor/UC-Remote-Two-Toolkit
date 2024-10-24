@@ -345,13 +345,13 @@ export class ActivityGridComponent implements AfterViewInit {
       initialUiContainerPosition: this.width*index,
       uiClientX: x,
       mousePressed: true,
-      uiContainerPosition: -this.width*index
+      uiContainerPosition: this.width*index
     }
     $event.preventDefault();
   }
 
   mouseUpUIPages($event: MouseEvent | TouchEvent) {
-    console.log("WIDTH2", this.width);
+    // console.log("WIDTH2", this.width);
   }
 
   mouseMoveUIPages($event: MouseEvent | TouchEvent) {
@@ -359,10 +359,14 @@ export class ActivityGridComponent implements AfterViewInit {
     $event.preventDefault();
     let x = 0;
     if ($event instanceof MouseEvent) x = $event.clientX;
-    else if ($event instanceof TouchEvent) x =$event.touches[0].clientX;
-    this.swipeInfo.uiContainerPosition = this.swipeInfo.initialUiContainerPosition+(this.swipeInfo.uiClientX - x)*this.swipeAcceleration;
-    this.uiCollection.nativeElement.setAttribute("style", `transform: translate3d(-${this.swipeInfo.uiContainerPosition}px, 0px, 0px`);
-    this.cdr.detectChanges();
+    else if ($event instanceof TouchEvent) x = $event.touches[0].clientX;
+    // const acceleration = $event instanceof TouchEvent ? this.swipeAcceleration*2 : this.swipeAcceleration;
+    const acceleration = this.swipeAcceleration;
+    this.swipeInfo.uiContainerPosition = -(this.swipeInfo.initialUiContainerPosition+(this.swipeInfo.uiClientX - x)*acceleration);
+    // this.swipeInfo.uiContainerPosition = this.swipeInfo.uiContainerPosition - (this.swipeInfo.uiClientX - x)*acceleration;
+    // this.swipeInfo.uiClientX = x;
+    this.uiCollection.nativeElement.setAttribute("style", `transform: translate3d(${this.swipeInfo.uiContainerPosition}px, 0px, 0px`);
+    // this.cdr.detectChanges();
   }
 
   switchCurrentPage()

@@ -84,7 +84,7 @@ export class LightEntityComponent implements OnInit {
       const s = Math.round(this.lightEntity?.new_state?.attributes?.saturation ? this.lightEntity.new_state.attributes.saturation/255*100 : 100);
       const b = Math.round(this.lightEntity?.new_state?.attributes?.brightness ? this.lightEntity.new_state.attributes.brightness/255*100 : 100);
       this.lightColor = {h, s, b};
-      console.debug(`Color ${this.lightEntity?.entity_id}`, this.lightColor);
+      // console.debug(`Color ${this.lightEntity?.entity_id}`, this.lightColor);
       this.cdr.detectChanges();
     }
   }
@@ -96,7 +96,7 @@ export class LightEntityComponent implements OnInit {
       const h = Math.round(this.lightEntity?.new_state?.attributes?.hue ? this.lightEntity.new_state.attributes.hue : 0);
       const s = Math.round(this.lightEntity?.new_state?.attributes?.saturation ? this.lightEntity.new_state.attributes.saturation / 255 * 100 : 100);
       const b = Math.round(this.lightEntity?.new_state?.attributes?.brightness ? this.lightEntity.new_state.attributes.brightness / 255 * 100 : 100);
-      console.debug(this.lightEntity.entity_id, `hsl(${h},${s}%,${b}%)`)
+      // console.debug(this.lightEntity.entity_id, `hsl(${h},${s}%,${b}%)`)
       return `hsl(${h},100%,50%)`;
     }
     return "white";

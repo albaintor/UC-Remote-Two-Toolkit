@@ -59,7 +59,10 @@
 {
   display: flex;
   flex-direction: row;
-  transition: all 1s ease;
+  transform: translateZ(0);
+  transition: all 0.1s ease-out;
+  -webkit-backface-visibility: hidden;
+  -webkit-transition: all 0.1s ease-out;
 }
 
 .ui-page-item

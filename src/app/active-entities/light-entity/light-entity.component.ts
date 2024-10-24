@@ -97,14 +97,9 @@ export class LightEntityComponent implements OnInit {
       const s = Math.round(this.lightEntity?.new_state?.attributes?.saturation ? this.lightEntity.new_state.attributes.saturation / 255 * 100 : 100);
       const b = Math.round(this.lightEntity?.new_state?.attributes?.brightness ? this.lightEntity.new_state.attributes.brightness / 255 * 100 : 100);
       console.debug(this.lightEntity.entity_id, `hsl(${h},${s}%,${b}%)`)
-      return `hsl(${h},${s}%,60%)`;
+      return `hsl(${h},100%,50%)`;
     }
     return "white";
-  }
-
-  getStyleColor()
-  {
-    return `color:${this.getColor()}`;
   }
 
   checkFeature(lightEntityState: LightEntityState, feature: string | string[]): boolean

@@ -66,6 +66,8 @@
 .slider-wrapper {
   height: 40px;
   transition: all 0.5s ease-in-out;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 .slider-wrapper:hover .slider-progress

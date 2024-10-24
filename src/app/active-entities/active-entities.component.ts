@@ -514,12 +514,9 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
         }
         this.server.getRemotetEntity(remote, entityId!).subscribe(entity => {
           const existing = this.entityStates.find(item => item.entity_id === entityId);
-          if (existing)
-          {
-            this.entityStates.splice(this.entityStates.indexOf(existing), 1);
-          }
           const mediaState = {...entity, new_state: {attributes: entity.attributes, features: entity.features}} as any;
-          this.entityStates.push(mediaState);
+          if (existing) this.entityStates[this.entityStates.indexOf(existing)] = mediaState;
+          else this.entityStates.push(mediaState);
           this.cdr.detectChanges();
         });
       }
@@ -583,5 +580,9 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   removeEntityState(entityState: EntityState) {
     this.entityStates.splice(this.entityStates.indexOf(entityState), 1);
     this.cdr.detectChanges();
+  }
+
+  isLargeFormat(entityState: EntityState) {
+    return !!(entityState.new_state as any)?.attributes?.media_image_url
   }
 }

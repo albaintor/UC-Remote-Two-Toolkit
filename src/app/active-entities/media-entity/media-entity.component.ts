@@ -70,6 +70,11 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
     this.cdr.detectChanges();
   }
 
+  hasArtwork()
+  {
+   return !!this.mediaEntity?.new_state?.attributes?.media_image_url;
+  }
+
   getStatusStyle(state: string) {
     switch(state)
     {

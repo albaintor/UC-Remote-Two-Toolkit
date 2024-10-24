@@ -41,10 +41,10 @@
         [currentIndex]="activity!.options!.user_interface!.pages!.indexOf(currentPage)"
         [numberOfPages]="activity!.options!.user_interface!.pages!.length" class="grid-pagination"
         (onIndexChange)="selectPage($event)"/>
-      <div class="flex align-items-center justify-content-center gap-2" [style]="'width: 100%;scale:'+scale"
+      <div class="flex align-items-center justify-content-center gap-2" style="width: 100%"
            *ngIf="volumeEntity?.new_state?.attributes?.volume">
         <app-slider [value]="Math.round(volumeEntity!.new_state!.attributes!.volume!)" style="width: 100%"
-                    (valueChange)="updateVolume($event, volumeEntity!.entity_id!)"
+                    (valueChange)="updateVolume($event, volumeEntity!.entity_id!)" [scale]="scale"
                     [textValue]="'Volume '+Helper.getNumber(volumeEntity!.new_state!.attributes!.volume!)+'%'+
                     (Helper.isMuted(volumeEntity) ? ' (muted)' : '')"
                     [secondaryState]="Helper.isMuted(volumeEntity)"></app-slider>
@@ -89,10 +89,10 @@
                       [currentIndex]="activity!.options!.user_interface!.pages!.indexOf(currentPage)"
                       [numberOfPages]="activity!.options!.user_interface!.pages!.length" class="grid-pagination"
                       (onIndexChange)="selectPage($event)"/>
-      <div class="flex align-items-center justify-content-center gap-2" [style]="'width: 100%;scale:'+scale"
+      <div class="flex align-items-center justify-content-center gap-2" style="width: 100%"
            *ngIf="volumeEntity?.new_state?.attributes?.volume">
         <app-slider [value]="Math.round(volumeEntity!.new_state!.attributes!.volume!)" style="width: 100%"
-                    (valueChange)="updateVolume($event, volumeEntity!.entity_id!)"
+                    (valueChange)="updateVolume($event, volumeEntity!.entity_id!)" [scale]="scale"
                     [textValue]="'Volume '+Helper.getNumber(volumeEntity!.new_state!.attributes!.volume!)+'%'+
                     (Helper.isMuted(volumeEntity) ? ' (muted)' : '')"
                     [secondaryState]="Helper.isMuted(volumeEntity)"></app-slider>

@@ -8,7 +8,8 @@
     <div class="progress-text">{{textValue}}</div>
     <div class="progress-max" *ngIf="max">{{max}}</div>
   </div>
-  <div class="flex flex-column align-items-center justify-content-center slider-edit" *ngIf="editable">
+  <div class="flex flex-column align-items-center justify-content-center slider-edit" *ngIf="editable"
+       [style]="{'max-height':scale*25+'px'}">
     <p-slider [(ngModel)]="value" class="w-full" (ngModelChange)="valueUpdate(value)"
               [class]="secondaryState ? 'secondary-state' : ''"/>
     {{textValue}}

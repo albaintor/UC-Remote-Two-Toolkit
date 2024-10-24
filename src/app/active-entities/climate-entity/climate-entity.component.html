@@ -1,4 +1,4 @@
-<div *ngIf="climateEntity" class="flex gap-2 justify-content-center media-card" style="width: 100%;">
+<div *ngIf="climateEntity" class="flex gap-2 justify-content-center media-card" style="width: 100%;height:100%">
   <div class="power-button" [style]="'scale:'+scale" *ngIf="checkFeature(climateEntity, 'on_off')">
     <p-button *ngIf="!isOn()" icon="pi pi-power-off"
               [rounded]="true" (click)="powerToggle()"
@@ -10,14 +10,14 @@
     <p-button icon="pi pi-times" [rounded]="true" (click)="closeEntity()"
               size="small" pTooltip="Close" severity="secondary"/>
   </div>
-  <div class="flex-column" style="width: 100%">
+  <div class="flex-column align-content-start" style="width: 100%;height:100%">
     <div class="flex align-content-center justify-content-center card-title"  cdkDragHandle [style]="'text-align:center;scale:'+scale">
       <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
-      <ng-container *ngIf="!headerTemplate"><h2>{{websocketService.getEntityName(climateEntity)}}</h2></ng-container>
+      <ng-container *ngIf="!headerTemplate">{{websocketService.getEntityName(climateEntity)}}</ng-container>
     </div>
-    <div class="flex flex-column gap-2">
+    <div class="flex flex-column justify-content-center gap-2" style="height:100%">
       <div *ngIf="havcModes.length > 0"
-           class="flex align-items-center justify-content-center" style="width: 100%; height: 100%">
+           class="flex align-items-center justify-content-center" style="width: 100%">
         <app-dropdown-over [(value)]="havcMode" [options]="havcModes" [textTemplate]="currentMode" (valueChange)="setHavcMode(havcMode!)">
           <ng-template #currentMode>
             <p-tag [value]="getLabel(havcMode)" [severity]="getStatusSeverity()"></p-tag>

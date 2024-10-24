@@ -9,12 +9,12 @@
             size="small" pTooltip="Close" severity="secondary"/>
 </div>
 <div class="flex-column" style="width: 100%">
-  <div class="flex align-content-center justify-content-center card-title"  cdkDragHandle [style]="'text-align:center;scale:'+scale+';margin-left:'+(38*scale)+'px'">
+  <div class="flex align-content-center justify-content-center card-title"  cdkDragHandle [style]="'text-align:center;scale:'+scale">
     <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
-    <ng-container *ngIf="!headerTemplate"><h2>{{websocketService.getEntityName(mediaEntity)}}</h2></ng-container>
+    <ng-container *ngIf="!headerTemplate">{{websocketService.getEntityName(mediaEntity)}}</ng-container>
   </div>
   <div class="flex" style="width: 100%">
-    <div *ngIf="mediaEntity?.new_state?.attributes?.media_image_url"  class="flex-initial flex align-items-center" [style]="'margin-left:10px;max-width:'+(scale*380)+'px; max-height: '+(300*scale)+'px'">
+    <div *ngIf="mediaEntity?.new_state?.attributes?.media_image_url"  class="flex-initial flex align-items-center" [style]="'max-width:'+(scale*380)+'px; max-height: '+(300*scale)+'px'">
       <img class="media-image" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && !mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="mediaEntity.new_state!.attributes!.media_image_url!"
            [alt]="mediaEntity.new_state!.attributes!.media_title!"/>
       <img class="media-image" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="'/api/proxy?url='+mediaEntity.new_state!.attributes!.media_image_url!"
@@ -83,7 +83,7 @@
               {{formatDuration(websocketService.getMediaPosition(mediaEntity))}}</b>
           </div>
         </div>
-        <div class="flex align-items-center justify-content-center gap-2" [style]="'width: 100%'"
+        <div class="flex align-items-center justify-content-between" [style]="'width: 100%'"
              *ngIf="checkFeature(mediaEntity, ['volume', 'volume_up_down', 'mute_toggle', 'mute'])">
           <p-button *ngIf="checkFeature(mediaEntity, 'mute_toggle')" (click)="mediaAction(mediaEntity, 'media_player.mute_toggle')"
                     icon="icon icon-mute" size="small" pTooltip="Mute" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
@@ -91,7 +91,7 @@
                     (click)="mediaAction(mediaEntity, 'media_player.mute')"
                     icon="icon icon-mute" size="small" pTooltip="Mute" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
           <p-button *ngIf="!checkFeature(mediaEntity, 'mute_toggle') && checkFeature(mediaEntity, 'unmute')"
-                    (click)="mediaAction(mediaEntity, 'media_player.unmute')"
+                    (click)="mediaAction(mediaEntity, 'media_player.unmute')" severity="secondary"
                     icon="icon icon-mute" size="small" pTooltip="Unmute" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
           <p-button *ngIf="checkFeature(mediaEntity, 'volume_up_down')"
                     (click)="mediaAction(mediaEntity, 'media_player.volume_down')"
@@ -99,7 +99,7 @@
           <p-button *ngIf="checkFeature(mediaEntity, 'volume_up_down')"
                     (click)="mediaAction(mediaEntity, 'media_player.volume_up')"
                     icon="icon icon-plus" size="small" pTooltip="Volume +" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
-          <app-slider [value]="Math.round(mediaEntity.new_state!.attributes!.volume!)" style="width: 100%" (valueChange)="updateVolume($event, mediaEntity)"
+          <app-slider [value]="Math.round(mediaEntity.new_state!.attributes!.volume!)" [style]="'width: 100%;min-width:'+120*scale+'px'" (valueChange)="updateVolume($event, mediaEntity)"
                       [scale]="scale" [backgroundStyle]="'linear-gradient(90deg, rgba(122,122,122,1) 0%, rgba(255,82,0,1) 71%)'"
                       [textValue]="'Volume '+Helper.getNumber(mediaEntity.new_state!.attributes!.volume!)+'%'+
                     (Helper.isMuted(mediaEntity) ? ' (muted)' : '')"

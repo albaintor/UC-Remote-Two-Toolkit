@@ -60,9 +60,9 @@
   display: flex;
   flex-direction: row;
   transform: translateZ(0);
-  transition: all 0.1s ease-out;
+  transition: all 0.5s ease-out;
   -webkit-backface-visibility: hidden;
-  -webkit-transition: all 0.1s ease-out;
+  /*-webkit-transition: all 0.5s ease-out;*/
 }
 
 .ui-page-item

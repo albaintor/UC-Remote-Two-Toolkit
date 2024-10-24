@@ -38,7 +38,7 @@
                          [selectionMode]="false" [currentPage]="currentPage" [runMode]="true" (onSelectButton)="handleCommand($event)"
                           (onPageChange)="selectPage($event)"/>
       <app-pagination *ngIf="activity?.options?.user_interface?.pages && currentPage"
-        [currentIndex]="activity!.options!.user_interface!.pages!.indexOf(currentPage)"
+        [currentIndex]="activity!.options!.user_interface!.pages!.indexOf(currentPage)" [displayedIndexes]="6"
         [numberOfPages]="activity!.options!.user_interface!.pages!.length" class="grid-pagination"
         (onIndexChange)="selectPage($event)"/>
       <div class="flex align-items-center justify-content-center gap-2" style="width: 100%"

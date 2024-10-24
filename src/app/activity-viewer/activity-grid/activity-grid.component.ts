@@ -140,7 +140,7 @@ export class ActivityGridComponent implements AfterViewInit {
     initialUiContainerPosition: 0
   }
   @Output() onPageChange = new EventEmitter<number>();
-  swipeAcceleration = 2;
+  swipeAcceleration = 1.5;
 
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
@@ -360,25 +360,21 @@ export class ActivityGridComponent implements AfterViewInit {
     let x = 0;
     if ($event instanceof MouseEvent) x = $event.clientX;
     else if ($event instanceof TouchEvent) x = $event.touches[0].clientX;
-    // const acceleration = $event instanceof TouchEvent ? this.swipeAcceleration*2 : this.swipeAcceleration;
-    const acceleration = this.swipeAcceleration;
-    this.swipeInfo.uiContainerPosition = -(this.swipeInfo.initialUiContainerPosition+(this.swipeInfo.uiClientX - x)*acceleration);
-    // this.swipeInfo.uiContainerPosition = this.swipeInfo.uiContainerPosition - (this.swipeInfo.uiClientX - x)*acceleration;
-    // this.swipeInfo.uiClientX = x;
-    this.uiCollection.nativeElement.setAttribute("style", `transform: translate3d(${this.swipeInfo.uiContainerPosition}px, 0px, 0px`);
-    // this.cdr.detectChanges();
+    this.swipeInfo.uiContainerPosition = -(this.swipeInfo.initialUiContainerPosition+(this.swipeInfo.uiClientX - x)*this.swipeAcceleration);
+
+    this.uiCollection.nativeElement.setAttribute("style", `transform: translate3d(${this.swipeInfo.uiContainerPosition}px, 0px, 0px);transition: all 0s ease-out;`);
   }
 
   switchCurrentPage()
   {
-    let index = Math.round(Math.abs(this.swipeInfo.uiContainerPosition/this.width));
+    let index = Math.round(-this.swipeInfo.uiContainerPosition/this.width);
     if (this.activity?.options?.user_interface?.pages && index >= this.activity.options.user_interface.pages.length)
       index = this.activity.options?.user_interface?.pages.length - 1;
     if (index < 0) index = 0;
     if (!this.activity?.options?.user_interface?.pages?.[index]) return;
     this.currentPage = this.activity.options.user_interface.pages[index];
     if (this.uiCollection)
-      this.uiCollection.nativeElement.setAttribute("style", `transform: translate3d(-${index*100}%, 0px, 0px`);
+      this.uiCollection.nativeElement.setAttribute("style", `transform: translate3d(-${index*100}%, 0px, 0px)`);
     this.onPageChange.emit(index);
     this.cdr.detectChanges();
   }

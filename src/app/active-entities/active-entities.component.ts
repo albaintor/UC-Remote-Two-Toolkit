@@ -47,6 +47,10 @@ import {CoverEntityComponent} from "./cover-entity/cover-entity.component";
 import {ClimateEntityComponent} from "./climate-entity/climate-entity.component";
 import {ToggleButtonModule} from "primeng/togglebutton";
 
+interface SelectedActivity extends RemoteActivity {
+  collapsed?: boolean;
+}
+
 
 @Component({
   selector: 'app-active-entities',
@@ -104,7 +108,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   newEntity: Entity | undefined;
   entities: Entity[] = [];
   suggestions: Entity[] = [];
-  selectedActivities: RemoteActivity[] = [];
+  selectedActivities: SelectedActivity[] = [];
   suggestedActivities: RemoteActivity[] = [];
   protected readonly Helper = Helper;
   newActivity: RemoteActivity | undefined;
@@ -273,7 +277,8 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
         return {entity_id: item.entity_id!, entity_type: item.entity_type, remote_name: this.selectedRemote!.remote_name!}
       }),
       popupEntitiyIds: this.selectedActivities.map(item => {
-        return {entity_id: item.entity_id!, entity_type: 'activity', remote_name: this.selectedRemote!.remote_name!}
+        return {entity_id: item.entity_id!, entity_type: 'activity', remote_name: this.selectedRemote!.remote_name!,
+        collapsed: item.collapsed}
       }), lockDashboard: this.lockDashboard};
     const existingDashboard = dashboards.find(item => item.name === dashboard.name);
     if (existingDashboard) {
@@ -369,14 +374,14 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   addActivity($event: RemoteActivity) {
     if (!this.selectedRemote || !$event?.entity_id || this.selectedActivities.find(item => item.entity_id === $event.entity_id)) return;
     this.server.getRemoteActivity(this.selectedRemote, $event.entity_id).subscribe(activity => {
-      this.selectedActivities.push({...activity, remote: $event.remote});
+      this.selectedActivities.push({...activity, remote: $event.remote, collapsed: false});
     })
     this.cdr.detectChanges();
   }
 
   playActivity(activity: RemoteActivity) {
-    if (!this.selectedActivities.includes(activity)) {
-      this.selectedActivities.push(activity);
+    if (!this.selectedActivities.find(activity => activity.entity_id === activity.entity_id)) {
+      this.selectedActivities.push({...activity, collapsed: false});
       this.cdr.detectChanges();
     }
   }
@@ -546,7 +551,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
       if (!this.selectedActivities.find(item => item.entity_id === entityId))
       {
         const existing = this.activities.find(item => item.entity_id === entityId);
-        if (existing) this.selectedActivities.push(existing);
+        if (existing) this.selectedActivities.push({...existing, collapsed: !!dashboardItem.collapsed});
       }
       this.server.getRemoteActivity(remote, entityId!).subscribe(activity => {
         const existing = this.selectedActivities.find(item => item.entity_id === entityId);
@@ -554,7 +559,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
         {
           this.selectedActivities.splice(this.selectedActivities.indexOf(existing), 1);
         }
-        this.selectedActivities.push({...activity, remote});
+        this.selectedActivities.push({...activity, remote, collapsed: !!dashboardItem.collapsed});
         this.cdr.detectChanges();
       })
     }

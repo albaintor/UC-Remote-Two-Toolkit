@@ -178,6 +178,7 @@ export interface DashboardEntity {
   entity_id: string;
   remote_name: string;
   entity_type?: string;
+  collapsed?: boolean;
 }
 
 export interface Dashboard

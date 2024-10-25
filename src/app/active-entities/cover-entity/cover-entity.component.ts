@@ -17,6 +17,7 @@ import {CdkDragHandle} from "@angular/cdk/drag-drop";
 import {NgIf, NgTemplateOutlet} from "@angular/common";
 import {SliderComponent} from "../../controls/slider/slider.component";
 import {TooltipModule} from "primeng/tooltip";
+import {ButtonComponent} from "../../controls/button/button.component";
 
 @Component({
   selector: 'app-cover-entity',
@@ -27,7 +28,8 @@ import {TooltipModule} from "primeng/tooltip";
     NgIf,
     SliderComponent,
     TooltipModule,
-    NgTemplateOutlet
+    NgTemplateOutlet,
+    ButtonComponent
   ],
   templateUrl: './cover-entity.component.html',
   styleUrl: './cover-entity.component.css',

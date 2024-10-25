@@ -19,6 +19,7 @@ import {CdkDragHandle} from "@angular/cdk/drag-drop";
 import {SliderComponent} from "../../controls/slider/slider.component";
 import {ColorPickerModule} from "primeng/colorpicker";
 import {FormsModule} from "@angular/forms";
+import {ButtonComponent} from "../../controls/button/button.component";
 
 @Component({
   selector: 'app-light-entity',
@@ -31,7 +32,8 @@ import {FormsModule} from "@angular/forms";
     NgTemplateOutlet,
     SliderComponent,
     ColorPickerModule,
-    FormsModule
+    FormsModule,
+    ButtonComponent
   ],
   templateUrl: './light-entity.component.html',
   styleUrl: './light-entity.component.css',

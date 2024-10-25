@@ -1,0 +1,14 @@
+.app-button {
+  --button-font-size: 0.7rem;
+  --button-size: 2rem;
+}
+
+.app-button .p-component {
+  font-size: var(--button-font-size) !important;
+}
+
+.app-button .p-button {
+  width: var(--button-size) !important;
+  height: var(--button-size) !important;
+  padding: 0;
+}

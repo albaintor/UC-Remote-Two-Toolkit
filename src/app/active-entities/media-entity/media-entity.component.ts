@@ -21,6 +21,7 @@ import {Helper} from "../../helper";
 import {MediaEntityState} from "../../websocket/remote-websocket-instance";
 import {WebsocketService} from "../../websocket/websocket.service";
 import {CdkDragHandle} from "@angular/cdk/drag-drop";
+import {ButtonComponent} from "../../controls/button/button.component";
 
 @Component({
   selector: 'app-media-entity',
@@ -34,7 +35,8 @@ import {CdkDragHandle} from "@angular/cdk/drag-drop";
     TagModule,
     TooltipModule,
     NgTemplateOutlet,
-    CdkDragHandle
+    CdkDragHandle,
+    ButtonComponent
   ],
   templateUrl: './media-entity.component.html',
   styleUrl: './media-entity.component.css',

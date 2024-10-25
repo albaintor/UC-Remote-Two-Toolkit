@@ -95,6 +95,11 @@ export interface RemoteState {
   batteryInfo?: BatteryState;
 }
 
+export interface SoftwareUpdate {
+  state: "INITIAL"|"START"|"RUN"|"PROGRESS"|"SUCCESS"|"DONE";
+  
+}
+
 export class RemoteWebsocketInstance {
   get mediaEntity(): MediaEntityState | undefined {
     return this._mediaEntity;
@@ -241,6 +246,27 @@ export class RemoteWebsocketInstance {
         else if (eventMessage.msg == "battery_status")
         {
           this.handleBatteryEvent(eventMessage);
+        }
+        else if (eventMessage.msg === "software_update")
+        { //TODO
+          /*
+          {
+  "kind": "event",
+  "msg": "software_update",
+  "cat": "REMOTE",
+  "ts": "2024-09-30T16:25:18.668395688Z",
+  "msg_data": {
+    "event_type": "PROGRESS",
+    "progress": {
+      "download_bytes": 256734720,
+      "download_percent": 97,
+      "state": "DOWNLOAD",
+      "update_id": "some-id"
+    },
+    "update_id": "some-id"
+  }
+}
+           */
         }
         else {
           console.debug("Unhandled message", message);

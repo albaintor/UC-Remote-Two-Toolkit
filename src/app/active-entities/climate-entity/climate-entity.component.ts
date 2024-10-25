@@ -22,6 +22,7 @@ import {KnobModule} from "primeng/knob";
 import {FormsModule} from "@angular/forms";
 import {DropdownOverComponent} from "../../controls/dropdown-over/dropdown-over.component";
 import {TagModule} from "primeng/tag";
+import {ButtonComponent} from "../../controls/button/button.component";
 
 type HavcMode = 'OFF' |'HEAT'|'COOL'|'HEAT_COOL'|'FAN'|'AUTO';
 
@@ -56,7 +57,8 @@ const HAVC_FEATURES_MAP: {[type:string]: string} = {
     KnobModule,
     FormsModule,
     DropdownOverComponent,
-    TagModule
+    TagModule,
+    ButtonComponent
   ],
   templateUrl: './climate-entity.component.html',
   styleUrl: './climate-entity.component.css',

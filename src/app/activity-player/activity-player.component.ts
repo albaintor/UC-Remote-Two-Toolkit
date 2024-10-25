@@ -80,6 +80,14 @@ export class ActivityPlayerComponent implements OnInit {
   @Output() onClose: EventEmitter<ActivityPlayerComponent> = new EventEmitter();
   @Output() onMessage: EventEmitter<Message> = new EventEmitter();
   minimized = false;
+  @Input("minimized") set _minimized(minimized: boolean | undefined) {
+    if (minimized === undefined || this.minimized === minimized) return;
+    this.minimized = minimized;
+    this.minimizedChange.emit(this.minimized);
+    this.cdr.detectChanges();
+  }
+  @Output() minimizedChange = new EventEmitter<boolean>();
+
   currentPage: UIPage | undefined;
   progress = 0;
   progressDetail: string | undefined;
@@ -282,5 +290,9 @@ export class ActivityPlayerComponent implements OnInit {
         this.cdr.detectChanges();
         }})
     }
+  }
+
+  toggleMinimized($event: MouseEvent) {
+    this._minimized = !this.minimized;
   }
 }

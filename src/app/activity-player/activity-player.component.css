@@ -43,8 +43,6 @@
   transition: width 1s, height 1s;
 }
 
-
-
 .grid-pagination {
   position: absolute;
   max-width: 150px;

@@ -40,7 +40,7 @@
   </ng-template>
   <ng-container *ngIf="!minimized">
     <ng-container *ngIf="mediaEntity && remote">
-        <div class="flex gap-2 align-content-center justify-content-center" style="width: 100%">
+        <div class="flex gap-2 align-content-center justify-content-center" style="width: 100%;overflow: hidden">
         <app-media-entity [mediaEntity]="mediaEntity" [remote]="remote"
                           class="flex flex-wrap gap-2 align-content-center justify-content-center ng-star-inserted"
                           [headerTemplate]="entitySelector" [scale]="scale" style="width: 100%">

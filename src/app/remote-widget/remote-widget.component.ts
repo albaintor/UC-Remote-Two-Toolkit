@@ -22,7 +22,7 @@ import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.com
 import {WebsocketService} from "../websocket/websocket.service";
 import {ToastModule} from "primeng/toast";
 import {MessageService} from "primeng/api";
-import {MediaEntityState, RemoteState} from "../websocket/remote-websocket-instance";
+import {MediaEntityState, RemoteState, SoftwareUpdate} from "../websocket/remote-websocket-instance";
 
 interface WidgetConfiguration {
   minimized: boolean;
@@ -63,6 +63,7 @@ export class RemoteWidgetComponent implements OnInit {
   mediaEntities: MediaEntityState[] = [];
   activities: Activity[] = [];
   protected readonly Math = Math;
+  softwareUpdate: SoftwareUpdate | undefined;
 
   constructor(private server:ServerService, protected websocketService: WebsocketService, private cdr:ChangeDetectorRef,
               private messageService: MessageService,) { }
@@ -89,6 +90,10 @@ export class RemoteWidgetComponent implements OnInit {
     this.websocketService.onMediaPositionChange().subscribe(entities => {
       this.cdr.detectChanges();
     });
+    this.websocketService.onSofwareUpdateChange().subscribe(state => {
+      this.softwareUpdate = state;
+      this.cdr.detectChanges();
+    })
     this.server.remote$.subscribe(remote => {
       this.remote = remote;
       this.server.getRemoteBattery(this.remote).subscribe(batteryInfo => {
@@ -155,5 +160,23 @@ export class RemoteWidgetComponent implements OnInit {
       }
     });
     this.server.wakeRemote(this.remote, "255.255.255.0").subscribe({});
+  }
+
+  getSoftwareProgress() {
+    if (!this.softwareUpdate?.progress) return 0;
+    if (this.softwareUpdate.progress.state === 'START' || this.softwareUpdate.progress.state === 'RUN') return 0;
+    let offset = 0; let percent = 0;
+    if (this.softwareUpdate.progress.total_steps)
+    {
+      offset = Math.round(100/this.softwareUpdate.progress.total_steps);
+      percent = offset/100;
+    }
+    if (this.softwareUpdate.progress.state === 'PROGRESS')
+    {
+      const step_offset = offset * (this.softwareUpdate.progress.current_step - 1);
+      return (percent*this.softwareUpdate.progress.current_percent + step_offset);
+    }
+    if (this.softwareUpdate.progress.state === 'SUCCESS') return 100;
+    return 0;
   }
 }

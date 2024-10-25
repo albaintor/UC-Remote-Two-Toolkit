@@ -491,6 +491,31 @@ export class Helper
     return true;
   }
 
+  static findRoom(newItems: ActivityPageCommand[], grid: ActivityPageCommand[], width: number, height: number): ActivityPageCommand[]
+  {
+    const gridCopy: ActivityPageCommand[] = [...grid];
+    const newItemsMapped: ActivityPageCommand[] = [];
+    newItems.forEach(item => {
+      for (let x=0; x<width; x++)
+      {
+        for (let y=0; y<height; y++)
+        {
+          const existingItem = gridCopy.find(item => item.location.x === x && item.location.y === y);
+          if (!Helper.isEmptyItem(existingItem)) continue;
+          if (Helper.checkItem(item, gridCopy, x, y, item!.size.width, item!.size.height))
+          {
+            const newItem = {...item};
+            newItem.location = {x, y};
+            newItemsMapped.push(newItem);
+            return;
+          }
+        }
+      }
+    });
+    console.debug("Find room", newItems, width, height, newItemsMapped);
+    return newItemsMapped;
+  }
+
   static getGridMinSize(grid: (ActivityPageCommand | null)[]): {width: number, height: number}
   {
     const gridSize = {width: 1, height: 1};

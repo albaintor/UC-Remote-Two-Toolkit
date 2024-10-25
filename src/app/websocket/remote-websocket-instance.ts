@@ -96,8 +96,12 @@ export interface RemoteState {
 }
 
 export interface SoftwareUpdate {
-  state: "INITIAL"|"START"|"RUN"|"PROGRESS"|"SUCCESS"|"DONE";
-  
+  progress: {
+    state: "INITIAL"|"START"|"RUN"|"PROGRESS"|"SUCCESS"|"DONE";
+    current_step: number;
+    total_steps: number;
+    current_percent: number;
+  }
 }
 
 export class RemoteWebsocketInstance {
@@ -127,6 +131,7 @@ export class RemoteWebsocketInstance {
   private _climateEntities: ClimateEntityState[] = [];
   climateEntitiesUpdated$ = new BehaviorSubject<ClimateEntityState[]>([]);
   activityEntitiesUpdated$ = new BehaviorSubject<ActivityState[]>([]);
+  softwareUpdate$ = new BehaviorSubject<SoftwareUpdate|undefined>(undefined);
 
   constructor(private serverService: ServerService, private remoteWebsocket: RemoteWebsocket) {
     this.init();
@@ -213,6 +218,11 @@ export class RemoteWebsocketInstance {
     return this.climateEntitiesUpdated$;
   }
 
+  public onSoftwareUpdateChange()
+  {
+    return this.softwareUpdate$;
+  }
+
   reset()
   {
     this._mediaEntities = [];
@@ -248,25 +258,8 @@ export class RemoteWebsocketInstance {
           this.handleBatteryEvent(eventMessage);
         }
         else if (eventMessage.msg === "software_update")
-        { //TODO
-          /*
-          {
-  "kind": "event",
-  "msg": "software_update",
-  "cat": "REMOTE",
-  "ts": "2024-09-30T16:25:18.668395688Z",
-  "msg_data": {
-    "event_type": "PROGRESS",
-    "progress": {
-      "download_bytes": 256734720,
-      "download_percent": 97,
-      "state": "DOWNLOAD",
-      "update_id": "some-id"
-    },
-    "update_id": "some-id"
-  }
-}
-           */
+        {
+          this.climateEntitiesUpdated$.next(eventMessage.msg_data);
         }
         else {
           console.debug("Unhandled message", message);

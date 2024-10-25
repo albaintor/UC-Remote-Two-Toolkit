@@ -26,6 +26,16 @@
                  pTooltip="Click to wake up the remote"
                  (click)="wakeRemote($event)" [style]="{'cursor': 'pointer'}"/>
         </div>
+        <div class="flex align-items-center justify-content-center"
+             *ngIf="softwareUpdate?.progress?.state && softwareUpdate!.progress!.state! !== 'DONE'">
+          <p-tag [value]="softwareUpdate?.progress?.state"
+                 [severity]="'warning'"
+                 pTooltip="Software is updating..."/>
+        </div>
+        <div class="flex align-items-center justify-content-center"
+             *ngIf="softwareUpdate?.progress?.state && softwareUpdate!.progress!.state! !== 'DONE'">
+          <p-progressBar [value]="getSoftwareProgress()" [style]="{'width': '250px'}"/>
+        </div>
     </div>
   </ng-template>
   <ng-container *ngIf="!minimized">

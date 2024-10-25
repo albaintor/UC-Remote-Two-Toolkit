@@ -272,18 +272,36 @@ export class ActivityViewerComponent implements AfterViewInit {
       }
       if (!this.activity || !this.currentPage) return;
       const commands: ActivityPageCommand[] = data.object;
+      let foundRoom = true;
       for (let command of commands)
       {
         if (!Helper.checkItem(command, this.currentPage.items, command.location.x, command.location.y, command.size.width, command.size.height))
+        {
+          foundRoom = false;
+          break;
+        }
+      }
+      if (foundRoom) {
+        for (let command of commands) {
+          this.currentPage.items.push(command);
+        }
+      }
+      else {
+        console.warn("No room for selection, trying to find room in the grid");
+        const newItems = Helper.findRoom(commands, this.currentPage.items,
+          this.currentPage.grid.width, this.currentPage.grid.height);
+        if (newItems.length === commands.length)
+        {
+          for (let command of newItems) {
+            this.currentPage.items.push(command);
+          }
+        }
+        else
         {
           this.messageService.add({severity:'error', summary: "Cannot paste commands in this page, there is some overlap", key: 'activity'});
           this.cdr.detectChanges();
           return;
         }
-      }
-      for (let command of commands)
-      {
-        this.currentPage.items.push(command);
       }
       this.updateButtonsGrid();
       this.messageService.add({severity:'success', summary: `Pasted ${commands.length} commands into current page`, key: 'activity'});
@@ -524,5 +542,10 @@ export class ActivityViewerComponent implements AfterViewInit {
       }
     }
     this.includedEntity = undefined;
+  }
+
+  selectionChange($event: ActivityGridItemComponent[]) {
+    this.selection = $event;
+    this.cdr.detectChanges();
   }
 }

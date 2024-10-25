@@ -125,7 +125,7 @@
       <div class="flex align-items-center justify-content-center" style="width: 100%">
         <app-activity-grid [remote]="remote" [activity]="activity" [currentPage]="currentPage" [selectionMode]="selectionMode"
                            [width]="gridPixelWidth" [height]="gridPixelHeight"  [editMode]="editMode"  [style]="'width: '+gridPixelWidth+'px'"
-                           (onPageChange)="pageChanged($event)"/>
+                           (onPageChange)="pageChanged($event)" (onSelectionChange)="selectionChange($event)"/>
       </div>
     </div>
   </ng-container>

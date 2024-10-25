@@ -8,7 +8,7 @@ import {
   ActivityState, ClimateEntityState, CoverEntityState, EntityState, LightEntityState,
   MediaEntityState,
   RemoteState,
-  RemoteWebsocketInstance
+  RemoteWebsocketInstance, SoftwareUpdate
 } from "./remote-websocket-instance";
 
 
@@ -44,6 +44,7 @@ export class WebsocketService implements OnDestroy {
   lightChanged$ = new BehaviorSubject<LightEntityState[]>([]);
   coverChanged$ = new BehaviorSubject<CoverEntityState[]>([]);
   climateChange$ = new BehaviorSubject<ClimateEntityState[]>([]);
+  softwareUpdateChange$ = new BehaviorSubject<SoftwareUpdate|undefined>(undefined);
 
   constructor(private serverService: ServerService) {
     this.init();
@@ -122,6 +123,7 @@ export class WebsocketService implements OnDestroy {
     this.websocketInstance.onLightChange().subscribe(state => {this.lightChanged$.next(state)});
     this.websocketInstance.onCoverChange().subscribe(state => {this.coverChanged$.next(state)});
     this.websocketInstance.onClimateChange().subscribe(state => {this.climateChange$.next(state)});
+    this.websocketInstance.onSoftwareUpdateChange().subscribe(state => {this.softwareUpdateChange$.next(state)})
     this.remoteStateUpdated$.next({batteryInfo: this.websocketInstance.batteryState});
   }
 
@@ -180,6 +182,11 @@ export class WebsocketService implements OnDestroy {
   public onClimateChange()
   {
     return this.climateChange$;
+  }
+
+  public onSofwareUpdateChange()
+  {
+    return this.softwareUpdateChange$;
   }
 
   updateEntity(entity: Entity)

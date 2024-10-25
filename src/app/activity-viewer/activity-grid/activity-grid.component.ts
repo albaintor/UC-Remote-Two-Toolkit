@@ -140,6 +140,7 @@ export class ActivityGridComponent implements AfterViewInit {
     initialUiContainerPosition: 0
   }
   @Output() onPageChange = new EventEmitter<number>();
+  @Output() onSelectionChange = new EventEmitter<ActivityGridItemComponent[]>();
   swipeAcceleration = 1.5;
 
 
@@ -262,6 +263,7 @@ export class ActivityGridComponent implements AfterViewInit {
       else {
         this.selection.push($event);
       }
+      this.onSelectionChange.emit(this.selection);
       this.cdr.detectChanges();
       return;
     }

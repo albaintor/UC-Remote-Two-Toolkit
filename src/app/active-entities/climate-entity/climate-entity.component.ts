@@ -226,10 +226,11 @@ export class ClimateEntityComponent implements OnInit {
     console.debug("Set temperature", this.climateEntity.entity_id, $event);
     this.server.executeRemotetCommand(this.remote, {
       entity_id: this.climateEntity.entity_id,
-      cmd_id: "climate.target_temperature",
+      // cmd_id: "climate.target_temperature_c",
+      cmd_id: "target_temperature",
       params: {
-        temperature: this.climateEntity.new_state!.attributes!.current_temperature
+        temperature: this.climateEntity.new_state!.attributes!.target_temperature,
       }
-    }).subscribe();
+    } as any).subscribe();
   }
 }

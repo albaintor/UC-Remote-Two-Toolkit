@@ -113,16 +113,16 @@
        [style]="'width:100%'" *ngFor="let entityState of entityStates" [ngSwitch]="entityState.entity_type">
     <app-media-entity *ngSwitchCase="'media_player'" [mediaEntity]="entityState" [remote]="selectedRemote" style="width:100%" [scale]="1"
                       class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
-                      [closable]="true" (onClose)="removeEntityState(entityState)"></app-media-entity>
+                      [closable]="true" (onClose)="removeEntityState(entityState)" (onMessage)="handleMessage($event)"></app-media-entity>
     <app-light-entity *ngSwitchCase="'light'" [lightEntity]="entityState" [remote]="selectedRemote" style="width:100%" [scale]="1"
                       class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
-                      [closable]="true" (onClose)="removeEntityState(entityState)"></app-light-entity>
+                      [closable]="true" (onClose)="removeEntityState(entityState)" (onMessage)="handleMessage($event)"></app-light-entity>
     <app-cover-entity *ngSwitchCase="'cover'" [coverEntity]="entityState" [remote]="selectedRemote" style="width:100%" [scale]="1"
                       class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
-                      [closable]="true" (onClose)="removeEntityState(entityState)"></app-cover-entity>
+                      [closable]="true" (onClose)="removeEntityState(entityState)" (onMessage)="handleMessage($event)"></app-cover-entity>
     <app-climate-entity *ngSwitchCase="'climate'" [climateEntity]="entityState" [remote]="selectedRemote" style="width:100%" [scale]="1"
                         class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
-                        [closable]="true" (onClose)="removeEntityState(entityState)"></app-climate-entity>
+                        [closable]="true" (onClose)="removeEntityState(entityState)" (onMessage)="handleMessage($event)"></app-climate-entity>
   </div>
 </div>
 <div class="flex flex-wrap gap-3" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="drop($event)" *ngIf="!smallSizeMode">
@@ -143,32 +143,25 @@
                           [closable]="true" (onClose)="removeEntityState(entityState)"></app-media-entity>
       </div>
     </ng-container>
-<!--    <div *ngSwitchCase="'media_player'" class="flex gap-2 align-content-center justify-content-center media-card-border"-->
-<!--         [style]="'width:'+(600*scale)+'px'" cdkDrag>-->
-<!--      <app-media-entity [mediaEntity]="entityState" [remote]="selectedRemote"-->
-<!--                        [scale]="scale"-->
-<!--                        class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"-->
-<!--                        [closable]="true" (onClose)="removeEntityState(entityState)"></app-media-entity>-->
-<!--    </div>-->
     <div *ngSwitchCase="'light'" class="flex gap-2 align-content-center justify-content-center media-card-border"
-         [style]="'width:'+(290*scale)+'px'" cdkDrag>
+         [style]="'height:100%;width:'+(290*scale)+'px'" cdkDrag>
       <app-light-entity [lightEntity]="entityState" [remote]="selectedRemote" [style]="'width:'+(290*scale)+'px'" [scale]="scale"
                         class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
-                        style="width:100%"
+                        style="width:100%;height:100%" (onMessage)="handleMessage($event)"
                         [closable]="true" (onClose)="removeEntityState(entityState)"></app-light-entity>
     </div>
     <div *ngSwitchCase="'cover'" class="flex gap-2 align-content-center justify-content-center media-card-border"
-         [style]="'width:'+(290*scale)+'px'" cdkDrag>
+         [style]="'height:100%;width:'+(290*scale)+'px'" cdkDrag>
       <app-cover-entity [coverEntity]="entityState" [remote]="selectedRemote" [style]="'width:'+(290*scale)+'px'" [scale]="scale"
                         class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
-                        style="width:100%"
+                        style="width:100%;height:100%" (onMessage)="handleMessage($event)"
                         [closable]="true" (onClose)="removeEntityState(entityState)"></app-cover-entity>
     </div>
     <div *ngSwitchCase="'climate'" class="flex gap-2 align-content-center justify-content-center media-card-border"
-         [style]="'width:'+(290*scale)+'px'" cdkDrag>
+         [style]="'height:100%;width:'+(290*scale)+'px'" cdkDrag>
       <app-climate-entity [climateEntity]="entityState" [remote]="selectedRemote" [style]="'width:'+(290*scale)+'px'" [scale]="scale"
                         class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
-                          style="width:100%"
+                          style="width:100%;height:100%" (onMessage)="handleMessage($event)"
                         [closable]="true" (onClose)="removeEntityState(entityState)"></app-climate-entity>
     </div>
   </ng-container>

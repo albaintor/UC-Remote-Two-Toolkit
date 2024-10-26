@@ -18,6 +18,8 @@ import {NgIf, NgTemplateOutlet} from "@angular/common";
 import {SliderComponent} from "../../controls/slider/slider.component";
 import {TooltipModule} from "primeng/tooltip";
 import {ButtonComponent} from "../../controls/button/button.component";
+import {Message} from "primeng/api";
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'app-cover-entity',
@@ -43,6 +45,7 @@ export class CoverEntityComponent implements OnInit {
   @Input() scale = 1;
   @Input() closable: boolean = false;
   @Output() onClose: EventEmitter<CoverEntityState> = new EventEmitter();
+  @Output() onMessage: EventEmitter<Message> = new EventEmitter();
   protected readonly Helper = Helper;
 
   constructor(private server:ServerService, protected websocketService: WebsocketService, private cdr:ChangeDetectorRef) { }
@@ -69,7 +72,16 @@ export class CoverEntityComponent implements OnInit {
     this.server.executeRemotetCommand(this.remote, {
       entity_id: this.coverEntity.entity_id,
       cmd_id: command
-    }).subscribe();
+    }).subscribe({next: res => {
+      this.onMessage.emit({severity: "success", summary: `Cover ${this.coverEntity?.entity_id} command ${command}`});
+    },
+      error: (err: HttpErrorResponse) => {
+        this.onMessage.emit({
+          severity: "error",
+          detail: `Error executing ${this.coverEntity?.entity_id} command ${command} : ${err.error.code} - ${err.error.message}`
+        })
+      }
+  });
   }
 
   closeEntity() {
@@ -88,8 +100,19 @@ export class CoverEntityComponent implements OnInit {
       params: {
         position
       }
-    }).subscribe(res => {
+    }).subscribe({next: res => {
+      this.onMessage.emit({
+        severity: "success",
+        detail: `Cover ${this.coverEntity?.entity_id} set position ${position}`
+      });
       this.cdr.detectChanges();
-    });
+    },
+      error: (err: HttpErrorResponse) => {
+        this.onMessage.emit({
+          severity: "error",
+          detail: `Error setting ${this.coverEntity?.entity_id} position mode to ${position} : ${err.error.code} - ${err.error.message}`
+        })
+      }
+  });
   }
 }

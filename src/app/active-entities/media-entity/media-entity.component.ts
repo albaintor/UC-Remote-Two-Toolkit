@@ -22,6 +22,8 @@ import {MediaEntityState} from "../../websocket/remote-websocket-instance";
 import {WebsocketService} from "../../websocket/websocket.service";
 import {CdkDragHandle} from "@angular/cdk/drag-drop";
 import {ButtonComponent} from "../../controls/button/button.component";
+import {Message} from "primeng/api";
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'app-media-entity',
@@ -51,6 +53,7 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
   @Input() scale = 1;
   @Input() closable: boolean = false;
   @Output() onClose: EventEmitter<MediaEntityState> = new EventEmitter();
+  @Output() onMessage: EventEmitter<Message> = new EventEmitter();
   protected readonly Helper = Helper;
 
   textStyle = "font-size: 1.2rem";
@@ -127,7 +130,12 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
       cmd_id:"media_player.seek", params: {"media_position": newPosition}};
     console.debug("Seek", body);
     this.server.executeRemotetCommand(this.remote, body).subscribe(
-      {error: err => console.error("Error updting position", err)});
+      {error: (err: HttpErrorResponse) =>
+          this.onMessage.emit({
+            severity: "error",
+            detail: `Error setting ${this.mediaEntity?.entity_id} position to ${newPosition} : ${err.error.code} - ${err.error.message}`
+          })
+      });
   }
 
   clickState(mediaEntity: MediaEntityState) {
@@ -194,7 +202,12 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
       cmd_id: "media_player.select_source", params: {
         "source": source
       }
-    }).subscribe();
+    }).subscribe({error: (err: HttpErrorResponse) =>
+        this.onMessage.emit({
+          severity: "error",
+          detail: `Error setting ${this.mediaEntity?.entity_id} source to ${source} : ${err.error.code} - ${err.error.message}`
+        })
+    });
   }
 
   soundModeSelected(mediaEntity: MediaEntityState, sound_mode: any) {
@@ -205,7 +218,12 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
       cmd_id: "media_player.select_sound_mode", params: {
         "mode": sound_mode
       }
-    }).subscribe();
+    }).subscribe({error: (err: HttpErrorResponse) =>
+        this.onMessage.emit({
+          severity: "error",
+          detail: `Error setting ${this.mediaEntity?.entity_id} sound mode to ${sound_mode} : ${err.error.code} - ${err.error.message}`
+        })
+    });
   }
 
   hasMediaControls(mediaEntity: MediaEntityState) {

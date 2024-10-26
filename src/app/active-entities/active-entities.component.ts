@@ -124,6 +124,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   additionalWebsocketMedias: RemoteWebsocketInstance[] = [];
   progress = false;
   supported_entity_types = ['media_player', 'light', 'cover', 'climate'];
+  removedEntityStates: string[] = [];
 
 
   constructor(private server:ServerService,
@@ -173,7 +174,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
           {
             this.entityStates[this.entityStates.indexOf(existingEntity)] = mediaState;
           }
-          else if (!this.lockDashboard)
+          else if (!this.lockDashboard && !this.removedEntityStates.includes(mediaState.entity_id))
             this.entityStates.push(mediaState);
         });
       }
@@ -201,7 +202,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
         {
           this.entityStates[this.entityStates.indexOf(existingEntity)] = entityState;
         }
-        else if (!this.lockDashboard)
+        else if (!this.lockDashboard && !this.removedEntityStates.includes(entityState.entity_id))
           this.entityStates.push(entityState);
       });
       this.cdr.detectChanges();
@@ -213,7 +214,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
         {
           this.entityStates[this.entityStates.indexOf(existingEntity)] = entityState;
         }
-        else if (!this.lockDashboard)
+        else if (!this.lockDashboard && !this.removedEntityStates.includes(entityState.entity_id))
           this.entityStates.push(entityState);
       });
       this.cdr.detectChanges();
@@ -225,7 +226,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
         {
           this.entityStates[this.entityStates.indexOf(existingEntity)] = entityState;
         }
-        else if (!this.lockDashboard)
+        else if (!this.lockDashboard && !this.removedEntityStates.includes(entityState.entity_id))
           this.entityStates.push(entityState);
       });
       this.cdr.detectChanges();
@@ -355,6 +356,8 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   addEntity(entity: Entity) {
     if (entity?.entity_id)
     {
+      if (this.removedEntityStates.includes(entity.entity_id))
+        this.removedEntityStates.splice(this.removedEntityStates.indexOf(entity.entity_id), 1);
       this.websocketService.updateEntity(entity);
       this.newEntity = undefined;
       this.cdr.detectChanges();
@@ -584,6 +587,8 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
 
   removeEntityState(entityState: EntityState) {
     this.entityStates.splice(this.entityStates.indexOf(entityState), 1);
+    if (!this.removedEntityStates.includes(entityState.entity_id))
+      this.removedEntityStates.push(entityState.entity_id);
     this.cdr.detectChanges();
   }
 

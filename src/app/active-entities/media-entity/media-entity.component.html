@@ -58,17 +58,17 @@
           <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_album!" class="card-info" [textStyle]="textStyle"
                               style="width: 100%"/>
         </div>
-        <div class="flex align-items-center justify-content-between" *ngIf="hasMediaControls(mediaEntity)" [style]="'width: 100%;scale:'+scale">
-          <p-button *ngIf="checkFeature(mediaEntity, 'rewind')" (click)="mediaAction(mediaEntity, 'media_player.rewind')" icon="icon icon-bw" size="small" pTooltip="Rewind" [rounded]="true" [outlined]="true" class="uc-button"/>
-          <p-button *ngIf="checkFeature(mediaEntity, 'stop')" (click)="mediaAction(mediaEntity, 'media_player.stop')" icon="icon icon-stop" size="small" pTooltip="Stop" [rounded]="true" [outlined]="true" class="uc-button"/>
-          <p-button *ngIf="checkFeature(mediaEntity, 'play_pause')" (click)="mediaAction(mediaEntity, 'media_player.play_pause')" icon="icon icon-play-pause" size="small" pTooltip="Play pause" [rounded]="true" [outlined]="true" class="uc-button"/>
-          <p-button *ngIf="checkFeature(mediaEntity, 'fast_forward')" (click)="mediaAction(mediaEntity, 'media_player.fast_forward')" icon="icon icon-ff" size="small" pTooltip="Fast foward" [rounded]="true" [outlined]="true" class="uc-button"/>
+        <div class="flex align-items-center justify-content-between" *ngIf="hasMediaControls(mediaEntity)" style="width: 100%">
+          <app-button *ngIf="checkFeature(mediaEntity, 'rewind')" [scale]="scale" (click)="mediaAction(mediaEntity, 'media_player.rewind')" icon="icon icon-bw" size="small" pTooltip="Rewind" [rounded]="true" [outlined]="true" class="uc-button"/>
+          <app-button *ngIf="checkFeature(mediaEntity, 'stop')" [scale]="scale" (click)="mediaAction(mediaEntity, 'media_player.stop')" icon="icon icon-stop" size="small" pTooltip="Stop" [rounded]="true" [outlined]="true" class="uc-button"/>
+          <app-button *ngIf="checkFeature(mediaEntity, 'play_pause')" [scale]="scale" (click)="mediaAction(mediaEntity, 'media_player.play_pause')" icon="icon icon-play-pause" size="small" pTooltip="Play pause" [rounded]="true" [outlined]="true" class="uc-button"/>
+          <app-button *ngIf="checkFeature(mediaEntity, 'fast_forward')" [scale]="scale" (click)="mediaAction(mediaEntity, 'media_player.fast_forward')" icon="icon icon-ff" size="small" pTooltip="Fast foward" [rounded]="true" [outlined]="true" class="uc-button"/>
         </div>
-        <div class="flex align-items-center justify-content-between" *ngIf="checkFeature(mediaEntity, ['previous', 'next', 'channel_switcher'])" [style]="'width: 100%;scale:'+scale">
-          <p-button *ngIf="checkFeature(mediaEntity, 'previous')" (click)="mediaAction(mediaEntity, 'media_player.previous')" icon="icon icon-prev" size="small" pTooltip="Previous chapter" [rounded]="true" [outlined]="true" class="uc-button"/>
-          <p-button *ngIf="checkFeature(mediaEntity, 'next')" (click)="mediaAction(mediaEntity, 'media_player.next')" icon="icon icon-next" size="small" pTooltip="Next chapter" [rounded]="true" [outlined]="true" class="uc-button"/>
-          <p-button *ngIf="checkFeature(mediaEntity, 'channel_switcher')" (click)="mediaAction(mediaEntity, 'media_player.channel_down')" icon="icon icon-down-arrow" size="small" pTooltip="Previous channel" [rounded]="true" [outlined]="true" class="uc-button"/>
-          <p-button *ngIf="checkFeature(mediaEntity, 'channel_switcher')" (click)="mediaAction(mediaEntity, 'media_player.channel_up')" icon="icon icon-up-arrow" size="small" pTooltip="Next channel" [rounded]="true" [outlined]="true" class="uc-button"/>
+        <div class="flex align-items-center justify-content-between" *ngIf="checkFeature(mediaEntity, ['previous', 'next', 'channel_switcher'])" style="width: 100%">
+          <app-button *ngIf="checkFeature(mediaEntity, 'previous')" [scale]="scale" (click)="mediaAction(mediaEntity, 'media_player.previous')" icon="icon icon-prev" size="small" pTooltip="Previous chapter" [rounded]="true" [outlined]="true" class="uc-button"/>
+          <app-button *ngIf="checkFeature(mediaEntity, 'next')" [scale]="scale" (click)="mediaAction(mediaEntity, 'media_player.next')" icon="icon icon-next" size="small" pTooltip="Next chapter" [rounded]="true" [outlined]="true" class="uc-button"/>
+          <app-button *ngIf="checkFeature(mediaEntity, 'channel_switcher')" [scale]="scale" (click)="mediaAction(mediaEntity, 'media_player.channel_down')" icon="icon icon-down-arrow" size="small" pTooltip="Previous channel" [rounded]="true" [outlined]="true" class="uc-button"/>
+          <app-button *ngIf="checkFeature(mediaEntity, 'channel_switcher')" [scale]="scale"  (click)="mediaAction(mediaEntity, 'media_player.channel_up')" icon="icon icon-up-arrow" size="small" pTooltip="Next channel" [rounded]="true" [outlined]="true" class="uc-button"/>
         </div>
         <div class="flex flex-column" style="width: 100%">
           <div *ngIf="mediaEntity.new_state?.attributes?.media_position && mediaEntity.new_state?.attributes?.media_duration &&
@@ -86,20 +86,20 @@
         </div>
         <div class="flex align-items-center justify-content-between" [style]="'width: 100%'"
              *ngIf="checkFeature(mediaEntity, ['volume', 'volume_up_down', 'mute_toggle', 'mute'])">
-          <p-button *ngIf="checkFeature(mediaEntity, 'mute_toggle')" (click)="mediaAction(mediaEntity, 'media_player.mute_toggle')"
-                    icon="icon icon-mute" size="small" pTooltip="Mute" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
-          <p-button *ngIf="!checkFeature(mediaEntity, 'mute_toggle') && checkFeature(mediaEntity, 'mute')"
-                    (click)="mediaAction(mediaEntity, 'media_player.mute')"
-                    icon="icon icon-mute" size="small" pTooltip="Mute" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
-          <p-button *ngIf="!checkFeature(mediaEntity, 'mute_toggle') && checkFeature(mediaEntity, 'unmute')"
-                    (click)="mediaAction(mediaEntity, 'media_player.unmute')" severity="secondary"
-                    icon="icon icon-mute" size="small" pTooltip="Unmute" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
-          <p-button *ngIf="checkFeature(mediaEntity, 'volume_up_down')"
+          <app-button *ngIf="checkFeature(mediaEntity, 'mute_toggle')" (click)="mediaAction(mediaEntity, 'media_player.mute_toggle')" [scale]="scale"
+                    icon="icon icon-mute" size="small" pTooltip="Mute" [rounded]="true" [outlined]="true" class="uc-button"/>
+          <app-button *ngIf="!checkFeature(mediaEntity, 'mute_toggle') && checkFeature(mediaEntity, 'mute')"
+                    (click)="mediaAction(mediaEntity, 'media_player.mute')"  severity="secondary"
+                    icon="icon icon-mute" size="small" pTooltip="Mute" [rounded]="true" [outlined]="true" class="uc-button" [scale]="scale"/>
+          <app-button *ngIf="!checkFeature(mediaEntity, 'mute_toggle') && checkFeature(mediaEntity, 'unmute')"
+                    (click)="mediaAction(mediaEntity, 'media_player.unmute')"
+                    icon="icon icon-mute" size="small" pTooltip="Unmute" [rounded]="true" [outlined]="true" class="uc-button" [scale]="scale"/>
+          <app-button *ngIf="checkFeature(mediaEntity, 'volume_up_down')"
                     (click)="mediaAction(mediaEntity, 'media_player.volume_down')"
-                    icon="icon icon-minus" size="small" pTooltip="Volume -" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
-          <p-button *ngIf="checkFeature(mediaEntity, 'volume_up_down')"
+                    icon="icon icon-minus" size="small" pTooltip="Volume -" [rounded]="true" [outlined]="true" class="uc-button" [scale]="scale"/>
+          <app-button *ngIf="checkFeature(mediaEntity, 'volume_up_down')"
                     (click)="mediaAction(mediaEntity, 'media_player.volume_up')"
-                    icon="icon icon-plus" size="small" pTooltip="Volume +" [rounded]="true" [outlined]="true" class="uc-button" [style]="{'scale':scale}"/>
+                    icon="icon icon-plus" size="small" pTooltip="Volume +" [rounded]="true" [outlined]="true" class="uc-button" [scale]="scale"/>
           <app-slider [value]="Math.round(mediaEntity.new_state!.attributes!.volume!)" [style]="'width: 100%;min-width:'+120*scale+'px'" (valueChange)="updateVolume($event, mediaEntity)"
                       [scale]="scale" [backgroundStyle]="'linear-gradient(90deg, rgba(122,122,122,1) 0%, rgba(255,82,0,1) 71%)'"
                       [textValue]="'Volume '+Helper.getNumber(mediaEntity.new_state!.attributes!.volume!)+'%'+

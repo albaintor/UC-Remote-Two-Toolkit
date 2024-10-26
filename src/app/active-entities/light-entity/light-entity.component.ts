@@ -20,6 +20,8 @@ import {SliderComponent} from "../../controls/slider/slider.component";
 import {ColorPickerModule} from "primeng/colorpicker";
 import {FormsModule} from "@angular/forms";
 import {ButtonComponent} from "../../controls/button/button.component";
+import {Message} from "primeng/api";
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'app-light-entity',
@@ -52,6 +54,7 @@ export class LightEntityComponent implements OnInit {
   @Input() scale = 1;
   @Input() closable: boolean = false;
   @Output() onClose: EventEmitter<LightEntityState> = new EventEmitter();
+  @Output() onMessage: EventEmitter<Message> = new EventEmitter();
   protected readonly Helper = Helper;
   protected readonly Math = Math;
   lightColor: {h: number; s: number; b: number} | undefined;
@@ -121,19 +124,46 @@ export class LightEntityComponent implements OnInit {
       this.server.executeRemotetCommand(this.remote, {
         entity_id: lightEntity.entity_id,
         cmd_id: "light.toggle"
-      }).subscribe();
+      }).subscribe({next: res => {
+        this.onMessage.emit({severity: "success", summary: `Light ${this.lightEntity?.entity_id} toggle`});
+      },
+        error: (err: HttpErrorResponse) => {
+          this.onMessage.emit({
+            severity: "error",
+            detail: `Error toggling ${this.lightEntity?.entity_id} : ${err.error.code} - ${err.error.message}`
+          })
+        }
+    });
       return;
     }
     else if (lightEntity?.new_state?.attributes?.state !== 'ON')
       this.server.executeRemotetCommand(this.remote, {
         entity_id: lightEntity.entity_id,
         cmd_id: "light.on"
-      }).subscribe();
+      }).subscribe({next: res => {
+      this.onMessage.emit({severity: "success", summary: `Light ${this.lightEntity?.entity_id} on`});
+    },
+        error: (err: HttpErrorResponse) => {
+          this.onMessage.emit({
+            severity: "error",
+            detail: `Error turning on ${this.lightEntity?.entity_id} : ${err.error.code} - ${err.error.message}`
+          })
+        }
+  });
     else
       this.server.executeRemotetCommand(this.remote, {
         entity_id: lightEntity.entity_id,
         cmd_id: "light.off"
-      }).subscribe();
+      }).subscribe({next: res => {
+      this.onMessage.emit({severity: "success", summary: `Light ${this.lightEntity?.entity_id} off`});
+    },
+        error: (err: HttpErrorResponse) => {
+          this.onMessage.emit({
+            severity: "error",
+            detail: `Error turning off ${this.lightEntity?.entity_id} : ${err.error.code} - ${err.error.message}`
+          })
+        }
+  });
   }
 
   isOn(): boolean {
@@ -152,12 +182,33 @@ export class LightEntityComponent implements OnInit {
         this.server.executeRemotetCommand(this.remote, {
           entity_id: lightEntity.entity_id,
           cmd_id: "light.off"
-        }).subscribe();
+        }).subscribe({next: res => {
+        this.onMessage.emit({severity: "success", summary: `Light ${this.lightEntity?.entity_id} off`});
+      },
+          error: (err: HttpErrorResponse) => {
+            this.onMessage.emit({
+              severity: "error",
+              detail: `Error turning off ${this.lightEntity?.entity_id} : ${err.error.code} - ${err.error.message}`
+            })
+          }
+    });
       else this.server.executeRemotetCommand(this.remote, {
         entity_id: lightEntity.entity_id,
         cmd_id: "light.on",
         params: {brightness: Math.round(value * 255 / 100)}
-      }).subscribe();
+      }).subscribe({next: res => {
+        this.onMessage.emit({
+          severity: "success",
+          summary: `Light ${this.lightEntity?.entity_id} brightness ${Math.round(value * 255 / 100)}%`
+        });
+      },
+        error: (err: HttpErrorResponse) => {
+          this.onMessage.emit({
+            severity: "error",
+            detail: `Error setting ${this.lightEntity?.entity_id} brightness mode to ${Math.round(value*255/100)}% : ${err.error.code} - ${err.error.message}`
+          })
+        }
+    });
       // console.debug("Set brightness", lightEntity, value);
     }
   }
@@ -168,12 +219,33 @@ export class LightEntityComponent implements OnInit {
         this.server.executeRemotetCommand(this.remote, {
           entity_id: lightEntity.entity_id,
           cmd_id: "light.off"
-        }).subscribe();
+        }).subscribe({next: res => {
+        this.onMessage.emit({severity: "success", summary: `Light ${this.lightEntity?.entity_id} off`});
+      },
+          error: (err: HttpErrorResponse) => {
+            this.onMessage.emit({
+              severity: "error",
+              detail: `Error turning off ${this.lightEntity?.entity_id} : ${err.error.code} - ${err.error.message}`
+            })
+          }
+    });
       else this.server.executeRemotetCommand(this.remote, {
         entity_id: lightEntity.entity_id,
         cmd_id: "light.on",
         params: {color_temperature: Math.round(value)}
-      }).subscribe();
+      }).subscribe({next: res => {
+        this.onMessage.emit({
+          severity: "success",
+          summary: `Light ${this.lightEntity?.entity_id} temperature ${Math.round(value)}%`
+        });
+      },
+        error: (err: HttpErrorResponse) => {
+          this.onMessage.emit({
+            severity: "error",
+            detail: `Error setting ${this.lightEntity?.entity_id} temperature to ${Math.round(value)}% : ${err.error.code} - ${err.error.message}`
+          })
+        }
+    });
       // console.debug("Set saturation", lightEntity, value);
     }
   }
@@ -189,7 +261,19 @@ export class LightEntityComponent implements OnInit {
           saturation: Math.round(255*this.lightColor.s/100),
           brightness: Math.round(255*this.lightColor.b/100)
         }
-      }).subscribe();
+      }).subscribe({next: res => {
+        this.onMessage.emit({
+          severity: "success",
+          summary: `Light ${this.lightEntity?.entity_id} color ${JSON.stringify(this.lightColor)}`
+        });
+      },
+        error: (err: HttpErrorResponse) => {
+          this.onMessage.emit({
+            severity: "error",
+            detail: `Error setting ${this.lightEntity?.entity_id} color to ${JSON.stringify(this.lightColor)} : ${err.error.code} - ${err.error.message}`
+          })
+        }
+    });
     }
   }
 }

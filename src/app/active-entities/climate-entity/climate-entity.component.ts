@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   EventEmitter,
-  Input, OnInit,
+  Input, OnDestroy, OnInit,
   Output,
   TemplateRef,
   ViewEncapsulation
@@ -23,6 +23,10 @@ import {FormsModule} from "@angular/forms";
 import {DropdownOverComponent} from "../../controls/dropdown-over/dropdown-over.component";
 import {TagModule} from "primeng/tag";
 import {ButtonComponent} from "../../controls/button/button.component";
+import {debounceTime, map, Subject, Subscription} from "rxjs";
+import {distinctUntilChanged} from "rxjs/operators";
+import {Message} from "primeng/api";
+import {HttpErrorResponse} from "@angular/common/http";
 
 type HavcMode = 'OFF' |'HEAT'|'COOL'|'HEAT_COOL'|'FAN'|'AUTO';
 
@@ -65,7 +69,7 @@ const HAVC_FEATURES_MAP: {[type:string]: string} = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class ClimateEntityComponent implements OnInit {
+export class ClimateEntityComponent implements OnInit, OnDestroy {
   climateEntity: ClimateEntityState | undefined;
   @Input("climateEntity") set _climateEntity(climateEntity: ClimateEntityState | undefined)
   {
@@ -78,6 +82,7 @@ export class ClimateEntityComponent implements OnInit {
   @Input() scale = 1;
   @Input() closable: boolean = false;
   @Output() onClose: EventEmitter<ClimateEntityState> = new EventEmitter();
+  @Output() onMessage: EventEmitter<Message> = new EventEmitter();
   protected readonly Helper = Helper;
   target_temperature_step = 0.5;
   min_temperature = 10;
@@ -85,6 +90,8 @@ export class ClimateEntityComponent implements OnInit {
   temperature_unit = "°C";
   havcModes: {label: string, value: HavcMode}[] = [...HAVC_MODES];
   havcMode: HavcMode | undefined;
+  targetTemperature$ = new Subject<number>();
+  targetTemperatureSubscription: Subscription | undefined;
 
   constructor(private server:ServerService, protected websocketService: WebsocketService, private cdr:ChangeDetectorRef) { }
 
@@ -96,7 +103,35 @@ export class ClimateEntityComponent implements OnInit {
         this.update();
         this.cdr.detectChanges();
       }
-    })
+    });
+  this.targetTemperatureSubscription = this.targetTemperature$.pipe(
+    debounceTime(1000),
+    distinctUntilChanged(),
+    map(value => {
+      if (!this.climateEntity || !this.remote) return;
+      console.debug("Set temperature", this.climateEntity.entity_id, value);
+      this.server.executeRemotetCommand(this.remote, {
+        entity_id: this.climateEntity.entity_id,
+        // cmd_id: "climate.target_temperature_c",
+        cmd_id: "target_temperature",
+        params: {
+          temperature: this.climateEntity.new_state!.attributes!.target_temperature,
+        }
+    } as any).subscribe({
+        next: res => {
+          this.onMessage.emit({
+            severity: "success",
+            detail: `Set ${this.climateEntity?.entity_id} temperature to ${value}`
+          });
+        },
+        error: (err: HttpErrorResponse) => {
+          this.onMessage.emit({
+            severity: "error",
+            detail: `Error setting ${this.climateEntity?.entity_id} temperature mode to ${value} : ${err.error.code} - ${err.error.message}`
+          })
+        }
+    });
+  })).subscribe();
   }
 
   getLabel(value: HavcMode | undefined)
@@ -107,19 +142,19 @@ export class ClimateEntityComponent implements OnInit {
     return value;
   }
 
-  getStatusColor()
-  {
-    switch(this.havcMode)
-    {
-      case "OFF": return "rgba(83,83,83,0.74)";
-      case "HEAT": return "#ed440c";
-      case "COOL": return "#23a1f3";
-      case "FAN": return "#51b15d";
-      case "HEAT_COOL":
-      case "AUTO": return "#f3d023";
-      default: return "#eaeaea";
-    }
-  }
+  // getStatusColor()
+  // {
+  //   switch(this.havcMode)
+  //   {
+  //     case "OFF": return "rgba(83,83,83,0.74)";
+  //     case "HEAT": return "#ed440c";
+  //     case "COOL": return "#23a1f3";
+  //     case "FAN": return "#51b15d";
+  //     case "HEAT_COOL":
+  //     case "AUTO": return "#f3d023";
+  //     default: return "#eaeaea";
+  //   }
+  // }
 
   getStatusSeverity()
   {
@@ -217,20 +252,32 @@ export class ClimateEntityComponent implements OnInit {
       params: {
         hvac_mode: hvac_mode
       }
-    }).subscribe();
+    }).subscribe({next: res=> {
+          this.onMessage.emit({
+            severity: "success",
+            detail: `Set ${this.climateEntity?.entity_id} HAVC mode to ${hvac_mode}`
+          });
+        },
+      error: (err: HttpErrorResponse) => {
+          this.onMessage.emit({
+            severity: "error",
+            detail: `Error setting ${this.climateEntity?.entity_id} HAVC mode to ${hvac_mode} : ${err.error.code} - ${err.error.message}`
+          })
+      }}
+    );
   }
 
   setTemperature($event: any) {
     if (!this.remote || !this.climateEntity) return;
     if (!this.checkFeature(this.climateEntity, 'target_temperature')) return;
-    console.debug("Set temperature", this.climateEntity.entity_id, $event);
-    this.server.executeRemotetCommand(this.remote, {
-      entity_id: this.climateEntity.entity_id,
-      // cmd_id: "climate.target_temperature_c",
-      cmd_id: "target_temperature",
-      params: {
-        temperature: this.climateEntity.new_state!.attributes!.target_temperature,
-      }
-    } as any).subscribe();
+    if (this.climateEntity?.new_state?.attributes?.target_temperature)
+      this.targetTemperature$.next(this.climateEntity.new_state!.attributes!.target_temperature);
+  }
+
+  ngOnDestroy() {
+    if (this.targetTemperatureSubscription) {
+      this.targetTemperatureSubscription.unsubscribe();
+      this.targetTemperatureSubscription = undefined;
+    }
   }
 }

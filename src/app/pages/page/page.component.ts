@@ -12,7 +12,7 @@ import {ServerService} from "../../server.service";
 import {MessageService, PrimeTemplate} from "primeng/api";
 import {Entity, Page, PageItem, Profile, ProfileGroup, Remote} from "../../interfaces";
 import {Button} from "primeng/button";
-import {CommandEditorComponent} from "../../activity-editor/command-editor/command-editor.component";
+import {CommandEditorComponent} from "../../remote-editor/command-editor/command-editor.component";
 import {DialogModule} from "primeng/dialog";
 import {IconComponent} from "../../controls/icon/icon.component";
 import {InputNumberModule} from "primeng/inputnumber";

@@ -198,6 +198,17 @@ export class ServerService {
     }))
   }
 
+  getRemoteRemotes(remote: Remote): Observable<Entity[]>
+  {
+    return this.http.get<Entity[]>(`/api/remote/${remote.address}/entities`).pipe(map(entities => {
+      /*entities.forEach(entity => {
+        entity.name = this.getObjectName(entity);
+      })*/
+      this.entities = entities;
+      return entities;
+    }))
+  }
+
   getRemotetEntity(remote: Remote, entityId: string): Observable<Entity>
   {
     return this.http.get<Entity>(`/api/remote/${remote.address}/entities/${entityId}`).pipe(map(results => {

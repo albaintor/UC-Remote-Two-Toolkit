@@ -31,6 +31,15 @@
             <div><b>{{Helper.getEntityName(item)}}</b>&nbsp;<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span></div>
           </ng-template>
         </p-autoComplete>
+        Remotes :
+        <p-autoComplete [(ngModel)]="newRemote" [dropdown]="true" [suggestions]="suggestedRemotes" (completeMethod)="searchRemotes($event)" appendTo="body"
+                        [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id"
+                        (ngModelChange)="addRemote($event)"
+                        pTooltip="View remote">
+          <ng-template let-item pTemplate="item">
+            <div><b>{{Helper.getEntityName(item)}}</b>&nbsp;<span *ngIf="item?.options?.kind" [style]="{'color': Helper.getBackgroundColor(item.options.kind)}">{{item.options.kind}}</span></div>
+          </ng-template>
+        </p-autoComplete>
         <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="loader.loadRemote(selectedRemote)"
                     class="smaller-dropdown">
           <ng-template pTemplate="selectedItem">
@@ -60,6 +69,13 @@
                         placeholder="Entity">
           <ng-template let-item pTemplate="item">
             <div><b>{{Helper.getEntityName(item)}}</b></div>
+          </ng-template>
+        </p-autoComplete>
+        <p-autoComplete [(ngModel)]="newRemote" [dropdown]="true" [suggestions]="suggestedRemotes" (completeMethod)="searchRemotes($event)" appendTo="body"
+                        [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id"
+                        (ngModelChange)="addRemote($event)" placeholder="Remotes">
+          <ng-template let-item pTemplate="item">
+            <div><b>{{Helper.getEntityName(item)}}</b>&nbsp;<span *ngIf="item?.options?.kind" [style]="{'color': Helper.getBackgroundColor(item.options.kind)}">{{item.options.kind}}</span></div>
           </ng-template>
         </p-autoComplete>
         <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Remote" (ngModelChange)="loader.loadRemote(selectedRemote)"

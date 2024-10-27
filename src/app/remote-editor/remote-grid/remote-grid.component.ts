@@ -15,18 +15,18 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {Helper} from "../../helper";
-import {ActivityGridItemComponent} from "../activity-grid-item/activity-grid-item.component";
+import {RemoteGridItemComponent} from "../remote-grid-item/remote-grid-item.component";
 import {ChipModule} from "primeng/chip";
 import {NgForOf, NgIf} from "@angular/common";
 import {TagModule} from "primeng/tag";
 import {Activity, ActivityPageCommand, Command, EntityCommand, Remote, ScreenLayout, UIPage} from "../../interfaces";
-import {UiCommandEditorComponent} from "../../activity-editor/ui-command-editor/ui-command-editor.component";
+import {UiCommandEditorComponent} from "../ui-command-editor/ui-command-editor.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ServerService} from "../../server.service";
 import {MessageService} from "primeng/api";
 import {ToastModule} from "primeng/toast";
-import {ActivityMediaEntityComponent} from "../actiivty-media-entity/activity-media-entity.component";
-import {ButtonMode} from "../activity-buttons/activity-buttons.component";
+import {RemoteMediaEntityComponent} from "./remote-media-entity/remote-media-entity.component";
+import {ButtonMode} from "../remote-buttons/remote-buttons.component";
 
 
 interface SwipeInfo
@@ -44,10 +44,10 @@ export class AsPipe implements PipeTransform {
   }
 }
 @Component({
-  selector: 'app-activity-grid',
+  selector: 'app-remote-grid',
   standalone: true,
   imports: [
-    ActivityGridItemComponent,
+    RemoteGridItemComponent,
     AsPipe,
     ChipModule,
     NgForOf,
@@ -55,15 +55,15 @@ export class AsPipe implements PipeTransform {
     TagModule,
     UiCommandEditorComponent,
     ToastModule,
-    ActivityMediaEntityComponent,
+    RemoteMediaEntityComponent,
   ],
-  templateUrl: './activity-grid.component.html',
-  styleUrl: './activity-grid.component.css',
+  templateUrl: './remote-grid.component.html',
+  styleUrl: './remote-grid.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [MessageService]
 })
-export class ActivityGridComponent implements AfterViewInit {
+export class RemoteGridComponent implements AfterViewInit {
   currentPage: UIPage | undefined;
   activity: Activity | undefined;
 
@@ -120,12 +120,12 @@ export class ActivityGridComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
   // gridCommands: ActivityPageCommand[] = [];
-  gridItemSource: ActivityGridItemComponent | undefined;
-  gridItem: ActivityGridItemComponent | undefined;
-  selection: ActivityGridItemComponent[] = [];
+  gridItemSource: RemoteGridItemComponent | undefined;
+  gridItem: RemoteGridItemComponent | undefined;
+  selection: RemoteGridItemComponent[] = [];
   @ViewChild("commandeditor", {static: false}) commandeditor: UiCommandEditorComponent | undefined;
   @ViewChild("uiCollection", {static: false}) uiCollection: ElementRef<HTMLDivElement> | undefined;
-  @ViewChildren(ActivityGridItemComponent) gridButtons:QueryList<ActivityGridItemComponent> | undefined;
+  @ViewChildren(RemoteGridItemComponent) gridButtons:QueryList<RemoteGridItemComponent> | undefined;
   @Output() onSelectButton: EventEmitter<{command: Command, mode: ButtonMode, severity: "success" | "error",
     error?: string}> = new EventEmitter();
 
@@ -140,7 +140,7 @@ export class ActivityGridComponent implements AfterViewInit {
     initialUiContainerPosition: 0
   }
   @Output() onPageChange = new EventEmitter<number>();
-  @Output() onSelectionChange = new EventEmitter<ActivityGridItemComponent[]>();
+  @Output() onSelectionChange = new EventEmitter<RemoteGridItemComponent[]>();
   swipeAcceleration = 1.5;
 
 
@@ -228,13 +228,13 @@ export class ActivityGridComponent implements AfterViewInit {
     return `Unknown ${entityId}`;
   }
 
-  updateGridItem(gridItem: ActivityGridItemComponent) {
+  updateGridItem(gridItem: RemoteGridItemComponent) {
     if (!gridItem?.item) return;
     this.getGridPageItems(this.currentPage, true);
     this.cdr.detectChanges();
   }
 
-  deleteGridItem($event: ActivityGridItemComponent) {
+  deleteGridItem($event: RemoteGridItemComponent) {
     if (!$event.item) return;
     const index = this.currentPage?.items.indexOf($event.item as ActivityPageCommand);
     if (index) this.currentPage?.items.splice(index, 1);
@@ -242,17 +242,17 @@ export class ActivityGridComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  gridSourceSelected($event: ActivityGridItemComponent) {
+  gridSourceSelected($event: RemoteGridItemComponent) {
     this.gridItemSource = $event;
     this.cdr.detectChanges();
   }
 
-  gridDestinationSelected($event: ActivityGridItemComponent) {
+  gridDestinationSelected($event: RemoteGridItemComponent) {
     this.getGridPageItems(this.currentPage, true);
     this.cdr.detectChanges();
   }
 
-  gridItemClicked($event: ActivityGridItemComponent) {
+  gridItemClicked($event: RemoteGridItemComponent) {
     this.gridItem = $event;
     if (this.selectionMode)
     {
@@ -280,17 +280,33 @@ export class ActivityGridComponent implements AfterViewInit {
 
   executeCommand(command: Command) {
     if (!this.remote) return;
-    this.server.executeRemotetCommand(this.remote, command).subscribe({next: results => {
-      this.onSelectButton.emit({command, mode: ButtonMode.ShortPress, severity: "success"});
+    let execCommand = {...command};
+    if (this.activity?.entity_type !== 'activity')
+    {
+      const internalCommand = this.configEntityCommands?.find(item => item.id === command.cmd_id);
+      if (!internalCommand)
+      {
+        //TODO why is it not possible to get the "default" cmd_id from entity type ?
+        if (this.activity?.options?.kind === 'IR')
+          execCommand = {entity_id: this.activity!.entity_id!, cmd_id: "remote.send", params: {...command}};
+        else
+          execCommand = {entity_id: this.activity!.entity_id!, cmd_id: "remote.send_cmd", params: {command: command.cmd_id}};
+      }
+      else if (!execCommand.entity_id)
+        execCommand.entity_id = this.activity!.entity_id!;
+    }
+    console.debug("Execute command", execCommand);
+    this.server.executeRemotetCommand(this.remote, execCommand).subscribe({next: results => {
+      this.onSelectButton.emit({command: execCommand, mode: ButtonMode.ShortPress, severity: "success"});
       }, error: (err: HttpErrorResponse) => {
         console.error("Error command", err);
-        this.onSelectButton.emit({command, mode: ButtonMode.ShortPress, severity: "error",
+        this.onSelectButton.emit({command: execCommand, mode: ButtonMode.ShortPress, severity: "error",
           error: `${err.error.name} (${err.status} ${err.statusText})`});
       }});
     this.cdr.detectChanges();
   }
 
-  addGridItem($event: ActivityGridItemComponent) {
+  addGridItem($event: RemoteGridItemComponent) {
     const position = {x: $event.item.location.x, y: $event.item.location.y,
       width: $event.item.size.width, height: $event.item.size.height};
     this.currentPage?.items.push({location: {x: position.x, y: position.y},

@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {
   Activity,
-  ButtonMapping, Command,
+  ButtonMapping, Command, EntityCommand,
   Remote,
 } from "../../interfaces";
 import {ButtonModule} from "primeng/button";
@@ -25,7 +25,7 @@ import {MessageService, SharedModule} from "primeng/api";
 import {ToastModule} from "primeng/toast";
 import {ServerService} from "../../server.service";
 import {Helper} from "../../helper";
-import {CommandEditorComponent} from "../command-editor/command-editor.component";
+import {CommandEditorComponent} from "../../remote-editor/command-editor/command-editor.component";
 
 @Component({
   selector: 'app-button-editor',
@@ -57,8 +57,10 @@ export class ButtonEditorComponent {
   @Output() buttonChanged = new EventEmitter<ButtonMapping>();
   visible = false;
   backupCommand : ButtonMapping | undefined;
+  private configEntityCommands: EntityCommand[] | undefined;
 
-  constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
+  constructor(private server:ServerService, private cdr:ChangeDetectorRef) {
+    this.server.configCommands$.subscribe(config => this.configEntityCommands = config);
   }
 
   updateCommand() {
@@ -118,7 +120,20 @@ export class ButtonEditorComponent {
 
   executeCommand(command: Command) {
     if (!this.remote) return;
-    this.server.executeRemotetCommand(this.remote, command).subscribe(results => {
+    let execCommand = {...command};
+    if (this.activity?.entity_type !== 'activity')
+    {
+      const internalCommand = this.configEntityCommands?.find(item => item.id === command.cmd_id);
+      if (!internalCommand)
+      {
+        //TODO why is it not possible to get the "default" cmd_id from entity type ?
+        if (this.activity?.options?.kind === 'IR')
+          execCommand = {entity_id: this.activity!.entity_id!, cmd_id: "remote.send", params: {...command}};
+        else
+          execCommand = {entity_id: this.activity!.entity_id!, cmd_id: "remote.send_cmd", params: {command: command.cmd_id}};
+      }
+    }
+    this.server.executeRemotetCommand(this.remote, execCommand).subscribe(results => {
       // this.messageService.add({key: "remoteButton", summary: "Command executed",
       //   severity: "success", detail: `Results : ${results.code} : ${results.message}`});
     });

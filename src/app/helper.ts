@@ -449,7 +449,13 @@ export class Helper
     for (let item of list)
     {
       if (!item) continue;
-      if (Helper.isIntersection({x: item.location.x, y: item.location.y, width: item.size.width, height: item.size.height},
+      const size = {width: 1, height: 1};
+      if (item.size)
+      {
+        size.width = item.size.width;
+        size.height = item.size.height;
+      }
+      if (Helper.isIntersection({x: item.location.x, y: item.location.y, width: size.width, height: size.height},
         {x, y, width: 1, height: 1}))
       {
         return true;

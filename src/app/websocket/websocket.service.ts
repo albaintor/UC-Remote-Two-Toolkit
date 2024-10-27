@@ -1,7 +1,7 @@
 import {Injectable, OnDestroy} from '@angular/core';
 import {ServerService} from "../server.service";
 import {Entity, Remote} from "../interfaces";
-import {BehaviorSubject,Observable, Subject} from "rxjs";
+import {BehaviorSubject, from, Observable, of, Subject} from "rxjs";
 import {distinctUntilChanged} from "rxjs/operators";
 import {Message, RemoteWebsocket} from "./remote-websocket";
 import {
@@ -189,6 +189,11 @@ export class WebsocketService implements OnDestroy {
     return this.softwareUpdateChange$;
   }
 
+  addEntity(entity_id: string, entity_type: string)
+  {
+    this.websocketInstance?.addEntity(entity_id, entity_type);
+  }
+
   updateEntity(entity: Entity)
   {
     this.websocketInstance?.addEntity(entity.entity_id!, entity.entity_type);
@@ -206,5 +211,10 @@ export class WebsocketService implements OnDestroy {
 
   getMediaPosition(mediaEntity: MediaEntityState): number {
     return this.websocketInstance ? this.websocketInstance?.getMediaPosition(mediaEntity) : 0;
+  }
+
+  reloadEntities()
+  {
+    return this.websocketInstance ? this.websocketInstance.reloadEntities() : from([]);
   }
 }

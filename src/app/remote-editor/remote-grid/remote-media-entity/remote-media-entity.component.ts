@@ -6,16 +6,16 @@ import {
   Input, Output,
   ViewEncapsulation
 } from '@angular/core';
-import {ServerService} from "../../server.service";
+import {ServerService} from "../../../server.service";
 import {NgIf} from "@angular/common";
-import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-text.component";
-import {SliderComponent} from "../../controls/slider/slider.component";
-import {Helper} from "../../helper";
-import {Command, Remote} from "../../interfaces";
-import {ButtonMode} from "../activity-buttons/activity-buttons.component";
+import {ScrollingTextComponent} from "../../../controls/scrolling-text/scrolling-text.component";
+import {SliderComponent} from "../../../controls/slider/slider.component";
+import {Helper} from "../../../helper";
+import {Command, Remote} from "../../../interfaces";
+import {ButtonMode} from "../../remote-buttons/remote-buttons.component";
 import {HttpErrorResponse} from "@angular/common/http";
-import {MediaEntityState} from "../../websocket/remote-websocket-instance";
-import {WebsocketService} from "../../websocket/websocket.service";
+import {MediaEntityState} from "../../../websocket/remote-websocket-instance";
+import {WebsocketService} from "../../../websocket/websocket.service";
 
 @Component({
   selector: 'app-activity-media-entity',
@@ -25,12 +25,12 @@ import {WebsocketService} from "../../websocket/websocket.service";
     ScrollingTextComponent,
     SliderComponent
   ],
-  templateUrl: './activity-media-entity.component.html',
-  styleUrl: './activity-media-entity.component.css',
+  templateUrl: './remote-media-entity.component.html',
+  styleUrl: './remote-media-entity.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class ActivityMediaEntityComponent implements AfterViewInit {
+export class RemoteMediaEntityComponent implements AfterViewInit {
   mediaEntityState: MediaEntityState | undefined;
   imageUrl: string | undefined;
   entityId: string | undefined;

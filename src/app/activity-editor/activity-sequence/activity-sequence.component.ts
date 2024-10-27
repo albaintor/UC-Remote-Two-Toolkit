@@ -10,7 +10,7 @@ import {
 import {MessageService} from "primeng/api";
 import {ServerService} from "../../server.service";
 import {Activity, CommandSequence, Entity, Remote, RemoteMap} from "../../interfaces";
-import {CommandEditorComponent} from "../command-editor/command-editor.component";
+import {CommandEditorComponent} from "../../remote-editor/command-editor/command-editor.component";
 import {NgIf} from "@angular/common";
 import {OrderListModule} from "primeng/orderlist";
 import {IconComponent} from "../../controls/icon/icon.component";

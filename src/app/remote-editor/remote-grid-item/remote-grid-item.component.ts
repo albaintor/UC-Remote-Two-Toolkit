@@ -14,7 +14,7 @@ import {Helper} from "../../helper";
 export interface GridItem
 {
   item: ActivityPageCommand | undefined;
-  gridComponent: ActivityGridItemComponent;
+  gridComponent: RemoteGridItemComponent;
   index: number;
 }
 
@@ -22,19 +22,19 @@ export interface GridItem
   selector: 'grid-button',
   standalone: true,
   imports: [],
-  templateUrl: './activity-grid-item.component.html',
-  styleUrl: './activity-grid-item.component.css',
+  templateUrl: './remote-grid-item.component.html',
+  styleUrl: './remote-grid-item.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class ActivityGridItemComponent implements AfterViewInit{
+export class RemoteGridItemComponent implements AfterViewInit{
   editable: boolean = true;
   @Input("editable") set _editable(editable: boolean)
   {
     this.editable = editable;
     this.initView();
   }
-  @Input({required: true}) source: ActivityGridItemComponent | undefined;
+  @Input({required: true}) source: RemoteGridItemComponent | undefined;
   @Input() item!: ActivityPageCommand;
   @Input() gridCommands: ActivityPageCommand[] = [];
   selectionMode: boolean = false;
@@ -49,9 +49,9 @@ export class ActivityGridItemComponent implements AfterViewInit{
     if (value === undefined) return;
     this.selected = value;
   }
-  @Output() sourceSelected = new EventEmitter<ActivityGridItemComponent>();
-  @Output() destinationSelected = new EventEmitter<ActivityGridItemComponent>();
-  @Output() itemClicked = new EventEmitter<ActivityGridItemComponent>();
+  @Output() sourceSelected = new EventEmitter<RemoteGridItemComponent>();
+  @Output() destinationSelected = new EventEmitter<RemoteGridItemComponent>();
+  @Output() itemClicked = new EventEmitter<RemoteGridItemComponent>();
   @ViewChild("griditem", {static: false}) gridItem: ElementRef<HTMLDivElement> | undefined;
   @Input() grid!: { width: number; height: number };
 
@@ -177,7 +177,7 @@ export class ActivityGridItemComponent implements AfterViewInit{
     this.cdr.detectChanges();
   }
 
-  invertElements(c1:  ActivityGridItemComponent, c2:  ActivityGridItemComponent)
+  invertElements(c1:  RemoteGridItemComponent, c2:  RemoteGridItemComponent)
   {
     let dummy = document.createElement("span")
     c1.elRef.nativeElement.before(dummy);

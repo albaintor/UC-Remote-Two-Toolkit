@@ -1,3 +1,45 @@
+.pagination-container
+{
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  background-color: rgb(113, 113, 113);
+  border-radius: 45px;
+  height: 25px;
+  padding: 0 10px 0 10px;
+  transition: all 0.5s ease-in-out;
+  opacity: 0.6;
+  scale: 0.6;
+}
+
+.pagination-container-small {
+  scale: 1;
+}
+
+.pagination-container:hover {
+  opacity: 1;
+  scale:1;
+}
+
+.pagination-collection
+{
+  display: flex;
+  flex-direction: row;
+  transform: translateZ(0);
+  transition: all 0.5s ease-out;
+  -webkit-backface-visibility: hidden;
+  align-items: center;
+  justify-content: center;
+  /*-webkit-transition: all 0.5s ease-out;*/
+}
+
+.pagination-item
+{
+  flex: 1 0 100%;
+}
+
 .dot {
   height: 8px;
   width: 8px;
@@ -5,46 +47,33 @@
   border-radius: 50%;
   display: inline-block;
   cursor: pointer;
-  margin-left: 4px;
-  margin-right: 4px;
   transition: all 0.5s ease-in-out;
 }
 
 .active-dot {
-  height: 10px;
-  width: 10px;
+  height: 12px;
+  width: 12px;
   box-shadow: 0 0 45px 6px rgba(255, 255, 255, 0.9);
   background-color: #ffffff;
   border-radius: 50%;
   display: inline-block;
-  margin-left: 6px;
-  margin-right: 6px;
   transition: all 0.5s ease-in-out;
 }
 
-.pagination-container {
-  background-color: rgb(113, 113, 113);
-  border-radius: 45px;
-  padding: 2px;
-  height: 15px;
-  transition: all 0.5s ease-in-out;
-  opacity: 0.6;
-}
+/*.pagination-container:hover .active-dot {*/
+/*  scale: 1.4;*/
+/*  margin-left: 12px;*/
+/*  margin-right: 12px;*/
+/*}*/
 
-.pagination-container:hover .active-dot {
-  scale: 1.4;
-  margin-left: 12px;
-  margin-right: 12px;
-}
+/*.pagination-container:hover .dot {*/
+/*  scale: 1.4;*/
+/*  margin-left: 12px;*/
+/*  margin-right: 12px;*/
+/*}*/
 
-.pagination-container:hover .dot {
-  scale: 1.4;
-  margin-left: 12px;
-  margin-right: 12px;
-}
-
-.pagination-container:hover {
-  padding: 15px;
-  height: 30px;
-  opacity: 1;
-}
+/*.pagination-container:hover {*/
+/*  padding: 15px;*/
+/*  height: 30px;*/
+/*  opacity: 1;*/
+/*}*/

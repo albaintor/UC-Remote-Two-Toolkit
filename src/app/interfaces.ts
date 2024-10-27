@@ -177,7 +177,7 @@ export interface RemoteMap
 export interface DashboardEntity {
   entity_id: string;
   remote_name: string;
-  entity_type?: string;
+  entity_type: string;
   collapsed?: boolean;
 }
 
@@ -384,10 +384,12 @@ export interface ActivityOption
   user_interface?: {
     pages?: UIPage[];
   }
+  kind?: string;
 }
 
 export interface Activity {
   entity_id?: string;
+  entity_type?: string;
   name: LanguageName;
   icon?: string;
   description?: any;

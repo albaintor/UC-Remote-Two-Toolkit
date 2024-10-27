@@ -15,7 +15,7 @@ import {
   Entity,
   EntityCommand,
   EntityFeature,
-  Remote,
+  Remote, RemoteData,
   RemoteMap
 } from "../../interfaces";
 import {FormsModule} from "@angular/forms";
@@ -29,7 +29,7 @@ import {DialogModule} from "primeng/dialog";
 import {IconSelectorComponent} from "../../controls/icon-selector/icon-selector.component";
 import {DropdownModule} from "primeng/dropdown";
 import {ButtonModule} from "primeng/button";
-import {ActivityGridItemComponent, GridItem} from "../../activity-viewer/activity-grid-item/activity-grid-item.component";
+import {RemoteGridItemComponent, GridItem} from "../remote-grid-item/remote-grid-item.component";
 import {CommandEditorComponent} from "../command-editor/command-editor.component";
 
 @Component({
@@ -56,13 +56,13 @@ import {CommandEditorComponent} from "../command-editor/command-editor.component
 })
 export class UiCommandEditorComponent {
   @Input() remote: Remote | undefined;
-  @Input() gridItem: ActivityGridItemComponent | undefined;
+  @Input() gridItem: RemoteGridItemComponent | undefined;
   @Input() activity: Activity | undefined;
   @Input() gridCommands: ActivityPageCommand[] | undefined;
   @Input() grid : { width: number; height: number} | undefined;
-  @Output() updateItem: EventEmitter<ActivityGridItemComponent> = new EventEmitter();
-  @Output() addItem: EventEmitter<ActivityGridItemComponent> = new EventEmitter();
-  @Output() deleteItem: EventEmitter<ActivityGridItemComponent> = new EventEmitter();
+  @Output() updateItem: EventEmitter<RemoteGridItemComponent> = new EventEmitter();
+  @Output() addItem: EventEmitter<RemoteGridItemComponent> = new EventEmitter();
+  @Output() deleteItem: EventEmitter<RemoteGridItemComponent> = new EventEmitter();
   templates: RemoteMap[] | undefined;
   stateOptions: any[] = [
     { label: 'Text', value: 'text' },
@@ -74,12 +74,14 @@ export class UiCommandEditorComponent {
   @ViewChild(IconSelectorComponent) iconSelector: IconSelectorComponent | undefined;
   @ViewChild(CommandEditorComponent) commandEditor: CommandEditorComponent | undefined;
   gridItemSize =  {width: 4, height: 6};
+  configEntityCommands: EntityCommand[] | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService) {
     this.server.getTemplateRemoteMap().subscribe(templates => {
       this.templates = templates;
       this.cdr.detectChanges();
     });
+    this.server.configCommands$.subscribe(config => this.configEntityCommands = config);
   }
 
 
@@ -193,7 +195,20 @@ export class UiCommandEditorComponent {
 
   executeCommand(command: string | Command) {
     if (!this.remote || typeof command === 'string') return;
-    this.server.executeRemotetCommand(this.remote, command).subscribe(results => {
+    let execCommand = {...command};
+    if (this.activity?.entity_type !== 'activity')
+    {
+      const internalCommand = this.configEntityCommands?.find(item => item.id === command.cmd_id);
+      if (!internalCommand)
+      {
+        //TODO why is it not possible to get the "default" cmd_id from entity type ?
+        if (this.activity?.options?.kind === 'IR')
+          execCommand = {entity_id: this.activity!.entity_id!, cmd_id: "remote.send", params: {...command}};
+        else
+          execCommand = {entity_id: this.activity!.entity_id!, cmd_id: "remote.send_cmd", params: {command: command.cmd_id}};
+      }
+    }
+    this.server.executeRemotetCommand(this.remote, execCommand).subscribe(results => {
       // this.messageService.add({key: "remoteCommand", summary: "Command executed",
       //   severity: "success", detail: `Results : ${results.code} : ${results.message}`});
     });

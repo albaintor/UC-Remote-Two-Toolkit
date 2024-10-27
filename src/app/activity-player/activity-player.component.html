@@ -23,7 +23,7 @@
     </div>
 
   </ng-template>
-  <div *ngIf="!minimized" class="flex-initial flex align-items-center justify-content-center gap-4" [style]="'scale:'+scale">
+  <div *ngIf="!minimized && activity?.entity_type === 'activity'" class="flex-initial flex align-items-center justify-content-center gap-4" [style]="'scale:'+scale">
     <p-button icon="pi pi-stop" [rounded]="true" pTooltip="Stop activity" (click)="executeActivity('activity.off')" severity="danger"/>
     <p-button icon="pi pi-play" [rounded]="true" pTooltip="Start activity" (click)="executeActivity('activity.on')" severity="success"/>
     <p-button icon="pi pi-hammer" [outlined]="true" [rounded]="true" pTooltip="Fix states to turn off" (click)="executeSequence('off')" severity="danger"/>
@@ -31,16 +31,16 @@
     <p-button icon="pi pi-cog" [rounded]="true" pTooltip="Edit activity" [routerLink]="'/activity/edit/'+activity?.entity_id" />
   </div>
   <ng-container *ngIf="!minimized">
-    <app-activity-buttons [remote]="remote" [activity]="activity" [editMode]="false" [scale]="scale" [hideButtonsInfo]="true"
+    <app-remote-buttons [remote]="remote" [activity]="activity" [editMode]="false" [scale]="scale" [hideButtonsInfo]="true"
     (onSelectButton)="handleMessage($event)" (onSelectUnassignedButton)="handleEmptyButton($event)"/>
     <div style="position: relative">
-      <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [width]="400*scale" [height]="500*scale"
+      <app-remote-grid [activity]="activity" [editMode]="false" [remote]="remote" [width]="400*scale" [height]="500*scale"
                          [selectionMode]="false" [currentPage]="currentPage" [runMode]="true" (onSelectButton)="handleCommand($event)"
                           (onPageChange)="selectPage($event)"/>
       <app-pagination *ngIf="activity?.options?.user_interface?.pages && currentPage"
         [currentIndex]="activity!.options!.user_interface!.pages!.indexOf(currentPage)" [displayedIndexes]="6"
-        [numberOfPages]="activity!.options!.user_interface!.pages!.length" class="grid-pagination"
-        (onIndexChange)="selectPage($event)"/>
+        [numberOfPages]="activity!.options!.user_interface!.pages!.length" class="grid-pagination" [smallSizeMode]="smallSizeMode"
+        (onIndexChange)="selectPage($event)" [style]="'width:'+200*scale+'px'"/>
       <div class="flex align-items-center justify-content-center gap-2" style="width: 100%"
            *ngIf="volumeEntity?.new_state?.attributes?.volume">
         <app-slider [value]="Math.round(volumeEntity!.new_state!.attributes!.volume!)" style="width: 100%"
@@ -71,7 +71,7 @@
     <div [style]="'position: absolute;right:0; top:0;scale:'+scale">
       <p-button icon="pi pi-times" pTooltip="Close window" (click)="closeDialog($event)" [rounded]="true" [outlined]="true"/>
     </div>
-  <div *ngIf="!minimized" class="flex-initial flex align-items-center justify-content-between" [style]="'scale:'+scale">
+  <div *ngIf="!minimized && activity?.entity_type === 'activity'" class="flex-initial flex align-items-center justify-content-between" [style]="'scale:'+scale">
     <p-button icon="pi pi-stop" [rounded]="true" pTooltip="Stop activity" (click)="executeActivity('activity.off')" severity="danger"/>
     <p-button icon="pi pi-play" [rounded]="true" pTooltip="Start activity" (click)="executeActivity('activity.on')" severity="success"/>
     <p-button icon="pi pi-hammer" [outlined]="true" [rounded]="true" pTooltip="Fix states to turn off" (click)="executeSequence('off')" severity="danger"/>
@@ -79,16 +79,16 @@
     <p-button icon="pi pi-cog" [rounded]="true" pTooltip="Edit activity" [routerLink]="'/activity/edit/'+activity?.entity_id" />
   </div>
   <ng-container *ngIf="!minimized" style="width: 100%; text-align: center">
-    <app-activity-buttons [remote]="remote" [activity]="activity" [editMode]="false" [scale]="1" [hideButtonsInfo]="true"
+    <app-remote-buttons [remote]="remote" [activity]="activity" [editMode]="false" [scale]="1" [hideButtonsInfo]="true"
                           (onSelectButton)="handleMessage($event)"  (onSelectUnassignedButton)="handleEmptyButton($event)" style="width:100%"/>
     <div style="position: relative; text-align: center">
-      <app-activity-grid [activity]="activity" [editMode]="false" [remote]="remote" [width]="400" [fitScreen]="true" [height]="500"
+      <app-remote-grid [activity]="activity" [editMode]="false" [remote]="remote" [width]="400" [fitScreen]="true" [height]="500"
                          [selectionMode]="false" [currentPage]="currentPage" [runMode]="true" (onSelectButton)="handleCommand($event)"
                          (onPageChange)="selectPage($event)"/>
       <app-pagination *ngIf="activity?.options?.user_interface?.pages && currentPage"
                       [currentIndex]="activity!.options!.user_interface!.pages!.indexOf(currentPage)"
                       [numberOfPages]="activity!.options!.user_interface!.pages!.length" class="grid-pagination"
-                      (onIndexChange)="selectPage($event)"/>
+                      (onIndexChange)="selectPage($event)"  [style]="'width:'+200*scale+'px'" [smallSizeMode]="smallSizeMode"/>
       <div class="flex align-items-center justify-content-center gap-2" style="width: 100%"
            *ngIf="volumeEntity?.new_state?.attributes?.volume">
         <app-slider [value]="Math.round(volumeEntity!.new_state!.attributes!.volume!)" style="width: 100%"

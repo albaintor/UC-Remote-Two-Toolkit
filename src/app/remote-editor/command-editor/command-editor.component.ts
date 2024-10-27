@@ -76,7 +76,7 @@ export class CommandEditorComponent implements OnInit {
     if (value) {
       this.activityEntities = this.activity?.options?.included_entities?.sort((a, b) =>
         Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!))!;
-      this.mediaPlayers = this.activityEntities.filter(entity => entity.entity_type === 'media_player');
+      this.mediaPlayers = this.activityEntities?.filter(entity => entity.entity_type === 'media_player');
     }
     this.initSelection();
   }
@@ -212,13 +212,9 @@ export class CommandEditorComponent implements OnInit {
           if (!this.selectedCommand.params?.find(param => param.param === key))
             delete this.command.params[key];
         }
-
-        /*this.selectedCommand.params?.forEach(params => {
-
-        })*/
       }
     }
-    console.log("Entity & command selected", this.selectedEntity, this.selectedCommand);
+    if (this.selectedEntity) console.debug("Entity & command selected", this.selectedEntity, this.selectedCommand);
     this.cdr.detectChanges();
   }
 

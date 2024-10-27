@@ -26,11 +26,11 @@ import {PaginatorModule, PaginatorState} from "primeng/paginator";
 import {ChipModule} from "primeng/chip";
 import {OverlayPanelModule} from "primeng/overlaypanel";
 import {RouterLink} from "@angular/router";
-import {ActivityGridItemComponent} from "./activity-grid-item/activity-grid-item.component";
+import {RemoteGridItemComponent} from "../remote-editor/remote-grid-item/remote-grid-item.component";
 import {ButtonModule} from "primeng/button";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {Helper} from "../helper";
-import {UiCommandEditorComponent} from "../activity-editor/ui-command-editor/ui-command-editor.component";
+import {UiCommandEditorComponent} from "../remote-editor/ui-command-editor/ui-command-editor.component";
 import { saveAs } from 'file-saver-es';
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {ButtonEditorComponent} from "../activity-editor/button-editor/button-editor.component";
@@ -40,11 +40,11 @@ import {ImageMapComponent} from "../controls/image-map/image-map.component";
 import {DividerModule} from "primeng/divider";
 import {ToolbarModule} from "primeng/toolbar";
 import {DockModule} from "primeng/dock";
-import {ActivityPageListComponent, Operation} from "./activity-page-list/activity-page-list.component";
+import {RemotePageListComponent, Operation} from "../remote-editor/remote-page-list/remote-page-list.component";
 import {TagModule} from "primeng/tag";
 import {InputTextModule} from "primeng/inputtext";
-import {ActivityButtonsComponent} from "./activity-buttons/activity-buttons.component";
-import {ActivityGridComponent} from "./activity-grid/activity-grid.component";
+import {RemoteButtonsComponent} from "../remote-editor/remote-buttons/remote-buttons.component";
+import {RemoteGridComponent} from "../remote-editor/remote-grid/remote-grid.component";
 
 enum DataFormat {
   None,
@@ -72,7 +72,7 @@ export class AsPipe implements PipeTransform {
     ChipModule,
     OverlayPanelModule,
     RouterLink,
-    ActivityGridItemComponent,
+    RemoteGridItemComponent,
     ButtonModule,
     NgxJsonViewerModule,
     UiCommandEditorComponent,
@@ -83,11 +83,11 @@ export class AsPipe implements PipeTransform {
     DividerModule,
     ToolbarModule,
     DockModule,
-    ActivityPageListComponent,
+    RemotePageListComponent,
     TagModule,
     InputTextModule,
-    ActivityButtonsComponent,
-    ActivityGridComponent
+    RemoteButtonsComponent,
+    RemoteGridComponent
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',
@@ -125,9 +125,9 @@ export class ActivityViewerComponent implements AfterViewInit {
   public Command!: Command;
   @ViewChild("commandeditor", {static: false}) commandeditor: UiCommandEditorComponent | undefined;
   @ViewChild("input_file_page", {static: false}) input_file_page: ElementRef | undefined;
-  @ViewChildren(ActivityGridItemComponent) gridButtons:QueryList<ActivityGridItemComponent> | undefined;
-  @ViewChild(ActivityButtonsComponent) buttons:ActivityButtonsComponent | undefined;
-  @ViewChild(ActivityGridComponent) activityGrid:ActivityGridComponent | undefined;
+  @ViewChildren(RemoteGridItemComponent) gridButtons:QueryList<RemoteGridItemComponent> | undefined;
+  @ViewChild(RemoteButtonsComponent) buttons:RemoteButtonsComponent | undefined;
+  @ViewChild(RemoteGridComponent) activityGrid:RemoteGridComponent | undefined;
 
   protected readonly JSON = JSON;
   showDump: boolean = false;
@@ -136,7 +136,7 @@ export class ActivityViewerComponent implements AfterViewInit {
   gridPixelHeight = 6*185;
   protected readonly Helper = Helper;
   selectionMode = false;
-  selection: ActivityGridItemComponent[] = [];
+  selection: RemoteGridItemComponent[] = [];
   includedEntity: Entity | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
@@ -544,7 +544,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.includedEntity = undefined;
   }
 
-  selectionChange($event: ActivityGridItemComponent[]) {
+  selectionChange($event: RemoteGridItemComponent[]) {
     this.selection = $event;
     this.cdr.detectChanges();
   }

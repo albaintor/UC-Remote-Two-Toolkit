@@ -15,10 +15,10 @@ import {Activity, ButtonMapping, Command, Entity, EntityCommand, Remote, RemoteA
 import {Helper} from "../helper";
 import {Button} from "primeng/button";
 import {TooltipModule} from "primeng/tooltip";
-import {ActivityButtonsComponent, ButtonMode} from "../activity-viewer/activity-buttons/activity-buttons.component";
+import {RemoteButtonsComponent, ButtonMode} from "../remote-editor/remote-buttons/remote-buttons.component";
 import {NgIf} from "@angular/common";
 import {catchError, delay, forkJoin, from, map, mergeMap, Observable, of} from "rxjs";
-import {ActivityGridComponent} from "../activity-viewer/activity-grid/activity-grid.component";
+import {RemoteGridComponent} from "../remote-editor/remote-grid/remote-grid.component";
 import {ToastModule} from "primeng/toast";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ProgressBarModule} from "primeng/progressbar";
@@ -39,9 +39,9 @@ import {WebsocketService} from "../websocket/websocket.service";
     ActivityViewerComponent,
     Button,
     TooltipModule,
-    ActivityButtonsComponent,
+    RemoteButtonsComponent,
     NgIf,
-    ActivityGridComponent,
+    RemoteGridComponent,
     ToastModule,
     ProgressBarModule,
     PaginationComponent,

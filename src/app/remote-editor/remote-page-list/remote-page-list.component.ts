@@ -26,7 +26,7 @@ export enum Operation {
 }
 
 @Component({
-  selector: 'app-activity-page-list',
+  selector: 'app-remote-page-list',
   standalone: true,
   imports: [
     Button,
@@ -37,13 +37,13 @@ export enum Operation {
     PrimeTemplate,
     TooltipModule
   ],
-  templateUrl: './activity-page-list.component.html',
-  styleUrl: './activity-page-list.component.css',
+  templateUrl: './remote-page-list.component.html',
+  styleUrl: './remote-page-list.component.css',
   providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class ActivityPageListComponent implements OnInit {
+export class RemotePageListComponent implements OnInit {
   remote: Remote | undefined;
   private screenLayout: ScreenLayout | undefined;
   @Input("remote") set _remote(value: Remote | undefined) {

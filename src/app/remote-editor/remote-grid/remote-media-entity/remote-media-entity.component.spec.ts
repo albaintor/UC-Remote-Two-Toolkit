@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ActivityMediaEntityComponent } from './activity-media-entity.component';
+import { RemoteMediaEntityComponent } from './remote-media-entity.component';
 
 describe('ActiivtyMediaEntityComponent', () => {
-  let component: ActivityMediaEntityComponent;
-  let fixture: ComponentFixture<ActivityMediaEntityComponent>;
+  let component: RemoteMediaEntityComponent;
+  let fixture: ComponentFixture<RemoteMediaEntityComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ActivityMediaEntityComponent]
+      imports: [RemoteMediaEntityComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ActivityMediaEntityComponent);
+    fixture = TestBed.createComponent(RemoteMediaEntityComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

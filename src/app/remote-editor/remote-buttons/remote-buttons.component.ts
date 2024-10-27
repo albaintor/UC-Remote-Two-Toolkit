@@ -34,7 +34,7 @@ export enum ButtonMode {
 }
 
 @Component({
-  selector: 'app-activity-buttons',
+  selector: 'app-remote-buttons',
   standalone: true,
   imports: [
     TagModule,
@@ -49,13 +49,13 @@ export enum ButtonMode {
     OverlayPanelModule,
     NgTemplateOutlet
   ],
-  templateUrl: './activity-buttons.component.html',
-  styleUrl: './activity-buttons.component.css',
+  templateUrl: './remote-buttons.component.html',
+  styleUrl: './remote-buttons.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [MessageService]
 })
-export class ActivityButtonsComponent implements AfterViewInit {
+export class RemoteButtonsComponent implements AfterViewInit {
   remote: Remote | undefined;
   @Input("remote") set _remote(value: Remote | undefined) {
     this.remote = value;
@@ -99,12 +99,6 @@ export class ActivityButtonsComponent implements AfterViewInit {
   @ViewChild("buttonsInfo", {static: false}) buttonsInfo: ElementRef<HTMLDivElement> | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,) {
-    const data = localStorage.getItem("remoteData");
-    if (data) {
-      const remoteData: RemoteData = JSON.parse(data);
-      if (remoteData.configCommands)
-        this.configEntityCommands = remoteData.configCommands;
-    }
     this.server.getRemoteModels().subscribe(remoteModels => {
       this.remoteModels = remoteModels;
       this.updateButtons();
@@ -116,6 +110,7 @@ export class ActivityButtonsComponent implements AfterViewInit {
       this.updateButtons();
       this.cdr.detectChanges();
     })
+    this.server.configCommands$.subscribe(config => this.configEntityCommands = config);
   }
 
   ngAfterViewInit(): void {
@@ -124,13 +119,36 @@ export class ActivityButtonsComponent implements AfterViewInit {
   executeCommand(button: ButtonMapping, mode: ButtonMode) {
     const command = (mode === ButtonMode.ShortPress) ? button.short_press : (mode === ButtonMode.LongPress) ? button.long_press : button.double_press;
     if (!this.remote || !command) return;
-    this.server.executeRemotetCommand(this.remote, command).subscribe({next: results => {
-      this.onSelectButton.emit({button, mode, severity: "success"});
+    console.debug("Execute command", command);
+    let execCommand = {...command};
+    if (this.activity?.entity_type !== 'activity')
+    {
+      const internalCommand = this.configEntityCommands?.find(item => item.id === command.cmd_id);
+      if (!internalCommand)
+      {
+        //TODO why is it not possible to get the "default" cmd_id from entity type ?
+        if (this.activity?.options?.kind === 'IR')
+          execCommand = {entity_id: this.activity!.entity_id!, cmd_id: "remote.send", params: {...command}};
+        else
+          execCommand = {entity_id: this.activity!.entity_id!, cmd_id: "remote.send_cmd", params: {command: command.cmd_id}};
+      }
+    }
+    console.debug("Execute command", mode, execCommand);
+    const updatedButton = {...button};
+    if (mode === ButtonMode.ShortPress)
+      updatedButton.short_press = execCommand;
+    else if (mode === ButtonMode.LongPress)
+      updatedButton.long_press = execCommand;
+    else
+      updatedButton.double_press = execCommand;
+
+    this.server.executeRemotetCommand(this.remote, execCommand).subscribe({next: results => {
+      this.onSelectButton.emit({button: updatedButton, mode, severity: "success"});
         // this.messageService.add({key: "activityButtons", summary: "Command executed",
         //   severity: "success", detail: `Results : ${results.code} : ${results.message}`});
       }, error: (err: HttpErrorResponse) => {
         console.error("Error command", err);
-        this.onSelectButton.emit({button, mode, severity: "error", error: `${err.error.name} (${err.status} ${err.statusText})`});
+        this.onSelectButton.emit({button: updatedButton, mode, severity: "error", error: `${err.error.name} (${err.status} ${err.statusText})`});
       }});
     this.cdr.detectChanges();
   }

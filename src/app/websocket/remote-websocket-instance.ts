@@ -1,6 +1,18 @@
 import {ServerService} from "../server.service";
 import {BatteryState, Entity, Remote, Activity} from "../interfaces";
-import {BehaviorSubject, map, share, Subject, Subscription, timer} from "rxjs";
+import {
+  BehaviorSubject,
+  forkJoin,
+  from,
+  map,
+  mergeMap,
+  Observable,
+  of,
+  share,
+  Subject,
+  Subscription,
+  timer
+} from "rxjs";
 import {Helper} from "../helper";
 import {EventMessage, RemoteWebsocket, RequestMessage, ResponseMessage} from "./remote-websocket";
 
@@ -164,7 +176,7 @@ export class RemoteWebsocketInstance {
 
   getEntityStates(): EntityState[]
   {
-    return [...this._mediaEntities, ...this._lightEntities];
+    return [...this._mediaEntities, ...this._lightEntities, ...this._coverEntities, ...this._climateEntities];
   }
 
   removeEntityState(entityId: string): void
@@ -345,11 +357,11 @@ export class RemoteWebsocketInstance {
     }
   }
 
-  updateEntity(entity_id: string, entityStates: EntityState[], entitySubject: Subject<EntityState[]>)
+  updateEntity$(entity_id: string, entityStates: EntityState[], entitySubject: Subject<EntityState[]>): Observable<EntityState|undefined>
   {
-    if (!this.remoteWebsocket.getRemote()) return;
-    this.serverService.getRemotetEntity(this.remoteWebsocket.getRemote()!, entity_id).subscribe(entity => {
-      console.debug("Add new entity for tracking", entity);
+    if (!this.remoteWebsocket.getRemote()) return of(undefined);
+    return this.serverService.getRemotetEntity(this.remoteWebsocket.getRemote()!, entity_id).pipe(map(entity => {
+      console.debug("Add or reload entity for tracking", entity);
       let entityEntry = entityStates.find(item =>
         item.entity_id === entity.entity_id);
       if (!entityEntry) {
@@ -358,7 +370,13 @@ export class RemoteWebsocketInstance {
       }
       this.fillEntityFields(entityEntry, entity);
       entitySubject.next([entityEntry!]);
-    });
+      return entityEntry;
+    }));
+  }
+
+  updateEntity(entity_id: string, entityStates: EntityState[], entitySubject: Subject<EntityState[]>)
+  {
+    this.updateEntity$(entity_id, entityStates, entitySubject).subscribe();
   }
 
   updateActivity(entity_id: string, activityStates: ActivityState[], activities: Subject<ActivityState[]>)
@@ -559,5 +577,28 @@ export class RemoteWebsocketInstance {
         (entityEntry.new_state as any)[key] = value;
       }
     }
+  }
+
+  public reloadEntities()
+  {
+    const entityStates = this.getEntityStates();
+    const remote = this.getRemote();
+    if (!remote) return forkJoin([from([...this.getEntityStates()])]);
+    const tasks = from(entityStates).pipe(mergeMap(item => {
+      switch(item.entity_type)
+      {
+        case 'media_player':return this.updateEntity$(item.entity_id, this._mediaEntities, this.mediaUpdated$);
+        case 'light': return this.updateEntity$(item.entity_id, this._lightEntities, this.lightEntitiesUpdated$);
+        case 'cover': return this.updateEntity$(item.entity_id, this._coverEntities, this.coverEntitiesUpdated$);
+        case 'climate': return this.updateEntity$(item.entity_id, this._climateEntities, this.climateEntitiesUpdated$);
+        default: console.warn("Unsupported entity", item.entity_type);
+        return of(item) as Observable<EntityState| undefined>;
+      }
+    },4));
+
+    console.debug("Tasks", tasks);
+    return forkJoin([tasks]).pipe(map(res => {
+      return res;
+    }));
   }
 }

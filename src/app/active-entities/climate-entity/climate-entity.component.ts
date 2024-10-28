@@ -269,11 +269,13 @@ export class ClimateEntityComponent implements OnInit, OnDestroy {
     );
   }
 
-  setTemperature($event: any) {
-    if (!this.remote || !this.climateEntity) return;
+  setTemperature($event: number) {
+    if (!this.remote || !this.climateEntity || this.climateEntity?.new_state?.attributes?.target_temperature === $event) return;
     if (!this.checkFeature(this.climateEntity, 'target_temperature')) return;
-    if (this.climateEntity?.new_state?.attributes?.target_temperature)
-      this.targetTemperature$.next(this.climateEntity.new_state!.attributes!.target_temperature);
+    if (!this.climateEntity?.new_state) this.climateEntity.new_state = {};
+    if (!this.climateEntity?.new_state?.attributes) this.climateEntity.new_state.attributes = {};
+    this.climateEntity.new_state.attributes.target_temperature = $event;
+    this.targetTemperature$.next(this.climateEntity.new_state!.attributes!.target_temperature);
   }
 
   ngOnDestroy() {

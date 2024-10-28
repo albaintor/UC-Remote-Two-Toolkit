@@ -22,21 +22,23 @@ import {FormsModule} from "@angular/forms";
 import {ButtonComponent} from "../../controls/button/button.component";
 import {Message} from "primeng/api";
 import {HttpErrorResponse} from "@angular/common/http";
+import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-text.component";
 
 @Component({
   selector: 'app-light-entity',
   standalone: true,
-  imports: [
-    NgIf,
-    Button,
-    TooltipModule,
-    CdkDragHandle,
-    NgTemplateOutlet,
-    SliderComponent,
-    ColorPickerModule,
-    FormsModule,
-    ButtonComponent
-  ],
+    imports: [
+        NgIf,
+        Button,
+        TooltipModule,
+        CdkDragHandle,
+        NgTemplateOutlet,
+        SliderComponent,
+        ColorPickerModule,
+        FormsModule,
+        ButtonComponent,
+        ScrollingTextComponent
+    ],
   templateUrl: './light-entity.component.html',
   styleUrl: './light-entity.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

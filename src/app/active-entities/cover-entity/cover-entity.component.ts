@@ -20,6 +20,7 @@ import {TooltipModule} from "primeng/tooltip";
 import {ButtonComponent} from "../../controls/button/button.component";
 import {Message} from "primeng/api";
 import {HttpErrorResponse} from "@angular/common/http";
+import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-text.component";
 
 @Component({
   selector: 'app-cover-entity',
@@ -31,7 +32,8 @@ import {HttpErrorResponse} from "@angular/common/http";
     SliderComponent,
     TooltipModule,
     NgTemplateOutlet,
-    ButtonComponent
+    ButtonComponent,
+    ScrollingTextComponent
   ],
   templateUrl: './cover-entity.component.html',
   styleUrl: './cover-entity.component.css',

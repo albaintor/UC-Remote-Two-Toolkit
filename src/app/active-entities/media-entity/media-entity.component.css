@@ -81,3 +81,11 @@
 .uc-button .p-button-icon {
   font-size: 2rem !important;
 }
+
+.close-button .p-button {
+  transition: all 0.3s ease-in-out;
+}
+
+.close-button .p-button:hover {
+  background-color: rgba(255, 255, 255, 0.7);
+}

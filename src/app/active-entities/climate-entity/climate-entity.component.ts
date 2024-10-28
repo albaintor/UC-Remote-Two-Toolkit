@@ -27,6 +27,7 @@ import {debounceTime, map, Subject, Subscription} from "rxjs";
 import {distinctUntilChanged} from "rxjs/operators";
 import {Message} from "primeng/api";
 import {HttpErrorResponse} from "@angular/common/http";
+import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-text.component";
 
 type HavcMode = 'OFF' |'HEAT'|'COOL'|'HEAT_COOL'|'FAN'|'AUTO';
 
@@ -62,7 +63,8 @@ const HAVC_FEATURES_MAP: {[type:string]: string} = {
     FormsModule,
     DropdownOverComponent,
     TagModule,
-    ButtonComponent
+    ButtonComponent,
+    ScrollingTextComponent
   ],
   templateUrl: './climate-entity.component.html',
   styleUrl: './climate-entity.component.css',

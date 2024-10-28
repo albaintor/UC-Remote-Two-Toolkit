@@ -66,28 +66,30 @@ export class PaginationComponent implements AfterViewInit {
     })
     let width = this.paginationContainer?.nativeElement.clientWidth;
     if (!width) return;
+    const displayedItems = Math.min(this.displayedIndexes, this.indexes.length);
     if (this.paginationContainer)
-      if (this.indexes.length == 2 && width > 70) {
+      if (displayedItems == 2 && width > 70) {
         this.paginationContainer.nativeElement.style.width = '70px';
         width = 70;
       }
+      else if (displayedItems == 3 && width > 100) {
+        this.paginationContainer.nativeElement.style.width = '100px';
+        width = 100;
+      }
       else
         this.paginationContainer.nativeElement.style.width = "unset";
-          //(Math.min(this.displayedIndexes, this.indexes.length)*(this.dotSize+25))+'px';
-    const displayedItems = Math.min(this.displayedIndexes, this.indexes.length);
-    const itemWidth = Math.round((width - this.padding)/displayedItems);
 
-    console.debug("WIDTH", width, itemWidth);
+    const itemWidth = Math.round((width - this.padding)/displayedItems);
 
     let direction = true;
     let indexRight = this.currentIndex + 1;
     let indexLeft = this.currentIndex -1;
     const indexesLeft: Indexes[] = [];
-    const indexesRight: Indexes[] = [];
+    // const indexesRight: Indexes[] = [];
     for (let i=0; i<this.displayedIndexes-1; i++)
     {
       if (direction && indexRight < this.numberOfPages) {
-        indexesRight.push({index: indexRight, current: false});
+        // indexesRight.push({index: indexRight, current: false});
         indexRight++
       } else if (indexLeft >= 0) {
         indexesLeft.push({index: indexLeft, current: false});
@@ -112,31 +114,6 @@ export class PaginationComponent implements AfterViewInit {
       this.indexes.push({index:i, current: (i === this.currentIndex)});
     }
     this.update();
-    this.cdr.detectChanges();
-  }
-
-  init2()
-  {
-    this.indexes = [];
-    if (this.numberOfPages <= 1) return;
-    let direction = true;
-    let indexRight = this.currentIndex + 1;
-    let indexLeft = this.currentIndex -1;
-    const indexesLeft: Indexes[] = [];
-    const indexesRight: Indexes[] = [];
-
-    for (let i=0; i<this.displayedIndexes-1; i++)
-    {
-      if (direction && indexRight < this.numberOfPages) {
-        indexesRight.push({index: indexRight, current: false});
-        indexRight++
-      } else if (indexLeft >= 0) {
-        indexesLeft.push({index: indexLeft, current: false});
-        indexLeft--;
-      }
-      direction = !direction;
-    }
-    this.indexes = [...indexesLeft.reverse(), {index: this.currentIndex, current: true}, ...indexesRight];
     this.cdr.detectChanges();
   }
 

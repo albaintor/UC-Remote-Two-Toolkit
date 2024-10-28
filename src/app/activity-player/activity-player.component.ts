@@ -294,5 +294,6 @@ export class ActivityPlayerComponent implements OnInit {
 
   toggleMinimized($event: MouseEvent) {
     this._minimized = !this.minimized;
+    this.cdr.detectChanges();
   }
 }

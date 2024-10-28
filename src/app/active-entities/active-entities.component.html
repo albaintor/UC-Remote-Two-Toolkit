@@ -10,36 +10,44 @@
                   (click)="showDashboardDialog = true"/>
         <p-toggleButton [(ngModel)]="lockDashboard" onLabel="Freeze dashboard" offLabel="Add new entities" onIcon="pi pi-lock"
                         offIcon="pi pi-lock-open" [style]="{'scale': scale}"/>
-        Scale :
-        <p-inputNumber [(ngModel)]="scale" pTooltip="Scale elements" min="0.1" max="3" (ngModelChange)="Helper.setScale(scale)" mode="decimal"
-                       [minFractionDigits]="1"
-                       [maxFractionDigits]="1" [inputStyle]="{width: '40px'}"/>&nbsp;
-        Activities :
-        <p-autoComplete [(ngModel)]="newActivity" [dropdown]="true" [suggestions]="suggestedActivities" (completeMethod)="searchActivities($event)" appendTo="body"
-                        [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addActivity($event)"
-                        pTooltip="View activity">
-          <ng-template let-item pTemplate="item">
-            <div><b>{{Helper.getEntityName(item)}}</b></div>
-          </ng-template>
-        </p-autoComplete>
-        Entities :
-        <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntities($event)" appendTo="body"
-                        [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}"
-                        optionLabel="entity_id" (ngModelChange)="addEntity($event)"
-                        pTooltip="Add entity">
-          <ng-template let-item pTemplate="item">
-            <div><b>{{Helper.getEntityName(item)}}</b>&nbsp;<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span></div>
-          </ng-template>
-        </p-autoComplete>
-        Remotes :
-        <p-autoComplete [(ngModel)]="newRemote" [dropdown]="true" [suggestions]="suggestedRemotes" (completeMethod)="searchRemotes($event)" appendTo="body"
-                        [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id"
-                        (ngModelChange)="addRemote($event)"
-                        pTooltip="View remote">
-          <ng-template let-item pTemplate="item">
-            <div><b>{{Helper.getEntityName(item)}}</b>&nbsp;<span *ngIf="item?.options?.kind" [style]="{'color': Helper.getBackgroundColor(item.options.kind)}">{{item.options.kind}}</span></div>
-          </ng-template>
-        </p-autoComplete>
+        <div class="flex flex-column align-items-center">
+          Scale
+          <p-inputNumber [(ngModel)]="scale" pTooltip="Scale elements" min="0.1" max="3" (ngModelChange)="Helper.setScale(scale)" mode="decimal"
+                         [minFractionDigits]="1" [style]="{'height': '10px'}"
+                         [maxFractionDigits]="1" [inputStyle]="{width: '40px'}"/>&nbsp;
+        </div>
+        <div class="flex flex-column align-items-center">
+        Activities
+          <p-autoComplete [(ngModel)]="newActivity" [dropdown]="true" [suggestions]="suggestedActivities" (completeMethod)="searchActivities($event)" appendTo="body"
+                          [style]="{'width':'50px', 'height': '10px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addActivity($event)"
+                          pTooltip="View activity">
+            <ng-template let-item pTemplate="item">
+              <div><b>{{Helper.getEntityName(item)}}</b></div>
+            </ng-template>
+          </p-autoComplete>
+        </div>
+        <div class="flex flex-column align-items-center">
+        Entities
+          <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntities($event)" appendTo="body"
+                          [style]="{'width':'50px', 'height': '10px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}"
+                          optionLabel="entity_id" (ngModelChange)="addEntity($event)"
+                          pTooltip="Add entity">
+            <ng-template let-item pTemplate="item">
+              <div><b>{{Helper.getEntityName(item)}}</b>&nbsp;<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span></div>
+            </ng-template>
+          </p-autoComplete>
+        </div>
+        <div class="flex flex-column align-items-center">
+        Remotes
+          <p-autoComplete [(ngModel)]="newRemote" [dropdown]="true" [suggestions]="suggestedRemotes" (completeMethod)="searchRemotes($event)" appendTo="body"
+                          [style]="{'width':'50px', 'height': '10px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id"
+                          (ngModelChange)="addRemote($event)"
+                          pTooltip="View remote">
+            <ng-template let-item pTemplate="item">
+              <div><b>{{Helper.getEntityName(item)}}</b>&nbsp;<span *ngIf="item?.options?.kind" [style]="{'color': Helper.getBackgroundColor(item.options.kind)}">{{item.options.kind}}</span></div>
+            </ng-template>
+          </p-autoComplete>
+        </div>
         <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="loader.loadRemote(selectedRemote)"
                     class="smaller-dropdown">
           <ng-template pTemplate="selectedItem">

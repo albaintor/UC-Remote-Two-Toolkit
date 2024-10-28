@@ -89,7 +89,7 @@ export class ClimateEntityComponent implements OnInit, OnDestroy {
   max_temperature = 30;
   temperature_unit = "°C";
   havcModes: {label: string, value: HavcMode}[] = [...HAVC_MODES];
-  havcMode: HavcMode | undefined;
+  hvacMode: HavcMode | undefined;
   targetTemperature$ = new Subject<number>();
   targetTemperatureSubscription: Subscription | undefined;
 
@@ -158,7 +158,7 @@ export class ClimateEntityComponent implements OnInit, OnDestroy {
 
   getStatusSeverity()
   {
-    switch(this.havcMode)
+    switch(this.hvacMode)
     {
       case "OFF": return "secondary";
       case "HEAT": return "warning";
@@ -203,7 +203,7 @@ export class ClimateEntityComponent implements OnInit, OnDestroy {
     }
     if (this.climateEntity.new_state?.attributes?.state)
     {
-      this.havcMode = this.climateEntity.new_state.attributes.state as any;
+      this.hvacMode = this.climateEntity.new_state.attributes.state as any;
     }
     this.cdr.detectChanges();
   }
@@ -245,7 +245,9 @@ export class ClimateEntityComponent implements OnInit, OnDestroy {
 
   setHavcMode(hvac_mode: HavcMode)
   {
-    if (!this.remote || !this.climateEntity) return;
+    if (!this.remote || !this.climateEntity || this.hvacMode === hvac_mode) return;
+    console.debug(`Climate set HVAC mode from ${this.hvacMode} => ${hvac_mode}`, this.climateEntity, hvac_mode);
+    this.hvacMode = hvac_mode;
     this.server.executeRemotetCommand(this.remote, {
       entity_id: this.climateEntity.entity_id,
       cmd_id: "climate.hvac_mode",

@@ -18,9 +18,9 @@
     <div class="flex flex-column justify-content-around" style="height: 100%">
       <div *ngIf="havcModes.length > 0"
            class="flex align-items-center justify-content-center" style="width: 100%">
-        <app-dropdown-over [(value)]="havcMode" [options]="havcModes" [textTemplate]="currentMode" (valueChange)="setHavcMode(havcMode!)">
+        <app-dropdown-over [value]="hvacMode" [options]="havcModes" [textTemplate]="currentMode" (valueChange)="setHavcMode(hvacMode!)">
           <ng-template #currentMode>
-            <p-tag [value]="getLabel(havcMode)" [severity]="getStatusSeverity()"></p-tag>
+            <p-tag [value]="getLabel(hvacMode)" [severity]="getStatusSeverity()"></p-tag>
           </ng-template>
         </app-dropdown-over>
       </div>

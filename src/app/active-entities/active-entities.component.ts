@@ -3,7 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   OnDestroy,
-  OnInit,
+  OnInit, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import {DropdownModule} from "primeng/dropdown";
@@ -101,7 +101,8 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   protected readonly Math = Math;
   menuItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
-    {label: 'Reload', command: () => this.reloadEntities(), icon: 'pi pi-refresh'},
+    {label: 'Refresh', command: () => this.reloadEntities(), icon: 'pi pi-refresh'},
+    {label: 'Load remote', command: () => this.remoteLoader?.load(), icon: 'pi pi-download'},
   ]
   selectedRemote: Remote | undefined;
   remotes: Remote[] | undefined;
@@ -129,6 +130,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   progress = false;
   supported_entity_types = ['media_player', 'light', 'cover', 'climate'];
   removedEntityStates: string[] = [];
+  @ViewChild(RemoteDataLoaderComponent) remoteLoader: RemoteDataLoaderComponent | undefined;
 
 
   constructor(private server:ServerService,

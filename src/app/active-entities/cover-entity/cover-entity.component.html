@@ -3,25 +3,23 @@
     <app-button icon="pi pi-times" [rounded]="true" (click)="closeEntity()" [scale]="scale"
               size="small" severity="secondary" [text]="true"/>
   </div>
-  <div class="flex-column align-content-start" style="width: 100%;height: 100%">
-    <div class="flex align-content-center justify-content-center card-title"  cdkDragHandle [style]="'text-align:center;font-size:'+26*scale+'px'">
+  <div class="flex flex-column align-content-start gap-1" style="width: 100%;height:100%">
+    <div class="flex align-content-center justify-content-center card-title"  cdkDragHandle
+         [style]="'margin-bottom:0;text-align:center;font-size:'+26*scale+'px'">
       <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
       <ng-container *ngIf="!headerTemplate">{{websocketService.getEntityName(coverEntity)}}</ng-container>
     </div>
     <div class="flex flex-column justify-content-center gap-4" style="height: 100%;">
       <div class="flex align-content-center justify-content-between" style="width: 100%">
-        <div *ngIf="checkFeature(coverEntity, 'close')" [style]="'align-content: center;scale:'+scale">
-          <p-button icon="pi pi-arrow-down" (click)="executeCommand('cover.close')"
-                    size="small" pTooltip="Close cover"/>
-        </div>
-        <div *ngIf="checkFeature(coverEntity, 'stop')" [style]="'align-content: center;scale:'+scale">
-          <p-button icon="pi pi-stop" (click)="executeCommand('cover.stop')"
-                    size="small" pTooltip="Stop cover"/>
-        </div>
-        <div *ngIf="checkFeature(coverEntity, 'open')" [style]="'align-content: center;scale:'+scale">
-          <p-button icon="pi pi-arrow-up" (click)="executeCommand('cover.open')"
-                    size="small" pTooltip="Open cover"/>
-        </div>
+        <app-button *ngIf="checkFeature(coverEntity, 'close')" icon="pi pi-arrow-down"
+                    (click)="executeCommand('cover.close')" [scale]="scale"
+                  size="small" pTooltip="Close cover"/>
+        <app-button *ngIf="checkFeature(coverEntity, 'stop')" icon="pi pi-stop"
+                    (click)="executeCommand('cover.stop')" [scale]="scale"
+                  size="small" pTooltip="Stop cover"/>
+        <app-button *ngIf="checkFeature(coverEntity, 'open')" icon="pi pi-arrow-up"
+                    (click)="executeCommand('cover.open')" [scale]="scale"
+                  size="small" pTooltip="Open cover"/>
       </div>
       <div *ngIf="checkFeature(coverEntity, 'position')" style="width:100%;align-content: center">
         <div *ngIf="coverEntity.new_state?.attributes?.position"

@@ -35,7 +35,7 @@
           <p-chip *ngIf="!runMode" [label]="getEntityName(item?.media_player_id!)"
                   [style]="Helper.getStyle(getEntityName(item?.media_player_id!))"></p-chip>
           <div style="position: relative; width: 100%;height: 100%">
-            <img *ngIf="!runMode" src="/src/assets/icons/media_player.svg" alt="Media player" class="media_player_icon">
+            <img *ngIf="!runMode" src="/assets/icons/media_player.svg" alt="Media player" class="media_player_icon">
             <ng-container *ngIf="runMode">
               <app-activity-media-entity [entityId]="item.media_player_id" [remote]="remote" [size]="getGridItemSize(page, item)"
                                          (onSelectButton)="onSelectButton.emit($event)"/>

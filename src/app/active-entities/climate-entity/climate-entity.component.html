@@ -11,11 +11,11 @@
               size="small" severity="secondary" [text]="true"/>
   </div>
   <div class="flex-column align-content-start" style="width: 100%;height:100%">
-    <div class="flex align-content-center justify-content-center card-title"  cdkDragHandle [style]="'text-align:center;font-size:'+26*scale+'px'">
+    <div class="flex align-content-center justify-content-center card-title"  cdkDragHandle [style]="'margin:0;text-align:center;font-size:'+26*scale+'px'">
       <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
       <ng-container *ngIf="!headerTemplate">{{websocketService.getEntityName(climateEntity)}}</ng-container>
     </div>
-    <div class="flex flex-column justify-content-center gap-2">
+    <div class="flex flex-column justify-content-around" style="height: 100%">
       <div *ngIf="havcModes.length > 0"
            class="flex align-items-center justify-content-center" style="width: 100%">
         <app-dropdown-over [(value)]="havcMode" [options]="havcModes" [textTemplate]="currentMode" (valueChange)="setHavcMode(havcMode!)">
@@ -25,14 +25,14 @@
         </app-dropdown-over>
       </div>
       <div *ngIf="checkFeature(climateEntity, 'target_temperature') && climateEntity?.new_state?.attributes"
-           class="flex align-items-center justify-content-center gap-2" style="width: 100%">
+           class="flex align-items-center justify-content-center gap-2" style="width:100%;margin-bottom:5px">
         <p-knob [(ngModel)]="climateEntity.new_state!.attributes!.target_temperature"
                 (ngModelChange)="setTemperature($event)"
         [min]="min_temperature" [max]="max_temperature" [step]="target_temperature_step" [valueColor]="getColor()"/>
         <div class="flex align-items-center justify-content-center">{{climateEntity.new_state!.attributes!.current_temperature}}</div>
       </div>
       <div *ngIf="!checkFeature(climateEntity, 'target_temperature') && checkFeature(climateEntity, 'current_temperature') && climateEntity?.new_state?.attributes"
-           class="flex align-items-center justify-content-center" style="width: 100%">
+           class="flex align-items-center justify-content-center" style="width: 100%;margin-bottom:5px">
         <p-knob [(ngModel)]="climateEntity.new_state!.attributes!.current_temperature" [valueColor]="getColor()"
                 [min]="min_temperature" [max]="max_temperature" [step]="target_temperature_step" [disabled]="true"/>
       </div>

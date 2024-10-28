@@ -160,21 +160,21 @@
       </div>
     </ng-container>
     <div *ngSwitchCase="'light'" class="flex gap-2 align-content-center justify-content-center media-card-border"
-         [style]="'height:100%;width:'+(290*scale)+'px'" cdkDrag>
+         [style]="'width:'+(290*scale)+'px'" cdkDrag>
       <app-light-entity [lightEntity]="entityState" [remote]="selectedRemote" [style]="'width:'+(290*scale)+'px'" [scale]="scale"
                         class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
                         style="width:100%;height:100%" (onMessage)="handleMessage($event)"
                         [closable]="true" (onClose)="removeEntityState(entityState)"></app-light-entity>
     </div>
     <div *ngSwitchCase="'cover'" class="flex gap-2 align-content-center justify-content-center media-card-border"
-         [style]="'height:100%;width:'+(290*scale)+'px'" cdkDrag>
+         [style]="'width:'+(290*scale)+'px'" cdkDrag>
       <app-cover-entity [coverEntity]="entityState" [remote]="selectedRemote" [style]="'width:'+(290*scale)+'px'" [scale]="scale"
                         class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
                         style="width:100%;height:100%" (onMessage)="handleMessage($event)"
                         [closable]="true" (onClose)="removeEntityState(entityState)"></app-cover-entity>
     </div>
     <div *ngSwitchCase="'climate'" class="flex gap-2 align-content-center justify-content-center media-card-border"
-         [style]="'height:100%;width:'+(290*scale)+'px'" cdkDrag>
+         [style]="'width:'+(290*scale)+'px'" cdkDrag>
       <app-climate-entity [climateEntity]="entityState" [remote]="selectedRemote" [style]="'width:'+(290*scale)+'px'" [scale]="scale"
                         class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"
                           style="width:100%;height:100%" (onMessage)="handleMessage($event)"

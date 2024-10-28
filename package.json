@@ -1,6 +1,6 @@
 {
   "name": "ucr-tool",
-  "version": "2.3.10",
+  "version": "2.3.11",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --host 0.0.0.0",

@@ -1,4 +1,4 @@
-<div *ngIf="mediaEntity" class="flex gap-2 justify-content-center media-card" style="width: 100%;">
+<div *ngIf="mediaEntity" class="flex justify-content-center media-card" style="width: 100%;height:100%">
 <div class="power-button" *ngIf="checkFeature(mediaEntity, 'on_off') || checkFeature(mediaEntity, 'toggle')">
   <app-button *ngIf="!isPowerOn(mediaEntity)" icon="pi pi-power-off" [rounded]="true" (click)="powerToggle(mediaEntity)"
             size="small" pTooltip="Power toggle" severity="secondary" [scale]="scale"/>
@@ -9,21 +9,20 @@
   <app-button icon="pi pi-times" [rounded]="true" (click)="closeEntity(mediaEntity)"
             size="small" severity="secondary" [scale]="scale" [text]="true"/>
 </div>
-<div class="flex-column" style="width: 100%">
-  <div class="flex align-content-center justify-content-center card-title"  cdkDragHandle [style]="'text-align:center;font-size:'+26*scale+'px'">
+<div class="flex flex-column align-content-start gap-1" style="width: 100%;height:100%">
+  <div class="flex flex-wrap align-content-center justify-content-center card-title"  cdkDragHandle [style]="'margin-bottom:0;text-align:center;font-size:'+26*scale+'px'">
     <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
     <ng-container *ngIf="!headerTemplate">{{websocketService.getEntityName(mediaEntity)}}</ng-container>
   </div>
-  <div class="flex" style="width: 100%">
+  <div class="flex gap-1" style="width:100%;height:100%">
     <div *ngIf="mediaEntity?.new_state?.attributes?.media_image_url"  class="flex-initial flex align-items-center" [style]="'max-width:'+(scale*380)+'px; max-height: '+(300*scale)+'px'">
       <img class="media-image" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && !mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="mediaEntity.new_state!.attributes!.media_image_url!"
            [alt]="mediaEntity.new_state!.attributes!.media_title!"/>
       <img class="media-image" *ngIf="mediaEntity?.new_state?.attributes?.media_image_url && mediaEntity?.new_state?.attributes?.media_image_proxy" [src]="'/api/proxy?url='+mediaEntity.new_state!.attributes!.media_image_url!"
            [alt]="mediaEntity.new_state!.attributes!.media_title!"/>
     </div>
-    <div class="flex flex-column justify-content-start gap-2"
-         [style]="{'width': '100%','max-width': mediaEntity.new_state?.attributes?.media_image_url ? (300*scale)+'px' : (800*scale)+'px'}">
-      <div class="flex flex-column justify-content-between gap-1" [style]="'width: 100%;height: 100%'">
+    <div class="flex flex-column justify-content-around gap-1"
+         [style]="{'height':'100%','width': '100%','max-width': mediaEntity.new_state?.attributes?.media_image_url ? (300*scale)+'px' : (800*scale)+'px'}">
         <div class="flex flex-wrap align-content-center justify-content-between column-gap-1" style="width: 100%">
           <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity.new_state?.attributes?.state">
             <p-tag [value]="mediaEntity.new_state!.attributes!.state!" [severity]="getStatusStyle(mediaEntity.new_state!.attributes!.state!)"
@@ -107,7 +106,6 @@
                       [editable]="checkFeature(mediaEntity, 'volume')" [secondaryState]="Helper.isMuted(mediaEntity)"/>
         </div>
       </div>
-    </div>
   </div>
 
 </div>

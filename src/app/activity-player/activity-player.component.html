@@ -88,7 +88,7 @@
       <app-pagination *ngIf="activity?.options?.user_interface?.pages && currentPage"
                       [currentIndex]="activity!.options!.user_interface!.pages!.indexOf(currentPage)"
                       [numberOfPages]="activity!.options!.user_interface!.pages!.length" class="grid-pagination"
-                      (onIndexChange)="selectPage($event)"  [style]="'width:'+200*scale+'px'" [smallSizeMode]="smallSizeMode"/>
+                      (onIndexChange)="selectPage($event)"  [style]="'max-width:'+200*scale+'px'" [smallSizeMode]="smallSizeMode"/>
       <div class="flex align-items-center justify-content-center gap-2" style="width: 100%"
            *ngIf="volumeEntity?.new_state?.attributes?.volume">
         <app-slider [value]="Math.round(volumeEntity!.new_state!.attributes!.volume!)" style="width: 100%"

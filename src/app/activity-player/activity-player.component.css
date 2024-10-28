@@ -45,7 +45,6 @@
 
 .grid-pagination {
   position: absolute;
-  max-width: 150px;
   top: 20px;
   left: 50%;
   transform: translate(-50%, -50%);

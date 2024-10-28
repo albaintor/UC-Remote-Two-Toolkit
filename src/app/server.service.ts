@@ -327,7 +327,7 @@ export class ServerService {
     }
     if (command.params)
       body.params = {...command.params};
-
+    console.debug("Execute command", `/api/entities/${command.entity_id}/command`, body);
     return this.http.put<{code: string, message: string}>(`/api/remote/${remote.address}/entities/${command.entity_id}/command`, body).pipe(map(results => {
       return results;
     }))

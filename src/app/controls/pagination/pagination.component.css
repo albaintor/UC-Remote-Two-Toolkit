@@ -1,6 +1,6 @@
 .pagination-container
 {
-  min-width: 0;
+  min-width: 70px;
   width: 100%;
   overflow: hidden;
   white-space: nowrap;
@@ -8,9 +8,12 @@
   background-color: rgb(113, 113, 113);
   border-radius: 45px;
   height: 25px;
-  padding: 0 10px 0 10px;
+  padding: 0 15px 0 15px;
   transition: all 0.5s ease-in-out;
   opacity: 0.6;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transform-origin: top left;
   scale: 0.6;
 }
 
@@ -32,7 +35,6 @@
   -webkit-backface-visibility: hidden;
   align-items: center;
   justify-content: center;
-  /*-webkit-transition: all 0.5s ease-out;*/
 }
 
 .pagination-item
@@ -60,20 +62,3 @@
   transition: all 0.5s ease-in-out;
 }
 
-/*.pagination-container:hover .active-dot {*/
-/*  scale: 1.4;*/
-/*  margin-left: 12px;*/
-/*  margin-right: 12px;*/
-/*}*/
-
-/*.pagination-container:hover .dot {*/
-/*  scale: 1.4;*/
-/*  margin-left: 12px;*/
-/*  margin-right: 12px;*/
-/*}*/
-
-/*.pagination-container:hover {*/
-/*  padding: 15px;*/
-/*  height: 30px;*/
-/*  opacity: 1;*/
-/*}*/

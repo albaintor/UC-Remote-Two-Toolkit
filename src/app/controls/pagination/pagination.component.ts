@@ -50,6 +50,7 @@ export class PaginationComponent implements AfterViewInit {
   @ViewChild("paginationContainer", {static: false}) paginationContainer: ElementRef<HTMLDivElement> | undefined;
   indexes: Indexes[] = [];
   dotSize = 8;
+  padding = 15;
   @Input() smallSizeMode = false;
 
   constructor(private cdr: ChangeDetectorRef) {}
@@ -63,10 +64,20 @@ export class PaginationComponent implements AfterViewInit {
     this.indexes.forEach(index => {
       index.current = index.index == this.currentIndex;
     })
-    const width = this.paginationContainer?.nativeElement.clientWidth;
+    let width = this.paginationContainer?.nativeElement.clientWidth;
     if (!width) return;
+    if (this.paginationContainer)
+      if (this.indexes.length == 2 && width > 70) {
+        this.paginationContainer.nativeElement.style.width = '70px';
+        width = 70;
+      }
+      else
+        this.paginationContainer.nativeElement.style.width = "unset";
+          //(Math.min(this.displayedIndexes, this.indexes.length)*(this.dotSize+25))+'px';
     const displayedItems = Math.min(this.displayedIndexes, this.indexes.length);
-    const itemWidth = Math.round((width - 10)/displayedItems);
+    const itemWidth = Math.round((width - this.padding)/displayedItems);
+
+    console.debug("WIDTH", width, itemWidth);
 
     let direction = true;
     let indexRight = this.currentIndex + 1;

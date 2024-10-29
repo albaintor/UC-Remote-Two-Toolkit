@@ -10,7 +10,7 @@
             size="small" severity="secondary" [scale]="scale" [text]="true"/>
 </div>
 <div class="flex flex-column align-content-start gap-1" style="width: 100%;height:100%">
-  <div class="flex flex-wrap align-content-center justify-content-center card-title"  cdkDragHandle [style]="'margin-bottom:0;text-align:center;font-size:'+26*scale+'px'">
+  <div class="flex flex-wrap align-content-center justify-content-center card-title"  cdkDragHandle [style]="'margin-bottom:0;text-align:center;font-size:'+22*scale+'px'">
     <ng-container *ngIf="headerTemplate" [ngTemplateOutlet]="headerTemplate"/>
     <ng-container *ngIf="!headerTemplate"><app-scrolling-text [text]="websocketService.getEntityName(mediaEntity)" style="width:100%"/></ng-container>
   </div>

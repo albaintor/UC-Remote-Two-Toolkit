@@ -412,7 +412,8 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   }
 
   playActivity(activity: RemoteActivity) {
-    if (!this.selectedActivities.find(activity => activity.entity_id === activity.entity_id)) {
+    // console.debug("Raise activity or remote entity", activity);
+    if (!this.selectedActivities.find(item => item.entity_id === activity.entity_id)) {
       this.selectedActivities.push({...activity, collapsed: false});
       this.cdr.detectChanges();
     }

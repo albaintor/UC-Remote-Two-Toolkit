@@ -21,6 +21,7 @@ import {ButtonComponent} from "../../controls/button/button.component";
 import {Message} from "primeng/api";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-text.component";
+import {TagModule} from "primeng/tag";
 
 @Component({
   selector: 'app-cover-entity',
@@ -33,7 +34,8 @@ import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-te
     TooltipModule,
     NgTemplateOutlet,
     ButtonComponent,
-    ScrollingTextComponent
+    ScrollingTextComponent,
+    TagModule
   ],
   templateUrl: './cover-entity.component.html',
   styleUrl: './cover-entity.component.css',
@@ -84,6 +86,36 @@ export class CoverEntityComponent implements OnInit {
         })
       }
   });
+  }
+
+  getSeverity()
+  {
+    switch(this.coverEntity?.new_state?.attributes?.state)
+    {
+      case 'OPEN': return "success";
+      case 'CLOSED': return "secondary";
+      case 'OPENING': return "warning";
+      case 'CLOSING': return "danger";
+      default:
+        return "info";
+    }
+  }
+
+  isClosed(): boolean
+  {
+    return !(!this.coverEntity?.new_state?.attributes || this.coverEntity?.new_state?.attributes?.state === 'CLOSE');
+  }
+
+  isOpened(): boolean
+  {
+    return !(!this.coverEntity?.new_state?.attributes || this.coverEntity?.new_state?.attributes?.state === 'OPEN');
+  }
+
+  isMoving(): boolean
+  {
+    return !(!this.coverEntity?.new_state?.attributes ||
+      (this.coverEntity?.new_state?.attributes?.state === 'OPENING' ||
+        this.coverEntity?.new_state?.attributes?.state === 'CLOSING'));
   }
 
   closeEntity() {

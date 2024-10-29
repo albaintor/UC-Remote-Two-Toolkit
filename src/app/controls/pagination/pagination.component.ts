@@ -52,6 +52,7 @@ export class PaginationComponent implements AfterViewInit {
   dotSize = 8;
   padding = 15;
   @Input() smallSizeMode = false;
+  widthFixed = false;
 
   constructor(private cdr: ChangeDetectorRef) {}
 
@@ -67,17 +68,20 @@ export class PaginationComponent implements AfterViewInit {
     let width = this.paginationContainer?.nativeElement.clientWidth;
     if (!width) return;
     const displayedItems = Math.min(this.displayedIndexes, this.indexes.length);
-    if (this.paginationContainer)
-      if (displayedItems == 2 && width > 70) {
-        this.paginationContainer.nativeElement.style.width = '70px';
-        width = 70;
+    if (!this.widthFixed && width > 0)
+    {
+      if (this.paginationContainer) {
+        if (displayedItems == 2 && width > 70) {
+          this.paginationContainer.nativeElement.style.width = '70px';
+          width = 70;
+        } else if (displayedItems == 3 && width > 100) {
+          this.paginationContainer.nativeElement.style.width = '100px';
+          width = 100;
+        } else
+          this.paginationContainer.nativeElement.style.width = "unset";
       }
-      else if (displayedItems == 3 && width > 100) {
-        this.paginationContainer.nativeElement.style.width = '100px';
-        width = 100;
-      }
-      else
-        this.paginationContainer.nativeElement.style.width = "unset";
+      this.widthFixed = true;
+    }
 
     const itemWidth = Math.round((width - this.padding)/displayedItems);
 

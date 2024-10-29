@@ -357,7 +357,9 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
     if (!$event.query) this.suggestions = [...this.entities];
     this.suggestions = this.entities.filter(entity =>
       !this.entityStates.find(item => item.entity_id === entity.entity_id) &&
-      Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()));
+      Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()))
+      .sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
+
     if (entityType) this.suggestions = this.suggestions.filter(item => item.entity_type === entityType);
   }
 

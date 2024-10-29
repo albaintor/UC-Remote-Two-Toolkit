@@ -47,6 +47,18 @@
   z-index: 10;
 }
 
+p-colorpicker {
+  height: 100%;
+}
+
+.p-colorpicker {
+  height: 100%;
+}
+
+.p-colorpicker-content {
+  height: 100%;
+}
+
 .p-colorpicker-panel .p-colorpicker-color {
   background: transparent url("/assets/images/custom-color.png") no-repeat left top !important;
 }

@@ -16,23 +16,23 @@
       <ng-container *ngIf="!headerTemplate"><span class="color-title" [style]="'color:'+getColor()">
         <app-scrolling-text [text]="websocketService.getEntityName(lightEntity)" style="width:100%"/></span></ng-container>
     </div>
-    <div class="flex flex-column justify-content-center gap-2" style="height: 100%;">
+    <div class="flex flex-column justify-content-around gap-2">
       <div *ngIf="lightEntity.new_state?.attributes?.brightness && checkFeature(lightEntity, 'dim')"
-           class="flex align-items-center justify-content-center" style="width: 100%">
+           class="flex align-items-center justify-content-center" style="width: 100%;height:100%">
         <app-slider [value]="Math.round(lightEntity!.new_state!.attributes!.brightness!*100/255)" [scale]="scale"
                     [textValue]="'Brightness '+ Math.round(lightEntity!.new_state!.attributes!.brightness!*100/255) + '%'"
                     style="width: 100%" (valueChange)="updateBrightness($event, lightEntity)"
                     [editable]="true" [backgroundStyle]="'linear-gradient(90deg, rgba(69,40,9,0.8596230728619573) 0%, rgba(235,232,208,1) 76%)'"></app-slider>
       </div>
       <div *ngIf="checkFeature(lightEntity, 'color_temperature')"
-           class="flex align-items-center justify-content-center" style="width: 100%">
+           class="flex align-items-center justify-content-center" style="width: 100%;height:100%">
         <app-slider [value]="Math.round(lightEntity!.new_state!.attributes!.color_temperature!)" [scale]="scale"
                     [textValue]="'Temperature '+ Math.round(lightEntity!.new_state!.attributes!.color_temperature!) + '%'"
                     style="width: 100%" (valueChange)="updateColorTemperature($event, lightEntity)"
                     [editable]="true" [backgroundStyle]="'linear-gradient(90deg, rgba(34,193,195,1) 0%, rgba(253,187,45,1) 100%)'"></app-slider>
       </div>
       <div *ngIf="checkFeature(lightEntity, 'color')" class="flex align-items-center justify-content-center"
-           style="width: 100%;height:170px">
+           style="width: 100%;height:100%">
         <p-colorPicker [(ngModel)]="lightColor" [inline]="true" format="hsb" (ngModelChange)="setColor($event)"/>
       </div>
     </div>

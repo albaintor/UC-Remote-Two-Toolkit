@@ -66,7 +66,6 @@ export class RemoteMediaEntityComponent implements AfterViewInit {
     }
   }
 
-
   updateEntity(mediaStates: MediaEntityState[])
   {
     if (!this.entityId) {
@@ -82,7 +81,6 @@ export class RemoteMediaEntityComponent implements AfterViewInit {
     {
       this.mediaEntityState = mediaEntityState;
       this.cdr.detectChanges();
-      return;
     }
     if (this.mediaEntityState?.new_state?.attributes?.media_image_url && this.mediaEntityState?.new_state?.attributes?.media_image_proxy)
     {

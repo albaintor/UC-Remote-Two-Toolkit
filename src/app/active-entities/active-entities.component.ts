@@ -640,66 +640,50 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   }
 
   private reloadEntities() {
-    this.websocketService.reloadEntities()?.subscribe({next: res =>
+    this.websocketService.reloadEntities(this.entityStates)?.subscribe({next: res =>
     {
-      // Websocket may not have the entities here (eg dashboard loaded from backup)
-      console.log("First update results", res);
-      const entitiesToUpdate: EntityState[] = [];
-      this.entityStates.forEach(item => {
-        if (!res || !res.find(updatedItem => updatedItem?.entity_id === item.entity_id))
-          entitiesToUpdate.push(item);
+      this.messageService.add({
+        severity: "success",
+        summary: `${res.length} entities reloaded`,
+        key: 'activeEntities'
       });
-      if (entitiesToUpdate.length > 0) {
-        const tasks = from(entitiesToUpdate).pipe(mergeMap(item => {
-          return this.server.getRemotetEntity(item.remote, item.entity_id).pipe(map(entity => {
-            const existing = this.entityStates.find(item => item.entity_id === entity.entity_id);
-            const mediaState = {
-              ...entity,
-              new_state: {attributes: entity.attributes, features: entity.features}
-            } as any;
-            if (existing) this.entityStates[this.entityStates.indexOf(existing)] = mediaState;
-            else this.entityStates.push(mediaState);
-            this.cdr.detectChanges();
-          }))
-        }, 4));
-        forkJoin([tasks]).subscribe(res => {
-          this.messageService.add({
-            severity: "success",
-            summary: `${res.length + entitiesToUpdate.length} entities reloaded`,
-            key: 'activeEntities'
-          });
-          this.cdr.detectChanges();
-        })
-      } else {
-        this.messageService.add({
-          severity: "success",
-          summary: `${res.length} entities reloaded`,
-          key: 'activeEntities'
-        });
-        this.cdr.detectChanges();
-      }
-    }/*, complete: () => {
-        const tasks = from(this.entityStates).pipe(mergeMap(item => {
-          return this.server.getRemotetEntity(item.remote ? item.remote : this.selectedRemote!, item.entity_id).pipe(map(entity => {
-            const existing = this.entityStates.find(item => item.entity_id === entity.entity_id);
-            const mediaState = {
-              ...entity,
-              new_state: {attributes: entity.attributes, features: entity.features}
-            } as any;
-            if (existing) this.entityStates[this.entityStates.indexOf(existing)] = mediaState;
-            else this.entityStates.push(mediaState);
-            this.cdr.detectChanges();
-          }))
-        }, 4));
-        forkJoin([tasks]).subscribe(res => {
-          this.messageService.add({
-            severity: "success",
-            summary: `${this.entityStates.length} entities reloaded`,
-            key: 'activeEntities'
-          });
-          this.cdr.detectChanges();
-        })
-      }*/
+      this.cdr.detectChanges();
+      // console.log("First update results", res);
+      // const entitiesToUpdate: EntityState[] = [];
+      // this.entityStates.forEach(item => {
+      //   if (!res || !res.find(updatedItem => updatedItem?.entity_id === item.entity_id))
+      //     entitiesToUpdate.push(item);
+      // });
+      // if (entitiesToUpdate.length > 0) {
+      //   const tasks = from(entitiesToUpdate).pipe(mergeMap(item => {
+      //     return this.server.getRemotetEntity(item.remote, item.entity_id).pipe(map(entity => {
+      //       const existing = this.entityStates.find(item => item.entity_id === entity.entity_id);
+      //       const mediaState = {
+      //         ...entity,
+      //         new_state: {attributes: entity.attributes, features: entity.features}
+      //       } as any;
+      //       if (existing) this.entityStates[this.entityStates.indexOf(existing)] = mediaState;
+      //       else this.entityStates.push(mediaState);
+      //       this.cdr.detectChanges();
+      //     }))
+      //   }, 4));
+      //   forkJoin([tasks]).subscribe(res => {
+      //     this.messageService.add({
+      //       severity: "success",
+      //       summary: `${res.length + entitiesToUpdate.length} entities reloaded`,
+      //       key: 'activeEntities'
+      //     });
+      //     this.cdr.detectChanges();
+      //   })
+      // } else {
+      //   this.messageService.add({
+      //     severity: "success",
+      //     summary: `${res.length} entities reloaded`,
+      //     key: 'activeEntities'
+      //   });
+      //   this.cdr.detectChanges();
+      // }
+    }
   })
   }
 }

@@ -63,11 +63,6 @@ export class WebsocketService implements OnDestroy {
     }
   }
 
-
-  get lightEntities(): LightEntityState[] {
-    return this.websocketInstance?.lightEntities ? this.websocketInstance?.lightEntities : [];
-  }
-
   init(): void
   {
     this.serverService.remote$.subscribe(remote => {
@@ -213,8 +208,8 @@ export class WebsocketService implements OnDestroy {
     return this.websocketInstance ? this.websocketInstance?.getMediaPosition(mediaEntity) : 0;
   }
 
-  reloadEntities()
+  reloadEntities(mediaStates: MediaEntityState[])
   {
-    return this.websocketInstance ? this.websocketInstance.reloadEntities() : from([]);
+    return this.websocketInstance ? this.websocketInstance.reloadEntities(mediaStates) : from([]);
   }
 }

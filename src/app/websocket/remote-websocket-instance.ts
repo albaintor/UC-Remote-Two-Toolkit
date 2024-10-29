@@ -121,26 +121,31 @@ export class RemoteWebsocketInstance {
     return this._mediaEntity;
   }
   set mediaEntity(mediaEntity: MediaEntityState | undefined) {
-    this._mediaEntity = this.mediaEntities.find(item => item.entity_id === mediaEntity?.entity_id);
+    this._mediaEntity = this._entityStates.find(item => item.entity_id === mediaEntity?.entity_id);
   }
-
   get mediaEntities(): MediaEntityState[] {
-    return this._mediaEntities;
+    return this._entityStates.filter(item => item.entity_type === 'media_player');
   }
-  private _mediaEntity : MediaEntityState | undefined;
-  private _mediaEntities: MediaEntityState[] = [];
+  get lightEntities(): LightEntityState[] {
+    return this._entityStates.filter(item => item.entity_type === 'light');
+  }
+  get coverEntities(): LightEntityState[] {
+    return this._entityStates.filter(item => item.entity_type === 'cover');
+  }
+  get climateEntities(): LightEntityState[] {
+    return this._entityStates.filter(item => item.entity_type === 'climate');
+  }
+  private _entityStates: EntityState[] = [];
   private _activities: ActivityState[] = [];
+  private _mediaEntity: MediaEntityState | undefined;
   batteryState: BatteryState | undefined;
   private mediaPositionTask: Subscription | undefined;
   entities: Entity[] = [];
-  mediaUpdated$ = new BehaviorSubject<MediaEntityState[]>(this.mediaEntities);
+  mediaUpdated$ = new BehaviorSubject<MediaEntityState[]>([]);
   remoteStateUpdated$ = new BehaviorSubject<RemoteState>({});
   mediaPositionUpdated$ = new BehaviorSubject<MediaEntityState[]>([]);
-  private _lightEntities: LightEntityState[] = [];
   lightEntitiesUpdated$ = new BehaviorSubject<LightEntityState[]>([]);
-  private _coverEntities: CoverEntityState[] = [];
   coverEntitiesUpdated$ = new BehaviorSubject<CoverEntityState[]>([]);
-  private _climateEntities: ClimateEntityState[] = [];
   climateEntitiesUpdated$ = new BehaviorSubject<ClimateEntityState[]>([]);
   activityEntitiesUpdated$ = new BehaviorSubject<ActivityState[]>([]);
   softwareUpdate$ = new BehaviorSubject<SoftwareUpdate|undefined>(undefined);
@@ -149,9 +154,7 @@ export class RemoteWebsocketInstance {
     this.init();
   }
 
-  get lightEntities(): LightEntityState[] {
-    return this._lightEntities;
-  }
+
 
   init(): void {
     this.entities = this.serverService.getCachedEntities();
@@ -176,7 +179,7 @@ export class RemoteWebsocketInstance {
 
   getEntityStates(): EntityState[]
   {
-    return [...this._mediaEntities, ...this._lightEntities, ...this._coverEntities, ...this._climateEntities];
+    return this._entityStates;
   }
 
   removeEntityState(entityId: string): void
@@ -186,10 +189,10 @@ export class RemoteWebsocketInstance {
       this.getEntityStates().splice(this.getEntityStates().indexOf(item), 1);
       switch(item.entity_type)
       {
-        case "media_player": this.mediaUpdated$.next(this._mediaEntities);break;
-        case "light": this.lightEntitiesUpdated$.next(this._lightEntities);break;
-        case "cover": this.coverEntitiesUpdated$.next(this._coverEntities);break;
-        case "climate": this.climateEntitiesUpdated$.next(this._climateEntities);break;
+        case "media_player": this.mediaUpdated$.next(this.mediaEntities);break;
+        case "light": this.lightEntitiesUpdated$.next(this.lightEntities);break;
+        case "cover": this.coverEntitiesUpdated$.next(this.coverEntities);break;
+        case "climate": this.climateEntitiesUpdated$.next(this.climateEntities);break;
         default: console.warn("Not supported entity", entityId);
       }
     }
@@ -235,18 +238,10 @@ export class RemoteWebsocketInstance {
     return this.softwareUpdate$;
   }
 
-  reset()
-  {
-    this._mediaEntities = [];
-    this._mediaEntity = undefined;
-    this.batteryState = undefined;
-    this.mediaUpdated$.next(this._mediaEntities);
-  }
-
   subscribeEvents()
   {
-    if (!this._mediaEntity && this._mediaEntities?.length > 0) {
-      this._mediaEntity = this._mediaEntities[0];
+    if (!this._mediaEntity && this.mediaEntities?.length > 0) {
+      this._mediaEntity = this.mediaEntities[0];
       console.debug("Init media entities", this._mediaEntity);
       this.mediaUpdated$.next([this._mediaEntity!]);
     }
@@ -294,7 +289,7 @@ export class RemoteWebsocketInstance {
       .pipe(
         map(() => {
           const entities: MediaEntityState[] = [];
-          this._mediaEntities?.forEach(mediaEntity => {
+          this.mediaEntities?.forEach(mediaEntity => {
             if (mediaEntity.new_state?.attributes?.media_position)
             {
               if (!mediaEntity.new_state?.attributes?.last_update_time)
@@ -304,8 +299,8 @@ export class RemoteWebsocketInstance {
               entities.push(mediaEntity);
             }
           });
-          if (!this._mediaEntity && this._mediaEntities?.length > 0) {
-            this._mediaEntity = this._mediaEntities[0];
+          if (!this._mediaEntity && this.mediaEntities?.length > 0) {
+            this._mediaEntity = this.mediaEntities[0];
           }
           if (entities.length > 0) this.mediaPositionUpdated$.next(entities);
           return entities;
@@ -349,10 +344,10 @@ export class RemoteWebsocketInstance {
   {
     switch(entity_type)
     {
-      case 'media_player':this.updateEntity(entity_id, this._mediaEntities, this.mediaUpdated$);break;
-      case 'light': this.updateEntity(entity_id, this._lightEntities, this.lightEntitiesUpdated$);break;
-      case 'cover': this.updateEntity(entity_id, this._coverEntities, this.coverEntitiesUpdated$);break;
-      case 'climate': this.updateEntity(entity_id, this._climateEntities, this.climateEntitiesUpdated$);break;
+      case 'media_player':this.updateEntity(entity_id, this._entityStates, this.mediaUpdated$);break;
+      case 'light': this.updateEntity(entity_id, this._entityStates, this.lightEntitiesUpdated$);break;
+      case 'cover': this.updateEntity(entity_id, this._entityStates, this.coverEntitiesUpdated$);break;
+      case 'climate': this.updateEntity(entity_id, this._entityStates, this.climateEntitiesUpdated$);break;
       default: console.warn("Unsupported entity", entity_type);
     }
   }
@@ -401,14 +396,14 @@ export class RemoteWebsocketInstance {
 
   updateMediaEntityFromEvent(message: EventMessage): void {
     if (!message.msg_data?.entity_id) return;
-    let entity = this._mediaEntities.find(item => item.entity_id === message.msg_data.entity_id);
+    let entity = this._entityStates.find(item => item.entity_id === message.msg_data.entity_id);
     if (!entity)
     {
       if (message.msg_data.new_state.attributes.media_position)
         message.msg_data.new_state.attributes.last_update_time = Date.now();
       entity = message.msg_data as MediaEntityState;
-      this._mediaEntities.push(entity);
-      this.updateEntity(entity.entity_id, this.mediaEntities, this.mediaUpdated$);
+      this._entityStates.push(entity);
+      this.updateEntity(entity.entity_id, this._entityStates, this.mediaUpdated$);
     }
     else {
       this.checkEntityImage(entity, message.msg_data.new_state.attributes);
@@ -423,10 +418,11 @@ export class RemoteWebsocketInstance {
         if (!entity.new_state) entity.new_state = {};
         if (!entity.new_state.attributes) entity.new_state.attributes = {};
         entity.new_state.attributes.last_update_time = Date.now();
+        entity.new_state.attributes.media_position = message.msg_data.new_state.attributes.media_position;
       }
       this.mediaUpdated$.next([entity]);
     }
-    console.debug("Media entities", this._mediaEntities);
+    console.debug("Media entities", this.mediaEntities);
   }
 
   handleMediaPlayerEvent(message: EventMessage)
@@ -434,7 +430,7 @@ export class RemoteWebsocketInstance {
     if (message.msg_data?.new_state?.attributes)
     {
       this.updateMediaEntityFromEvent(message);
-      const entity = this._mediaEntities.find(item => item.entity_id === message.msg_data.entity_id);
+      const entity = this._entityStates.find(item => item.entity_id === message.msg_data.entity_id);
       if (!this._mediaEntity) {
         this._mediaEntity = entity;
         console.debug("Init media entity", this._mediaEntity);
@@ -509,18 +505,18 @@ export class RemoteWebsocketInstance {
   }
 
   private handleLightEvent(eventMessage: EventMessage) {
-    this.updateEntityState(eventMessage, this._lightEntities, this.lightEntitiesUpdated$);
-    console.debug("Updated light entity", this._lightEntities);
+    this.updateEntityState(eventMessage, this._entityStates, this.lightEntitiesUpdated$);
+    console.debug("Updated light entity", this.lightEntities);
   }
 
   private handleCoverEvent(eventMessage: EventMessage) {
-    this.updateEntityState(eventMessage, this._coverEntities, this.coverEntitiesUpdated$);
-    console.debug("Updated cover entity", this._coverEntities);
+    this.updateEntityState(eventMessage, this._entityStates, this.coverEntitiesUpdated$);
+    console.debug("Updated cover entity", this.coverEntities);
   }
 
   private handleClimateEvent(eventMessage: EventMessage) {
-    this.updateEntityState(eventMessage, this._climateEntities, this.climateEntitiesUpdated$);
-    console.debug("Updated climate entity", this._climateEntities);
+    this.updateEntityState(eventMessage, this._entityStates, this.climateEntitiesUpdated$);
+    console.debug("Updated climate entity", this.climateEntities);
   }
 
   getMediaInfo(): string | undefined
@@ -579,18 +575,21 @@ export class RemoteWebsocketInstance {
     }
   }
 
-  public reloadEntities()
+  public reloadEntities(mediaStates: MediaEntityState[])
   {
     const entityStates = this.getEntityStates();
     const remote = this.getRemote();
     if (!remote) return forkJoin([from([...this.getEntityStates()])]);
+    this._entityStates.push(...mediaStates.filter(item =>
+      item.remote.address === this.getRemote()?.address &&
+      !this._entityStates.find(entity => entity.entity_id === item.entity_id)));
     const tasks = from(entityStates).pipe(mergeMap(item => {
       switch(item.entity_type)
       {
-        case 'media_player':return this.updateEntity$(item.entity_id, this._mediaEntities, this.mediaUpdated$);
-        case 'light': return this.updateEntity$(item.entity_id, this._lightEntities, this.lightEntitiesUpdated$);
-        case 'cover': return this.updateEntity$(item.entity_id, this._coverEntities, this.coverEntitiesUpdated$);
-        case 'climate': return this.updateEntity$(item.entity_id, this._climateEntities, this.climateEntitiesUpdated$);
+        case 'media_player':return this.updateEntity$(item.entity_id, this._entityStates, this.mediaUpdated$);
+        case 'light': return this.updateEntity$(item.entity_id, this._entityStates, this.lightEntitiesUpdated$);
+        case 'cover': return this.updateEntity$(item.entity_id, this._entityStates, this.coverEntitiesUpdated$);
+        case 'climate': return this.updateEntity$(item.entity_id, this._entityStates, this.climateEntitiesUpdated$);
         default: console.warn("Unsupported entity", item.entity_type);
         return of(item) as Observable<EntityState| undefined>;
       }

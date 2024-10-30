@@ -365,11 +365,12 @@ export class RemoteGridComponent implements AfterViewInit {
       mousePressed: true,
       uiContainerPosition: this.width*index
     }
-    $event.preventDefault();
+    if ($event instanceof MouseEvent)
+      $event.preventDefault();
   }
 
   mouseUpUIPages($event: MouseEvent | TouchEvent) {
-    // console.log("WIDTH2", this.width);
+    // console.log("Mouse up", $event);
   }
 
   mouseMoveUIPages($event: MouseEvent | TouchEvent) {

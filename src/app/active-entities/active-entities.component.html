@@ -133,7 +133,7 @@
 <app-activity-player *ngFor="let activity of selectedActivities" [activity]="activity" [visible]="true" [(minimized)]="activity.collapsed"
                      (onClose)="removeActivity($event)" [scale]="scale" (onMessage)="handleMessage($event)" style="width:100%"/>
 <div class="flex flex-wrap gap-3" *ngIf="smallSizeMode">
-  <div class="flex gap-2 align-content-center justify-content-center media-card-border"
+  <div class="flex gap-2 align-content-center justify-content-center media-card-border border-small"
        [style]="'width:100%'" *ngFor="let entityState of entityStates" [ngSwitch]="entityState.entity_type">
     <app-media-entity *ngSwitchCase="'media_player'" [mediaEntity]="entityState" [remote]="selectedRemote" style="width:100%" [scale]="1"
                       class="flex flex-wrap gap-2 align-content-start justify-content-center ng-star-inserted"

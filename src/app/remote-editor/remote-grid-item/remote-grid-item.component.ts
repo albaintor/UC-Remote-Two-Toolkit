@@ -103,6 +103,7 @@ export class RemoteGridItemComponent implements AfterViewInit{
   }
 
   clickItem(event: MouseEvent) {
+    // console.debug("Click item", this.item);
     if (this.selectionMode) {
       if (Helper.isEmptyItem(this.item)) return;
       this.selected = !this.selected;

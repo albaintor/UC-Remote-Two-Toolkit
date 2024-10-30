@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  OnInit,
   ViewChild,
   ViewEncapsulation
 } from '@angular/core';
@@ -17,10 +16,10 @@ import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loade
 import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
 import {
-  Activity, ActivityPageCommand,
+  Activity,
   ButtonMapping, Command,
   CommandSequence,
-  Config,
+  Config, Driver,
   Entity, OperationStatus,
   Remote,
   RemoteData, RemoteModel, RemoteModels,
@@ -29,7 +28,7 @@ import {
 } from "../interfaces";
 import {ServerService} from "../server.service";
 import {Helper} from "../helper";
-import {forkJoin, from, map} from "rxjs";
+import {forkJoin, map} from "rxjs";
 import {ChipModule} from "primeng/chip";
 import {IconComponent} from "../controls/icon/icon.component";
 import {InputTextModule} from "primeng/inputtext";
@@ -44,7 +43,7 @@ import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
 import {MultiSelectModule} from "primeng/multiselect";
 
-enum ActivityStatus {
+enum DiffStatus {
   Equals = 1,
   Different = 2,
   Missing = 3
@@ -64,7 +63,7 @@ interface ButtonsMappingDiff
 interface ActivityDiff {
   activity1?: Activity;
   activity2?: Activity;
-  status: ActivityStatus;
+  status: DiffStatus;
   buttons?:ButtonsMappingDiff[];
   pages?:UIpageIndexed[];
   sequences?: {[type: string]: CommandSequence[]};
@@ -83,6 +82,12 @@ interface OrphanEntity
   newEntity: Entity | undefined;
   activity: Activity;
   origin: ButtonMapping | UIPage | CommandSequence | string;
+}
+
+interface DriverDiff {
+  driver1?: Driver;
+  driver2?: Driver;
+  status: DiffStatus;
 }
 
 @Component({
@@ -133,6 +138,9 @@ export class ActivitySyncComponent implements AfterViewInit {
   config: Config | undefined;
   remoteData1: RemoteData | undefined;
   remoteData2: RemoteData | undefined;
+  drivers1: Driver[] | undefined;
+  drivers2: Driver[] | undefined;
+  driversDiff: DriverDiff[] = [];
   @ViewChild("loader1") remoteLoader1: RemoteDataLoaderComponent | undefined;
   @ViewChild("loader2") remoteLoader2: RemoteDataLoaderComponent | undefined;
   activitiesDiff: ActivityDiff[] = [];
@@ -167,21 +175,21 @@ export class ActivitySyncComponent implements AfterViewInit {
     });
   }
 
-  static getStatusLabel2(status : ActivityStatus): string
+  static getStatusLabel2(status : DiffStatus): string
   {
     switch(status)
     {
-      case ActivityStatus.Equals:
+      case DiffStatus.Equals:
         return "Identical";
-      case ActivityStatus.Different:
+      case DiffStatus.Different:
         return "Different";
-      case ActivityStatus.Missing:
+      case DiffStatus.Missing:
         return "Missing";
       default: return "Unknown";
     }
   }
 
-  static getActivityName(entity: any): string
+  static getObjectName(entity: any): string
   {
     if (!entity) return "";
     console.debug(entity);
@@ -197,11 +205,11 @@ export class ActivitySyncComponent implements AfterViewInit {
   {
     switch(diff.status)
     {
-      case ActivityStatus.Equals:
+      case DiffStatus.Equals:
         return "Identical";
-      case ActivityStatus.Different:
+      case DiffStatus.Different:
         return "Different";
-      case ActivityStatus.Missing:
+      case DiffStatus.Missing:
         return "Missing";
       default: return "Unknown";
     }
@@ -429,9 +437,9 @@ export class ActivitySyncComponent implements AfterViewInit {
   {
     if (!diff) return 'status_unknown';
     switch(diff.status) {
-      case ActivityStatus.Missing: return 'status_missing';
-      case ActivityStatus.Equals: return 'status_identical';
-      case ActivityStatus.Different: return 'status_different';
+      case DiffStatus.Missing: return 'status_missing';
+      case DiffStatus.Equals: return 'status_identical';
+      case DiffStatus.Different: return 'status_different';
       default: return 'status_unknown';
     }
   }
@@ -471,10 +479,10 @@ export class ActivitySyncComponent implements AfterViewInit {
       const activity2 = activities2.find(activity2 =>
         Helper.getEntityName(activity2) == Helper.getEntityName(activity1));
       if (!activity2) {
-        activitiesDiff.push({activity1: activity1, status: ActivityStatus.Missing});
+        activitiesDiff.push({activity1: activity1, status: DiffStatus.Missing});
         continue;
       }
-      const diff:ActivityDiff = {activity1: activity1, activity2: activity2, status: ActivityStatus.Equals};
+      const diff:ActivityDiff = {activity1: activity1, activity2: activity2, status: DiffStatus.Equals};
       activitiesDiff.push(diff);
       if (activity1.options?.button_mapping)
       {
@@ -593,13 +601,13 @@ export class ActivitySyncComponent implements AfterViewInit {
           }
         }
       }
-      if (diff.sequences || diff.pages || diff.buttons) diff.status = ActivityStatus.Different;
+      if (diff.sequences || diff.pages || diff.buttons) diff.status = DiffStatus.Different;
     }
     for (let activity2 of activities2) {
       const activity1 = activities1.find(activity1 =>
         Helper.getEntityName(activity2) === Helper.getEntityName(activity1));
       if (!activity1) {
-        activitiesDiff.push({activity2: activity2, status: ActivityStatus.Missing});
+        activitiesDiff.push({activity2: activity2, status: DiffStatus.Missing});
       }
     }
     return activitiesDiff;
@@ -625,7 +633,13 @@ export class ActivitySyncComponent implements AfterViewInit {
       this.remoteLoader2.loadRemoteData().pipe(map(data => {
         this.remoteData2 = data;
         return data;
-      }))
+      })),
+      this.server.getRemoteDrivers(this.selectedRemote1).pipe(map(data => {
+        this.drivers1 = data;
+      })),
+      this.server.getRemoteDrivers(this.selectedRemote2).pipe(map(data => {
+        this.drivers2 = data;
+      })),
     ];
     this.blockedMenu = true;
     this.progress = true;
@@ -637,10 +651,36 @@ export class ActivitySyncComponent implements AfterViewInit {
       this.cdr.detectChanges();
       if (!this.remoteData1?.activities || !this.remoteData2?.activities) return;
       this.activitiesDiff = this.compareActivities(this.remoteData1.activities, this.remoteData2.activities);
+      this.cdr.detectChanges();
+      this.compareIntegrations();
       // this.activitiesDiff.sort((a1, a2) => a1.status.com)
       console.debug("Differences between activities", this.activitiesDiff);
       this.cdr.detectChanges();
     })
+  }
+
+  compareIntegrations()
+  {
+    this.driversDiff = [];
+    this.drivers1?.forEach(driver1 => {
+      const driver2 = this.drivers2?.find(driver2 => driver2.driver_id === driver1.driver_id);
+      if (!driver2) {
+        this.driversDiff.push({driver1, driver2: undefined, status: DiffStatus.Missing});
+        return;
+      }
+      if (driver1.version !== driver2.version) {
+        this.driversDiff.push({driver1, driver2, status: DiffStatus.Different});
+        return;
+      }
+      this.driversDiff.push({driver1, driver2, status: DiffStatus.Equals});
+    });
+    this.drivers2?.forEach(driver2 => {
+      const driver1 = this.drivers1?.find(driver1 => driver1.driver_id === driver2.driver_id);
+      if (!driver1) {
+        this.driversDiff.push({driver2, driver1: undefined, status: DiffStatus.Missing});
+        return;
+      }
+    });
   }
 
   showButton(button : ButtonsMappingDiff, diffPanelButton: OverlayPanel, $event: MouseEvent) {

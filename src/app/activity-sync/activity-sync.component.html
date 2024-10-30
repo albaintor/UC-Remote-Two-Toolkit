@@ -84,7 +84,7 @@
         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
           <p-multiSelect
             [ngModel]="value"
-            [options]="Helper.getItemsConverted(activitiesDiff, 'activity1.name', ActivitySyncComponent.getActivityName)"
+            [options]="Helper.getItemsConverted(activitiesDiff, 'activity1.name', ActivitySyncComponent.getObjectName)"
             placeholder="Activity name"
             (onChange)="filter($event.value)"
             optionLabel="name" optionValue="value" appendTo="body">
@@ -156,6 +156,63 @@
           </ng-container>
         </ng-container>
       </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-table *ngIf="driversDiff.length>0" [value]="driversDiff" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
+         [scrollable]="true" [scrollHeight]="'calc(100vh - 50px)'" [(selection)]="selectedActivities">
+  <ng-template pTemplate="header">
+    <tr>
+      <th pResizableColumn><p-columnFilter field="driver1.name" matchMode="in" [showMenu]="false">
+        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+          <p-multiSelect
+            [ngModel]="value"
+            [options]="Helper.getItemsConverted(driversDiff, 'driver1.name', ActivitySyncComponent.getObjectName)"
+            placeholder="Driver name"
+            (onChange)="filter($event.value)"
+            optionLabel="name" optionValue="value" appendTo="body">
+          </p-multiSelect>
+        </ng-template>
+      </p-columnFilter></th>
+      <th pResizableColumn>Driver {{selectedRemote1?.remote_name}}</th>
+      <th pResizableColumn>Driver {{selectedRemote2?.remote_name}}</th>
+      <th pResizableColumn><p-columnFilter field="status" matchMode="in" [showMenu]="false">
+        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+          <p-multiSelect
+            [ngModel]="value"
+            [options]="Helper.getItemsConverted(driversDiff, 'status', ActivitySyncComponent.getStatusLabel2)"
+            placeholder="Status"
+            (onChange)="filter($event.value)"
+            optionLabel="name" optionValue="value" appendTo="body">
+          </p-multiSelect>
+        </ng-template>
+      </p-columnFilter></th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-diff>
+    <tr>
+      <td>
+        <div class="flex" *ngIf="diff.driver1">
+          <div *ngIf="diff.driver1.icon" style="width: 40px; height: 40px" class="flex-initial flex align-items-center justify-content-center link-element">
+            <app-icon [remote]="selectedRemote1" [icon]="diff.driver1.icon" [size]="50" [fontSize]="55"/>
+          </div>
+          <div class="flex-initial flex align-items-center justify-content-center">
+            &nbsp;{{ Helper.getEntityName(diff.driver1) }}
+          </div>
+        </div>
+        <div class="flex" *ngIf="!diff.driver1 && diff.driver2">
+          <div *ngIf="diff.driver2.icon" style="width: 40px; height: 40px" class="flex-initial flex align-items-center justify-content-center link-element">
+            <app-icon [remote]="selectedRemote2" [icon]="diff.driver2.icon" [size]="50" [fontSize]="55"/>
+          </div>
+          <div class="flex-initial flex align-items-center justify-content-center">
+            &nbsp;{{ Helper.getEntityName(diff.driver2) }}
+          </div>
+        </div>
+      </td>
+      <td>{{diff.driver1?.version}}</td>
+      <td>{{diff.driver2?.version}}</td>
+      <td><p-chip [label]="ActivitySyncComponent.getStatusLabel(diff)" [styleClass]="getStatusStyle(diff)"></p-chip></td>
     </tr>
   </ng-template>
 </p-table>

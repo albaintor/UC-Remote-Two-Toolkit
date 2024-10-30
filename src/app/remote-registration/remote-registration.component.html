@@ -1,5 +1,6 @@
 <p-toast key="remote"></p-toast>
-<p-dialog header="Remotes configured" [(visible)]="visible" [style]="{width: '50vw'}">
+<p-dialog header="Remotes configured" [(visible)]="visible" [style]="{width: '50vw'}"
+          styleClass="remote-registration-header" contentStyleClass="remote-registration">
   <div class="row">
     <div class="col-50">
       <input [(ngModel)]="host" type="text" pInputText placeholder="Remote host" />
@@ -35,6 +36,7 @@
           <p-button icon="pi pi-barcode" pTooltip="Get registrations" [rounded]="true" (click)="getRemote(remote)"></p-button>&nbsp;
           <p-button icon="pi pi-wifi" pTooltip="Test connection" [rounded]="true" (click)="testRemote(remote)"></p-button>&nbsp;
           <p-button icon="pi pi-replay" severity="warning" pTooltip="Reboot remote" [rounded]="true" (click)="restartRemote(remote)"></p-button>&nbsp;
+          <p-button icon="pi pi-power-off" severity="danger" pTooltip="Shutdown remote" [rounded]="true" (click)="shutdownRemote(remote)"></p-button>&nbsp;
           <p-button icon="pi pi-wifi" severity="success" pTooltip="Wake up remote" [rounded]="true" (click)="wakeRemote(remote)"></p-button>
         </td>
         <td><ng-container *ngIf="selectedRemote == remote"><b>{{remote.remote_name}}</b> (selected)</ng-container>

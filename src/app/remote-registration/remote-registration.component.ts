@@ -1,4 +1,11 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Output} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Output,
+  ViewEncapsulation
+} from '@angular/core';
 import {DialogModule} from "primeng/dialog";
 import {MessageService} from "primeng/api";
 import {ServerService} from "../server.service";
@@ -32,7 +39,8 @@ import {WebsocketService} from "../websocket/websocket.service";
   templateUrl: './remote-registration.component.html',
   styleUrl: './remote-registration.component.css',
   providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class RemoteRegistrationComponent {
   visible = false;
@@ -98,6 +106,17 @@ export class RemoteRegistrationComponent {
   {
     if (remote == undefined) return;
     this.server.powerRemote(remote, "REBOOT").subscribe(results => {
+      console.debug("Restart remote", results);
+      this.messageService.add({severity: "success", summary: "Remote restarted",
+        key: "remote"});
+      this.cdr.detectChanges();
+    });
+  }
+
+  shutdownRemote(remote: Remote | undefined)
+  {
+    if (remote == undefined) return;
+    this.server.powerRemote(remote, "POWER_OFF").subscribe(results => {
       console.debug("Restart remote", results);
       this.messageService.add({severity: "success", summary: "Remote restarted",
         key: "remote"});

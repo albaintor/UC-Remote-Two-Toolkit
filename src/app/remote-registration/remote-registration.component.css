@@ -28,3 +28,13 @@ input[type=text], select, textarea {
   width: 100%;
   resize: vertical;
 }
+
+.remote-registration {
+  backdrop-filter: blur(30px);
+  background: none;
+}
+
+.remote-registration-header > div {
+  backdrop-filter: blur(30px);
+  background: none;
+}

@@ -1,4 +1,4 @@
-<div #textContainer class="scrolling-text">
+<div #textContainer class="scrolling-text" *ngIf="text && text.length >0">
   <span #textContent class="animate">{{text}}</span>
   <div class="fader fader-left"></div>
   <div class="fader fader-right"></div>

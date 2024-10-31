@@ -401,7 +401,7 @@ export class RemoteWebsocketInstance {
     {
       if (message.msg_data.new_state.attributes.media_position)
         message.msg_data.new_state.attributes.last_update_time = Date.now();
-      entity = message.msg_data as MediaEntityState;
+      entity = {...message.msg_data as MediaEntityState, remote: this.getRemote()!};
       this._entityStates.push(entity);
       this.updateEntity(entity.entity_id, this._entityStates, this.mediaUpdated$);
     }
@@ -456,7 +456,7 @@ export class RemoteWebsocketInstance {
     if (!entity)
     {
       entity = message.msg_data as EntityState;
-      entityStates.push(entity);
+      entityStates.push({...entity, remote: this.getRemote()!});
       this.updateEntity(entity.entity_id, entityStates, entityStateUpdater);
     }
     else {
@@ -476,7 +476,7 @@ export class RemoteWebsocketInstance {
     if (!activityState)
     {
       activityState = message.msg_data;
-      activityStates.push(activityState as any);
+      activityStates.push({...activityState as any, remote: this.getRemote()!});
       this.updateActivity(message.msg_data.entity_id, activityStates, activityStateUpdater);
     }
     else {
@@ -499,7 +499,7 @@ export class RemoteWebsocketInstance {
       this.activityEntitiesUpdated$.next([entity]);
     }
     else {
-      this._activities.push(eventMessage.msg_data);
+      this._activities.push({...eventMessage.msg_data, remote: this.getRemote()!});
       this.activityEntitiesUpdated$.next([eventMessage.msg_data]);
     }
   }

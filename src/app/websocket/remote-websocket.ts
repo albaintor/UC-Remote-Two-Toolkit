@@ -159,6 +159,7 @@ export class RemoteWebsocket  {
       },
       error: err => {
         console.error("Websocket error", err);
+        this.status$.next(false);
       }});
   }
 

@@ -363,7 +363,7 @@ export class RemoteGridComponent implements AfterViewInit {
       initialUiContainerPosition: this.width*index,
       uiClientX: x,
       mousePressed: true,
-      uiContainerPosition: this.width*index
+      uiContainerPosition: -this.width*index
     }
     if ($event instanceof MouseEvent)
       $event.preventDefault();

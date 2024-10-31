@@ -514,6 +514,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
             body: {}, status: OperationStatus.Todo});
         })
       }
+      //TODO handle delta mode for UI page items
       activity.options?.user_interface?.pages?.forEach(page => {
         if (page.page_id)
           remoteOperations.push({name: `Delete page ${page.name} ${Helper.getEntityName(this.updatedActivity)}`,

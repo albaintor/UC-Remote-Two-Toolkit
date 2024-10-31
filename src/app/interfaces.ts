@@ -511,3 +511,10 @@ export interface BatteryState {
 export interface RemoteActivity extends Activity {
   remote: Remote;
 }
+
+export interface RemoteLogStreamConfiguration
+{
+  autostart?: boolean;
+  enabled: boolean;
+  password?:string;
+}

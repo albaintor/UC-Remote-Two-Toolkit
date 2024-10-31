@@ -5,6 +5,8 @@
   <ng-template pTemplate="end">
     <div class="flex align-items-center gap-2">
       <ng-container *ngIf="selectedRemote">
+        <a pTooltip="Open stream logs in new tab" [href]="'http://'+selectedRemote.address+'/log'" target="_blank">Stream logs</a>&nbsp;
+        <p-inputSwitch pTooltip="Enable/disable stream logs" [(ngModel)]="streamLogs" (ngModelChange)="toggleStreamLogs($event)"/>&nbsp;&nbsp;
         <span class="pi pi-chart-line"></span>
         <p-progressBar *ngIf="remoteStatus?.memory" [value]="(remoteStatus!.memory!.total_memory!-remoteStatus!.memory!.available_memory!)/remoteStatus!.memory!.total_memory!*100" [style]="{width: '100px'}"
             [pTooltip]="'Memory : '+Math.floor(remoteStatus!.memory!.available_memory!/1000000).toLocaleString()+' megabytes available on '

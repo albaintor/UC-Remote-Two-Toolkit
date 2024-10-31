@@ -539,6 +539,29 @@ export class Remote
   }
 
 
+  async configureLogStream(data)
+  {
+    const options = {
+      headers: this.getHeaders(),
+      json: data
+    };
+    const url = this.getURL() + `/api/system/logs/web`;
+    let res = await got.put(url, options);
+    return JSON.parse(res.body);
+  }
+
+  async getLogStreamConfiguration()
+  {
+    const options = {
+      headers: this.getHeaders()
+    };
+
+    const url = this.getURL() + `/api/system/logs/web`;
+    let res = await got.get(url, options);
+    return JSON.parse(res.body);
+  }
+
+
   async getStatus()
   {
     const options = this.getOptions();

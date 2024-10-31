@@ -40,6 +40,8 @@ import {BlockUIModule} from "primeng/blockui";
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {InputTextModule} from "primeng/inputtext";
 import {MultiSelectModule} from "primeng/multiselect";
+import {InputSwitchModule} from "primeng/inputswitch";
+import {HttpErrorResponse} from "@angular/common/http";
 
 type DriverIntegration = Driver | Integration;
 
@@ -68,7 +70,8 @@ interface IntegrationsDrivers {
     ConfirmDialogModule,
     InputTextModule,
     MultiSelectModule,
-    NgForOf
+    NgForOf,
+    InputSwitchModule
   ],
   templateUrl: './integrations.component.html',
   styleUrl: './integrations.component.css',
@@ -90,6 +93,7 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
   remoteStatus: RemoteStatus | undefined;
   updateTask: Subscription | undefined;
   entities: Entity[] | undefined;
+  streamLogs = false;
   @ViewChild(FileUpload) fileUpload: FileUpload | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
@@ -97,24 +101,18 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
     this.server.getConfig().subscribe(config => {});
   }
 
-
   ngAfterViewInit(): void {
     this.server.config$.subscribe(config => {
       if (config) {
-        this.updateRemote(config);
+        this.config = config;
+        this.remotes = config.remotes!;
+        this.selectedRemote  = Helper.getSelectedRemote(this.remotes);
+        if (this.selectedRemote) this.server.remote$.next(this.selectedRemote);
+        this.loadRemoteData();
+        this.cdr.detectChanges();
         this.startUpdateTask();
       }
     })
-  }
-
-  updateRemote(config: Config): void
-  {
-    this.config = config;
-    this.remotes = config.remotes!;
-    this.selectedRemote  = Helper.getSelectedRemote(this.remotes);
-    if (this.selectedRemote) this.server.remote$.next(this.selectedRemote);
-    this.loadRemoteData();
-    this.cdr.detectChanges();
   }
 
   setRemote(remote: Remote): void
@@ -201,6 +199,11 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
         this.progress = false;
         this.cdr.detectChanges();
       }}));
+
+    this.server.getLogStreamConfiguration(this.selectedRemote).subscribe(results => {
+      this.streamLogs = results.enabled;
+      this.cdr.detectChanges();
+    })
   }
 
 
@@ -361,6 +364,22 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
       console.debug("Entities for integration", integrationDriver, entities);
       this.entities = entities;
       this.cdr.detectChanges();
+    })
+  }
+
+  toggleStreamLogs($event: any) {
+    if (this.selectedRemote)
+    this.server.configureLogStream(this.selectedRemote, {enabled: this.streamLogs}).subscribe({
+      next: value => {
+        this.messageService.add({key: "integrationComponent", severity: "success", summary: `Toggled stream logs for remote ${this.selectedRemote?.remote_name}`});
+        this.cdr.detectChanges();
+      },
+      error: (err: HttpErrorResponse)  => {
+        console.error("Error", err);
+        this.messageService.add({key: "integrationComponent", severity: "error", summary: `Error toggling streaming logs to the remote ${this.selectedRemote?.remote_name}`,
+          detail: `${err.error.statusCode} - ${err.message}`, sticky: true});
+        this.cdr.detectChanges();
+      }
     })
   }
 }

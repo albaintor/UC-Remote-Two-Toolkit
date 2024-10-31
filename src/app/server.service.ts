@@ -2,12 +2,27 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import {BehaviorSubject, forkJoin, from, map, mergeMap, Observable, of, Subject} from "rxjs";
 import {
-  Activity, BatteryState, Command,
+  Activity,
+  BatteryState,
+  Command,
   Config,
   Driver,
-  Entity, EntityCommand,
-  Integration, LanguageCode, Macro, Page, Profile, ProfileGroup,
-  Remote, RemoteMap, RemoteModels, RemoteRegistration, RemoteStatus, RemoteVersion, ScreenLayout
+  Entity,
+  EntityCommand,
+  Integration,
+  LanguageCode,
+  Macro,
+  Page,
+  Profile,
+  ProfileGroup,
+  Remote,
+  RemoteLogStreamConfiguration,
+  RemoteMap,
+  RemoteModels,
+  RemoteRegistration,
+  RemoteStatus,
+  RemoteVersion,
+  ScreenLayout
 } from "./interfaces";
 import { DomHandler } from 'primeng/dom';
 import {Helper} from "./helper";
@@ -407,6 +422,23 @@ export class ServerService {
   //     return results;
   //   }))
   // }
+
+
+  getLogStreamConfiguration(remote: Remote): Observable<RemoteLogStreamConfiguration>
+  {
+    return this.http.get<RemoteLogStreamConfiguration>(`/api/remote/${remote.address}/system/logs/web`).
+    pipe(map(results => {
+      return results;
+    }))
+  }
+
+  configureLogStream(remote: Remote, data:RemoteLogStreamConfiguration): Observable<any>
+  {
+    return this.http.put<RemoteLogStreamConfiguration>(`/api/remote/${remote.address}/system/logs/web`, data).
+    pipe(map(results => {
+      return results;
+    }))
+  }
 
   remotePost(remote: Remote, url: string, data: any,
             params?:{[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}): Observable<any>

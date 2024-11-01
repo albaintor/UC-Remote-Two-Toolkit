@@ -168,7 +168,7 @@
               <div *ngIf="!targetRemote || !item?.icon" style="width: 30px; height: 30px"></div>
             </div>
             <div class="inline-block p-1">
-              {{item.name}} ({{item.entity_id}})
+              {{Helper.getEntityName(item)}} ({{item.entity_id}})
             </div>
           </div>
         </ng-template>

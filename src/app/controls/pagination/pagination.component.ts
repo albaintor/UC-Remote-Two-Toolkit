@@ -13,7 +13,7 @@ import {NgForOf, NgIf} from "@angular/common";
 interface Indexes
 {
   index: number;
-  current: boolean
+  current: boolean;
 }
 
 @Component({
@@ -53,8 +53,17 @@ export class PaginationComponent implements AfterViewInit {
   padding = 15;
   @Input() smallSizeMode = false;
   widthFixed = false;
+  firstDisplayed = 0;
+  lastDisplayed = 0;
 
   constructor(private cdr: ChangeDetectorRef) {}
+
+  getClass(index: Indexes): string
+  {
+    if (index.current) return 'active-dot';
+    if (index.index === this.firstDisplayed || index.index === this.lastDisplayed) return 'small-dot'
+    return 'dot';
+  }
 
   update()
   {
@@ -89,19 +98,33 @@ export class PaginationComponent implements AfterViewInit {
     let indexRight = this.currentIndex + 1;
     let indexLeft = this.currentIndex -1;
     const indexesLeft: Indexes[] = [];
-    // const indexesRight: Indexes[] = [];
+    const indexesRight: Indexes[] = [];
     for (let i=0; i<this.displayedIndexes-1; i++)
     {
       if (direction && indexRight < this.numberOfPages) {
-        // indexesRight.push({index: indexRight, current: false});
+        indexesRight.push({index: indexRight, current: false});
         indexRight++
       } else if (indexLeft >= 0) {
         indexesLeft.push({index: indexLeft, current: false});
         indexLeft--;
+      } else if (indexRight < this.numberOfPages) {
+        indexesRight.push({index: indexRight, current: false});
+        indexRight++
       }
       direction = !direction;
     }
     const newIndex = this.currentIndex-indexesLeft.length;
+
+    if (indexesLeft.length > 0 && indexesLeft[indexesLeft.length-1].index > 0)
+      this.firstDisplayed = indexesLeft[indexesLeft.length-1].index;
+    else
+      this.firstDisplayed = this.currentIndex;
+
+    if (indexesRight.length > 0 && indexesRight[indexesRight.length-1].index < this.indexes.length-1)
+      this.lastDisplayed = indexesRight[indexesRight.length-1].index;
+    else this.lastDisplayed = this.currentIndex;
+
+    console.debug(this.displayedIndexes, indexesRight, this.lastDisplayed);
 
     if (this.paginationCollection?.nativeElement && this.currentIndex >= 0) {
       this.paginationCollection.nativeElement.setAttribute("style",

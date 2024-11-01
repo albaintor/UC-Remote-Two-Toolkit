@@ -42,6 +42,16 @@
   flex: 1 0 100%;
 }
 
+.small-dot {
+  height: 5px;
+  width: 5px;
+  background-color: #8e8e8e;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+  transition: all 0.5s ease-in-out;
+}
+
 .dot {
   height: 8px;
   width: 8px;

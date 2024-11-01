@@ -711,4 +711,89 @@ export class Helper
     if (!volumeEntity?.new_state?.attributes) return false;
     return !!volumeEntity?.new_state?.attributes.muted;
   }
+
+  static compareActivitySequences(activity1: Activity, activity2: Activity): {[type: string]: CommandSequence[]}
+  {
+    const diff: {[type: string]: CommandSequence[]} = {};
+
+    if (activity1.options?.sequences)
+    {
+      for (let sequenceName in activity1.options.sequences)
+      {
+        const sequences1 = activity1.options.sequences[sequenceName];
+        const sequences2 = activity2.options?.sequences?.[sequenceName];
+        // Sequences1 not empty and sequences2 empty
+        if (sequences1.length > 0 && (!sequences2 || sequences2.length == 0))
+        {
+          diff[sequenceName] = sequences1;
+        }
+        else if (sequences1.length > 0 && sequences2 && sequences2.length > 0) // Sequences 1 not empty
+        {
+          for (let i=0; i<sequences1.length; i++)
+          {
+            const sequence1 = sequences1[i];
+            if (sequences2.length < i+1)
+            {
+              if (!diff[sequenceName]) diff[sequenceName] = [];
+              diff[sequenceName].push(sequence1);
+            }
+            else
+            {
+              const sequence2 = sequences2[i];
+              if (!Helper.compareSequences(sequence2, sequence2))
+              {
+                if (!diff[sequenceName]) diff[sequenceName] = [];
+                diff[sequenceName].push(sequence1);
+              }
+            }
+          }
+        }
+      }
+      if (activity2.options?.sequences)
+        for (let sequenceName in activity2.options.sequences) {
+          const sequences2 = activity2.options.sequences[sequenceName];
+          const sequences1 = activity1.options.sequences[sequenceName];
+          if (sequences2.length > 0 && (!sequences1 || sequences1.length == 0))
+          {
+            diff[sequenceName] = sequences2;
+          }
+          else
+          {
+            if (sequences2.length > sequences1.length) {
+              for (let i = sequences1.length; i < sequences2.length; i++) {
+                if (!diff[sequenceName]) diff[sequenceName] = [];
+                diff[sequenceName].push(sequences2[i]);
+              }
+            }
+          }
+        }
+    } else if (activity2.options?.sequences)
+    {
+      for (let sequenceName in activity2.options.sequences) {
+        const sequences2 = activity2.options.sequences[sequenceName];
+        if (sequences2.length > 0)
+        {
+          diff[sequenceName] = sequences2;
+        }
+      }
+    }
+    return diff;
+  }
+
+  static compareActivityEntities(activity1: Activity, activity2: Activity): {entityId: string, missing1: boolean}[]
+  {
+    const results: {entityId: string, missing1: boolean}[] = [];
+    activity1.options?.included_entities?.forEach(entity1 => {
+      if (!activity2.options?.included_entities
+        || !activity2.options.included_entities.find(entity2 => entity1.entity_id === entity2.entity_id))
+        results.push({entityId: entity1.entity_id!, missing1: false})
+    })
+
+    activity2.options?.included_entities?.forEach(entity2 => {
+      if (!activity1.options?.included_entities
+        || !activity1.options.included_entities.find(entity1 => entity1.entity_id === entity2.entity_id))
+        results.push({entityId: entity2.entity_id!, missing1: true})
+    })
+    return results;
+  }
 }

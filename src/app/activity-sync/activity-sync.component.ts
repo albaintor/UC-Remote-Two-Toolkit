@@ -534,73 +534,11 @@ export class ActivitySyncComponent implements AfterViewInit {
           return {...page, index}});
       }
 
-      if (activity1.options?.sequences)
-      {
-        for (let sequenceName in activity1.options.sequences)
-        {
-          const sequences1 = activity1.options.sequences[sequenceName];
-          const sequences2 = activity2.options?.sequences?.[sequenceName];
-          // Sequences1 not empty and sequences2 empty
-          if (sequences1.length > 0 && (!sequences2 || sequences2.length == 0))
-          {
-            if (!diff.sequences) diff.sequences = {};
-            diff.sequences[sequenceName] = sequences1;
-          }
-          else if (sequences1.length > 0 && sequences2 && sequences2.length > 0) // Sequences 1 not empty
-          {
-            for (let i=0; i<sequences1.length; i++)
-            {
-              const sequence1 = sequences1[i];
-              if (sequences2.length < i+1)
-              {
-                if (!diff.sequences) diff.sequences = {};
-                if (!diff.sequences[sequenceName]) diff.sequences[sequenceName] = [];
-                diff.sequences[sequenceName].push(sequence1);
-              }
-              else
-              {
-                const sequence2 = sequences2[i];
-                if (!Helper.compareSequences(sequence2, sequence2))
-                {
-                  if (!diff.sequences) diff.sequences = {};
-                  if (!diff.sequences[sequenceName]) diff.sequences[sequenceName] = [];
-                  diff.sequences[sequenceName].push(sequence1);
-                }
-              }
-            }
-          }
-        }
-        if (activity2.options?.sequences)
-        for (let sequenceName in activity2.options.sequences) {
-          const sequences2 = activity2.options.sequences[sequenceName];
-          const sequences1 = activity1.options.sequences[sequenceName];
-          if (sequences2.length > 0 && (!sequences1 || sequences1.length == 0))
-          {
-            if (!diff.sequences) diff.sequences = {};
-            diff.sequences[sequenceName] = sequences2;
-          }
-          else
-          {
-            if (sequences2.length > sequences1.length) {
-              for (let i = sequences1.length; i < sequences2.length; i++) {
-                if (!diff.sequences) diff.sequences = {};
-                if (!diff.sequences[sequenceName]) diff.sequences[sequenceName] = [];
-                diff.sequences[sequenceName].push(sequences2[i]);
-              }
-            }
-          }
-        }
-      } else if (activity2.options?.sequences)
-      {
-        for (let sequenceName in activity2.options.sequences) {
-          const sequences2 = activity2.options.sequences[sequenceName];
-          if (sequences2.length > 0)
-          {
-            if (!diff.sequences) diff.sequences = {};
-            diff.sequences[sequenceName] = sequences2;
-          }
-        }
+      const sequencesDiff = Helper.compareActivitySequences(activity1, activity2);
+      if (Object.keys(sequencesDiff).length > 0) {
+        diff.sequences = sequencesDiff;
       }
+
       if (diff.sequences || diff.pages || diff.buttons) diff.status = DiffStatus.Different;
     }
     for (let activity2 of activities2) {

@@ -27,6 +27,17 @@ import {ServerService} from "../../server.service";
 import {Helper} from "../../helper";
 import {CommandEditorComponent} from "../../remote-editor/command-editor/command-editor.component";
 
+export enum ButtonEditionType {
+  Create,
+  Modify,
+  Delete
+}
+
+export interface ButtonEditionEvent {
+  button: ButtonMapping;
+  type: ButtonEditionType;
+}
+
 @Component({
   selector: 'app-button-editor',
   standalone: true,
@@ -54,7 +65,7 @@ export class ButtonEditorComponent {
   @Input() button: ButtonMapping | undefined;
   @Input() remote: Remote | undefined;
   @Input() activity: Activity | undefined;
-  @Output() buttonChanged = new EventEmitter<ButtonMapping>();
+  @Output() buttonChanged = new EventEmitter<ButtonEditionEvent>();
   visible = false;
   backupCommand : ButtonMapping | undefined;
   private configEntityCommands: EntityCommand[] | undefined;
@@ -64,7 +75,8 @@ export class ButtonEditorComponent {
   }
 
   updateCommand() {
-    this.buttonChanged.emit(this.button);
+    if (this.button)
+      this.buttonChanged.emit({button: this.button, type: ButtonEditionType.Modify});
     this.cdr.detectChanges();
   }
 
@@ -80,7 +92,7 @@ export class ButtonEditorComponent {
     if (!this.backupCommand) return;
     this.button = this.backupCommand;
     this.backupCommand = JSON.parse(JSON.stringify(this.button));
-    this.buttonChanged.emit(this.button);
+    this.buttonChanged.emit({button: this.button, type: ButtonEditionType.Modify});
   }
 
   deleteCommand()
@@ -89,7 +101,7 @@ export class ButtonEditorComponent {
     delete this.button?.short_press;
     delete this.button?.double_press;
     this.cdr.detectChanges();
-    this.buttonChanged.emit(this.button);
+    this.buttonChanged.emit({button: this.button!, type: ButtonEditionType.Delete});
   }
 
   protected readonly Helper = Helper;
@@ -97,25 +109,25 @@ export class ButtonEditorComponent {
   assignShortPress() {
     this.button!.short_press = {} as any;
     this.cdr.detectChanges();
-    this.buttonChanged.emit(this.button);
+    this.buttonChanged.emit({button: this.button!, type: ButtonEditionType.Modify});
   }
 
   assignLongPress() {
     this.button!.long_press = {} as any;
     this.cdr.detectChanges();
-    this.buttonChanged.emit(this.button);
+    this.buttonChanged.emit({button: this.button!, type: ButtonEditionType.Modify});
   }
 
   assignDoublePress() {
     this.button!.double_press = {} as any;
     this.cdr.detectChanges();
-    this.buttonChanged.emit(this.button);
+    this.buttonChanged.emit({button: this.button!, type: ButtonEditionType.Modify});
   }
 
   removeElement(object: any, element: string) {
     delete object[element];
     this.cdr.detectChanges();
-    this.buttonChanged.emit(this.button);
+    this.buttonChanged.emit({button: this.button!, type: ButtonEditionType.Modify});
   }
 
   executeCommand(command: Command) {

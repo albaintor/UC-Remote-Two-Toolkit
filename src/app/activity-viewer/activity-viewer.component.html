@@ -47,7 +47,7 @@
 <h3>Buttons mapping and startup/stop sequences</h3>
 <div class="flex justify-content-center flex-wrap gap-6">
   <div class="flex align-items-start justify-content-center">
-    <app-remote-buttons [remote]="remote" [activity]="activity" [editMode]="editMode" class="flex"/>
+    <app-remote-buttons [remote]="remote" [activity]="activity" [editMode]="editMode" class="flex" (onChange)="onButtonChange($event)"/>
   </div>
   <div class="flex align-items-start justify-content-center">
     <app-activity-sequence [remote]="remote" [activity]="activity" [editable]="editMode" sequenceName="on" (onUpdate)="onChange.emit()"></app-activity-sequence>
@@ -113,10 +113,10 @@
             </div>
             <div class="flex align-items-center">
               <p-inputNumber [(ngModel)]="currentPage.grid.width" [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal" [step]="1" pTooltip="Grid width"
-                             decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus" (ngModelChange)="updateButtonsGrid()"
+                             decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus" (ngModelChange)="updateGridSize()"
                              decrementButtonIcon="pi pi-minus" [min]="gridSizeMin.width" [max]="screenLayout?.grid!.max.width" styleClass="grid-size"></p-inputNumber>
               <p-inputNumber [(ngModel)]="currentPage.grid.height" [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal" [step]="1" pTooltip="Grid height"
-                             decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus" (ngModelChange)="updateButtonsGrid()"
+                             decrementButtonClass="p-button-danger" incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus" (ngModelChange)="updateGridSize()"
                              decrementButtonIcon="pi pi-minus" [min]="gridSizeMin.height" [max]="screenLayout?.grid!.max.height" styleClass="grid-size"></p-inputNumber>
             </div>
           </div>
@@ -125,12 +125,14 @@
       <div class="flex align-items-center justify-content-center" style="width: 100%">
         <app-remote-grid [remote]="remote" [activity]="activity" [currentPage]="currentPage" [selectionMode]="selectionMode"
                            [width]="gridPixelWidth" [height]="gridPixelHeight"  [editMode]="editMode"  [style]="'width: '+gridPixelWidth+'px'"
-                           (onPageChange)="pageChanged($event)" (onSelectionChange)="selectionChange($event)"/>
+                           (onPageChange)="pageChanged($event)" (onSelectionChange)="selectionChange($event)"
+                          (onPageModified)="pageModified($event)"/>
       </div>
     </div>
   </ng-container>
   <ng-container *ngIf="editMode">
-    <app-remote-page-list [remote]="remote" [activity]="activity" [editable]="editMode" (onReorder)="onReorderPages($event)" (onSelectPage)="selectPage($event)"/>
+    <app-remote-page-list [remote]="remote" [activity]="activity" [editable]="editMode"
+                          (onChange)="onPagesChange($event)" (onSelectPage)="selectPage($event)"/>
   </ng-container>
 </div>
   <ng-container *ngIf="activity"><br><p-button label="Show data" (onClick)="showDump = true"></p-button>&nbsp;

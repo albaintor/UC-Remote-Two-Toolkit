@@ -37,6 +37,18 @@ interface SwipeInfo
   uiClientX: number;
 }
 
+export enum PageChangedType {
+  Modification,
+  Deletion,
+  Creation,
+}
+
+export interface PageChanged {
+  uiPage: UIPage;
+  items: ActivityPageCommand[];
+  mode: PageChangedType;
+}
+
 @Pipe({name: 'as', standalone: true, pure: true})
 export class AsPipe implements PipeTransform {
   transform<T>(input: unknown, baseItem: T | undefined): T {
@@ -141,6 +153,7 @@ export class RemoteGridComponent implements AfterViewInit {
   }
   @Output() onPageChange = new EventEmitter<number>();
   @Output() onSelectionChange = new EventEmitter<RemoteGridItemComponent[]>();
+  @Output() onPageModified = new EventEmitter<PageChanged>();
   swipeAcceleration = 1.5;
 
 
@@ -231,6 +244,7 @@ export class RemoteGridComponent implements AfterViewInit {
   updateGridItem(gridItem: RemoteGridItemComponent) {
     if (!gridItem?.item) return;
     this.getGridPageItems(this.currentPage, true);
+    this.onPageModified.emit({uiPage: this.currentPage!, items: [gridItem.item], mode: PageChangedType.Modification});
     this.cdr.detectChanges();
   }
 
@@ -239,6 +253,7 @@ export class RemoteGridComponent implements AfterViewInit {
     const index = this.currentPage?.items.indexOf($event.item as ActivityPageCommand);
     if (index) this.currentPage?.items.splice(index, 1);
     this.getGridPageItems(this.currentPage, true);
+    this.onPageModified.emit({uiPage: this.currentPage!, items: [$event.item], mode: PageChangedType.Deletion});
     this.cdr.detectChanges();
   }
 
@@ -249,6 +264,11 @@ export class RemoteGridComponent implements AfterViewInit {
 
   gridDestinationSelected($event: RemoteGridItemComponent) {
     this.getGridPageItems(this.currentPage, true);
+    if (this.gridItemSource?.item) {
+      const items: ActivityPageCommand[] = [this.gridItemSource?.item];
+      if (!Helper.isEmptyItem($event.item)) items.push($event.item);
+      this.onPageModified.emit({uiPage: this.currentPage!, items, mode: PageChangedType.Modification})
+    }
     this.cdr.detectChanges();
   }
 
@@ -317,6 +337,8 @@ export class RemoteGridComponent implements AfterViewInit {
       gridButton.item?.location.x == position.x && gridButton.item?.location.y == position.y)
     this.gridItem = targetGridItem;
     console.log("New command", targetGridItem, this.gridButtons, position);
+    if (targetGridItem)
+      this.onPageModified.emit({uiPage: this.currentPage!, items: [targetGridItem?.item], mode: PageChangedType.Creation})
     this.commandeditor?.show();
     this.cdr.detectChanges();
   }

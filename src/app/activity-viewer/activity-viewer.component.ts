@@ -3,21 +3,30 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef, EventEmitter, Input, Output,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
   Pipe,
-  PipeTransform, QueryList,
-  ViewChild, ViewChildren, ViewEncapsulation
+  PipeTransform,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+  ViewEncapsulation
 } from '@angular/core';
 import {ConfirmationService, MessageService} from "primeng/api";
 import {ServerService} from "../server.service";
 import {
   Activity,
-  UIPage,
   ActivityPageCommand,
+  ButtonMapping,
   Command,
-  Remote,
   Entity,
-  EntityCommand, RemoteData, ScreenLayout
+  EntityCommand,
+  Remote,
+  RemoteData,
+  ScreenLayout,
+  UIPage
 } from "../interfaces";
 import {DialogModule} from "primeng/dialog";
 import {ToastModule} from "primeng/toast";
@@ -31,26 +40,46 @@ import {ButtonModule} from "primeng/button";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {Helper} from "../helper";
 import {UiCommandEditorComponent} from "../remote-editor/ui-command-editor/ui-command-editor.component";
-import { saveAs } from 'file-saver-es';
+import {saveAs} from 'file-saver-es';
 import {ConfirmDialogModule} from "primeng/confirmdialog";
-import {ButtonEditorComponent} from "../activity-editor/button-editor/button-editor.component";
+import {
+  ButtonEditionEvent,
+  ButtonEditionType,
+  ButtonEditorComponent
+} from "../activity-editor/button-editor/button-editor.component";
 import {from, map, Observable} from "rxjs";
 import {ActivitySequenceComponent} from "../activity-editor/activity-sequence/activity-sequence.component";
 import {ImageMapComponent} from "../controls/image-map/image-map.component";
 import {DividerModule} from "primeng/divider";
 import {ToolbarModule} from "primeng/toolbar";
 import {DockModule} from "primeng/dock";
-import {RemotePageListComponent, Operation} from "../remote-editor/remote-page-list/remote-page-list.component";
+import {Operation, RemotePageListComponent} from "../remote-editor/remote-page-list/remote-page-list.component";
 import {TagModule} from "primeng/tag";
 import {InputTextModule} from "primeng/inputtext";
 import {RemoteButtonsComponent} from "../remote-editor/remote-buttons/remote-buttons.component";
-import {RemoteGridComponent} from "../remote-editor/remote-grid/remote-grid.component";
+import {PageChanged, RemoteGridComponent} from "../remote-editor/remote-grid/remote-grid.component";
 
 enum DataFormat {
   None,
   Page,
   UICommands,
   Activity
+}
+
+export enum ActivityChangeType {
+  NewPage,
+  ModifiedPage,
+  DeletedPage,
+  DeletedActivity,
+  ModifiedButton,
+  DeletedButton
+}
+
+export interface ActivityChange {
+  page?: UIPage;
+  button?: ButtonMapping;
+  type: ActivityChangeType;
+  pageOrder?: string[];
 }
 
 @Pipe({name: 'as', standalone: true, pure: true})
@@ -120,7 +149,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     }
   }
   @Input() editMode = true;
-  @Output() onChange: EventEmitter<void> = new EventEmitter();
+  @Output() onChange: EventEmitter<ActivityChange> = new EventEmitter();
   @Output() reload = new EventEmitter<void>();
   public Command!: Command;
   @ViewChild("commandeditor", {static: false}) commandeditor: UiCommandEditorComponent | undefined;
@@ -188,6 +217,12 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.updateCurrentPage();
   }
 
+  updateGridSize()
+  {
+    this.updateButtonsGrid();
+    this.onChange.emit({page: this.currentPage, type: ActivityChangeType.ModifiedPage});
+  }
+
   updateButtonsGrid()
   {
     this.activityGrid?.updateCurrentPage();
@@ -215,7 +250,7 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  onReorderPages($event:  {activity: Activity, page: UIPage, operation: Operation})
+  onPagesChange($event:  {activity: Activity, page: UIPage, operation: Operation})
   {
     this.currentPage = this.activity?.options?.user_interface?.pages?.[0];
     this.firstPage = 0;
@@ -224,11 +259,14 @@ export class ActivityViewerComponent implements AfterViewInit {
       this.currentPage = this.activity?.options?.user_interface?.pages?.[this.activity?.options?.user_interface?.pages?.length-1];
       if (this.activity?.options?.user_interface?.pages?.length)
         this.firstPage = this.activity.options.user_interface.pages.length-1;
+      this.onChange.emit({page: $event.page, type: ActivityChangeType.NewPage});
     }
+    else if ($event.operation === Operation.DeletePage)
+      this.onChange.emit({page: $event.page, type: ActivityChangeType.DeletedPage});
+    else this.onChange.emit({page: $event.page, type: ActivityChangeType.ModifiedPage});
     this.updateButtonsGrid();
     this.updateCurrentPage();
     this.onChange.emit();
-
     this.cdr.detectChanges();
   }
 
@@ -391,7 +429,7 @@ export class ActivityViewerComponent implements AfterViewInit {
       this.activity.options.user_interface!.pages.push(page);
       this.messageService.add({severity:'success', summary: `Page ${page.name} with ${page.items.length} items added successfully`, key: 'activity'});
       this.updateButtonsGrid();
-      this.onChange.emit();
+      this.onChange.emit({page, type: ActivityChangeType.NewPage});
       this.cdr.detectChanges();
     })
   }
@@ -434,7 +472,7 @@ export class ActivityViewerComponent implements AfterViewInit {
         this.activity.options.user_interface!.pages.push(page);
         this.messageService.add({severity:'success', summary: `Page ${page.name} with ${page.items.length} items added successfully`, key: 'activity'});
         this.updateButtonsGrid();
-        this.onChange.emit();
+        this.onChange.emit({page, type: ActivityChangeType.NewPage});
         this.cdr.detectChanges();
       }
     }
@@ -459,7 +497,7 @@ export class ActivityViewerComponent implements AfterViewInit {
               severity: 'success',
               summary: `Activity "${Helper.getEntityName(this.activity)}" successfully deleted`
             });
-            this.onChange.emit();
+            this.onChange.emit({type: ActivityChangeType.DeletedActivity});
             this.cdr.detectChanges();
           },
           error: (error) => {
@@ -547,5 +585,15 @@ export class ActivityViewerComponent implements AfterViewInit {
   selectionChange($event: RemoteGridItemComponent[]) {
     this.selection = $event;
     this.cdr.detectChanges();
+  }
+
+  pageModified($event: PageChanged) {
+    this.onChange.emit({page: $event.uiPage, type: ActivityChangeType.ModifiedPage});
+  }
+
+  onButtonChange($event: ButtonEditionEvent) {
+    this.onChange.emit({button: $event.button,
+      type: $event.type === ButtonEditionType.Delete ? ActivityChangeType.DeletedButton:
+        ActivityChangeType.ModifiedButton});
   }
 }

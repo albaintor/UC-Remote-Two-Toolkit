@@ -23,7 +23,7 @@ import {ImageMapComponent, MapElement} from "../../controls/image-map/image-map.
 import {HttpErrorResponse} from "@angular/common/http";
 import {MessageService} from "primeng/api";
 import {ToastModule} from "primeng/toast";
-import {ButtonEditorComponent} from "../../activity-editor/button-editor/button-editor.component";
+import {ButtonEditionEvent, ButtonEditorComponent} from "../../activity-editor/button-editor/button-editor.component";
 import {IconComponent} from "../../controls/icon/icon.component";
 import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
 
@@ -97,6 +97,7 @@ export class RemoteButtonsComponent implements AfterViewInit {
   executeButton: ButtonMapping | undefined;
   @ViewChild("executeButtonPanel") executeButtonPanel: OverlayPanel | undefined;
   @ViewChild("buttonsInfo", {static: false}) buttonsInfo: ElementRef<HTMLDivElement> | undefined;
+  @Output() onChange = new EventEmitter<ButtonEditionEvent>();
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,) {
     this.server.getRemoteModels().subscribe(remoteModels => {
@@ -231,8 +232,9 @@ export class RemoteButtonsComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  buttonChanged($event: ButtonMapping) {
+  buttonChanged($event: ButtonEditionEvent) {
     this.updateButtons();
+    this.onChange.emit($event);
     this.cdr.detectChanges();
   }
 

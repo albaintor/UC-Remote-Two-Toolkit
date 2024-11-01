@@ -57,7 +57,7 @@ export class RemotePageListComponent implements OnInit {
   }
   @Input() activity: Activity | undefined;
   @Input() editable = true;
-  @Output() onReorder = new EventEmitter<{activity:Activity, page:UIPage, operation: Operation}>();
+  @Output() onChange = new EventEmitter<{activity:Activity, page:UIPage, operation: Operation}>();
   @Output() onSelectPage = new EventEmitter<{activity:Activity, page:UIPage}>();
 
   protected readonly Helper = Helper;
@@ -88,12 +88,12 @@ export class RemotePageListComponent implements OnInit {
     this.cdr.detectChanges();
     this.activity = activity;
     this.cdr.detectChanges();
-    this.onReorder.emit({activity: this.activity!, page: newPage, operation: Operation.AddPage});
+    this.onChange.emit({activity: this.activity!, page: newPage, operation: Operation.AddPage});
   }
 
   updatePages($event: UIPage) {
     console.log("Reorder pages", $event);
-    this.onReorder.emit({activity: this.activity!, page: $event, operation: Operation.UpdatePage});
+    this.onChange.emit({activity: this.activity!, page: $event, operation: Operation.UpdatePage});
   }
 
   selectPage(page: UIPage) {
@@ -102,6 +102,6 @@ export class RemotePageListComponent implements OnInit {
 
   deletePage(page: UIPage) {
     this.activity?.options?.user_interface?.pages?.splice(this.activity?.options?.user_interface?.pages.indexOf(page), 1);
-    this.onReorder.emit({activity: this.activity!, page: page, operation: Operation.DeletePage});
+    this.onChange.emit({activity: this.activity!, page: page, operation: Operation.DeletePage});
   }
 }

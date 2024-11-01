@@ -8,6 +8,7 @@
   margin: 0;
   /*margin: auto;*/
   width: 50%;
+  place-items: center;
 }
 
 .grid-item

@@ -68,7 +68,7 @@ export class LightEntityComponent implements OnInit {
       if (remoteState.find(item => item.entity_id === this.lightEntity?.entity_id))
       {
         this.updateLightAttributes();
-        console.debug("Changed light", this.lightEntity, this.lightColor);
+        // console.debug("Changed light", this.lightEntity, this.lightColor);
         this.cdr.detectChanges();
       }
     })

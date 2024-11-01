@@ -85,7 +85,7 @@
     <p-button label="Import activity from clipboard" (onClick)="importActivityFromClipboard()" severity="warning" icon="pi pi-clipboard" size="small"/>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-toggleButton [(ngModel)]="resetMapping" onLabel="Erase buttons mapping" offLabel="Keep buttons mapping"
+    <p-toggleButton [(ngModel)]="recreateMapping" onLabel="Recreate mapping" offLabel="Update mapping"
                     onIcon="pi pi-eraser" offIcon="pi pi-lock"/>
   </div>
 </div>
@@ -234,7 +234,7 @@
 </div>
 <p-divider />
 <br>
-<app-activity-viewer #editor [remote]="targetRemote" [editMode]="true" [activity]="updatedActivity" (onChange)="activityChanged()" (reload)="reloadActivity()"></app-activity-viewer>
+<app-activity-viewer #editor [remote]="targetRemote" [editMode]="true" [activity]="updatedActivity" (onChange)="activityChanged($event)" (reload)="reloadActivity()"></app-activity-viewer>
 <ng-container *ngIf="dump">
   <p>Generated mapping :</p>
   <ngx-json-viewer [json]="dump"></ngx-json-viewer>

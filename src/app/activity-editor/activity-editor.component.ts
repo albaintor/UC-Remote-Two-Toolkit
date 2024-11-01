@@ -20,18 +20,28 @@ import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
 import {
   Activity,
-  ActivityPageCommand, ButtonMapping,
+  ActivityPageCommand,
+  ButtonMapping,
   Command,
   Config,
-  Entity, LanguageCode,
+  Entity,
+  LanguageCode,
   OperationStatus,
-  Remote, RemoteData,
-  RemoteMap, RemoteModel, RemoteModels,
+  Remote,
+  RemoteData,
+  RemoteMap,
+  RemoteModel,
+  RemoteModels,
   RemoteOperation,
-  RemoteOperationResultField, RemoteVersion,
+  RemoteOperationResultField,
+  RemoteVersion,
   UIPage
 } from "../interfaces";
-import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
+import {
+  ActivityChange,
+  ActivityChangeType,
+  ActivityViewerComponent
+} from "../activity-viewer/activity-viewer.component";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {MultiSelectModule} from "primeng/multiselect";
 import {CheckboxModule} from "primeng/checkbox";
@@ -42,7 +52,7 @@ import {RemoteOperationsComponent} from "../remote-operations/remote-operations.
 import {MessagesModule} from "primeng/messages";
 import {DialogModule} from "primeng/dialog";
 import {saveAs} from "file-saver-es";
-import {map, Observable, of} from "rxjs";
+import {map, Observable} from "rxjs";
 import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 import {ChipModule} from "primeng/chip";
 import {InputTextModule} from "primeng/inputtext";
@@ -153,10 +163,11 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   suggestions3: Entity[] = [];
   targetRemote: Remote | undefined;
   existingActivity = false;
-  resetMapping = true;
+  recreateMapping = false;
   lockOperations = false;
   version: RemoteVersion | undefined;
   remoteModels: RemoteModels | undefined;
+  activityOperations: ActivityChange[] = [];
   currentLanguage: LanguageCode = Helper.getLanguageName();
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
@@ -378,6 +389,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
   checkIncludedEntity(entityId: string, activity: Activity)
   {
+    if (!entityId) return;
     if (activity.options?.included_entities?.find(entity => entity.entity_id === entityId)) return;
     let entity = this.entities.find(entity => entity.entity_id === entityId);
     if (!entity)
@@ -390,6 +402,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     if (!entity) entity = {entity_id: entityId} as any;
     if (!activity.options) activity.options = {included_entities: []}
     if (!activity.options.included_entities) activity.options.included_entities = [];
+    console.debug("Adding missing included entity", entityId, entity);
     activity.options.included_entities.push(entity!);
   }
 
@@ -504,8 +517,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     {
       this.existingActivity = true;
       console.log("Activity to import exists, we will update it", body);
-      if (this.resetMapping)
-      {
+      if (this.recreateMapping) {
         activity.options?.button_mapping?.forEach(button => {
           if (this.updatedActivity?.options?.button_mapping?.find(button2 => button2.button === button.button))
             return;
@@ -513,16 +525,33 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
             method: "DELETE", api: `/api/activities/${activity.entity_id}/buttons/${button.button}`,
             body: {}, status: OperationStatus.Todo});
         })
+        activity.options?.user_interface?.pages?.forEach(page => {
+          if (page.page_id)
+            remoteOperations.push({
+              name: `Delete page ${page.name} ${Helper.getEntityName(this.updatedActivity)}`,
+              method: "DELETE", api: `/api/activities/${activity.entity_id}/ui/pages/${page.page_id}`,
+              body: {}, status: OperationStatus.Todo
+            });
+        });
       }
-      //TODO handle delta mode for UI page items
-      activity.options?.user_interface?.pages?.forEach(page => {
-        if (page.page_id)
-          remoteOperations.push({name: `Delete page ${page.name} ${Helper.getEntityName(this.updatedActivity)}`,
-            method: "DELETE", api: `/api/activities/${activity.entity_id}/ui/pages/${page.page_id}`,
-            body: {}, status: OperationStatus.Todo});
-      });
-      remoteOperations.push({name: `Update activity ${Helper.getEntityName(this.updatedActivity)}`, method: "PATCH",
-        api: `/api/activities/${activity.entity_id}`, body, status: OperationStatus.Todo});
+
+      // Check if included entities or sequences need an update
+      if (!this.recreateMapping && this.activity)
+      {
+        let diff = false;
+        const entitiesDiff = Helper.compareActivityEntities(this.activity, this.updatedActivity);
+        if (entitiesDiff.length > 0) diff = true;
+        const sequencesDiff = Helper.compareActivitySequences(this.activity, this.updatedActivity);
+        if (Object.keys(sequencesDiff).length > 0) {
+          diff = true;
+        }
+        if (diff)
+          remoteOperations.push({name: `Update activity ${Helper.getEntityName(this.updatedActivity)}`, method: "PATCH",
+            api: `/api/activities/${activity.entity_id}`, body, status: OperationStatus.Todo});
+      }
+      else
+        remoteOperations.push({name: `Update activity ${Helper.getEntityName(this.updatedActivity)}`, method: "PATCH",
+          api: `/api/activities/${activity.entity_id}`, body, status: OperationStatus.Todo});
     }
     else
     {
@@ -534,56 +563,101 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       resultField = {fieldName: "entity_id", linkedOperation: createOperation, keyName: NEW_ACTIVITY_ID_KEY};
     }
 
-    let first = true;
-    this.updatedActivity!.options?.user_interface?.pages?.forEach(page => {
-      const newPage = {...page};
-      delete newPage["page_id"];
-      if (resultField) {
-        if (first)
-        {
+    if (!this.recreateMapping) {
+      console.debug("Operations on UI pages in delta", this.activityOperations);
+      this.activityOperations.forEach(operation => {
+        if (!operation.page) return;
+        if (operation.type === ActivityChangeType.NewPage)
           remoteOperations.push({
-            name: `Page ${page.name}`, method: "PATCH", api:
-              `/api/activities/${NEW_ACTIVITY_ID_KEY}/ui/pages/main`,
-            resultFields: [resultField],
+            name: `Page ${operation.page.name}`, method: "POST", api:
+              `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`,
             body: {
-              ...newPage
+              ...operation.page
             }, status: OperationStatus.Todo
           });
-          first = false;
-        } else
-        remoteOperations.push({
-          name: `Page ${page.name}`, method: "POST", api:
-            `/api/activities/${NEW_ACTIVITY_ID_KEY}/ui/pages`,
-          resultFields: [resultField],
-          body: {
-            ...newPage
-          }, status: OperationStatus.Todo
-        });
-      }
-      else
-        remoteOperations.push({name: `Page ${page.name}`, method: "POST", api:
-            `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`,
-          body: {
-            ...newPage
-          }, status: OperationStatus.Todo});
-    })
+        else if (operation.type === ActivityChangeType.ModifiedPage && operation.page?.page_id)
+          remoteOperations.push({
+            name: `Page ${operation.page.name}`, method: "PATCH", api:
+              `/api/activities/${this.updatedActivity?.entity_id}/ui/pages/${operation.page.page_id}`,
+            body: {
+              ...operation.page
+            }, status: OperationStatus.Todo
+          });
+        else if (operation.type === ActivityChangeType.DeletedPage && operation.page?.page_id)
+          remoteOperations.push({
+            name: `Page ${operation.page.name}`, method: "DELETE", api:
+              `/api/activities/${this.updatedActivity?.entity_id}/ui/pages/${operation.page.page_id}`,
+            body: {}, status: OperationStatus.Todo
+          });
+      });
+      this.activityOperations.forEach(operation => {
+        if (operation.type === ActivityChangeType.ModifiedButton && operation.button)
+          remoteOperations.push({name: `Button ${operation.button.button}`,method: "PATCH",
+            api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${operation.button.button}`,
+            body: {
+              ...operation.button
+            }, status: OperationStatus.Todo})
+        else if (operation.type === ActivityChangeType.DeletedButton && operation.button)
+          remoteOperations.push({name: `Button ${operation.button.button}`,method: "DELETE",
+            api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${operation.button.button}`,
+            body: {}, status: OperationStatus.Todo})
+      });
+    }
+    else {
+      let first = true;
+      this.updatedActivity!.options?.user_interface?.pages?.forEach(page => {
+        const newPage = {...page};
+        delete newPage["page_id"];
+        // resultField : means that the activity is new and being created
+        if (resultField) {
+          if (first)
+          {
+            remoteOperations.push({
+              name: `Page ${page.name}`, method: "PATCH", api:
+                `/api/activities/${NEW_ACTIVITY_ID_KEY}/ui/pages/main`,
+              resultFields: [resultField],
+              body: {
+                ...newPage
+              }, status: OperationStatus.Todo
+            });
+            first = false;
+          } else
+            remoteOperations.push({
+              name: `Page ${page.name}`, method: "POST", api:
+                `/api/activities/${NEW_ACTIVITY_ID_KEY}/ui/pages`,
+              resultFields: [resultField],
+              body: {
+                ...newPage
+              }, status: OperationStatus.Todo
+            });
+        }
+        else {
+          // Pages have been deleted before so we recreate all of them
+          remoteOperations.push({name: `Page ${page.name}`, method: "POST", api:
+              `/api/activities/${this.updatedActivity?.entity_id}/ui/pages`,
+            body: {
+              ...newPage
+            }, status: OperationStatus.Todo});
+        }
+      });
+      this.updatedActivity!.options?.button_mapping?.forEach(button => {
+        if (!button.long_press && !button.short_press && !button.double_press) return;
+        if (resultField)
+          remoteOperations.push({name: `Button ${button.button}`,method: "PATCH",
+            api: `/api/activities/${NEW_ACTIVITY_ID_KEY}/buttons/${button.button}`,
+            resultFields: [resultField],
+            body: {
+              ...button
+            }, status: OperationStatus.Todo})
+        else
+          remoteOperations.push({name: `Button ${button.button}`,method: "PATCH",
+            api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
+            body: {
+              ...button
+            }, status: OperationStatus.Todo})
+      });
+    }
 
-    this.updatedActivity!.options?.button_mapping?.forEach(button => {
-      if (!button.long_press && !button.short_press && !button.double_press) return;
-      if (resultField)
-        remoteOperations.push({name: `Button ${button.button}`,method: "PATCH",
-          api: `/api/activities/${NEW_ACTIVITY_ID_KEY}/buttons/${button.button}`,
-          resultFields: [resultField],
-          body: {
-            ...button
-          }, status: OperationStatus.Todo})
-      else
-        remoteOperations.push({name: `Button ${button.button}`,method: "PATCH",
-          api: `/api/activities/${this.updatedActivity?.entity_id}/buttons/${button.button}`,
-          body: {
-            ...button
-          }, status: OperationStatus.Todo})
-    });
 
     if (this.uncompatibleCommands.length > 0) this.activityViewer?.updateButtons();
     console.log("Updated activity", this.updatedActivity);
@@ -599,7 +673,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
   applyTemplate()
   {
-    this.resetMapping = false;
+    this.recreateMapping = false;
     this.applyTemplateOnActivity(this.updatedActivity!);
     this.remoteOperations = this.buildData();
     this.lockOperations = false;
@@ -653,6 +727,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
         targetButton!.long_press = {entity_id: this.selectedEntity?.entity_id!, cmd_id: button.cmd_id, params: button.params};
       else
         targetButton!.short_press = {entity_id: this.selectedEntity?.entity_id!, cmd_id: button.cmd_id, params: button.params};
+      this.activityOperations.push({type: ActivityChangeType.ModifiedButton, button: targetButton})
     })
     // console.log("BUTTONS", this.updatedActivity?.options?.button_mapping)
 
@@ -683,6 +758,10 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
           grid: {...page.grid}, items: []
         };
         updatedActivity!.options.user_interface.pages!.push(targetPage);
+        this.activityOperations.push({type: ActivityChangeType.NewPage, page: targetPage});
+      }
+      else if (!this.activityOperations.find(item => item.page?.page_id === targetPage?.page_id)){
+        this.activityOperations.push({type: ActivityChangeType.ModifiedPage, page: targetPage});
       }
 
       if (page.name) targetPage.name = page.name;
@@ -914,6 +993,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   {
     this.mode = OperationMode.Undefined;
     this.remoteOperations = [];
+    this.activityOperations = [];
     this.cdr.detectChanges();
   }
 
@@ -976,7 +1056,22 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     this.reloadAndBuildData();
   }
 
-  activityChanged() {
+  activityChanged($event: ActivityChange) {
+    if ($event.type == ActivityChangeType.DeletedPage)
+      this.activityOperations.push({type: ActivityChangeType.DeletedPage, page: $event.page})
+    else if ($event.type == ActivityChangeType.NewPage)
+      this.activityOperations.push({type: ActivityChangeType.NewPage, page: $event.page})
+    else if ($event.type == ActivityChangeType.ModifiedPage  && $event.page?.page_id
+      && !this.activityOperations.find(item => item.page?.page_id == $event.page?.page_id))
+      this.activityOperations.push({type: ActivityChangeType.ModifiedPage, page: $event.page})
+    else if ($event.type == ActivityChangeType.ModifiedButton && $event.button
+      && !this.activityOperations.find(item => item.button?.button == $event.button?.button
+      && $event.type == ActivityChangeType.ModifiedButton))
+      this.activityOperations.push({type: ActivityChangeType.ModifiedButton, button: $event.button})
+    else if ($event.type == ActivityChangeType.DeletedButton && $event.button
+      && !this.activityOperations.find(item => item.button?.button == $event.button?.button
+        && $event.type == ActivityChangeType.DeletedButton))
+      this.activityOperations.push({type: ActivityChangeType.DeletedButton, button: $event.button})
     if (!this.lockOperations) this.remoteOperations = this.buildData();
     this.cdr.detectChanges();
   }

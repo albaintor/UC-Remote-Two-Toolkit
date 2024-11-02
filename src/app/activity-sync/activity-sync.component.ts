@@ -583,7 +583,8 @@ export class ActivitySyncComponent implements AfterViewInit {
     this.progress = true;
     this.cdr.detectChanges();
 
-    forkJoin(tasks).subscribe(results => {
+    forkJoin(tasks).subscribe({next: results  =>
+    {
       this.blockedMenu = false;
       this.progress = false;
       this.cdr.detectChanges();
@@ -594,7 +595,18 @@ export class ActivitySyncComponent implements AfterViewInit {
       // this.activitiesDiff.sort((a1, a2) => a1.status.com)
       console.debug("Differences between activities", this.activitiesDiff);
       this.cdr.detectChanges();
-    })
+    },
+      error: err => {
+        this.blockedMenu = false;
+        this.progress = false;
+        this.messageService.add({
+          severity: "error",
+          summary: "Error during the extraction of activities"
+        });
+        console.error("Error during remote extraction", err);
+        this.cdr.detectChanges();
+      }
+  })
   }
 
   compareIntegrations()
@@ -696,6 +708,7 @@ export class ActivitySyncComponent implements AfterViewInit {
       summary: `${this.remoteOperations.length} operations done`
     });
     this.selectedActivities = [];
+    this.blockedMenu = false;
     this.cdr.detectChanges();
   }
 

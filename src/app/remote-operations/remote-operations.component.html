@@ -1,7 +1,6 @@
 <p-toast key="operation"></p-toast>
 <p-dialog #operationsDialog [header]="'Remotes operations to '+remote?.remote_name+' ('+remote?.address+')'" [(visible)]="visible" [style]="{width: '100vw'}" [draggable]="true"
-          [resizable]="true">
-
+          [resizable]="true" [closable]="!progress">
   <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px">
     <div class="flex align-items-center justify-content-center">
       <ng-container *ngIf="operations.length > 0">
@@ -15,6 +14,8 @@
       <p-button label="Reset errors only" (onClick)="resetErrors()" severity="secondary" icon="pi pi-minus" size="small" [rounded]="true"></p-button>
     </div>
   </div>
+  <p-progressBar *ngIf="progress" [value]="Math.round(100*operationsProcessed/operationsTotal)"/>
+  <ng-container *ngIf="progress && operationsErrors > 0">&nbsp;{{operationsErrors}} errors...</ng-container>
   <ng-container *ngIf="!groupByActivities">
     <p-table [value]="_operations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
              [scrollable]="true" [scrollHeight]="'calc(70vh - 50px)'" [(selection)]="selectedOperations" >

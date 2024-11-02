@@ -22,6 +22,7 @@ import {ChipModule} from "primeng/chip";
 import {Helper} from "../helper";
 import {Ripple} from "primeng/ripple";
 import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
+import {ProgressBarModule} from "primeng/progressbar";
 
 @Component({
   selector: 'app-remote-operations',
@@ -36,7 +37,8 @@ import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
     NgxJsonViewerModule,
     ChipModule,
     Ripple,
-    OverlayPanelModule
+    OverlayPanelModule,
+    ProgressBarModule
   ],
   templateUrl: './remote-operations.component.html',
   styleUrl: './remote-operations.component.css',
@@ -85,9 +87,15 @@ export class RemoteOperationsComponent {
   selectedOperations: RemoteOperation[] = [];
   @Output() visibleChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() operationsDone: EventEmitter<RemoteOperation[]> = new EventEmitter<RemoteOperation[]>();
+  @Output() operationsStart: EventEmitter<RemoteOperation[]> = new EventEmitter<RemoteOperation[]>();
   @ViewChild("resultsPannel", {static: false}) resultsPannel: OverlayPanel | undefined;
   selectedOperation: RemoteOperation | undefined = undefined;
   protected readonly Helper = Helper;
+  progress = false;
+  operationsTotal = 0;
+  operationsProcessed = 0;
+  operationsErrors = 0;
+  protected readonly OperationStatus = OperationStatus;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService)
   {
@@ -167,8 +175,15 @@ export class RemoteOperationsComponent {
 
   updateRemote() {
     if (!this.remote) return;
-    const operations = from(this.selectedOperations
-      .filter(operation => operation.status == OperationStatus.Todo)).pipe(
+    this.operationsStart.emit(this.selectedOperations);
+    this.progress = true;
+    const operationsList = this.selectedOperations
+      .filter(operation => operation.status == OperationStatus.Todo)
+    this.operationsTotal = operationsList.length;
+    this.operationsProcessed = 0;
+    this.operationsErrors = 0;
+    this.cdr.detectChanges();
+    const operations = from(operationsList).pipe(
       mergeMap(operation => {
         this.updateOperation(operation);
         if (operation.method === "POST")
@@ -177,12 +192,15 @@ export class RemoteOperationsComponent {
               console.log("Results from remote for operation", operation, results);
               operation.status = OperationStatus.Done;
               operation.results = results;
+              this.operationsProcessed++;
               this.cdr.detectChanges();
               return of(operation);
           }),
             catchError(error => {
               operation.status = OperationStatus.Error;
               operation.message = this.getErrorMessage(error);
+              this.operationsProcessed++;
+              this.operationsErrors++;
               this.cdr.detectChanges();
               console.error("Error during update", operation, error);
               return of(operation);
@@ -193,12 +211,15 @@ export class RemoteOperationsComponent {
               console.log("Results from remote for operation", operation, results);
               operation.status = OperationStatus.Done;
               operation.results = results;
+              this.operationsProcessed++;
               this.cdr.detectChanges();
               return of(operation);
             }),
             catchError(error => {
               operation.status = OperationStatus.Error;
               operation.message = this.getErrorMessage(error);
+              this.operationsProcessed++;
+              this.operationsErrors++;
               this.cdr.detectChanges();
               console.error("Error during update", operation, error);
               return of(operation);
@@ -209,12 +230,15 @@ export class RemoteOperationsComponent {
               console.log("Results from remote for operation", operation, results);
               operation.status = OperationStatus.Done;
               operation.results = results;
+              this.operationsProcessed++;
               this.cdr.detectChanges();
               return of(operation);
             }),
             catchError(error => {
               operation.status = OperationStatus.Error;
               operation.message = this.getErrorMessage(error);
+              this.operationsProcessed++;
+              this.operationsErrors++;
               this.cdr.detectChanges();
               console.error("Error during update", operation, error);
               return of(operation);
@@ -225,12 +249,15 @@ export class RemoteOperationsComponent {
               console.log("Results from remote for operation", operation, results);
               operation.status = OperationStatus.Done;
               operation.results = results;
+              this.operationsProcessed++;
               this.cdr.detectChanges();
               return of(operation);
             }),
             catchError(error => {
               operation.status = OperationStatus.Error;
               operation.message = this.getErrorMessage(error);
+              this.operationsProcessed++;
+              this.operationsErrors++;
               this.cdr.detectChanges();
               console.error("Error during update", operation, error);
               return of(operation);
@@ -249,6 +276,7 @@ export class RemoteOperationsComponent {
             detail: `${success} success, ${errors} errors`,
             key: "operation", sticky: true});
           this.operationsDone.emit(this.operations);
+          this.progress = false;
           this.cdr.detectChanges();
         },
         error: err => {
@@ -259,13 +287,12 @@ export class RemoteOperationsComponent {
             detail: `${success} success, ${errors} errors`,
             key: "operation", sticky: true});
           this.operationsDone.emit(this.operations);
+          this.progress = false;
           this.cdr.detectChanges();
         }
       }
     )
   }
-
-  protected readonly OperationStatus = OperationStatus;
 
   setStatus(operation: RemoteOperation, status: OperationStatus) {
     operation.status = status;
@@ -300,4 +327,6 @@ export class RemoteOperationsComponent {
     this.resultsPannel?.show(event, event.target);
     this.cdr.detectChanges();
   }
+
+  protected readonly Math = Math;
 }

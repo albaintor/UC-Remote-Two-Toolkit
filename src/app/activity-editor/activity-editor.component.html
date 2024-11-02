@@ -70,7 +70,7 @@
           optionLabel="label" optionValue="value" pTooltip="Switch language for entity names"/>
     </div>
     <div class="flex align-items-center justify-content-center">
-      <input type="text" pInputText [(ngModel)]="updatedActivity.name[currentLanguage]" />
+      <input type="text" pInputText [(ngModel)]="updatedActivity.name[currentLanguage]" (ngModelChange)="changedActivityName($event)"/>
     </div>
   </ng-container>
   <div class="flex align-items-center justify-content-center">

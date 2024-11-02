@@ -20,7 +20,7 @@ import {
   Activity,
   ActivityPageCommand,
   ButtonMapping,
-  Command,
+  Command, CommandSequence,
   Entity,
   EntityCommand,
   Remote,
@@ -72,12 +72,21 @@ export enum ActivityChangeType {
   DeletedPage,
   DeletedActivity,
   ModifiedButton,
-  DeletedButton
+  DeletedButton,
+  AddIncludedEntity,
+  DeleteIncludedEntity,
+  ModifiedSequence,
+  ModifiedName,
+  ModifiedIcon
 }
 
 export interface ActivityChange {
   page?: UIPage;
   button?: ButtonMapping;
+  includedEntityId?: string;
+  sequence?: {type: string, sequence:CommandSequence, position:number};
+  name?: string;
+  icon?: string;
   type: ActivityChangeType;
   pageOrder?: string[];
 }

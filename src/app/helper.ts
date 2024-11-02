@@ -1,22 +1,26 @@
 import {
   Activity,
-  Entity,
-  EntityUsage,
-  Profile,
-  Command,
-  ButtonMapping,
-  UIPage,
-  Remote,
   ActivityPageCommand,
-  OrphanEntity,
+  ButtonMapping,
+  Command,
   CommandSequence,
+  Driver,
+  Entity,
   EntityCommand,
   EntityCommandParameter,
+  EntityIntegration,
+  EntityUsage,
+  Integration,
   LanguageCode,
   LanguageName,
-  Macro, Integration, Driver, EntityIntegration
+  Macro,
+  OrphanEntity,
+  Profile,
+  Remote,
+  UIPage
 } from "./interfaces";
 import {MediaEntityState} from "./websocket/remote-websocket-instance";
+import {ActivityChange, ActivityChangeType} from "./activity-viewer/activity-viewer.component";
 
 export interface LocalizedName {
   languageCode: LanguageCode;
@@ -217,42 +221,73 @@ export class Helper
     return suggestions;
   }
 
-  static replaceEntity(activity: Activity, entities: Entity[], entity_id: string, new_entity_id: string)
+  static replaceEntity(activity: Activity, entities: Entity[], entity_id: string, new_entity_id: string): ActivityChange[]
   {
+    const activityChanges: ActivityChange[] = [];
     const newEntity = entities.find(entity => entity.entity_id === new_entity_id);
-    if (!activity || !newEntity) return;
-    if (!activity.options?.included_entities?.find(entity => entity.entity_id === new_entity_id))
+    if (!activity || !newEntity) return activityChanges;
+    if (!activity.options?.included_entities?.find(entity => entity.entity_id === new_entity_id)) {
       activity?.options!.included_entities!.push(newEntity);
+      activityChanges.push({type: ActivityChangeType.AddIncludedEntity, includedEntityId: newEntity.entity_id})
+    }
 
-    if (activity.options?.included_entities?.find(entity => entity.entity_id === entity_id))
+    if (activity.options?.included_entities?.find(entity => entity.entity_id === entity_id)) {
       activity.options.included_entities?.splice(
         activity.options.included_entities?.indexOf(
-          activity.options.included_entities.find(entity => entity.entity_id === entity_id)!),1);
+          activity.options.included_entities.find(entity => entity.entity_id === entity_id)!), 1);
+      activityChanges.push({type: ActivityChangeType.DeleteIncludedEntity, includedEntityId: entity_id});
+    }
 
     activity?.options?.button_mapping?.forEach(button => {
-      if (button.long_press?.entity_id === entity_id)
+      let found = false;
+      if (button.long_press?.entity_id === entity_id) {
         button.long_press.entity_id = new_entity_id;
-      if (button.short_press?.entity_id === entity_id)
+        found = true;
+      }
+      if (button.short_press?.entity_id === entity_id) {
         button.short_press.entity_id = new_entity_id;
-      if (button.double_press?.entity_id === entity_id)
+        found = true;
+      }
+      if (button.double_press?.entity_id === entity_id) {
         button.double_press.entity_id = new_entity_id;
+        found = true;
+      }
+      if (found) activityChanges.push({type: ActivityChangeType.ModifiedButton, button});
     })
     activity?.options?.user_interface?.pages?.forEach(page => {
       page?.items?.forEach(item => {
-        if (item.command && typeof item.command === "string" && (item.command as string) === entity_id)
+        let found = false;
+        if (item.command && typeof item.command === "string" && (item.command as string) === entity_id) {
           item.command = new_entity_id;
-        else if (item.command && (item.command as Command)?.entity_id === entity_id)
+          found = true;
+        }
+        else if (item.command && (item.command as Command)?.entity_id === entity_id) {
           (item.command as Command).entity_id = new_entity_id;
-        if (item.media_player_id === entity_id)
+          found = true;
+        }
+        if (item.media_player_id === entity_id) {
           item.media_player_id = new_entity_id;
+          found = true;
+        }
+        if (found && !activityChanges.find(item => item.type === ActivityChangeType.ModifiedPage &&
+          (page?.page_id && item.page?.page_id === page.page_id ||
+            (!page?.page_id && page.name === item.page?.name))))
+          activityChanges.push({type: ActivityChangeType.ModifiedPage, page});
       })
     });
     ['on', 'off'].forEach(type => {
-      activity?.options?.sequences?.[type]?.forEach(sequence => {
-        if (sequence.command?.entity_id === entity_id)
-          sequence.command!.entity_id = new_entity_id;
-      })
+      if (activity?.options?.sequences?.[type])
+      {
+        for (const [position, sequence] of activity.options.sequences[type].entries())
+        {
+          if (sequence.command?.entity_id === entity_id) {
+            sequence.command!.entity_id = new_entity_id;
+            activityChanges.push({type: ActivityChangeType.ModifiedSequence, sequence: {type, sequence, position}});
+          }
+        }
+      }
     })
+    return activityChanges;
   }
 
   /*static getActivityEntities(activity: Activity, entities: Entity[]): Entity[]

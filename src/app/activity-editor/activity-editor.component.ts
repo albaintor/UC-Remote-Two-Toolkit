@@ -536,15 +536,24 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       }
 
       // Check if included entities or sequences need an update
-      if (!this.recreateMapping && this.activity)
+      if (!this.recreateMapping)
       {
         let diff = false;
-        const entitiesDiff = Helper.compareActivityEntities(this.activity, this.updatedActivity);
-        if (entitiesDiff.length > 0) diff = true;
-        const sequencesDiff = Helper.compareActivitySequences(this.activity, this.updatedActivity);
-        if (Object.keys(sequencesDiff).length > 0) {
-          diff = true;
+        if (this.activityOperations.filter(item => item.type === ActivityChangeType.AddIncludedEntity ||
+          item.type === ActivityChangeType.DeleteIncludedEntity ||
+          item.type === ActivityChangeType.ModifiedSequence ||
+          item.type === ActivityChangeType.ModifiedName ||
+          item.type === ActivityChangeType.ModifiedIcon)) diff = true;
+
+        if (this.activity) {
+          const entitiesDiff = Helper.compareActivityEntities(this.activity, this.updatedActivity);
+          if (entitiesDiff.length > 0) diff = true;
+          const sequencesDiff = Helper.compareActivitySequences(this.activity, this.updatedActivity);
+          if (Object.keys(sequencesDiff).length > 0) {
+            diff = true;
+          }
         }
+
         if (diff)
           remoteOperations.push({name: `Update activity ${Helper.getEntityName(this.updatedActivity)}`, method: "PATCH",
             api: `/api/activities/${activity.entity_id}`, body, status: OperationStatus.Todo});
@@ -918,7 +927,9 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   {
     const newEntity = this.entities.find(entity => entity.entity_id === new_entity_id);
     if (!this.updatedActivity || !newEntity) return;
-    Helper.replaceEntity(this.updatedActivity, this.entities, entity_id, new_entity_id);
+    // this.recreateMapping = true;
+    const activityChanges = Helper.replaceEntity(this.updatedActivity, this.entities, entity_id, new_entity_id);
+    this.activityOperations.push(...activityChanges);
     if (!hideMessage)
       this.messageService.add({severity: "success", summary: "Entity replaced"});
 
@@ -1112,7 +1123,13 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   iconSelected($event: string) {
     if (!this.updatedActivity) return;
     this.updatedActivity.icon = $event;
+    this.activityOperations.push({type: ActivityChangeType.ModifiedIcon,
+      icon:$event});
     this.cdr.detectChanges();
   }
 
+  changedActivityName($event: any) {
+    this.activityOperations.push({type: ActivityChangeType.ModifiedName,
+      name:this.updatedActivity?.name?.[this.currentLanguage]});
+  }
 }

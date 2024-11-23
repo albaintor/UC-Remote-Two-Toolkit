@@ -107,6 +107,7 @@
       <th pResizableColumn>Buttons differences</th>
       <th pResizableColumn>Pages differences</th>
       <th pResizableColumn>Sequences differences</th>
+      <th pResizableColumn>Orphan entities</th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-diff>
@@ -152,6 +153,15 @@
         <ng-container *ngIf="diff.sequences">
           <ng-container *ngFor="let item of diff.sequences | keyvalue">
             <p-chip [label]="'Sequence '+item.key" [style]="Helper.getStyle($any(item).key)" (mouseover)="showSequence($any(item).value, diffPanelSequences, $event)"></p-chip>
+
+          </ng-container>
+        </ng-container>
+      </td>
+      <td>
+        <ng-container *ngIf="diff.orphanEntities">
+          <ng-container *ngFor="let item of diff.orphanEntities">
+            <p-chip [label]="Helper.getEntityName(item)" [style]="Helper.getStyle(Helper.getEntityName(item))"
+                    (mouseover)="showEntity(item, entityPanel, $event)"></p-chip>
 
           </ng-container>
         </ng-container>
@@ -343,5 +353,21 @@
 </p-overlayPanel>
 <app-remote-operations #operations [operations]="remoteOperations" [remote]="selectedRemote2" [groupByActivities]="true"
                        [(visible)]="showOperations" (operationsDone)="operationsDone($event)"></app-remote-operations>
-
+<p-overlayPanel #entityPanel [style]="{ width: '450px' }" [showCloseIcon]="true" appendTo="body" styleClass="buttons_panel">
+  <ng-template pTemplate="content">
+    <ng-container *ngIf="selectedEntity">
+      <div class="flex flex-column">
+        <div class="flex align-content-center gap-3" style="min-height: 50px">
+          <div class="flex flex-column">
+            <div class="flex align-items-center justify-content-center">
+              <app-icon [remote]="selectedRemote1" [icon]="getEntityIcon(selectedEntity.entity_id)" [size]="40"/>&nbsp;
+              {{Helper.getEntityName(selectedEntity)}} : {{selectedEntity.entity_type}}
+            </div>
+            <span class="entity_id">{{selectedEntity.entity_id}}</span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </ng-template>
+</p-overlayPanel>
 <p-confirmDialog key="confirmSync"/>

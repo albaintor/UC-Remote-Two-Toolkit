@@ -177,6 +177,7 @@ export class RemoteDataLoaderComponent {
       catchError(error => {
         console.error("Error during extraction", remote, error);
         this.progress = false;
+        this.remoteProgress = 0;
         this.cdr.detectChanges();
         throw error;
       }),

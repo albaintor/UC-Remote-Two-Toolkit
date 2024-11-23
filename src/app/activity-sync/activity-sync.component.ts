@@ -42,6 +42,7 @@ import {NEW_ACTIVITY_ID_KEY} from "../activity-editor/activity-editor.component"
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
 import {MultiSelectModule} from "primeng/multiselect";
+import {HttpErrorResponse} from "@angular/common/http";
 
 enum DiffStatus {
   Equals = 1,
@@ -67,6 +68,7 @@ interface ActivityDiff {
   buttons?:ButtonsMappingDiff[];
   pages?:UIpageIndexed[];
   sequences?: {[type: string]: CommandSequence[]};
+  orphanEntities?: Entity[];
 }
 
 interface ActivityOperations {
@@ -159,6 +161,7 @@ export class ActivitySyncComponent implements AfterViewInit {
   uncompatibleCommands: {activity: Activity, buttons: ButtonMapping[]}[] = [];
   showOperations = false;
   remoteOperations: RemoteOperation[] = [];
+  selectedEntity:Entity|undefined = undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private confirmationService: ConfirmationService) {
@@ -192,7 +195,7 @@ export class ActivitySyncComponent implements AfterViewInit {
   static getObjectName(entity: any): string
   {
     if (!entity) return "";
-    console.debug(entity);
+    // console.debug(entity);
     if (entity?.[Helper.getLanguageName()]) return entity[Helper.getLanguageName()];
     if (typeof entity === "string") return entity;
     if (typeof entity.name === "string") return entity.name;
@@ -215,12 +218,37 @@ export class ActivitySyncComponent implements AfterViewInit {
     }
   }
 
-  checkIncludedEntity(orphanEntities: OrphanEntity[], remoteData: RemoteData, entityId: string, activity: Activity,
-                      origin: ButtonMapping | UIPage | CommandSequence | string)
+  checkIncludedEntity(orphanEntities: OrphanEntity[], sourceRemoteData: RemoteData, targetRemoteData: RemoteData, entityId: string, activity: Activity,
+                      origin: ButtonMapping | UIPage | CommandSequence | string): string | undefined
   {
-    if (!remoteData) return;
-    if (activity.options?.included_entities?.find(entity => entity.entity_id === entityId)) return;
-    let entity = remoteData.entities.find(entity => entity.entity_id === entityId);
+    let newEntityId = entityId;
+    if (!targetRemoteData) return undefined;
+    if (activity.options?.included_entities?.find(entity => entity.entity_id === entityId)
+      && targetRemoteData.entities.find(targetEntity => targetEntity.entity_id === entityId)) return newEntityId;
+    let entity = targetRemoteData.entities.find(entity => entity.entity_id === entityId);
+    if (!entity)
+    {
+      const sourceEntity = sourceRemoteData.entities.find(entity => entity.entity_id === entityId);
+      if (sourceEntity)
+      {
+        if (["remote", "macro"].includes(sourceEntity.entity_type))
+        {
+          const entityName = Helper.getEntityName(sourceEntity);
+          const entity = targetRemoteData.entities.find(entity => Helper.getEntityName(entity) === entityName
+            && sourceEntity.entity_type === entity.entity_type);
+          if (entity) {
+            console.debug("Found similar entity with same name and type but different ID", sourceEntity, entity);
+            newEntityId = entity.entity_id!;
+            const found = activity.options?.included_entities?.find(entity => entity.entity_id === entityId);
+            if (found)
+            {
+              activity.options!.included_entities!.splice(activity.options!.included_entities!.indexOf(found), 1);
+            }
+          }
+        }
+      }
+    }
+
     if (!entity)
     {
       if (!orphanEntities.find(item => item.oldEntity?.entity_id === entityId))
@@ -228,11 +256,15 @@ export class ActivitySyncComponent implements AfterViewInit {
         orphanEntities.push({oldEntity: {entity_id:entityId, entity_type: "", name: Helper.buildName("")}, newEntity: undefined,
         origin, activity});
       }
+    } else if (activity.options?.included_entities?.find(item => entity!.entity_id === item.entity_id))
+    {
+      return newEntityId;
     }
     if (!entity) entity = {entity_id: entityId} as any;
     if (!activity.options) activity.options = {included_entities: []}
     if (!activity.options.included_entities) activity.options.included_entities = [];
     activity.options.included_entities.push(entity!);
+    return newEntityId;
   }
 
 
@@ -249,7 +281,7 @@ export class ActivitySyncComponent implements AfterViewInit {
 
 
   // TODO : diff activity groups, missing icons
-  buildData(targetRemoteData: RemoteData, orphanEntities:OrphanEntity[], activity1: Activity, activity2?: Activity): ActivityOperations | undefined
+  buildData(sourceRemoteData: RemoteData, targetRemoteData: RemoteData, orphanEntities:OrphanEntity[], activity1: Activity, activity2?: Activity): ActivityOperations | undefined
   {
     this.orphanEntities = [];
     const remoteModel = this.getRemoteModel();
@@ -292,8 +324,11 @@ export class ActivitySyncComponent implements AfterViewInit {
     {
       const sequences = updatedActivity.options!.sequences[sequenceName];
       sequences.forEach(sequence => {
-        if (sequence.command?.entity_id) this.checkIncludedEntity(activityOperations.orphanEntities, targetRemoteData,
-          sequence.command!.entity_id, updatedActivity!, sequence);
+        if (sequence.command?.entity_id && this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
+          targetRemoteData, sequence.command!.entity_id, updatedActivity!, sequence)) {
+          sequence.command.entity_id = this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
+            targetRemoteData, sequence.command!.entity_id, updatedActivity!, sequence)!;
+        }
       })
     }
     if (!remoteModel) console.debug("Sync : remote model is not available available yet")
@@ -302,12 +337,18 @@ export class ActivitySyncComponent implements AfterViewInit {
     }
     updatedActivity!.options?.button_mapping?.forEach(button => {
       if (!button.long_press && !button.short_press && !button.double_press) return;
-      if (button.long_press) this.checkIncludedEntity(activityOperations.orphanEntities, targetRemoteData,
-        button.long_press.entity_id, updatedActivity!, button);
-      if (button.short_press) this.checkIncludedEntity(activityOperations.orphanEntities, targetRemoteData,
-        button.short_press.entity_id, updatedActivity!, button);
-      if (button.double_press) this.checkIncludedEntity(activityOperations.orphanEntities, targetRemoteData,
-        button.double_press.entity_id, updatedActivity!, button);
+      if (button.long_press && this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
+        targetRemoteData, button.long_press.entity_id, updatedActivity!, button))
+        button.long_press.entity_id = this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
+          targetRemoteData, button.long_press.entity_id, updatedActivity!, button)!;
+      if (button.short_press && this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
+        targetRemoteData, button.short_press.entity_id, updatedActivity!, button))
+        button.short_press.entity_id = this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
+          targetRemoteData, button.short_press.entity_id, updatedActivity!, button)!;
+      if (button.double_press && this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
+        targetRemoteData, button.double_press.entity_id, updatedActivity!, button))
+        button.double_press.entity_id = this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
+          targetRemoteData, button.double_press.entity_id, updatedActivity!, button)!;
       if (remoteModel && !remoteModel?.buttons?.includes(button.button)) {
         activityOperations.uncompatibleCommands.push(button);
       }
@@ -319,10 +360,14 @@ export class ActivitySyncComponent implements AfterViewInit {
     })
     updatedActivity!.options?.user_interface?.pages?.forEach(page => {
       page.items.forEach(item => {
-        if (item.media_player_id) this.checkIncludedEntity(activityOperations.orphanEntities, targetRemoteData,
-          item.media_player_id, updatedActivity!, page);
-        if ((item.command as Command)?.entity_id) this.checkIncludedEntity(activityOperations.orphanEntities, targetRemoteData,
-          (item.command as Command)!.entity_id, updatedActivity!, page);
+        if (item.media_player_id && this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
+          targetRemoteData, item.media_player_id, updatedActivity!, page))
+          item.media_player_id = this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
+            targetRemoteData, item.media_player_id, updatedActivity!, page)!;
+        if ((item.command as Command)?.entity_id && this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
+          targetRemoteData, (item.command as Command)!.entity_id, updatedActivity!, page))
+          (item.command as Command).entity_id = this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
+            targetRemoteData, (item.command as Command)!.entity_id, updatedActivity!, page)!;
       })
     });
 
@@ -590,6 +635,7 @@ export class ActivitySyncComponent implements AfterViewInit {
       this.cdr.detectChanges();
       if (!this.remoteData1?.activities || !this.remoteData2?.activities) return;
       this.activitiesDiff = this.compareActivities(this.remoteData1.activities, this.remoteData2.activities);
+      this.compareEntities(this.remoteData1, this.remoteData2, this.activitiesDiff);
       this.cdr.detectChanges();
       this.compareIntegrations();
       // this.activitiesDiff.sort((a1, a2) => a1.status.com)
@@ -599,14 +645,87 @@ export class ActivitySyncComponent implements AfterViewInit {
       error: err => {
         this.blockedMenu = false;
         this.progress = false;
+        let message = "";
+        if (err instanceof HttpErrorResponse)
+        {
+          const error = err as HttpErrorResponse;
+          message = `${error.url ? error.url : ""} : ${error.message} ${error.error?.name}`;
+        }
         this.messageService.add({
           severity: "error",
-          summary: "Error during the extraction of activities"
+          summary: "Error during the extraction of activities",
+          detail: message
         });
         console.error("Error during remote extraction", err);
         this.cdr.detectChanges();
       }
   })
+  }
+
+  compareEntities(remoteData1: RemoteData, remoteData2: RemoteData, activitiesDiff: ActivityDiff[]): ActivityDiff[]
+  {
+    remoteData1.activities.forEach(activity1 => {
+      const activity2 = remoteData2.activities.find(activity2 =>
+        Helper.getEntityName(activity2.name) === Helper.getEntityName(activity1.name));
+      if (!activity2) return;
+      let diff = activitiesDiff.find(activityDiff =>
+        Helper.getEntityName(activityDiff.activity1) === Helper.getEntityName(activity1.name));
+      if (!diff) {
+        diff = {activity1: activity1, activity2: activity2, status: DiffStatus.Equals};
+        activitiesDiff.push(diff);
+      }
+
+      activity1.options?.button_mapping?.forEach(button1 => {
+        for (let button of ["long_press", "short_press", "double_press"])
+        {
+          const entityId = ((button1 as any)[button] as (Command|undefined))?.entity_id;
+          ActivitySyncComponent.checkDiff(entityId, remoteData1, remoteData2, diff);
+        }
+      });
+      activity1.options?.user_interface?.pages?.forEach(page => {
+        page.items?.forEach(item => {
+          const entityId = item.media_player_id ? item.media_player_id : (item.command as Command)?.entity_id;
+          ActivitySyncComponent.checkDiff(entityId, remoteData1, remoteData2, diff);
+        })
+      });
+      if (activity1?.options?.sequences)
+        for (const [sequenceName, sequences] of Object.entries(activity1.options.sequences))
+        {
+            sequences.forEach(sequence => {
+              if (!sequence.command) return;
+              ActivitySyncComponent.checkDiff(sequence.command.entity_id, remoteData1, remoteData2, diff);
+            });
+        }
+    })
+    return activitiesDiff;
+  }
+
+  static checkDiff(entityId: string|undefined, remoteData1: RemoteData, remoteData2: RemoteData, diff: ActivityDiff)
+  {
+    if (entityId && !remoteData2.entities.find(entity => entity.entity_id === entityId))
+    {
+      const entity1 = remoteData1.entities.find(entity => entity.entity_id === entityId);
+      if (entity1)
+      {
+        // Entity ids are checked exactly from integrations (should be the same), however for :
+        // IR remotes, BT remotes, macros we compare against entity name
+        if (["remote", "macro"].includes(entity1.entity_type))
+        {
+          const entityName = Helper.getEntityName(entity1);
+          const entity2 = remoteData2.entities.find(entity => Helper.getEntityName(entity) === entityName
+            && entity1.entity_type === entity.entity_type);
+          if (entity2) {
+            console.debug("Found similar entity with same name and type but different ID", entity1, entity2)
+            return;
+          }
+        }
+        diff.status = DiffStatus.Different;
+        if (!diff.orphanEntities) diff.orphanEntities = [];
+        if (!diff.orphanEntities.find(entity => entity.entity_id === entity1.entity_id)) {
+          diff.orphanEntities.push(entity1);
+        }
+      }
+    }
   }
 
   compareIntegrations()
@@ -647,6 +766,12 @@ export class ActivitySyncComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
+  showEntity(entity: Entity, entityPanel: OverlayPanel, $event: MouseEvent) {
+    this.selectedEntity = entity;
+    entityPanel.show($event, $event.target);
+    this.cdr.detectChanges();
+  }
+
   viewActivities(diff: ActivityDiff, actvitiesViewer: OverlayPanel, $event: MouseEvent) {
     this.selectedActivity1 = diff.activity1;
     this.selectedActivity2 = diff.activity2;
@@ -677,7 +802,7 @@ export class ActivitySyncComponent implements AfterViewInit {
     const remoteData = this.remoteData2;
     this.selectedActivities.forEach(activity => {
       if (!activity.activity1) return;
-      const data = this.buildData(remoteData, this.orphanEntities, activity.activity1, activity.activity2);
+      const data = this.buildData(this.remoteData1!, remoteData, this.orphanEntities, activity.activity1, activity.activity2);
       if (data)
       {
         this.activitiesOperations.push(data);
@@ -720,7 +845,7 @@ export class ActivitySyncComponent implements AfterViewInit {
     if (item.origin.hasOwnProperty("name"))
       return `${prefix} page : `+(item.origin as UIPage).name;
     if (item.origin.hasOwnProperty("type"))
-      return `${prefix} sequence : `+(item.origin as CommandSequence).command;
+      return `${prefix} sequence : `+(item.origin as CommandSequence).command?.cmd_id;
     return item.origin.toString()
   }
 }

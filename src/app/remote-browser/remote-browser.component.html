@@ -1,6 +1,9 @@
 <p-toast></p-toast>
 <app-remote-widget/>
-<h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Unfolded Circle remote configuration toolkit</h2>
+<div class="flex overflow-hidden">
+  <div class="flex-grow-1"><h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Unfolded Circle remote configuration toolkit</h2></div>
+  <div class="flex-none align-content-center text-sm">Version {{environment.appVersion}}</div>
+</div>
 <p-blockUI [blocked]="blockedMenu"/>
 <div class="progress-spinner" *ngIf="progress">
   <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>

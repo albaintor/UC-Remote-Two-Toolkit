@@ -23,6 +23,7 @@ import {WebsocketService} from "../websocket/websocket.service";
 import {ToastModule} from "primeng/toast";
 import {MessageService} from "primeng/api";
 import {MediaEntityState, RemoteState, SoftwareUpdate} from "../websocket/remote-websocket-instance";
+import {BreakpointObserver, Breakpoints} from "@angular/cdk/layout";
 
 interface WidgetConfiguration {
   minimized: boolean;
@@ -64,9 +65,11 @@ export class RemoteWidgetComponent implements OnInit {
   activities: Activity[] = [];
   protected readonly Math = Math;
   softwareUpdate: SoftwareUpdate | undefined;
+  smallSizeMode = false;
 
   constructor(private server:ServerService, protected websocketService: WebsocketService, private cdr:ChangeDetectorRef,
-              private messageService: MessageService,) { }
+              private messageService: MessageService,
+              private responsive: BreakpointObserver) { }
 
   ngOnInit(): void {
     const data = localStorage.getItem("remote-widget");
@@ -102,7 +105,16 @@ export class RemoteWidgetComponent implements OnInit {
       })
       this.loadActivities();
       this.cdr.detectChanges();
-    })
+    });
+    this.responsive.observe([
+      Breakpoints.HandsetLandscape,
+      Breakpoints.HandsetPortrait,
+      Breakpoints.TabletPortrait
+    ])
+      .subscribe(result => {
+        this.smallSizeMode = result.matches;
+        this.cdr.detectChanges();
+      });
   }
 
   loadActivities()

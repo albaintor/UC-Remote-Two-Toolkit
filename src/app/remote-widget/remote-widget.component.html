@@ -1,7 +1,8 @@
 <p-toast key="widget"/>
-<p-dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
-          contentStyleClass="widget-dialog" class="widget" styleClass="widget-header" appendTo="body">
-  <ng-template pTemplate="header">
+<ng-container *ngIf="!smallSizeMode">
+  <p-dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
+                       contentStyleClass="widget-dialog" class="widget" styleClass="widget-header" appendTo="body">
+    <ng-template pTemplate="header">
       <div class="flex justify-content-between flex-wrap gap-3 column-gap-4" style="width: 100%">
         <div class="flex align-items-center justify-content-center">
           <p-button icon="pi pi-window-minimize" [severity]="minimized ? 'secondary' : 'info'" class="smaller-button"
@@ -36,15 +37,15 @@
              *ngIf="softwareUpdate?.progress?.state && softwareUpdate!.progress!.state! !== 'DONE'">
           <p-progressBar [value]="getSoftwareProgress()" [style]="{'width': '250px'}"/>
         </div>
-    </div>
-  </ng-template>
-  <ng-container *ngIf="!minimized">
-    <ng-container *ngIf="mediaEntity && remote">
+      </div>
+    </ng-template>
+    <ng-container *ngIf="!minimized">
+      <ng-container *ngIf="mediaEntity && remote">
         <div class="flex gap-2 align-content-center justify-content-center" style="width: 100%;overflow: hidden">
-        <app-media-entity [mediaEntity]="mediaEntity" [remote]="remote"
-                          class="flex flex-wrap gap-2 align-content-center justify-content-center ng-star-inserted"
-                          [headerTemplate]="entitySelector" [scale]="scale" style="width: 100%">
-          <ng-template #entitySelector>
+          <app-media-entity [mediaEntity]="mediaEntity" [remote]="remote"
+                            class="flex flex-wrap gap-2 align-content-center justify-content-center ng-star-inserted"
+                            [headerTemplate]="entitySelector" [scale]="scale" style="width: 100%">
+            <ng-template #entitySelector>
               <div style="position: relative; width: 100%; height: 60px;margin-left:30px"></div>
               <p-dropdown [(ngModel)]="mediaEntity" [options]="mediaEntities" placeholder="Media entity" appendTo="body"
                           (ngModelChange)="changedMediaEntity($event)" optionLabel="entity_id"
@@ -56,9 +57,70 @@
                   {{websocketService.getEntityName(item)}}
                 </ng-template>
               </p-dropdown>
+            </ng-template>
+          </app-media-entity>
+        </div>
+      </ng-container>
+    </ng-container>
+  </p-dialog>
+</ng-container>
+<ng-container *ngIf="smallSizeMode">
+  <div class="flex justify-content-between flex-wrap gap-3 column-gap-4" style="width: 100%">
+    <div class="flex align-items-center justify-content-center">
+      <p-button icon="pi pi-window-minimize" [severity]="minimized ? 'secondary' : 'info'" class="smaller-button"
+                pTooltip="Minimize" (click)="toggleMinimized()"/>
+    </div>
+    <div class="flex align-items-center overflow-hidden" style="max-width: 250px">
+      <app-scrolling-text [text]="websocketService.getMediaInfo()"/>
+    </div>
+    <div class="flex align-items-center justify-content-center" *ngIf="remoteState?.batteryInfo?.capacity" style="width:40px">
+      <div class="flex align-items-center justify-content-center">{{remoteState!.batteryInfo!.capacity!}}%</div>
+      <div style="position: relative">
+        <div class="icon icon-battery" *ngIf="remoteState!.batteryInfo!.capacity!> 30 && remoteState!.batteryInfo!.capacity! < 85"></div>
+        <div class="icon icon-battery-low" *ngIf="remoteState!.batteryInfo!.capacity! <= 30"></div>
+        <div class="icon icon-battery-full" *ngIf="remoteState!.batteryInfo!.capacity! >= 85"></div>
+        <div class="pi pi-bolt charging-status" *ngIf="remoteState!.batteryInfo?.status === 'CHARGING'"></div>
+      </div>
+
+    </div>
+    <div class="flex align-items-center justify-content-center">
+      <p-tag [value]="(websocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
+             [severity]="(websocketService.connectionStatus  | async) ? 'success' : 'warning'"
+             pTooltip="Click to wake up the remote"
+             (click)="wakeRemote($event)" [style]="{'cursor': 'pointer'}"/>
+    </div>
+    <div class="flex align-items-center justify-content-center"
+         *ngIf="softwareUpdate?.progress?.state && softwareUpdate!.progress!.state! !== 'DONE'">
+      <p-tag [value]="softwareUpdate?.progress?.state"
+             [severity]="'warning'"
+             pTooltip="Software is updating..."/>
+    </div>
+    <div class="flex align-items-center justify-content-center"
+         *ngIf="softwareUpdate?.progress?.state && softwareUpdate!.progress!.state! !== 'DONE'">
+      <p-progressBar [value]="getSoftwareProgress()" [style]="{'width': '250px'}"/>
+    </div>
+  </div>
+  <ng-container *ngIf="!minimized">
+    <ng-container *ngIf="mediaEntity && remote">
+      <div class="flex gap-2 align-content-center justify-content-center" style="width: 100%;overflow: hidden">
+        <app-media-entity [mediaEntity]="mediaEntity" [remote]="remote"
+                          class="flex flex-wrap gap-2 align-content-center justify-content-center ng-star-inserted"
+                          [headerTemplate]="entitySelector" [scale]="scale" style="width: 100%">
+          <ng-template #entitySelector>
+            <div style="position: relative; width: 100%; height: 60px;margin-left:30px"></div>
+            <p-dropdown [(ngModel)]="mediaEntity" [options]="mediaEntities" placeholder="Media entity" appendTo="body"
+                        (ngModelChange)="changedMediaEntity($event)" optionLabel="entity_id"
+                        [style]="{'scale':scale, position: 'absolute', right: 0, top:0, transform: 'translate(25%, 0%)'}">
+              <ng-template pTemplate="selectedItem">
+                {{websocketService.getEntityName(mediaEntity)}}
+              </ng-template>
+              <ng-template let-item pTemplate="item">
+                {{websocketService.getEntityName(item)}}
+              </ng-template>
+            </p-dropdown>
           </ng-template>
         </app-media-entity>
-        </div>
+      </div>
     </ng-container>
   </ng-container>
-</p-dialog>
+</ng-container>

@@ -51,6 +51,7 @@ import { saveAs } from 'file-saver-es';
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {IconComponent} from "../controls/icon/icon.component";
 import {RemoteWidgetComponent} from "../remote-widget/remote-widget.component";
+import { environment } from '../../environment';
 
 interface FileProgress
 {
@@ -525,4 +526,6 @@ export class RemoteBrowserComponent implements AfterViewInit {
         this.triggerReload();
       }});
   }
+
+  protected readonly environment = environment;
 }

@@ -1,34 +1,35 @@
-import got, {HTTPError, Options} from 'got'
+import got from 'got';
 import fs from "node:fs";
 import { readdir } from 'node:fs/promises';
 import path from "path";
 import {pipeline as streamPipeline} from 'node:stream/promises';
-import wakeonlan from "wakeonlan";
-const SystemCommand = {
-  STANDBY: 'STANDBY',
-  REBOOT: 'REBOOT',
-  POWER_OFF: 'POWER_OFF',
-  RESTART: 'RESTART',
-  RESTART_UI: 'RESTART_UI',
-  RESTART_CORE: 'RESTART_CORE',
-};
+import {send as wakeonlan} from './wakeonlan';
+// const SystemCommand = {
+//   STANDBY: 'STANDBY',
+//   REBOOT: 'REBOOT',
+//   POWER_OFF: 'POWER_OFF',
+//   RESTART: 'RESTART',
+//   RESTART_UI: 'RESTART_UI',
+//   RESTART_CORE: 'RESTART_CORE',
+// };
 
 export class Remote
 {
-  address;
-  port;
-  api_key;
-  api_key_name;
-  user;
-  token;
-  valid_to;
-  remote_name;
+  address: string|undefined;
+  port: number|undefined;
+  api_key: string|undefined;
+  api_key_name: string|undefined;
+  user: string|undefined;
+  token: string|undefined;
+  valid_to: string|undefined;
+  remote_name: string|undefined;
   protocol = 'http://';
   resources_path = '';
-  mac_address;
+  mac_address: string|undefined;
+  resources_directory: string|undefined;
 
 
-  constructor(address, port, user, token, api_key, mac_address) {
+  constructor(address: string, port:number, user: string, token: string, api_key?: string, mac_address?: string) {
     this.address = address;
     this.port = port;
     this.api_key = api_key;
@@ -37,7 +38,8 @@ export class Remote
     this.mac_address = mac_address;
   }
 
-  async getResources(type, resources_directory) {
+  async getResources(type: string, resources_directory: string) {
+    if (!this.address) return;
     this.resources_directory = path.join(resources_directory, this.address);
     const target_path = path.join(this.resources_directory, type);
     if (!fs.existsSync(target_path))
@@ -45,8 +47,9 @@ export class Remote
     return await readdir(target_path);
   }
 
-  async loadResources(type, resources_directory)
+  async loadResources(type: string, resources_directory: string)
   {
+    if (!this.address) return;
     this.resources_directory = path.join(resources_directory, this.address);
     const target_path = path.join(this.resources_directory, type);
     if (fs.existsSync(target_path)) {
@@ -66,8 +69,8 @@ export class Remote
     const global_list = [];
     const url = this.getURL() + `/api/resources/${type}`;
     let res = await got.get(url, options);
-    const count = res.headers['pagination-count'];
-    let icons = JSON.parse(res.body);
+    const count: any = res.headers['pagination-count'];
+    let icons: any = JSON.parse(res.body);
     for (let icon of icons) {
       global_list.push(icon['id']);
       await streamPipeline(got.stream(`${url}/${icon['id']}`, options),
@@ -77,10 +80,10 @@ export class Remote
       options.searchParams.page = i;
       res = await got.get(url, options);
       icons = JSON.parse(res.body);
-      for (let icon of icons)
-        global_list.push(icon['id']);{
-        await streamPipeline(got.stream(`${url}/${icon['id']}`, options),
-          fs.createWriteStream(path.join(target_path, icon['id'])));
+      for (let icon of icons) {
+        global_list.push(icon['id']);
+        await streamPipeline(got.stream(`${url}/${(icon as any)['id']}`, options),
+          fs.createWriteStream(path.join(target_path, (icon as any)['id'])));
       }
     }
     console.log('List of resources extracted', global_list);
@@ -89,7 +92,7 @@ export class Remote
 
   toJson()
   {
-    const data = {address: this.address, port: this.port}
+    const data: any = {address: this.address, port: this.port}
     if (this.remote_name) data.remote_name = this.remote_name;
     if (this.user) data.user = this.user;
     if (this.token) data.token = this.token;
@@ -200,7 +203,7 @@ export class Remote
     }
   }
 
-  async register(api_key_name)
+  async register(api_key_name: string)
   {
     let headers = this.getHeaders();
     const options = {
@@ -227,7 +230,7 @@ export class Remote
     }
   }
 
-  async unregister(api_key_name)
+  async unregister(api_key_name: string)
   {
     const options = this.getOptions();
     let url = this.getURL() + '/api/auth/api_keys';
@@ -251,7 +254,7 @@ export class Remote
     }
   }
 
-  async getEntity(entityId)
+  async getEntity(entityId: string)
   {
     let headers = this.getHeaders();
     const limit = 100;
@@ -289,7 +292,7 @@ export class Remote
     let res = await got.head(url, options);
     const count = res.headers['pagination-count']
     let entities = [];
-    for (let i=1; i<=Math.ceil(count/limit); i++)
+    for (let i=1; i<=Math.ceil((count as any)/limit); i++)
     {
       options.searchParams.page = i;
       res = await got.get(url, options);
@@ -312,7 +315,7 @@ export class Remote
     let res = await got.head(url, options);
     const count = res.headers['pagination-count']
     let entities = [];
-    for (let i=1; i<=Math.ceil(count/limit); i++)
+    for (let i=1; i<=Math.ceil((count as any)/limit); i++)
     {
       options.searchParams.page = i;
       res = await got.get(url, options);
@@ -321,7 +324,7 @@ export class Remote
     return entities;
   }
 
-  async getActivity(activity_id)
+  async getActivity(activity_id: string)
   {
     const limit = 100;
     const options = {
@@ -336,7 +339,7 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-  async deleteActivity(activity_id)
+  async deleteActivity(activity_id: string)
   {
     const options = {
       ...this.getOptions()
@@ -346,7 +349,7 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-  async deleteActivityPage(activity_id, page_id)
+  async deleteActivityPage(activity_id: string, page_id: string)
   {
     const options = {
       ...this.getOptions()
@@ -356,7 +359,7 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-  async deleteEntity(entity_id)
+  async deleteEntity(entity_id: string)
   {
     const options = {
       ...this.getOptions()
@@ -374,7 +377,7 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-  async getProfilePages(profileId)
+  async getProfilePages(profileId: string)
   {
     const options = this.getOptions();
     const url = this.getURL() + `/api/profiles/${profileId}/pages`;
@@ -382,7 +385,7 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-  async getProfileGroups(profileId)
+  async getProfileGroups(profileId: string)
   {
     const options = this.getOptions();
     const url = this.getURL() + `/api/profiles/${profileId}/groups`;
@@ -428,10 +431,10 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-  async getMacro(macroid)
+  async getMacro(macroId: string)
   {
     const options = this.getOptions();
-    const url = this.getURL() + `/api/macros/${macroid}`;
+    const url = this.getURL() + `/api/macros/${macroId}`;
     let res = await got.get(url, options);
     return JSON.parse(res.body);
   }
@@ -466,7 +469,7 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-  async getIntegrationEntities(intgId, filter)
+  async getIntegrationEntities(intgId: string, filter?: string)
   {
     const options = {
       ...this.getOptions(),
@@ -479,7 +482,7 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-  async deleteDriver(driverId)
+  async deleteDriver(driverId: string)
   {
     const options = this.getOptions();
     const url = this.getURL() + `/api/intg/drivers/${driverId}`;
@@ -487,7 +490,7 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-  async uploadIntegration(fileData)
+  async uploadIntegration(fileData: any)
   {
     const formData = new FormData();
     let buffer = fs.readFileSync(fileData.path);
@@ -501,11 +504,11 @@ export class Remote
     };
     const url = this.getURL() + `/api/intg/install`;
     console.log("Upload file to remote", url, formData, options);
-    let res = await got.post(url, options);
+    let res = await got.post(url, options as any);
     return JSON.parse(res.body);
   }
 
-  async deleteIntegration(integrationId)
+  async deleteIntegration(integrationId: string)
   {
     const options = this.getOptions();
     const url = this.getURL() + `/api/intg/instances/${integrationId}`;
@@ -513,7 +516,7 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-  async executeCommand(entity_id, command)
+  async executeCommand(entity_id: string, command: string)
   {
     const options = {
       ...this.getOptions(),
@@ -524,7 +527,7 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-  async powerRemote(value)
+  async powerRemote(value: string)
   {
     const options = {
       headers: this.getHeaders(),
@@ -539,7 +542,7 @@ export class Remote
   }
 
 
-  async configureLogStream(data)
+  async configureLogStream(data: any)
   {
     const options = {
       headers: this.getHeaders(),
@@ -570,7 +573,7 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-  async wakeOnLan(broadcast = null)
+  async wakeOnLan(broadcast: string|undefined = undefined)
   {
     if (!this.mac_address) {
       console.error("Cannot wakeonlan, no mac address defined");
@@ -583,7 +586,7 @@ export class Remote
     }
   }
 
-  async getBackup(response)
+  async getBackup(response: any)
   {
     const options = { headers: this.getHeaders(), throwHttpErrors: false};
     const url = this.getURL() + `/api/system/backup/export`;

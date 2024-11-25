@@ -10,16 +10,16 @@ import {rimraf} from 'rimraf';
 import path from 'path';
 // import indexRouter from './routes/index.js';
 // import usersRouter from './routes/users.js';
-import {RC2Model} from './RC2Model.js'
+import {RC2Model} from './RC2Model';
 import fs from "node:fs";
-import {Remote} from "./remote.js";
-import {getConfigFile, writeConfigFile} from "./config.js";
+import {Remote} from "./remote";
+import {getConfigFile, writeConfigFile} from './config';
 import {program} from 'commander';
 import cors from 'cors';
 // import expressws from 'express-ws';
 
 let LISTEN_PORT = "8000";
-const DATA_DIR = process.env.DATA_DIR || '.';
+const DATA_DIR = process.env['DATA_DIR'] || '.';
 const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 const RESOURCES_DIR = path.join(DATA_DIR, 'resources');
 const app = express();
@@ -41,9 +41,9 @@ program
   .option('-p, --port <value>', 'Listen on given port', '8000')
   .parse(process.argv);
 const options = program.opts();
-if (options.port)
+if (options['port'])
 {
-  LISTEN_PORT = options.port;
+  LISTEN_PORT = options['port'];
 }
 
 const upload = multer({storage: storage})
@@ -68,17 +68,36 @@ const TEMP_FOLDER = 'temp';
 const REMOTE_USER = 'web-configurator';
 let rc2Model = new RC2Model();
 
+export interface ConfigRemote
+{
+  remote_name?: string;
+  address: string;
+  port: number;
+  user: string;
+  token: string;
+  mac_address: string;
+  api_key?: string;
+  api_key_name?: string;
+  api_valid_to?: string;
+}
+
+export interface Config
+{
+  remotes?: ConfigRemote[];
+}
+
 // Against 304
 // app.disable('etag');
 
 app.get('/server/api', (req, res, next) => {
-  let url = req.headers.destinationurl;
-  let headers = {}
+  let url = req.headers['destinationurl'];
+  if (!url || typeof url !== 'string') return;
+  let headers: any = {};
   for (let key in req.headers) {
     headers[key] = req.headers[key];
   }
   if (!url.startsWith('http://')) url = 'http://'+url;
-  headers['host'] = (new URL(url)).host;
+  headers['host'] = (new URL(url!)).host;
   headers['User-Agent'] = '';
   const options = {
     headers: headers,
@@ -104,8 +123,9 @@ app.get('/server/api', (req, res, next) => {
 })
 
 app.delete('/server/api', (req, res, next) => {
-  let url = req.headers.destinationurl;
-  let headers = {}
+  let url = req.headers['destinationurl'];
+  if (!url || typeof url !== 'string') return;
+  let headers: any = {}
   for (let key in req.headers) {
     headers[key] = req.headers[key];
   }
@@ -132,8 +152,9 @@ app.delete('/server/api', (req, res, next) => {
 })
 
 app.post('/server/api', (req, res, next) => {
-  let url = req.headers.destinationurl;
-  let headers = {}
+  let url = req.headers['destinationurl'];
+  if (!url || typeof url !== 'string') return;
+  let headers: any = {}
   for (let key in req.headers) {
     headers[key] = req.headers[key];
   }
@@ -162,8 +183,9 @@ app.post('/server/api', (req, res, next) => {
 })
 
 app.patch('/server/api', (req, res, next) => {
-  let url = req.headers.destinationurl;
-  let headers = {}
+  let url = req.headers['destinationurl'];
+  if (!url || typeof url !== 'string') return;
+  let headers: any = {}
   for (let key in req.headers) {
     headers[key] = req.headers[key];
     console.log(key, req.headers[key]);
@@ -193,8 +215,9 @@ app.patch('/server/api', (req, res, next) => {
 })
 
 app.put('/server/api', (req, res, next) => {
-  let url = req.headers.destinationurl;
-  let headers = {}
+  let url = req.headers['destinationurl'];
+  if (!url || typeof url !== 'string') return;
+  let headers: any = {}
   for (let key in req.headers) {
     headers[key] = req.headers[key];
   }
@@ -254,7 +277,7 @@ app.post('/api/config/remote', async (req, res, next) => {
     await remote.unregister(api_key_name);
     await remote.register(api_key_name);
     await remote.getRemoteName();
-    const configFile = getConfigFile();
+    const configFile: Config = getConfigFile();
     if (!configFile.remotes)
       configFile.remotes = []
     configFile.remotes = configFile.remotes.filter(local_remote => !(remote.address === local_remote.address
@@ -274,7 +297,7 @@ app.get('/api/config/remote/:address', async (req, res, next) => {
   if (req.body?.user)
     user = req.body?.user;
 
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -297,7 +320,7 @@ app.get('/api/config/remote/:address/key', async (req, res, next) => {
   if (req.body?.user)
     user = req.body?.user;
 
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -312,7 +335,7 @@ app.delete('/api/config/remote/:address', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -321,14 +344,15 @@ app.delete('/api/config/remote/:address', async (req, res, next) => {
   }
   const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
   try {
-    await remote.unregister(remoteEntry.api_key_name);
+    if (remoteEntry.api_key_name)
+      await remote.unregister(remoteEntry.api_key_name)
     res.status(200).json(address);
   } catch (error)
   {
     errorHandler(error, req, res, next);
   }
   finally {
-    configFile.remotes = configFile.remotes.filter(local_remote => remote.address !== local_remote.address);
+    configFile.remotes = configFile.remotes?.filter(local_remote => remote.address !== local_remote.address);
     writeConfigFile(configFile);
   }
 })
@@ -339,8 +363,8 @@ app.post('/api/remote/:address/wake', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  let broadcast = req.query.broadcast;
-  const configFile = getConfigFile();
+  let broadcast = req.query?.['broadcast'] ? req.query['broadcast'].toString(): undefined;
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -364,8 +388,8 @@ app.post('/api/remote/:address/system', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  let power = req.query.cmd;
-  const configFile = getConfigFile();
+  let power = req.query["cmd"]?.toString();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -374,7 +398,8 @@ app.post('/api/remote/:address/system', async (req, res, next) => {
   }
   const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
   try {
-    res.status(200).json(await remote.powerRemote(power));
+    if (power)
+      res.status(200).json(await remote.powerRemote(power));
   } catch (error)
   {
     errorHandler(error, req, res, next);
@@ -386,7 +411,7 @@ app.put('/api/remote/:address/system/logs/web', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -407,7 +432,7 @@ app.get('/api/remote/:address/system/logs/web', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -428,7 +453,7 @@ app.get('/api/remote/:address/version', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -449,7 +474,7 @@ app.get('/api/remote/:address/system/power/battery', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -470,7 +495,7 @@ app.get('/api/remote/:address/entities', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -491,7 +516,7 @@ app.get('/api/remote/:address/activities', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -513,7 +538,7 @@ app.get('/api/remote/:address/activities/:activity_id', async (req, res, next) =
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -538,7 +563,7 @@ app.delete('/api/remote/:address/activities/:activity_id', async (req, res, next
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -564,7 +589,7 @@ app.delete('/api/remote/:address/activities/:activity_id/ui/pages/:page_id', asy
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -590,7 +615,7 @@ app.get('/api/remote/:address/entities/:entity_id', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -612,7 +637,7 @@ app.delete('/api/remote/:address/entities/:entity_id', async (req, res, next) =>
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -637,7 +662,7 @@ app.get('/api/remote/:address/resources/:type', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -676,7 +701,7 @@ app.get('/api/remote/:address/local/resources/:type', async (req, res, next) => 
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -694,7 +719,7 @@ app.get('/api/remote/:address/local/resources/:type', async (req, res, next) => 
 
 app.get('/api/remote/:address/profiles', async (req, res, next) => {
   const address = req.params.address;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -713,7 +738,7 @@ app.get('/api/remote/:address/profiles', async (req, res, next) => {
 app.get('/api/remote/:address/profiles/:profileid/pages', async (req, res, next) => {
   const address = req.params.address;
   const profileId = req.params.profileid;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -732,7 +757,7 @@ app.get('/api/remote/:address/profiles/:profileid/pages', async (req, res, next)
 app.get('/api/remote/:address/profiles/:profileid/groups', async (req, res, next) => {
   const address = req.params.address;
   const profileId = req.params.profileid;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -750,7 +775,7 @@ app.get('/api/remote/:address/profiles/:profileid/groups', async (req, res, next
 
 app.get('/api/remote/:address/system/backup/export', async (req, res, next) => {
   const address = req.params.address;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -769,7 +794,7 @@ app.get('/api/remote/:address/system/backup/export', async (req, res, next) => {
 
 app.get('/api/remote/:address/cfg/entity/commands', async (req, res, next) => {
   const address = req.params.address;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -787,7 +812,7 @@ app.get('/api/remote/:address/cfg/entity/commands', async (req, res, next) => {
 
 app.get('/api/remote/:address/cfg/device/screen_layout', async (req, res, next) => {
   const address = req.params.address;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -809,7 +834,7 @@ app.get('/api/remote/:address/macros', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -831,7 +856,7 @@ app.get('/api/remote/:address/macros/:macroid', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -852,7 +877,7 @@ app.get('/api/remote/:address/intg/drivers', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -873,7 +898,7 @@ app.get('/api/remote/:address/intg/instances', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -892,12 +917,12 @@ app.get('/api/remote/:address/intg/instances', async (req, res, next) => {
 app.get('/api/remote/:address/intg/instances/:intgid/entities', async (req, res, next) => {
   const address = req.params.address;
   const intgId = req.params.intgid;
-  let filter = req.query.filter;
+  let filter = req.query["filter"]?.toString();
   if (filter === undefined) filter = "NEW";
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -914,11 +939,11 @@ app.get('/api/remote/:address/intg/instances/:intgid/entities', async (req, res,
 })
 
 app.post('/api/remote/:address/intg/install', upload.single('file'),async (req, res, next) => {
-  const address = req.params.address;
+  const address = req.params["address"];
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -934,7 +959,8 @@ app.post('/api/remote/:address/intg/install', upload.single('file'),async (req, 
     errorHandler(error, req, res, next);
   }
   try {
-    fs.rmSync(req.file.path)
+    if (req["file"]?.["path"])
+      fs.rmSync(req["file"]["path"])
   } catch (error)
   {
     console.error("Error while deleting uploaded integration", req.file, error);
@@ -947,7 +973,7 @@ app.delete('/api/remote/:address/intg/drivers/:driverid', async (req, res, next)
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -969,7 +995,7 @@ app.delete('/api/remote/:address/intg/instances/:integrationid', async (req, res
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -991,7 +1017,7 @@ app.get('/api/remote/:address/pub/status', async (req, res, next) => {
   let user = REMOTE_USER
   if (req.body?.user)
     user = req.body?.user;
-  const configFile = getConfigFile();
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -1013,8 +1039,8 @@ app.put('/api/remote/:address/entities/:entity_id/command', async (req, res, nex
   let user = REMOTE_USER;
   if (req.body?.user)
     user = req.body?.user;
-  let power = req.query.cmd;
-  const configFile = getConfigFile();
+  let power = req.query["cmd"];
+  const configFile: Config = getConfigFile();
   const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
   if (!remoteEntry)
   {
@@ -1036,10 +1062,11 @@ app.get('/api/proxy',  async (req, res) => {
     isStream: true,
     throwHttpErrors: false
   };
-  console.log("Proxy get", decodeURI(req.query.url), options);
+  const url = req.query["url"] ? req.query["url"].toString() : "";
+  console.log("Proxy get", decodeURI(url), options);
 
   await streamPipeline(
-    got.get(encodeURI(decodeURI(req.query.url)), options),
+    got.get(encodeURI(decodeURI(url)), options) as any,
     res
   );
   res.end();
@@ -1047,7 +1074,8 @@ app.get('/api/proxy',  async (req, res) => {
 
 app.post('/upload',upload.single('file'),(req,res)=>{
   console.log(req.file, req.body.name);
-  res.status(200).json(req.file.filename)
+  if (req["file"]?.["filename"])
+    res.status(200).json(req["file"]["filename"])
 })
 
 app.get('/download/:url', (req, res, next) => {
@@ -1089,7 +1117,7 @@ app.post('/api/load/path/:path', (req, res, next) => {
               return;
             }
             try {
-              zip.file(filename).async('nodebuffer').then(content => {
+              zip.file(filename)?.async('nodebuffer').then(content => {
                 if (filename.includes(':'))
                 {
                   console.log(`${zipFile} : renaming file ${filename} to ${filename.replaceAll(":", "_")}`);
@@ -1120,8 +1148,8 @@ app.post('/api/load/path/:path', (req, res, next) => {
       })
     });
   } catch (exception) {
-      next(error);
-      console.log(error);
+      next(exception);
+      console.log(exception);
   }
 })
 
@@ -1175,7 +1203,7 @@ app.get('/api/profiles', (req, res, next) => {
 
 app.get('/api/uploaded_files', (req, res, next) => {
   try {
-    const files = [];
+    const files: string[] = [];
     fs.readdirSync(UPLOAD_DIR).map(fileName => {
       files.push(fileName);
     });
@@ -1215,13 +1243,13 @@ app.listen(LISTEN_PORT, function () {
 });
 
 
-function errorHandler(error, req, res, next) {
+function errorHandler(error: any, req: any, res:any, next: any) {
   if (error.response instanceof TypeError) {
     return res.status(400).json(error.name + ": " + error.message);
   }
   if (error.response)
   {
-    let message = {};
+    let message: any = {};
     message['headers'] = error.response.headers;
     message['statusCode'] = error.response.statusCode;
     message['code'] = error.response.code;

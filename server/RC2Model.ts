@@ -1,20 +1,25 @@
 import fs from 'node:fs';
 import path from 'path';
 
+export interface Entity {
+  name: any;
+  type: string;
+  entity_type: string;
+}
 
 export class RC2Model
 {
-  entities_catalog = {};
+  entities_catalog: any = {};
   // {activity_id: {name, entities:[{entity_id, name, integration}], buttons:[{button, entity_id, short_press:True/False}]}}
-  activities = {};
+  activities: any = {};
   // {profile_id : {name, pages:[{page_id, name, entities: [entity_id]]}}
-  profiles = {}
-  activities_entities = {};
+  profiles: any = {}
+  activities_entities: any = {};
   // activity_entities: [activity_ids]
   // activity_buttons: [{ activity_id, button, short_press:boolean}]
   // activity_interface: [{page_id, entity_id, command}]
   // pages: [{profile_id, page_id}]
-  entities_usage = {};
+  entities_usage: any = {};
   constructor() {
   }
 
@@ -27,26 +32,9 @@ export class RC2Model
     this.entities_usage = {};
   }
 
-  getOrphans()
+  getEntity(entityNameOrId: string): {[entityId: string]: Entity}
   {
-    const orphans = [];
-    for (let entity_id in this.entities_usage)
-    {
-      const entity = this.entities_usage[entity_id];
-      if (entity["activity_entities"].length === 0 &&
-        entity["activity_buttons"].length === 0 &&
-        entity["pages"].length === 0)
-      {
-        const entity_ref = this.entities_catalog[entity_id];
-        orphans.push({"entity_id": entity_id, "name": entity_ref['name'], "type": entity_ref['type']});
-      }
-    }
-    return orphans;
-  }
-
-  getEntity(entityNameOrId)
-  {
-    const found_entities = {}
+    const found_entities: any = {}
     if (entityNameOrId in this.entities_catalog || entityNameOrId.toLowerCase() in this.entities_catalog)
     {
       found_entities[entityNameOrId] = {"name": this.entities_catalog[entityNameOrId]['name'],
@@ -73,7 +61,7 @@ export class RC2Model
     return found_entities;
   }
 
-  loadFromPath(folderName)
+  loadFromPath(folderName: string)
   {
     this.init();
     if (fs.existsSync(path.join(folderName, 'integrations'))) {
@@ -139,64 +127,8 @@ export class RC2Model
     }
   }
 
-  build_entity_usage()
-  {
-    const entities_usage = {};
-    for (let entity_id in this.entities_catalog)
-    {
-      const entity = this.entities_catalog[entity_id];
-      let entity_usage = {"name": entity['name'],
-        "type": entity["type"],
-        "activity_entities": [], "activity_buttons": [], "activity_interface": [],
-        "pages": [], "activity_sequences": []};
-      entities_usage[entity_id] = entity_usage
-      for (let profile_id in this.profiles)
-      {
-        const profile = this.profiles[profile_id];
-        for (let page_index in profile['pages'])
-        {
-          const page = profile['pages'][page_index];
-          if (page['entities'].includes(entity_id))
-          {
-            entity_usage['pages'].push({"profile_id": profile_id,
-              "page_id": page['page_id'],
-              "name": page['name']});
-          }
-        }
-      }
-      for (let activity_id in this.activities)
-      {
-        const activity = this.activities[activity_id];
-        const activity_name = activity['name'];
-        if (activity['entities'].find(activity_entity => activity_entity['entity_id'] === entity_id))
-        {
-          entity_usage["activity_entities"].push({"activity_id": activity_id, "name": activity_name});
-        }
-        const buttons = activity['buttons'].filter(activity_button => activity_button['entity_id'] === entity_id);
-        buttons.forEach(button => {
-          entity_usage["activity_buttons"].push({"activity_id": activity_id, "name": activity_name,
-            "button": button['button'],
-            "short_press": button['short_press']});
-        });
-        //activity_interface
-        activity["interface"].forEach(page => {
-          page["items"].forEach(item => {
-            if (item["entity_id"] === entity_id)
-            {
-              entity_usage["activity_interface"].push({"activity_id": activity_id, "name": activity_name,
-                "page_id": page["page_id"], "page_name": page["name"],
-                "command": item["command"]});
-            }
-          })
-        });
-        entity_usage["activity_sequences"].push(...activity["sequences"].filter(sequence => sequence.entity_id === entity_id));
-      }
-    }
-    return entities_usage;
-  }
-
-  parse_entities_folder(entities_path, type) {
-    const entities = {}
+  parse_entities_folder(entities_path: string, type: string): {[type: string]: any} {
+    const entities:{[type: string]: any} = {};
     fs.readdirSync(entities_path).map(fileName => {
       fileName = path.join(entities_path, fileName);
       if (fs.lstatSync(fileName).isDirectory() || !fileName.endsWith('.json'))

@@ -1,11 +1,11 @@
 import path from "path";
 import fs from "node:fs";
 
-const DATA_DIR = process.env.DATA_DIR || '.';
+const DATA_DIR = process.env["DATA_DIR"] || '.';
 const CONFIG_FOLDER = DATA_DIR;
 const CONFIG_FILE = 'config.json';
 
-export function writeConfigFile(config)
+export function writeConfigFile(config: any)
 {
   const filepath = path.join(CONFIG_FOLDER, CONFIG_FILE);
   console.log('Write config', filepath);

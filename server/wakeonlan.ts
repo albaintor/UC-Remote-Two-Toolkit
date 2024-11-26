@@ -1,8 +1,6 @@
-'use strict'
-
-const os = require('os')
-const net = require('net')
-const dgram = require('dgram')
+import os from "os";
+import net from "net";
+import dgram from "dgram";
 
 let createWOLPacket = (mac:string) => {
   mac = mac.replace(/:/g, '')
@@ -20,7 +18,7 @@ let getBroadcastAddr = (ip: string, netmask: string) => {
 
 let sendToAll = (mac: string, opts: any) => {
   let promises: Promise<any>[] = []
-  let ifaces = os.networkInterfaces();
+  let ifaces: any = os.networkInterfaces();
   for (let p in ifaces) {
     ifaces[p].forEach((iface: any) => {
       if (iface.internal || !net.isIPv4(iface.address)) return
@@ -64,8 +62,7 @@ export function send(mac: string, opts: any = {}) {
       let socket = dgram.createSocket(net.isIPv6(address) ? 'udp6' : 'udp4')
       socket.unref()
 
-      socket.bind(0, from, (err:any) => {
-        if (err) return reject(err)
+      socket.bind(0, from, () => {
         socket.setBroadcast(true)
         socket.once('error', done)
         doSend()

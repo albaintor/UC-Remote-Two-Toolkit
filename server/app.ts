@@ -3,17 +3,17 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import multer from 'multer';
 import JSZip from 'jszip';
-import got from 'got';
+import got, { Options } from 'got';
 import {pipeline as streamPipeline} from 'node:stream/promises';
 import {rimraf} from 'rimraf';
 
 import path from 'path';
 // import indexRouter from './routes/index.js';
 // import usersRouter from './routes/users.js';
-import {RC2Model} from './RC2Model';
+import {RC2Model} from "./RC2Model.js";
 import fs from "node:fs";
-import {Remote} from "./remote";
-import {getConfigFile, writeConfigFile} from './config';
+import {Remote} from "./remote.js";
+import {getConfigFile, writeConfigFile} from './config.js';
 import {program} from 'commander';
 import cors from 'cors';
 // import expressws from 'express-ws';
@@ -101,8 +101,8 @@ app.get('/server/api', (req, res, next) => {
   headers['User-Agent'] = '';
   const options = {
     headers: headers,
-    searchParams: req.query,
-  }
+    searchParams: req.query as any,
+  };
   console.log('Proxy get', url, req.query);
   got.get(url, options).then(proxyres => {
     let resBody;
@@ -134,7 +134,7 @@ app.delete('/server/api', (req, res, next) => {
   headers['User-Agent'] = '';
   const options = {
     headers: headers,
-    searchParams: req.query,
+    searchParams: req.query as any,
   }
   console.log('Proxy delete', url, req.query);
   got.delete(url, options).then(proxyres => {
@@ -163,7 +163,7 @@ app.post('/server/api', (req, res, next) => {
   headers['User-Agent'] = '';
   const options = {
     headers: headers,
-    searchParams: req.query,
+    searchParams: req.query as any,
     json: req.body
   }
   if (!url.startsWith('http://')) url = 'http://'+url;
@@ -196,7 +196,7 @@ app.patch('/server/api', (req, res, next) => {
   headers['User-Agent'] = '';
   const options = {
     headers: headers,
-    searchParams: req.query,
+    searchParams: req.query as any,
     json: req.body
   }
 
@@ -226,7 +226,7 @@ app.put('/server/api', (req, res, next) => {
   headers['User-Agent'] = '';
   const options = {
     headers: headers,
-    searchParams: req.query,
+    searchParams: req.query as any,
     json: req.body
   }
 

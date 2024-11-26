@@ -3,7 +3,7 @@ import fs from "node:fs";
 import { readdir } from 'node:fs/promises';
 import path from "path";
 import {pipeline as streamPipeline} from 'node:stream/promises';
-import {send as wakeonlan} from './wakeonlan';
+import {send as wakeonlan} from './wakeonlan.js';
 // const SystemCommand = {
 //   STANDBY: 'STANDBY',
 //   REBOOT: 'REBOOT',

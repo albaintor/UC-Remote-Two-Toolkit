@@ -4,7 +4,10 @@
   "version": "2.4.3",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "tsc": "tsc",
+    "postinstall": "npm run tsc",
+    "dev": "ts-node-dev -respawn -pretty -transpile-only app.ts"
   },
   "dependencies": {
     "commander": "^12.1.0",
@@ -26,10 +29,16 @@
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.7",
+    "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.14",
     "@types/morgan": "^1.9.9",
     "@types/multer": "^1.4.12",
+    "@types/node": "^22.10.0",
+    "@typescript-eslint/parser": "^8.16.0",
     "esbuild": "^0.24.0",
     "postject": "^1.0.0-alpha.6",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.2"
   }
 }

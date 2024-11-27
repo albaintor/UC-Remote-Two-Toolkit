@@ -4,10 +4,10 @@
   "version": "2.4.3",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node dist/app.js",
     "compile": "tsc",
     "postinstall": "npm run compile",
-    "test": "tsc-watch --onSuccess \"node app.js\""
+    "test": "tsc-watch --onSuccess \"node dist/app.js\""
   },
   "dependencies": {
     "commander": "^12.1.0",

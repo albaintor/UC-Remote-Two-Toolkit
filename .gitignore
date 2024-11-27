@@ -51,3 +51,4 @@ Thumbs.db
 /server/ucrtool-server*
 
 /conf
+/server/dist/

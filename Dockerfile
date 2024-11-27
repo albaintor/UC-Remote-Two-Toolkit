@@ -118,4 +118,4 @@ ENV UCTOOL_PORT=$UCTOOL_PORT
 ADD ./server /data
 WORKDIR /data
 EXPOSE $UCTOOL_PORT
-ENTRYPOINT ["/bin/sh", "-c", "cd /data;node app.js -p $UCTOOL_PORT"]
+ENTRYPOINT ["/bin/sh", "-c", "cd /data;node dist/app.js -p $UCTOOL_PORT"]

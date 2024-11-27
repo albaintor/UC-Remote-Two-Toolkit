@@ -1239,7 +1239,7 @@ if (fs.existsSync(WORKING_FOLDER))
   rc2Model.loadFromPath(WORKING_FOLDER);
 // console.dir(rc2Model.entities_catalog, {depth: null, colors: true});
 app.listen(LISTEN_PORT, function () {
-  console.log(`Listening on port ${LISTEN_PORT}!`);
+  console.log(`UCTool server started, listening on port ${LISTEN_PORT}!`);
 });
 
 

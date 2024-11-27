@@ -5,9 +5,9 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "tsc": "tsc",
-    "postinstall": "npm run tsc",
-    "dev": "ts-node-dev -respawn -pretty -transpile-only app.ts"
+    "compile": "tsc",
+    "postinstall": "npm run compile",
+    "test": "tsc-watch --onSuccess \"node app.js\""
   },
   "dependencies": {
     "commander": "^12.1.0",
@@ -37,8 +37,7 @@
     "@typescript-eslint/parser": "^8.16.0",
     "esbuild": "^0.24.0",
     "postject": "^1.0.0-alpha.6",
-    "ts-node": "^10.9.2",
-    "ts-node-dev": "^2.0.0",
+    "tsc-watch": "^6.2.1",
     "typescript": "^5.7.2"
   }
 }

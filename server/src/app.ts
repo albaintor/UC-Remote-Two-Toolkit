@@ -19,7 +19,7 @@ import cors from 'cors';
 // import expressws from 'express-ws';
 
 let LISTEN_PORT = "8000";
-const DATA_DIR = process.env['DATA_DIR'] || '.';
+const DATA_DIR = process.env['DATA_DIR'] || '..';
 const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 const RESOURCES_DIR = path.join(DATA_DIR, 'resources');
 const app = express();

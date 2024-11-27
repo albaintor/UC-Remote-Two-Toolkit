@@ -701,7 +701,7 @@ export class Helper
   static getSelectedRemote(remotes: Remote[]): Remote | undefined
   {
     const selectedRemoteAddress = localStorage.getItem('remote');
-    if (selectedRemoteAddress)
+    if (remotes && selectedRemoteAddress)
     {
       const address = selectedRemoteAddress.split(":")[0];
       let port = "80";

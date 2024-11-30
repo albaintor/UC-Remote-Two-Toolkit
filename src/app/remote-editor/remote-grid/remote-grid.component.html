@@ -32,15 +32,15 @@
               <p-tag [value]="Helper.getCommandName(item.command, configEntityCommands)" severity="secondary"></p-tag>
             </ng-container>
             <span *ngIf="item?.media_player_id" style="text-align: center;width:100%;height: 100%">
-          <p-chip *ngIf="!runMode" [label]="getEntityName(item?.media_player_id!)"
-                  [style]="Helper.getStyle(getEntityName(item?.media_player_id!))"></p-chip>
-          <div style="position: relative; width: 100%;height: 100%">
-            <img *ngIf="!runMode" src="/assets/icons/media_player.svg" alt="Media player" class="media_player_icon">
-            <ng-container *ngIf="runMode">
-              <app-activity-media-entity [entityId]="item.media_player_id" [remote]="remote" [size]="getGridItemSize(page, item)"
-                                         (onSelectButton)="onSelectButton.emit($event)"/>
-            </ng-container>
-          </div>
+              <p-chip *ngIf="!runMode" [label]="getEntityName(item?.media_player_id!)"
+                      [style]="Helper.getStyle(getEntityName(item?.media_player_id!))"></p-chip>
+              <div style="position: relative; width: 100%;height: 100%">
+                <img *ngIf="!runMode" src="/assets/icons/media_player.svg" alt="Media player" class="media_player_icon">
+                <ng-container *ngIf="runMode">
+                  <app-activity-media-entity [entityId]="item.media_player_id" [remote]="remote" [size]="getGridItemSize(page, item)"
+                                             (onSelectButton)="onSelectButton.emit($event)"/>
+                </ng-container>
+              </div>
         </span>
             <ng-container *ngIf="!runMode">
               <ng-container *ngFor="let param of Helper.getParams(item?.command)">

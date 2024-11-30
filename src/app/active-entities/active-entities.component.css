@@ -13,6 +13,14 @@
   color: #fbf100;
 }
 
+.widget-connection-status {
+  transition: all 1s ease-in-out;
+}
+
+.widget-connection-status .p-tag {
+  transition: all 1s ease-in-out;
+}
+
 .media-card-border {
   background: black;
   border-radius: 10px;

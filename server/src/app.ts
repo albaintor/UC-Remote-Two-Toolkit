@@ -13,13 +13,29 @@ import path from 'path';
 import {RC2Model} from "./RC2Model.js";
 import fs from "node:fs";
 import {Remote} from "./remote.js";
-import {getConfigFile, writeConfigFile} from './config.js';
+import {getConfigFile, writeConfigFile, setConfig} from './config.js';
 import {program} from 'commander';
 import cors from 'cors';
 // import expressws from 'express-ws';
 
 let LISTEN_PORT = "8000";
-const DATA_DIR = process.env['DATA_DIR'] || '..';
+let DATA_DIR = process.env['DATA_DIR'] || '..';
+program
+  .usage('[OPTIONS]...')
+  // .option('-f, --flag', 'Detects if the flag is present.')
+  .option('-p, --port <value>', 'Listen on given port', '8000')
+  .option('-d, --data_dir <value>', 'Uses given path as data directory', '.')
+  .parse(process.argv);
+const options = program.opts();
+if (options['port'])
+{
+  LISTEN_PORT = options['port'];
+}
+if (options['data_dir'])
+{
+  DATA_DIR = options['data_dir'];
+}
+setConfig(DATA_DIR);
 const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 const RESOURCES_DIR = path.join(DATA_DIR, 'resources');
 const app = express();
@@ -34,18 +50,6 @@ const storage = multer.diskStorage({
 });
 
 fs.mkdirSync(UPLOAD_DIR, {recursive: true});
-
-program
-  .usage('[OPTIONS]...')
-  // .option('-f, --flag', 'Detects if the flag is present.')
-  .option('-p, --port <value>', 'Listen on given port', '8000')
-  .parse(process.argv);
-const options = program.opts();
-if (options['port'])
-{
-  LISTEN_PORT = options['port'];
-}
-
 const upload = multer({storage: storage})
 
 app.use(cors());

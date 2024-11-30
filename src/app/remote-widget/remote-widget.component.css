@@ -40,6 +40,10 @@
   background: rgba(0, 0, 0, 0);
 }
 
+.widget-connection-status .p-tag {
+  transition: all 1s ease-in-out;
+}
+
 .charging-status {
   position: absolute;
   left: 50%;

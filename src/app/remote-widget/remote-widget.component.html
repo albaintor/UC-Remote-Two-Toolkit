@@ -24,7 +24,7 @@
         <div class="flex align-items-center justify-content-center">
           <p-tag [value]="(websocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
                  [severity]="(websocketService.connectionStatus  | async) ? 'success' : 'warning'"
-                 pTooltip="Click to wake up the remote"
+                 pTooltip="Click to wake up the remote" class="widget-connection-status"
                  (click)="wakeRemote($event)" [style]="{'cursor': 'pointer'}"/>
         </div>
         <div class="flex align-items-center justify-content-center"
@@ -86,7 +86,7 @@
     <div class="flex align-items-center justify-content-center">
       <p-tag [value]="(websocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
              [severity]="(websocketService.connectionStatus  | async) ? 'success' : 'warning'"
-             pTooltip="Click to wake up the remote"
+             pTooltip="Click to wake up the remote" class="widget-connection-status"
              (click)="wakeRemote($event)" [style]="{'cursor': 'pointer'}"/>
     </div>
     <div class="flex align-items-center justify-content-center"

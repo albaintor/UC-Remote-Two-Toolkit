@@ -9,18 +9,18 @@
         <p-inputSwitch pTooltip="Enable/disable stream logs" [(ngModel)]="streamLogs" (ngModelChange)="toggleStreamLogs($event)"/>&nbsp;&nbsp;
         <span class="pi pi-chart-line"></span>
         <p-progressBar *ngIf="remoteStatus?.memory" [value]="(remoteStatus!.memory!.total_memory!-remoteStatus!.memory!.available_memory!)/remoteStatus!.memory!.total_memory!*100" [style]="{width: '100px'}"
-            [pTooltip]="'Memory : '+Math.floor(remoteStatus!.memory!.available_memory!/1000000).toLocaleString()+' megabytes available on '
-                +Math.floor(remoteStatus!.memory!.total_memory!/1000000).toLocaleString()+' megabytes'" unit="Mb">
+            [pTooltip]="'Memory : '+Math.floor(remoteStatus!.memory!.available_memory!/1000000).toLocaleString()+' megabytes available (total '
+                +Math.floor(remoteStatus!.memory!.total_memory!/1000000).toLocaleString()+'MB)'" unit="Mb">
         </p-progressBar>
         <span class="pi pi-database"></span>
         <p-progressBar *ngIf="remoteStatus?.filesystem?.user_data" [value]="remoteStatus!.filesystem!.user_data!.used!/
         (remoteStatus!.filesystem!.user_data!.available!+remoteStatus!.filesystem!.user_data!.used!)*100" [style]="{width: '100px'}"
-                       [pTooltip]="'Storage : '+Math.floor(remoteStatus!.filesystem!.user_data!.available!/1000000).toLocaleString()+' megabytes available on '+
-                        Math.floor((remoteStatus!.filesystem!.user_data!.available!+remoteStatus!.filesystem!.user_data!.used!)/1000000).toLocaleString()" unit="Mb">
+                       [pTooltip]="'Storage : '+Math.floor(remoteStatus!.filesystem!.user_data!.available!/1000000).toLocaleString()+' megabytes available (total '+
+                        Math.floor((remoteStatus!.filesystem!.user_data!.available!+remoteStatus!.filesystem!.user_data!.used!)/1000000).toLocaleString()+'MB)'" unit="Mb">
         </p-progressBar>
         <span>CPU</span>
-        <p-progressBar *ngIf="remoteStatus?.load_avg" [value]="remoteStatus!.load_avg!.one!" [style]="{width: '100px'}"
-                       [pTooltip]="'CPU : '+Math.floor(remoteStatus!.load_avg!.one!).toLocaleString()+' %'">
+        <p-progressBar *ngIf="remoteStatus?.load_avg" [value]="Math.round(remoteStatus!.load_avg!.one!*100)/100" [style]="{width: '100px'}"
+                       [pTooltip]="'CPU : '+(Math.round(remoteStatus!.load_avg!.one!*100)/100).toLocaleString()+' %'">
         </p-progressBar>
       </ng-container>
       <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">

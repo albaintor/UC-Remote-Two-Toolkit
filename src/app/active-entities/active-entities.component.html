@@ -124,7 +124,7 @@
   <div class="flex align-items-center justify-content-center">
     <p-tag [value]="(websocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
            [severity]="(websocketService.connectionStatus  | async) ? 'success' : 'warning'"
-           [class]="'disconnected-state'"
+           [class]="'disconnected-state'" class="widget-connection-status"
             pTooltip="Click to wake up the remote"
             (click)="wakeRemote($event)"/>
   </div>

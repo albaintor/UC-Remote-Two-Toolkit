@@ -1,8 +1,7 @@
 import path from "path";
 import fs from "node:fs";
 
-const DATA_DIR = process.env["DATA_DIR"] || '..';
-let CONFIG_FOLDER = DATA_DIR;
+let CONFIG_FOLDER = process.env["DATA_DIR"] || '..';
 const CONFIG_FILE = 'config.json';
 
 export function setConfig(configFolder: string)

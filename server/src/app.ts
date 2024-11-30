@@ -24,7 +24,7 @@ program
   .usage('[OPTIONS]...')
   // .option('-f, --flag', 'Detects if the flag is present.')
   .option('-p, --port <value>', 'Listen on given port', '8000')
-  .option('-d, --data_dir <value>', 'Uses given path as data directory', '.')
+  .option('-d, --data_dir <value>', 'Uses given path as data directory')
   .parse(process.argv);
 const options = program.opts();
 if (options['port'])
@@ -36,6 +36,7 @@ if (options['data_dir'])
   DATA_DIR = options['data_dir'];
 }
 setConfig(DATA_DIR);
+console.log(`Using directory ${DATA_DIR} as data directory (current directory ${process.cwd()})`);
 const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 const RESOURCES_DIR = path.join(DATA_DIR, 'resources');
 const app = express();

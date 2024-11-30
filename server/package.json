@@ -7,8 +7,8 @@
     "start": "node dist/app.js",
     "compile": "tsc",
     "postinstall": "npm run compile",
-    "test": "tsc-watch --onSuccess \"node dist/app.js --data_dir .\"",
-    "testenv": "export DATA_DIR=. || set DATA_DIR=.&& tsc-watch --onSuccess \"node dist/app.js\""
+    "test": "tsc-watch --onSuccess \"node dist/app.js --data_dir ./conf\"",
+    "testenv": "export DATA_DIR=./conf || set DATA_DIR=./conf&& tsc-watch --onSuccess \"node dist/app.js\""
   },
   "dependencies": {
     "commander": "^12.1.0",

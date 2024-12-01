@@ -95,6 +95,7 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
   entities: Entity[] | undefined;
   streamLogs = false;
   @ViewChild(FileUpload) fileUpload: FileUpload | undefined;
+  private updateIntegrationsTask: Subscription | undefined;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private confirmationService: ConfirmationService) {
@@ -130,7 +131,13 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
       this.updateTask.unsubscribe();
       this.updateTask = undefined;
     }
+    if (this.updateIntegrationsTask)
+    {
+      this.updateIntegrationsTask.unsubscribe();
+      this.updateIntegrationsTask = undefined;
+    }
     this.updateTask = this.getRemoteStatus()?.subscribe();
+    this.updateIntegrationsTask = this.getRemoteIntegrations()?.subscribe();
   }
 
   updateIntegrations(): Observable<IntegrationsDrivers>
@@ -277,6 +284,19 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  getRemoteIntegrations(): Observable<IntegrationsDrivers> | undefined
+  {
+    if (!this.selectedRemote) return undefined;
+    return timer(0, 10000).pipe(mergeMap(() =>
+        this.updateIntegrations()),
+        takeWhile(results => {
+          console.debug("Updated remote integrations", results);
+          this.cdr.detectChanges();
+          return this.selectedRemote != undefined
+        }),
+        finalize(()=>console.log("Finished update status")));
+  }
+
   getRemoteStatus(): Observable<RemoteStatus | undefined> | undefined
   {
     if (!this.selectedRemote) return undefined;
@@ -321,18 +341,6 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
         return this.selectedRemote != undefined
       }),
       finalize(()=>console.log("Finished update status")))));
-
-    // return timer(0, 5000).pipe(mergeMap(() => {
-    //  if (!this.selectedRemote) return of({} as RemoteStatus);
-    //  return this.server.getRemoteStatus(this.selectedRemote)
-    //  }),
-    //    takeWhile(results=> {
-    //      console.debug("Updated remote status", results);
-    //      if (results) this.remoteStatus = results;
-    //      this.cdr.detectChanges();
-    //      return this.selectedRemote != undefined
-    //    }),
-    //    finalize(()=>console.log("Finished update status")))
   }
 
   protected readonly Math = Math;
@@ -343,6 +351,11 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
     {
       this.updateTask.unsubscribe();
       this.updateTask = undefined;
+    }
+    if (this.updateIntegrationsTask)
+    {
+      this.updateIntegrationsTask.unsubscribe();
+      this.updateIntegrationsTask = undefined;
     }
   }
 

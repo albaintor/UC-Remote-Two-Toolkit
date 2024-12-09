@@ -44,6 +44,10 @@
   transition: all 1s ease-in-out;
 }
 
+.widget-connection-status .p-tag:first-child {
+  width: 80px;
+}
+
 .charging-status {
   position: absolute;
   left: 50%;

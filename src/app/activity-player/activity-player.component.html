@@ -1,5 +1,5 @@
 <p-toast key="activityPlayer"/>
-<p-dialog *ngIf="!smallSizeMode" #dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
+<p-dialog *ngIf="!(smallSizeMode | async)?.matches" #dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
           contentStyleClass="activity-player-dialog" class="activity-player" styleClass="activity-player-header" appendTo="body"
           (close)="closeDialog($event);dialog.close($event)" [style]="{'width': (scale*400+30)+'px', 'max-height': 'calc(100vh - 20px)'}">
   <ng-template pTemplate="header">
@@ -39,7 +39,7 @@
                           (onPageChange)="selectPage($event)"/>
       <app-pagination *ngIf="activity?.options?.user_interface?.pages && currentPage"
         [currentIndex]="activity!.options!.user_interface!.pages!.indexOf(currentPage)" [displayedIndexes]="6"
-        [numberOfPages]="activity!.options!.user_interface!.pages!.length" class="grid-pagination" [smallSizeMode]="smallSizeMode"
+        [numberOfPages]="activity!.options!.user_interface!.pages!.length" class="grid-pagination" [smallSizeMode]="false"
         (onIndexChange)="selectPage($event)" [style]="'width:'+200*scale+'px'"/>
       <div class="flex align-items-center justify-content-center gap-2" style="width: 100%"
            *ngIf="volumeEntity?.new_state?.attributes?.volume">
@@ -52,7 +52,7 @@
     </div>
   </ng-container>
 </p-dialog>
-<div *ngIf="smallSizeMode" style="position: relative; text-align: center;width: 100%">
+<div *ngIf="(smallSizeMode | async)?.matches" style="position: relative; text-align: center;width: 100%">
     <div class="flex align-items-start justify-content-center"
          [style]="{width: '100%', height: '50px'}"></div>
     <div [style]="'position: absolute;top:5px;left:0;right:0;transform-origin: top;scale:'+scale*1.2">
@@ -88,7 +88,8 @@
       <app-pagination *ngIf="activity?.options?.user_interface?.pages && currentPage"
                       [currentIndex]="activity!.options!.user_interface!.pages!.indexOf(currentPage)"
                       [numberOfPages]="activity!.options!.user_interface!.pages!.length" class="grid-pagination"
-                      (onIndexChange)="selectPage($event)"  [style]="'max-width:'+200*scale+'px'" [smallSizeMode]="smallSizeMode"/>
+                      (onIndexChange)="selectPage($event)"  [style]="'max-width:'+200*scale+'px'"
+                      [smallSizeMode]="true"/>
       <div class="flex align-items-center justify-content-center gap-2" style="width: 100%"
            *ngIf="volumeEntity?.new_state?.attributes?.volume">
         <app-slider [value]="Math.round(volumeEntity!.new_state!.attributes!.volume!)" style="width: 100%"

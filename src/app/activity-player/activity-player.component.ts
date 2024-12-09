@@ -9,14 +9,13 @@ import {
 } from '@angular/core';
 import {DialogModule} from "primeng/dialog";
 import {Message, MessageService, PrimeTemplate} from "primeng/api";
-import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
 import {ServerService} from "../server.service";
-import {Activity, ButtonMapping, Command, Entity, EntityCommand, Remote, RemoteActivity, UIPage} from "../interfaces";
+import {Activity, ButtonMapping, Command, EntityCommand, Remote, RemoteActivity, UIPage} from "../interfaces";
 import {Helper} from "../helper";
 import {Button} from "primeng/button";
 import {TooltipModule} from "primeng/tooltip";
 import {RemoteButtonsComponent, ButtonMode} from "../remote-editor/remote-buttons/remote-buttons.component";
-import {NgIf} from "@angular/common";
+import {AsyncPipe, NgIf} from "@angular/common";
 import {catchError, delay, forkJoin, from, map, mergeMap, Observable, of} from "rxjs";
 import {RemoteGridComponent} from "../remote-editor/remote-grid/remote-grid.component";
 import {ToastModule} from "primeng/toast";
@@ -26,7 +25,7 @@ import {PaginationComponent} from "../controls/pagination/pagination.component";
 import {RouterLink} from "@angular/router";
 import {IconComponent} from "../controls/icon/icon.component";
 import {SliderComponent} from "../controls/slider/slider.component";
-import {BreakpointObserver, Breakpoints} from "@angular/cdk/layout";
+import {BreakpointObserver, Breakpoints, BreakpointState} from "@angular/cdk/layout";
 import {MediaEntityState} from "../websocket/remote-websocket-instance";
 import {WebsocketService} from "../websocket/websocket.service";
 
@@ -36,7 +35,6 @@ import {WebsocketService} from "../websocket/websocket.service";
   imports: [
     DialogModule,
     PrimeTemplate,
-    ActivityViewerComponent,
     Button,
     TooltipModule,
     RemoteButtonsComponent,
@@ -47,7 +45,8 @@ import {WebsocketService} from "../websocket/websocket.service";
     PaginationComponent,
     RouterLink,
     IconComponent,
-    SliderComponent
+    SliderComponent,
+    AsyncPipe
   ],
   templateUrl: './activity-player.component.html',
   styleUrl: './activity-player.component.css',
@@ -58,7 +57,7 @@ import {WebsocketService} from "../websocket/websocket.service";
 export class ActivityPlayerComponent implements OnInit {
   remote: Remote | undefined;
   configEntityCommands: EntityCommand[] | undefined;
-  smallSizeMode = false;
+  smallSizeMode : Observable<BreakpointState> | undefined;
   @Input('remote') set _remote(value: Remote | undefined) {
     this.remote = value;
     this.loadRemoteConfig();
@@ -108,15 +107,11 @@ export class ActivityPlayerComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.responsive.observe([
+    this.smallSizeMode = this.responsive.observe([
       Breakpoints.HandsetLandscape,
       Breakpoints.HandsetPortrait,
       Breakpoints.TabletPortrait
-    ])
-      .subscribe(result => {
-        this.smallSizeMode = result.matches;
-        this.cdr.detectChanges();
-      });
+    ]);
   }
 
   loadRemoteConfig()

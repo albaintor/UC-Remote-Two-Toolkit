@@ -789,7 +789,8 @@ app.get('/api/remote/:address/system/backup/export', async (req, res, next) => {
   }
   const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
   try {
-    res.status(200).json(await remote.getBackup(res));
+    await remote.getBackup(res);
+    // res.status(200).json(await remote.getBackup(res));
   } catch (error)
   {
     errorHandler(error, req, res, next);

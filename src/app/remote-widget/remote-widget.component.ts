@@ -23,7 +23,8 @@ import {WebsocketService} from "../websocket/websocket.service";
 import {ToastModule} from "primeng/toast";
 import {MessageService} from "primeng/api";
 import {MediaEntityState, RemoteState, SoftwareUpdate} from "../websocket/remote-websocket-instance";
-import {BreakpointObserver, Breakpoints} from "@angular/cdk/layout";
+import {BreakpointObserver, Breakpoints, BreakpointState} from "@angular/cdk/layout";
+import {Observable} from "rxjs";
 
 interface WidgetConfiguration {
   minimized: boolean;
@@ -65,7 +66,7 @@ export class RemoteWidgetComponent implements OnInit {
   activities: Activity[] = [];
   protected readonly Math = Math;
   softwareUpdate: SoftwareUpdate | undefined;
-  smallSizeMode = false;
+  smallSizeMode : Observable<BreakpointState> | undefined;
 
   constructor(private server:ServerService, protected websocketService: WebsocketService, private cdr:ChangeDetectorRef,
               private messageService: MessageService,
@@ -87,7 +88,7 @@ export class RemoteWidgetComponent implements OnInit {
     this.websocketService.onMediaStateChange().subscribe(remoteState => {
       this.mediaEntity = this.websocketService.mediaEntity;
       this.mediaEntities = this.websocketService.mediaEntities;
-      console.log("Media entities updated", this.mediaEntity, this.mediaEntities);
+      // console.log("Media entities updated", this.mediaEntity, this.mediaEntities);
       this.cdr.detectChanges();
     })
     this.websocketService.onMediaPositionChange().subscribe(entities => {
@@ -106,15 +107,11 @@ export class RemoteWidgetComponent implements OnInit {
       this.loadActivities();
       this.cdr.detectChanges();
     });
-    this.responsive.observe([
+    this.smallSizeMode = this.responsive.observe([
       Breakpoints.HandsetLandscape,
       Breakpoints.HandsetPortrait,
       Breakpoints.TabletPortrait
-    ])
-      .subscribe(result => {
-        this.smallSizeMode = result.matches;
-        this.cdr.detectChanges();
-      });
+    ]);
   }
 
   loadActivities()

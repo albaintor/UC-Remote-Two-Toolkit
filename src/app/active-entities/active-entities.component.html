@@ -2,7 +2,7 @@
 <p-menubar [model]="menuItems">
   <ng-template pTemplate="end">
     <div class="flex flex-wrap align-items-center gap-2">
-      <ng-container *ngIf="!smallSizeMode">
+      <ng-container *ngIf="!(smallSizeMode | async)?.matches">
         <p-dropdown *ngIf="config?.dashboards" [(ngModel)]="selectedDashboard" [options]="config!.dashboards!" placeholder="Select dashboard"
                     (ngModelChange)="selectDashboard($event)" optionLabel="name" class="smaller-dropdown">
         </p-dropdown>
@@ -59,7 +59,7 @@
           </ng-template>
         </p-dropdown>
       </ng-container>
-      <ng-container *ngIf="smallSizeMode">
+      <ng-container *ngIf="(smallSizeMode | async)?.matches">
         <p-dropdown *ngIf="config?.dashboards" [(ngModel)]="selectedDashboard" [options]="config!.dashboards!" placeholder="Dashboard"
                     (ngModelChange)="selectDashboard($event)" optionLabel="name" class="smaller-dropdown">
         </p-dropdown>
@@ -132,7 +132,7 @@
 </div>
 <app-activity-player *ngFor="let activity of selectedActivities" [activity]="activity" [visible]="true" [(minimized)]="activity.collapsed"
                      (onClose)="removeActivity($event)" [scale]="scale" (onMessage)="handleMessage($event)" style="width:100%"/>
-<div class="flex flex-wrap gap-3" *ngIf="smallSizeMode">
+<div class="flex flex-wrap gap-3" *ngIf="(smallSizeMode | async)?.matches">
   <div class="flex gap-2 align-content-center justify-content-center media-card-border border-small"
        [style]="'width:100%'" *ngFor="let entityState of entityStates" [ngSwitch]="entityState.entity_type">
     <app-media-entity *ngSwitchCase="'media_player'" [mediaEntity]="entityState" [remote]="selectedRemote" style="width:100%" [scale]="1"
@@ -149,7 +149,7 @@
                         [closable]="true" (onClose)="removeEntityState(entityState)" (onMessage)="handleMessage($event)"></app-climate-entity>
   </div>
 </div>
-<div class="flex flex-wrap gap-3" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="drop($event)" *ngIf="!smallSizeMode">
+<div class="flex flex-wrap gap-3" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="drop($event)" *ngIf="!(smallSizeMode | async)?.matches">
   <ng-container *ngFor="let entityState of entityStates" [ngSwitch]="entityState.entity_type">
     <ng-container *ngSwitchCase="'media_player'">
       <div *ngIf="isLargeFormat(entityState)" class="flex gap-2 align-content-center justify-content-center media-card-border"

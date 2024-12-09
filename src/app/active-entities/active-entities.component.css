@@ -21,6 +21,10 @@
   transition: all 1s ease-in-out;
 }
 
+.widget-connection-status .p-tag:first-child {
+  width: 80px;
+}
+
 .media-card-border {
   background: black;
   border-radius: 10px;

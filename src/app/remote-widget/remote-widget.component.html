@@ -1,5 +1,5 @@
 <p-toast key="widget"/>
-<ng-container *ngIf="!smallSizeMode">
+<ng-container *ngIf="!(smallSizeMode | async)?.matches">
   <p-dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
                        contentStyleClass="widget-dialog" class="widget" styleClass="widget-header" appendTo="body">
     <ng-template pTemplate="header">
@@ -64,7 +64,7 @@
     </ng-container>
   </p-dialog>
 </ng-container>
-<ng-container *ngIf="smallSizeMode">
+<ng-container *ngIf="(smallSizeMode | async)?.matches">
   <div class="flex justify-content-between flex-wrap gap-3 column-gap-4" style="width: 100%">
     <div class="flex align-items-center justify-content-center">
       <p-button icon="pi pi-window-minimize" [severity]="minimized ? 'secondary' : 'info'" class="smaller-button"

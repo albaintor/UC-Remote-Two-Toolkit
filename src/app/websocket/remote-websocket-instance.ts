@@ -356,7 +356,7 @@ export class RemoteWebsocketInstance {
   {
     if (!this.remoteWebsocket.getRemote()) return of(undefined);
     return this.serverService.getRemotetEntity(this.remoteWebsocket.getRemote()!, entity_id).pipe(map(entity => {
-      console.debug("Add or reload entity for tracking", entity);
+      // console.debug("Add or reload entity for tracking", entity);
       let entityEntry = entityStates.find(item =>
         item.entity_id === entity.entity_id);
       if (!entityEntry) {
@@ -422,7 +422,7 @@ export class RemoteWebsocketInstance {
       }
       this.mediaUpdated$.next([entity]);
     }
-    console.debug("Media entities", this.mediaEntities);
+    // console.debug("Media entities", this.mediaEntities);
   }
 
   handleMediaPlayerEvent(message: EventMessage)
@@ -446,7 +446,7 @@ export class RemoteWebsocketInstance {
       {
         this.mediaUpdated$.next([entity]);
       }
-      console.debug("Updated entity", entity);
+      // console.debug("Updated entity", entity);
     }
   }
 
@@ -490,7 +490,7 @@ export class RemoteWebsocketInstance {
   }
 
   private handleActivityEvent(eventMessage: EventMessage) {
-    console.debug("Updated activity event", eventMessage);
+    // console.debug("Updated activity event", eventMessage);
     this.updateActivityState(eventMessage, this._activities, this.activityEntitiesUpdated$);
 
     let entity = this._activities.find(item => item.entity_id === eventMessage.msg_data.entity_id);
@@ -506,17 +506,17 @@ export class RemoteWebsocketInstance {
 
   private handleLightEvent(eventMessage: EventMessage) {
     this.updateEntityState(eventMessage, this._entityStates, this.lightEntitiesUpdated$);
-    console.debug("Updated light entity", this.lightEntities);
+    // console.debug("Updated light entity", this.lightEntities);
   }
 
   private handleCoverEvent(eventMessage: EventMessage) {
     this.updateEntityState(eventMessage, this._entityStates, this.coverEntitiesUpdated$);
-    console.debug("Updated cover entity", this.coverEntities);
+    // console.debug("Updated cover entity", this.coverEntities);
   }
 
   private handleClimateEvent(eventMessage: EventMessage) {
     this.updateEntityState(eventMessage, this._entityStates, this.climateEntitiesUpdated$);
-    console.debug("Updated climate entity", this.climateEntities);
+    // console.debug("Updated climate entity", this.climateEntities);
   }
 
   getMediaInfo(): string | undefined

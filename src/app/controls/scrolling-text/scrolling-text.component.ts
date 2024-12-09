@@ -50,7 +50,7 @@ export class ScrollingTextComponent implements AfterViewInit {
 
   updateClass()
   {
-    if (!this.textContainer || !this.textContent) return;
+    if (!this.textContainer?.nativeElement?.clientWidth || !this.textContent?.nativeElement?.clientWidth) return;
     if (this.textClass) this.textContent.nativeElement.classList.add(this.textClass);
     this.cdr.detectChanges();
     const style = this.textStyle ? this.textStyle : "";

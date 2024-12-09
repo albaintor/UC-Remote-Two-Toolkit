@@ -10,16 +10,13 @@ import {DropdownModule} from "primeng/dropdown";
 import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase} from "@angular/common";
 import {MenuItem, Message, MessageService, PrimeTemplate} from "primeng/api";
 import {ProgressBarModule} from "primeng/progressbar";
-import {ScrollingTextComponent} from "../controls/scrolling-text/scrolling-text.component";
 import {TagModule} from "primeng/tag";
 import {ServerService} from "../server.service";
 import {MenubarModule} from "primeng/menubar";
 import {Config, Dashboard, Entity, Remote, RemoteActivity, RemoteData} from "../interfaces";
 import {FormsModule} from "@angular/forms";
 import {Helper} from "../helper";
-import {SliderComponent} from "../controls/slider/slider.component";
 import {Button} from "primeng/button";
-import {DropdownOverComponent} from "../controls/dropdown-over/dropdown-over.component";
 import {MediaEntityComponent} from "./media-entity/media-entity.component";
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
 import {ActivityPlayerComponent} from "../activity-player/activity-player.component";
@@ -30,7 +27,7 @@ import {WebsocketService} from "../websocket/websocket.service";
 import {CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray} from "@angular/cdk/drag-drop";
 import {DialogModule} from "primeng/dialog";
 import {InputTextModule} from "primeng/inputtext";
-import {BreakpointObserver, Breakpoints} from "@angular/cdk/layout";
+import {BreakpointObserver, Breakpoints, BreakpointState} from "@angular/cdk/layout";
 import {RemoteWebsocket} from "../websocket/remote-websocket";
 import {
   EntityState,
@@ -38,7 +35,7 @@ import {
   RemoteState,
   RemoteWebsocketInstance
 } from "../websocket/remote-websocket-instance";
-import {firstValueFrom, forkJoin, from, map, mergeMap, of} from "rxjs";
+import {firstValueFrom, Observable} from "rxjs";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {BlockUIModule} from "primeng/blockui";
 import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
@@ -60,15 +57,12 @@ interface SelectedActivity extends RemoteActivity {
     NgIf,
     PrimeTemplate,
     ProgressBarModule,
-    ScrollingTextComponent,
     TagModule,
     NgForOf,
     AsyncPipe,
     MenubarModule,
     FormsModule,
-    SliderComponent,
     Button,
-    DropdownOverComponent,
     MediaEntityComponent,
     AutoCompleteModule,
     ActivityPlayerComponent,
@@ -123,7 +117,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   dashboardName: string | undefined;
   selectedDashboard: Dashboard | undefined;
   lockDashboard = false;
-  smallSizeMode = false;
+  smallSizeMode : Observable<BreakpointState> | undefined;
   config: Config | undefined;
   additionalWebsockets: RemoteWebsocket[] = [];
   additionalWebsocketMedias: RemoteWebsocketInstance[] = [];
@@ -255,15 +249,11 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
       })
     })
     this.cdr.detectChanges();
-    this.responsive.observe([
+    this.smallSizeMode = this.responsive.observe([
       Breakpoints.HandsetLandscape,
       Breakpoints.HandsetPortrait,
       Breakpoints.TabletPortrait
-    ])
-      .subscribe(result => {
-        this.smallSizeMode = result.matches;
-        this.cdr.detectChanges();
-      });
+    ]);
   }
 
   saveDashboard()

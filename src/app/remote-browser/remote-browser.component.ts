@@ -11,7 +11,7 @@ import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.compon
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
 import {ButtonModule} from "primeng/button";
 import {ChipModule} from "primeng/chip";
-import {CommonModule} from "@angular/common";
+import {CommonModule, DatePipe} from "@angular/common";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
 import {OverlayPanelModule} from "primeng/overlaypanel";
 import {ProgressBarModule} from "primeng/progressbar";
@@ -52,6 +52,7 @@ import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {IconComponent} from "../controls/icon/icon.component";
 import {RemoteWidgetComponent} from "../remote-widget/remote-widget.component";
 import { environment } from '../../environment';
+import {HttpErrorResponse} from "@angular/common/http";
 
 interface FileProgress
 {
@@ -95,7 +96,7 @@ interface FileProgress
   ],
   templateUrl: './remote-browser.component.html',
   styleUrl: './remote-browser.component.css',
-  providers: [MessageService, ConfirmationService],
+  providers: [MessageService, ConfirmationService, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
@@ -156,7 +157,7 @@ export class RemoteBrowserComponent implements AfterViewInit {
   accordionActiveIndexes = [2, 3];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
-              private confirmationService: ConfirmationService) {
+              private datePipe: DatePipe) {
     this.server.getConfig().subscribe(config => {});
   }
 
@@ -509,9 +510,27 @@ export class RemoteBrowserComponent implements AfterViewInit {
 
   private saveRemote() {
     if (!this.selectedRemote) return;
-    return this.server.getRemoteBackup(this.selectedRemote).subscribe(blob => {
-      saveAs(blob, "backup.zip");
-    });
+    return this.server.getRemoteBackup(this.selectedRemote).subscribe({next: blob =>
+      {
+        saveAs(blob, `backup_${this.datePipe.transform(new Date(), "yyyyMMdd")}.zip`);
+      },
+      error: async err => {
+        console.error("Error while backing up", err);
+        let detail = err.message;
+        if (err instanceof HttpErrorResponse)
+        {
+          const error:HttpErrorResponse = err as HttpErrorResponse;
+          if (error.error)
+          {
+            const jsonError = await (new Response(err.error)).json();
+            detail += "\n"+jsonError.message;
+          }
+        }
+        this.messageService.add({severity: "error", summary: `Error while backing up remote data ${this.selectedRemote?.remote_name}`,
+          detail: `${detail}`});
+        this.cdr.detectChanges();
+      }
+  });
   }
 
   private restoreRemote() {

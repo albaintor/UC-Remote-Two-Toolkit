@@ -524,6 +524,8 @@ export interface RemoteModel {
 
 export interface RemoteModels {
   models: RemoteModel[];
+  resources: string[];
+  iconMapping:{[key: string]: string};
 }
 
 export interface BatteryState {
@@ -541,4 +543,11 @@ export interface RemoteLogStreamConfiguration
   autostart?: boolean;
   enabled: boolean;
   password?:string;
+}
+
+export interface FAFontConfiguration {
+  id: string;
+  label: string;
+  membership: { [key: string] : string[]};
+  unicode: string;
 }

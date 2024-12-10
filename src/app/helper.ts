@@ -31,6 +31,7 @@ export interface LocalizedName {
 export class Helper
 {
   static languageName: LanguageCode = 'en';
+  static iconsMap: Map<string, string> = new Map();
 
   static getLanguageName(): LanguageCode
   {
@@ -349,9 +350,12 @@ export class Helper
 
   static getIconClass(icon?: string): string
   {
+    if (!icon) return "";
     if (icon?.startsWith("uc:"))
-      return "icon icon-" + icon.replace("uc:", "")
-    return ""
+      icon = icon.replace("uc:", "")
+    const remap = Helper.iconsMap.get(icon);
+    if (remap) return "fa-light fa-" + remap;
+    return "fa-light fa-" + icon
   }
 
   static getIconURL(remote: Remote, icon: string | undefined) {

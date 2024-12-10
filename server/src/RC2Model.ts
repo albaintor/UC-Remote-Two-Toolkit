@@ -10,15 +10,9 @@ export interface Entity {
 export class RC2Model
 {
   entities_catalog: any = {};
-  // {activity_id: {name, entities:[{entity_id, name, integration}], buttons:[{button, entity_id, short_press:True/False}]}}
   activities: any = {};
-  // {profile_id : {name, pages:[{page_id, name, entities: [entity_id]]}}
   profiles: any = {}
   activities_entities: any = {};
-  // activity_entities: [activity_ids]
-  // activity_buttons: [{ activity_id, button, short_press:boolean}]
-  // activity_interface: [{page_id, entity_id, command}]
-  // pages: [{profile_id, page_id}]
   entities_usage: any = {};
   constructor() {
   }

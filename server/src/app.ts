@@ -683,6 +683,29 @@ app.get('/api/remote/:address/resources/:type', async (req, res, next) => {
   }
 })
 
+app.get(/api\/remote\/(.+)\/resource\/(.+)/, async (req, res, next) => {
+  const address = req.params[0];
+  const url = req.params[1];
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile: Config = getConfigFile();
+  console.log("Get remote resource", url);
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.loadResource('/'+url, RESOURCES_DIR));
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
 app.get('/api/remote/:address/resources/:type/:id', async (req, res, next) => {
   const address = req.params.address;
   const type = req.params.type;
@@ -691,9 +714,9 @@ app.get('/api/remote/:address/resources/:type/:id', async (req, res, next) => {
     res.set({'Content-Type': 'image/'+path.extname(resource_id).replace('.', '')});
     console.log('Get file', path.join(RESOURCES_DIR, address, type, resource_id))
     if (DATA_DIR.startsWith('.'))
-      await res.sendFile(path.join(RESOURCES_DIR, address, type, resource_id), { root: '.' });
+      res.sendFile(path.join(RESOURCES_DIR, address, type, resource_id), { root: '.' });
     else
-      await res.sendFile(path.join(RESOURCES_DIR, address, type, resource_id));
+      res.sendFile(path.join(RESOURCES_DIR, address, type, resource_id));
   } catch (error)
   {
     errorHandler(error, req, res, next);
@@ -1223,6 +1246,21 @@ app.get('/api/activities', (req, res, next) => {
 app.get('/api/profiles', (req, res, next) => {
   try {
     res.send(rc2Model.profiles).end();
+  } catch(error) {
+    next(error);
+  }
+})
+
+app.get(/^\/resources\/(.*)/, (req, res, next) => {
+  try {
+    const resource = '/'+req.params[0];
+      const resourceFile = path.join(RESOURCES_DIR, resource);
+      console.log('Get resource', resourceFile)
+      // res.set({'Content-Type': 'image/'+path.extname(resource_id).replace('.', '')});
+      let options = {}
+      if (DATA_DIR.startsWith('.'))
+        options = { root: '.' }
+      res.sendFile(resourceFile, options);
   } catch(error) {
     next(error);
   }

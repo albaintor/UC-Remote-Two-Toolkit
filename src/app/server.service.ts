@@ -8,7 +8,7 @@ import {
   Config,
   Driver,
   Entity,
-  EntityCommand,
+  EntityCommand, FAFontConfiguration,
   Integration,
   LanguageCode,
   Macro,
@@ -155,9 +155,18 @@ export class ServerService {
 
   loadResources(remote: Remote, type: string): Observable<any>
   {
-    return this.http.get<any>(`/api/remote/${remote.address}/resources/${type}`).pipe(map(results => {
-      return results;
-    }))
+    const tasks = [
+      /*this.http.get<any>(`/api/remote/${remote.address}/resources/${type}`).pipe(map(results => {
+        return results;
+      })),*/
+      this.getRemoteModels().pipe(mergeMap(models => {
+        console.debug("Loading remote resources", models.resources);
+        return from(models.resources).pipe(mergeMap(resource => {
+          return this.http.get<any>(`/api/remote/${remote.address}/resource/${resource}`);
+        }, 3))
+      }))
+    ]
+    return forkJoin(tasks);
   }
 
   getResources(remote: Remote, type: string): Observable<string[]>
@@ -524,9 +533,9 @@ export class ServerService {
     }))
   }
 
-  getUCIconsMap(): Observable<{name: string, icon: string}[]>
+  getFAIcons(): Observable<FAFontConfiguration[]>
   {
-    return this.http.get<{name: string, icon: string}[]>('/assets/icons/uc-icons.json').pipe(map(results => {
+    return this.http.get<FAFontConfiguration[]>('/assets/ucicon/fa-icons.json').pipe(map(results => {
       return results;
     }))
   }

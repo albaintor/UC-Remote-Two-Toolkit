@@ -24,7 +24,6 @@ export class Remote
   valid_to: string|undefined;
   remote_name: string|undefined;
   protocol = 'http://';
-  resources_path = '';
   mac_address: string|undefined;
   resources_directory: string|undefined;
 
@@ -53,7 +52,7 @@ export class Remote
     this.resources_directory = path.join(resources_directory, this.address);
     const target_path = path.join(this.resources_directory, type);
     if (fs.existsSync(target_path)) {
-      fs.rmdirSync(target_path, { recursive: true });
+      fs.rmSync(target_path, { recursive: true });
     }
     if (!fs.existsSync(target_path)) {
       fs.mkdirSync(target_path, { recursive: true });
@@ -88,6 +87,24 @@ export class Remote
     }
     console.log('List of resources extracted', global_list);
     return global_list;
+  }
+
+  async loadResource(url: string, target_directory: string)
+  {
+    if (!this.address) return;
+    const target_file = path.join(target_directory, url);
+    const target_path = path.dirname(target_file);
+    const sourceUrl = this.getURL() + url;
+    console.log(`Load resource ${sourceUrl} => ${target_file}`);
+    if (!fs.existsSync(target_path)) {
+      fs.mkdirSync(target_path, { recursive: true });
+    }
+
+    const options = {
+      ...this.getOptions(),
+    }
+    await streamPipeline(got.stream(sourceUrl),
+      fs.createWriteStream(target_file));
   }
 
   toJson()

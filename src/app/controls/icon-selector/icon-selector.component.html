@@ -1,16 +1,19 @@
 <p-dialog header="Select icon" [(visible)]="visible" [style]="{width: '80vw'}">
-  <div class="flex flex-row flex-wrap">
-    <div class="flex align-items-center justify-content-center w-4rem h-4rem p-6" *ngFor="let icon of ucIcons">
-      <span (click)="selectIcon(icon.icon)" class="icon-select" [pTooltip]="icon.name">
-        <span [class]="Helper.getIconClass(icon.icon)"></span>
-      </span>
+  <div class="flex flex-column">
+    <input type="text" pInputText [(ngModel)]="searchIcon" (input)="searchChanges($event)"/>
+    <div class="flex flex-row flex-wrap">
+      <div class="flex align-items-center justify-content-center w-4rem h-4rem p-6" *ngFor="let icon of filteredCustomIcons">
+        <span id="icon" (click)="selectIcon(icon)" class="icon-select" [pTooltip]="icon">
+          <img [src]="Helper.getIconURL(remote!, icon)" [alt]="icon" width="70" height="70">
+        </span>
+      </div>
     </div>
-  </div>
-  <div class="flex flex-row flex-wrap">
-    <div class="flex align-items-center justify-content-center w-4rem h-4rem p-6" *ngFor="let icon of customIcons">
-      <span id="icon" (click)="selectIcon(icon)" class="icon-select" [pTooltip]="icon">
-        <img [src]="Helper.getIconURL(remote!, icon)" [alt]="icon" width="70" height="70">
-      </span>
+    <div class="flex flex-row flex-wrap">
+      <div class="flex align-items-center justify-content-center w-4rem h-4rem p-6" *ngFor="let icon of filteredFaIcons">
+        <span id="faicon" (click)="selectIcon(icon.id)" class="icon-select" [pTooltip]="icon.label">
+          <span [class]="Helper.getIconClass(icon.id)"></span>
+        </span>
+      </div>
     </div>
   </div>
 </p-dialog>

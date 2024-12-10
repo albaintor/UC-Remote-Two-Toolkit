@@ -20,7 +20,7 @@ import {
   RemoteMap,
   RemoteModels,
   RemoteRegistration,
-  RemoteStatus,
+  RemoteStatus, RemoteUpdate,
   RemoteVersion,
   ScreenLayout
 } from "./interfaces";
@@ -394,6 +394,13 @@ export class ServerService {
   getRemoteStatus(remote: Remote): Observable<RemoteStatus>
   {
     return this.http.get<RemoteStatus>(`/api/remote/${remote.address}/pub/status`).pipe(map(results => {
+      return results;
+    }))
+  }
+
+  checkSystemUpdate(remote: Remote): Observable<RemoteUpdate>
+  {
+    return this.http.get<RemoteUpdate>(`/api/remote/${remote.address}/system/update`).pipe(map(results => {
       return results;
     }))
   }

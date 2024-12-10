@@ -1039,6 +1039,27 @@ app.get('/api/remote/:address/pub/status', async (req, res, next) => {
   }
 })
 
+app.get('/api/remote/:address/system/update', async (req, res, next) => {
+  const address = req.params.address;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile: Config = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    res.status(200).json(await remote.checkSystemUpdate());
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
+  }
+})
+
 app.put('/api/remote/:address/entities/:entity_id/command', async (req, res, next) => {
   const address = req.params.address;
   const entity_id = req.params.entity_id;

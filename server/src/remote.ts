@@ -564,11 +564,18 @@ export class Remote
     return JSON.parse(res.body);
   }
 
-
   async getStatus()
   {
     const options = this.getOptions();
     const url = this.getURL() + "/api/pub/status";
+    let res = await got.get(url, options);
+    return JSON.parse(res.body);
+  }
+
+  async checkSystemUpdate()
+  {
+    const options = this.getOptions();
+    const url = this.getURL() + "/api/system/update";
     let res = await got.get(url, options);
     return JSON.parse(res.body);
   }

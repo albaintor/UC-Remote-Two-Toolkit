@@ -707,7 +707,7 @@ export class ActivitySyncComponent implements AfterViewInit {
       const entity1 = remoteData1.entities.find(entity => entity.entity_id === entityId);
       if (entity1)
       {
-        // Entity ids are checked exactly from integrations (should be the same), however for :
+        // Entity ids are checked exactly from system (should be the same), however for :
         // IR remotes, BT remotes, macros we compare against entity name
         if (["remote", "macro"].includes(entity1.entity_type))
         {

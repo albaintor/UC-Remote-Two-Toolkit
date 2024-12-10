@@ -5,6 +5,15 @@
   <ng-template pTemplate="end">
     <div class="flex align-items-center gap-2">
       <ng-container *ngIf="selectedRemote">
+        <ng-container *ngIf="systemUpdate?.available?.[0]">
+          <p-tag [value]="'Firmware available '+systemUpdate!.available[0].version" severity="contrast"
+                 (click)="showUpdateDialog()"
+                 class="firmware-update"
+            pTooltip="Click to update firmware"></p-tag>
+        </ng-container>
+        <ng-container *ngIf="systemUpdate">
+          <span class="firmware-version" pTooltip="Check if a firmware update is available" (click)="checkFirmware()">Firmware {{systemUpdate.installed_version}}</span>
+        </ng-container>
         <a pTooltip="Open stream logs in new tab" [href]="'http://'+selectedRemote.address+'/log'" target="_blank">Stream logs</a>&nbsp;
         <p-inputSwitch pTooltip="Enable/disable stream logs" [(ngModel)]="streamLogs" (ngModelChange)="toggleStreamLogs($event)"/>&nbsp;&nbsp;
         <span class="pi pi-chart-line"></span>
@@ -160,3 +169,14 @@
   </ng-template>
 </p-table>
 <p-confirmDialog key="confirmIntegrations"/>
+<p-dialog [modal]="true" position="center" [showHeader]="false"
+          [closable]="true" [(visible)]="updateDialog" [draggable]="true" appendTo="body">
+  <div class="flex flex-column align-items-center" *ngIf="systemUpdate?.available">
+    <ng-container *ngFor="let update of systemUpdate!.available">
+      <h3>Firmware update {{update.version}} available (current {{systemUpdate!.installed_version}})</h3>
+      <div class="flex flex-wrap">{{update.description}}</div>
+      <a [href]="update.release_notes_url" target="_blank">View release notes</a>
+      <p-button (click)="installFirmware(update)" severity="danger" label="Install"></p-button>
+    </ng-container>
+  </div>
+</p-dialog>

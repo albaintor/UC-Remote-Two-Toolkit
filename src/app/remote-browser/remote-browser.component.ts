@@ -123,7 +123,7 @@ export class RemoteBrowserComponent implements AfterViewInit {
   protected readonly Math = Math;
   items: MenuItem[] = [
     {label: 'Remotes', command: () => this.selectRemote(), icon: 'pi pi-mobile'},
-    {label: 'Integrations', routerLink:'/integrations', icon: 'pi pi-microchip'},
+    {label: 'System', routerLink:'/system', icon: 'pi pi-microchip'},
     {label: 'Load', icon: 'pi pi-cloud-download',
       items: [
         {label: 'Load Remote data', command: () => this.loadRemote(), icon: 'pi pi-cloud-download', block: true},

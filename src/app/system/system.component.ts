@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {ConfirmationService, MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
-import {Config, Driver, Entity, Integration, Remote, RemoteStatus} from "../interfaces";
+import {Config, Driver, Entity, Integration, Remote, RemoteStatus, RemoteUpdate} from "../interfaces";
 import {
   finalize,
   forkJoin,
@@ -42,6 +42,8 @@ import {InputTextModule} from "primeng/inputtext";
 import {MultiSelectModule} from "primeng/multiselect";
 import {InputSwitchModule} from "primeng/inputswitch";
 import {HttpErrorResponse} from "@angular/common/http";
+import {TagModule} from "primeng/tag";
+import {DialogModule} from "primeng/dialog";
 
 type DriverIntegration = Driver | Integration;
 
@@ -51,7 +53,7 @@ interface IntegrationsDrivers {
 }
 
 @Component({
-  selector: 'app-integrations',
+  selector: 'app-system',
   standalone: true,
   imports: [
     DropdownModule,
@@ -65,21 +67,22 @@ interface IntegrationsDrivers {
     TableModule,
     ChipModule,
     FileUploadModule,
-    DecimalPipe,
     BlockUIModule,
     ConfirmDialogModule,
     InputTextModule,
     MultiSelectModule,
     NgForOf,
-    InputSwitchModule
+    InputSwitchModule,
+    TagModule,
+    DialogModule
   ],
-  templateUrl: './integrations.component.html',
-  styleUrl: './integrations.component.css',
+  templateUrl: './system.component.html',
+  styleUrl: './system.component.css',
   providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class IntegrationsComponent implements AfterViewInit, OnDestroy {
+export class SystemComponent implements AfterViewInit, OnDestroy {
   menuItems: MenuItem[] = [
     {label: 'Home', routerLink: '/home', icon: 'pi pi-home'},
   ]
@@ -96,6 +99,9 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
   streamLogs = false;
   @ViewChild(FileUpload) fileUpload: FileUpload | undefined;
   private updateIntegrationsTask: Subscription | undefined;
+  systemUpdate: RemoteUpdate | undefined;
+  protected readonly Math = Math;
+  updateDialog = false;
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private confirmationService: ConfirmationService) {
@@ -187,10 +193,10 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
     this.cdr.detectChanges();
     this.updateIntegrations().subscribe(({next: (results) => {
       if (!results.drivers && !results.integrations) return;
-        //this.driverIntegrations = [...this.integrations, ...this.drivers];
+        //this.driverIntegrations = [...this.system, ...this.drivers];
         this.driverIntegrations = [...this.drivers];
         this.messageService.add({key: "integrationComponent",
-          severity: "success", summary: "Remote drivers and integrations loaded",
+          severity: "success", summary: "Remote drivers and system loaded",
         });
         this.cdr.detectChanges();
       },
@@ -209,6 +215,11 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
 
     this.server.getLogStreamConfiguration(this.selectedRemote).subscribe(results => {
       this.streamLogs = results.enabled;
+      this.cdr.detectChanges();
+    });
+    this.server.checkSystemUpdate(this.selectedRemote).subscribe(systemUpdate => {
+      this.systemUpdate = systemUpdate;
+      console.debug("System update info", systemUpdate);
       this.cdr.detectChanges();
     })
   }
@@ -290,7 +301,7 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
     return timer(0, 10000).pipe(mergeMap(() =>
         this.updateIntegrations()),
         takeWhile(results => {
-          console.debug("Updated remote integrations", results);
+          console.debug("Updated remote system", results);
           this.cdr.detectChanges();
           return this.selectedRemote != undefined
         }),
@@ -343,8 +354,6 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
       finalize(()=>console.log("Finished update status")))));
   }
 
-  protected readonly Math = Math;
-
   ngOnDestroy(): void {
     this.selectedRemote = undefined;
     if (this.updateTask)
@@ -394,5 +403,51 @@ export class IntegrationsComponent implements AfterViewInit, OnDestroy {
         this.cdr.detectChanges();
       }
     })
+  }
+
+  checkFirmware() {
+    if (!this.selectedRemote) return;
+    this.server.checkSystemUpdate(this.selectedRemote).subscribe({next: systemUpdate=>
+      {
+        this.systemUpdate = systemUpdate;
+        console.debug("System update info", systemUpdate);
+        if (this.systemUpdate.available?.length > 0)
+        {
+          this.messageService.add({key: "integrationComponent", severity: "success",
+            summary: `New firmware ${systemUpdate.available[0].version} available for ${this.selectedRemote?.remote_name}`});
+          this.updateDialog = true;
+        }
+        else {
+          this.messageService.add({key: "integrationComponent", severity: "info",
+            summary: `No firmware available for ${this.selectedRemote?.remote_name}`});
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err: HttpErrorResponse)  => {
+        console.error("Error", err);
+        this.messageService.add({key: "integrationComponent", severity: "error", summary: `Error checking firmware ${this.selectedRemote?.remote_name}`,
+          detail: `${err.error.statusCode} - ${err.message}`, sticky: true});
+        this.cdr.detectChanges();
+      }
+  })
+  }
+
+  installFirmware(update: {
+    id: string;
+    title: string;
+    description: { [p: string]: any };
+    version: string;
+    channel: string;
+    release_date: Date;
+    size: number;
+    release_notes_url: string;
+    download: string
+  }) {
+    if (!this.selectedRemote) return;
+  }
+
+  showUpdateDialog() {
+    this.updateDialog = true;
+    this.cdr.detectChanges();
   }
 }

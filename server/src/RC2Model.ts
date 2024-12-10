@@ -64,8 +64,8 @@ export class RC2Model
   loadFromPath(folderName: string)
   {
     this.init();
-    if (fs.existsSync(path.join(folderName, 'integrations'))) {
-      const integrations_path = path.join(folderName, 'integrations');
+    if (fs.existsSync(path.join(folderName, 'system'))) {
+      const integrations_path = path.join(folderName, 'system');
       fs.readdirSync(integrations_path).map(fileName => {
         const integration_path = path.join(integrations_path, fileName);
         const entities_path = path.join(integration_path, 'entities');

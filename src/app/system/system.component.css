@@ -1,0 +1,9 @@
+.firmware-update .p-tag {
+  cursor: pointer;
+}
+
+.firmware-version {
+  cursor: pointer;
+  font-weight: bold;
+  color: #10b981;
+}

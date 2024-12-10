@@ -93,6 +93,30 @@ export interface RemoteStatus
   }
 }
 
+export interface RemoteUpdate
+{
+  update_in_progress: boolean;
+  last_check_date: Date;
+  next_check_date: Date;
+  update_check_enabled: boolean;
+  installed_version: string;
+  available: [
+    {
+      id: string;
+      title: string;
+      description: {
+        [name: string] : any;
+      };
+      version: string;
+      channel: string;
+      release_date: Date;
+      size: number;
+      release_notes_url: string;
+      download: string;
+    }
+  ]
+}
+
 export enum OperationStatus
 {
   Todo ,

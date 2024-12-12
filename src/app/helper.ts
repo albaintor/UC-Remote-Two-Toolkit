@@ -183,6 +183,8 @@ export class Helper
       if (item.media_player_id && item.media_player_id != item2.media_player_id) return false;
       if (item.command && (item.command as Command)?.entity_id != (item2.command as Command)?.entity_id &&
         (item.command as Command).cmd_id != (item2.command as Command)?.cmd_id) return false;
+      if (item.type == 'text' && item2.text !== item.text) return false;
+      if (item.type == 'icon' && item2.icon !== item.icon) return false;
     }
     return true;
   }

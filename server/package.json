@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/morgan": "^1.9.9",

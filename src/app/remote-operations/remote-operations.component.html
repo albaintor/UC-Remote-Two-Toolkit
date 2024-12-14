@@ -44,7 +44,7 @@
           <td [style]="{width: '60%'}"><ngx-json-viewer [json]="operation.body" [depth]="1"></ngx-json-viewer></td>
           <td>
             <ng-container *ngIf="operation.status !== OperationStatus.Todo">
-              <p-button pTooltip="Replay this operation" icon="pi pi-replay" [rounded]="true" severity="warning" (onClick)="setStatus(operation, OperationStatus.Todo)"/>
+              <p-button pTooltip="Replay this operation" icon="pi pi-replay" [rounded]="true" severity="warn" (onClick)="setStatus(operation, OperationStatus.Todo)"/>
             </ng-container>
           </td>
         </tr>
@@ -97,7 +97,7 @@
                     <td [style]="{width: '60%'}"><ngx-json-viewer [json]="operation.body" [depth]="1"></ngx-json-viewer></td>
                     <td>
                       <ng-container *ngIf="operation.status !== OperationStatus.Todo">
-                        <p-button pTooltip="Replay this operation" icon="pi pi-replay" [rounded]="true" severity="warning" (onClick)="setStatus(operation, OperationStatus.Todo)"/>
+                        <p-button pTooltip="Replay this operation" icon="pi pi-replay" [rounded]="true" severity="warn" (onClick)="setStatus(operation, OperationStatus.Todo)"/>
                       </ng-container>
                       <!--<ng-container *ngIf="operation.status == OperationStatus.Todo">
                         <p-button pTooltip="Cancel this operation" icon="pi pi-times" [rounded]="true" severity="danger" (onClick)="setStatus(operation, OperationStatus.Cancelled)"/>

@@ -2,7 +2,7 @@
 <h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Unfolded Circle remote configuration toolkit</h2>
 <p-blockUI [blocked]="progress"></p-blockUI>
 <p-menubar [model]="menuItems">
-  <ng-template pTemplate="end">
+  <ng-template #end>
     <div class="flex align-items-center gap-2">
       <ng-container *ngIf="selectedRemote">
         <ng-container *ngIf="systemUpdate?.available?.[0]">

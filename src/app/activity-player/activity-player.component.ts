@@ -8,7 +8,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {DialogModule} from "primeng/dialog";
-import {Message, MessageService, PrimeTemplate} from "primeng/api";
+import {MessageService, PrimeTemplate, ToastMessageOptions} from "primeng/api";
 import {ServerService} from "../server.service";
 import {Activity, ButtonMapping, Command, EntityCommand, Remote, RemoteActivity, UIPage} from "../interfaces";
 import {Helper} from "../helper";
@@ -77,7 +77,7 @@ export class ActivityPlayerComponent implements OnInit {
   @Input() visible = false;
   @Input() scale = 0.7;
   @Output() onClose: EventEmitter<ActivityPlayerComponent> = new EventEmitter();
-  @Output() onMessage: EventEmitter<Message> = new EventEmitter();
+  @Output() onMessage: EventEmitter<ToastMessageOptions> = new EventEmitter();
   minimized = false;
   @Input("minimized") set _minimized(minimized: boolean | undefined) {
     if (minimized === undefined || this.minimized === minimized) return;

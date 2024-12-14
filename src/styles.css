@@ -11,6 +11,11 @@
   --ngx-json-object : #059635;
   --ngx-json-separator : #FF2238;
 }
+
+html {
+  font-family:Inter var,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji",Segoe UI Symbol;
+}
+
 .p-component {
   font-size: 0.7rem !important;
 }
@@ -20,16 +25,15 @@ a:link {
   text-decoration: none;
 }
 
-/* visited link */
 a:visited {
   color: #bed8ff;
 }
 
-a.p-menuitem-link:hover {
+a.p-menubar-item-link:hover {
   text-decoration: none;
 }
 
-a.p-menuitem-link:active {
+a.p-menubar-item-link:active {
   text-decoration: none;
 }
 
@@ -41,14 +45,11 @@ a.p-accordion-header-link:active {
   text-decoration: none;
 }
 
-  /* mouse over link */
 a:hover {
-  /*font-weight: bold;*/
   color: white;
   text-decoration: underline;
 }
 
-/* selected link */
 a:active {
   font-weight: bold;
   text-decoration: underline;

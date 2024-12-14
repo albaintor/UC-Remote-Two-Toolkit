@@ -35,7 +35,7 @@
           <p-button icon="pi pi-trash" pTooltip="Unregister this remote" [rounded]="true" (click)="deleteRemote(remote)" severity="danger"></p-button>&nbsp;
           <p-button icon="pi pi-barcode" pTooltip="Get registrations" [rounded]="true" (click)="getRemote(remote)"></p-button>&nbsp;
           <p-button icon="pi pi-wifi" pTooltip="Test connection" [rounded]="true" (click)="testRemote(remote)"></p-button>&nbsp;
-          <p-button icon="pi pi-replay" severity="warning" pTooltip="Reboot remote" [rounded]="true" (click)="restartRemote(remote)"></p-button>&nbsp;
+          <p-button icon="pi pi-replay" severity="warn" pTooltip="Reboot remote" [rounded]="true" (click)="restartRemote(remote)"></p-button>&nbsp;
           <p-button icon="pi pi-power-off" severity="danger" pTooltip="Shutdown remote" [rounded]="true" (click)="shutdownRemote(remote)"></p-button>&nbsp;
           <p-button icon="pi pi-wifi" severity="success" pTooltip="Wake up remote" [rounded]="true" (click)="wakeRemote(remote)"></p-button>
         </td>

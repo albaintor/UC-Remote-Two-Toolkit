@@ -3,7 +3,7 @@
 <p-blockUI [blocked]="blockedMenu"/>
 <app-remote-data-loader #loader [remote]="selectedRemote" (loaded)="remoteLoaded($event)"></app-remote-data-loader>
 <p-menubar [model]="menuItems">
-  <ng-template pTemplate="end">
+  <ng-template #end>
     <div class="flex align-items-center gap-2">
       <i>Work in progress</i>&nbsp;
       <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)"

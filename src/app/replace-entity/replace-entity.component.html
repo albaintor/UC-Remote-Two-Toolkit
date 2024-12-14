@@ -4,7 +4,7 @@
 <p-toast></p-toast>
 <h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Unfolded Circle remote configuration toolkit</h2>
 <p-menubar [model]="items">
-  <ng-template pTemplate="end">
+  <ng-template #end>
     <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
       <ng-template pTemplate="selectedItem">
         <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>

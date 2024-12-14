@@ -7,7 +7,7 @@ import {
   TemplateRef,
   ViewEncapsulation
 } from '@angular/core';
-import {LightEntityState, MediaEntityState} from "../../websocket/remote-websocket-instance";
+import {LightEntityState} from "../../websocket/remote-websocket-instance";
 import {Remote} from "../../interfaces";
 import {Helper} from "../../helper";
 import {ServerService} from "../../server.service";
@@ -20,7 +20,7 @@ import {SliderComponent} from "../../controls/slider/slider.component";
 import {ColorPickerModule} from "primeng/colorpicker";
 import {FormsModule} from "@angular/forms";
 import {ButtonComponent} from "../../controls/button/button.component";
-import {Message} from "primeng/api";
+import {ToastMessageOptions} from "primeng/api";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-text.component";
 
@@ -29,7 +29,6 @@ import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-te
   standalone: true,
     imports: [
         NgIf,
-        Button,
         TooltipModule,
         CdkDragHandle,
         NgTemplateOutlet,
@@ -56,7 +55,7 @@ export class LightEntityComponent implements OnInit {
   @Input() scale = 1;
   @Input() closable: boolean = false;
   @Output() onClose: EventEmitter<LightEntityState> = new EventEmitter();
-  @Output() onMessage: EventEmitter<Message> = new EventEmitter();
+  @Output() onMessage: EventEmitter<ToastMessageOptions> = new EventEmitter();
   protected readonly Helper = Helper;
   protected readonly Math = Math;
   lightColor: {h: number; s: number; b: number} | undefined;

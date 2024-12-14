@@ -3,7 +3,7 @@
     <app-button *ngIf="!isOn()" icon="pi pi-power-off" [scale]="scale"
                 [rounded]="true" (click)="powerToggle()"
                 size="small" pTooltip="Power toggle" severity="secondary"/>
-    <app-button *ngIf="isOn()" icon="pi pi-power-off" [rounded]="true" severity="warning" [scale]="scale"
+    <app-button *ngIf="isOn()" icon="pi pi-power-off" [rounded]="true" severity="warn" [scale]="scale"
               (click)="powerToggle()" size="small" pTooltip="Power toggle"/>
   </div>
   <div class="close-button" *ngIf="closable">

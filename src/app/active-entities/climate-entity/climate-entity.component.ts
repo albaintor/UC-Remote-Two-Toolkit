@@ -25,7 +25,7 @@ import {TagModule} from "primeng/tag";
 import {ButtonComponent} from "../../controls/button/button.component";
 import {debounceTime, map, Subject, Subscription} from "rxjs";
 import {distinctUntilChanged} from "rxjs/operators";
-import {Message} from "primeng/api";
+import {ToastMessageOptions} from "primeng/api";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-text.component";
 
@@ -52,11 +52,9 @@ const HAVC_FEATURES_MAP: {[type:string]: string} = {
   selector: 'app-climate-entity',
   standalone: true,
   imports: [
-    Button,
     CdkDragHandle,
     ColorPickerModule,
     NgIf,
-    SliderComponent,
     TooltipModule,
     NgTemplateOutlet,
     KnobModule,
@@ -84,7 +82,7 @@ export class ClimateEntityComponent implements OnInit, OnDestroy {
   @Input() scale = 1;
   @Input() closable: boolean = false;
   @Output() onClose: EventEmitter<ClimateEntityState> = new EventEmitter();
-  @Output() onMessage: EventEmitter<Message> = new EventEmitter();
+  @Output() onMessage: EventEmitter<ToastMessageOptions> = new EventEmitter();
   protected readonly Helper = Helper;
   target_temperature_step = 0.5;
   min_temperature = 10;
@@ -163,7 +161,7 @@ export class ClimateEntityComponent implements OnInit, OnDestroy {
     switch(this.hvacMode)
     {
       case "OFF": return "secondary";
-      case "HEAT": return "warning";
+      case "HEAT": return "warn";
       case "COOL": return "info";
       case "FAN": return "success";
       case "HEAT_COOL":

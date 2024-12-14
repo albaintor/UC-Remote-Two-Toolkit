@@ -84,7 +84,7 @@ export class RemoteMediaEntityComponent implements AfterViewInit {
     }
     if (this.mediaEntityState?.new_state?.attributes?.media_image_url && this.mediaEntityState?.new_state?.attributes?.media_image_proxy)
     {
-      this.imageUrl = `'/api/proxy?url='${this.mediaEntityState.new_state.attributes.media_image_url}`;
+      this.imageUrl = `/api/proxy?url=${this.mediaEntityState.new_state.attributes.media_image_url}`;
     } else if (this.mediaEntityState?.new_state?.attributes?.media_image_url)
       this.imageUrl = this.mediaEntityState?.new_state?.attributes?.media_image_url;
     this.cdr.detectChanges();

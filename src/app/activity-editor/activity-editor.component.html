@@ -6,7 +6,7 @@
 <app-icon-selector #iconSelector (iconSelected)="iconSelected($event)"></app-icon-selector>
 <h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Unfolded Circle remote configuration toolkit</h2>
 <p-menubar [model]="items">
-  <ng-template pTemplate="end">
+  <ng-template #end>
     Target remote :
     <p-dropdown [(ngModel)]="targetRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(targetRemote!)">
       <ng-template pTemplate="selectedItem">
@@ -77,12 +77,12 @@
     <p-button label="Save this activity to file" (onClick)="saveActivity()" severity="success" icon="pi pi-save" size="small"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-button label="Import activity from file" (onClick)="importActivity()" severity="warning" icon="pi pi-file-import" size="small">
+    <p-button label="Import activity from file" (onClick)="importActivity()" severity="warn" icon="pi pi-file-import" size="small">
       <input #input_file type="file" style="display:none" (change)="loadInputFile($event)">
     </p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-button label="Import activity from clipboard" (onClick)="importActivityFromClipboard()" severity="warning" icon="pi pi-clipboard" size="small"/>
+    <p-button label="Import activity from clipboard" (onClick)="importActivityFromClipboard()" severity="warn" icon="pi pi-clipboard" size="small"/>
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-toggleButton [(ngModel)]="recreateMapping" onLabel="Recreate mapping" offLabel="Update mapping"

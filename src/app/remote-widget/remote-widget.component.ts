@@ -25,6 +25,7 @@ import {MessageService} from "primeng/api";
 import {MediaEntityState, RemoteState, SoftwareUpdate} from "../websocket/remote-websocket-instance";
 import {BreakpointObserver, Breakpoints, BreakpointState} from "@angular/cdk/layout";
 import {Observable} from "rxjs";
+import {Tooltip} from "primeng/tooltip";
 
 interface WidgetConfiguration {
   minimized: boolean;
@@ -47,7 +48,8 @@ interface WidgetConfiguration {
     FormsModule,
     MediaEntityComponent,
     DropdownOverComponent,
-    ToastModule
+    ToastModule,
+    Tooltip
   ],
   templateUrl: './remote-widget.component.html',
   styleUrl: './remote-widget.component.css',

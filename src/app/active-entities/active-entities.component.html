@@ -1,6 +1,6 @@
 <p-toast key="activeEntities"/>
 <p-menubar [model]="menuItems">
-  <ng-template pTemplate="end">
+  <ng-template #end>
     <div class="flex flex-wrap align-items-center gap-2">
       <ng-container *ngIf="!(smallSizeMode | async)?.matches">
         <p-dropdown *ngIf="config?.dashboards" [(ngModel)]="selectedDashboard" [options]="config!.dashboards!" placeholder="Select dashboard"
@@ -123,7 +123,7 @@
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-tag [value]="(websocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
-           [severity]="(websocketService.connectionStatus  | async) ? 'success' : 'warning'"
+           [severity]="(websocketService.connectionStatus  | async) ? 'success' : 'warn'"
            [class]="'disconnected-state'" class="widget-connection-status"
             pTooltip="Click to wake up the remote"
             (click)="wakeRemote($event)"/>
@@ -207,7 +207,7 @@
     <p-toggleButton [(ngModel)]="lockDashboard" onLabel="Freeze dashboard" offLabel="Add new entities automatically" onIcon="pi pi-lock"
                     offIcon="pi pi-lock-open" [style]="{'scale': scale}"/>
     <div class="flex flex-wrap align-items-center gap-1">
-      Virtual remotes : <p-tag *ngFor="let entity of selectedActivities" [value]="Helper.getEntityName(entity)" severity="warning"/>
+      Virtual remotes : <p-tag *ngFor="let entity of selectedActivities" [value]="Helper.getEntityName(entity)" severity="warn"/>
     </div>
     <div class="flex flex-wrap gap-3 align-items-center">
       <p-button icon="pi pi-times" pTooltip="Delete this dashboard"

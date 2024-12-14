@@ -53,6 +53,7 @@ import {IconComponent} from "../controls/icon/icon.component";
 import {RemoteWidgetComponent} from "../remote-widget/remote-widget.component";
 import { environment } from '../../environment';
 import {HttpErrorResponse} from "@angular/common/http";
+import {RouterLink} from "@angular/router";
 
 interface FileProgress
 {
@@ -92,7 +93,8 @@ interface FileProgress
     BlockUIModule,
     ConfirmDialogModule,
     IconComponent,
-    RemoteWidgetComponent
+    RemoteWidgetComponent,
+    RouterLink
   ],
   templateUrl: './remote-browser.component.html',
   styleUrl: './remote-browser.component.css',

@@ -4,7 +4,7 @@
   [dismissableMask]="true">
   <div class="flex flex-wrap gap-3">
     <div class="flex align-items-center" *ngIf="Helper.isEmptyItem(gridItem?.item)">
-      <p-button severity="warning" icon="pi pi-file-plus" (onClick)="addCommand()" label="Create a command"></p-button><br>
+      <p-button severity="warn" icon="pi pi-file-plus" (onClick)="addCommand()" label="Create a command"></p-button><br>
     </div>
     <div class="flex align-items-center" *ngIf="!Helper.isEmptyItem(gridItem?.item)">
       <p-button severity="danger" icon="pi pi-trash" (onClick)="deleteCommand()" label="Delete this command"></p-button><br>

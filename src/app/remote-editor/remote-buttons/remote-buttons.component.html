@@ -106,7 +106,7 @@
   </ng-container>
   <ng-container *ngIf="button && button.long_press">
     <div class="col-3 button-action" (click)="executeCommand(button, ButtonMode.LongPress)">
-      <p-tag severity="warning" value="Long press"/>
+      <p-tag severity="warn" value="Long press"/>
     </div>
     <div class="col-3 button-action" (click)="executeCommand(button, ButtonMode.LongPress)">
       <p-chip [label]="getEntityName(button.long_press.entity_id)"

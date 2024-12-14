@@ -5,7 +5,7 @@
 <!--</div>-->
 <p-blockUI [blocked]="blockedMenu"/>
 <p-menubar [model]="items">
-  <ng-template pTemplate="end">Source remote :
+  <ng-template #end>Source remote :
     <p-dropdown [(ngModel)]="selectedRemote1" [options]="remotes" placeholder="Select source remote">
       <ng-template pTemplate="selectedItem">
         <ng-container *ngIf="selectedRemote1">{{selectedRemote1.remote_name}} ({{selectedRemote1.address}})</ng-container>

@@ -18,7 +18,7 @@ import {NgIf, NgTemplateOutlet} from "@angular/common";
 import {SliderComponent} from "../../controls/slider/slider.component";
 import {TooltipModule} from "primeng/tooltip";
 import {ButtonComponent} from "../../controls/button/button.component";
-import {Message} from "primeng/api";
+import {ToastMessageOptions} from "primeng/api";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-text.component";
 import {TagModule} from "primeng/tag";
@@ -49,7 +49,7 @@ export class CoverEntityComponent implements OnInit {
   @Input() scale = 1;
   @Input() closable: boolean = false;
   @Output() onClose: EventEmitter<CoverEntityState> = new EventEmitter();
-  @Output() onMessage: EventEmitter<Message> = new EventEmitter();
+  @Output() onMessage: EventEmitter<ToastMessageOptions> = new EventEmitter();
   protected readonly Helper = Helper;
 
   constructor(private server:ServerService, protected websocketService: WebsocketService, private cdr:ChangeDetectorRef) { }
@@ -94,7 +94,7 @@ export class CoverEntityComponent implements OnInit {
     {
       case 'OPEN': return "success";
       case 'CLOSED': return "secondary";
-      case 'OPENING': return "warning";
+      case 'OPENING': return "warn";
       case 'CLOSING': return "danger";
       default:
         return "info";

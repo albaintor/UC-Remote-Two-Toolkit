@@ -59,9 +59,13 @@
   left: 8px;
 }
 
-.autocomplete-panel-custom{
-  height: 400px !important;
-  max-height: 600px !important;
+.autocomplete-panel-custom {
+  height: 600px !important;
+  max-height: 800px !important;
+}
+
+.autocomplete-panel-custom .p-autocomplete-list-container {
+  max-height: 100% !important;
 }
 
 .message-panel .p-message .p-message-wrapper {

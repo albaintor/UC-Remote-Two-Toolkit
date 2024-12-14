@@ -43,6 +43,8 @@ import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
 import {MultiSelectModule} from "primeng/multiselect";
 import {HttpErrorResponse} from "@angular/common/http";
+import {Tooltip} from "primeng/tooltip";
+import {RouterLink} from "@angular/router";
 
 enum DiffStatus {
   Equals = 1,
@@ -118,7 +120,9 @@ interface DriverDiff {
     DividerModule,
     ConfirmDialogModule,
     RemoteOperationsComponent,
-    MultiSelectModule
+    MultiSelectModule,
+    Tooltip,
+    RouterLink
   ],
   templateUrl: './activity-sync.component.html',
   styleUrl: './activity-sync.component.css',

@@ -23,14 +23,14 @@
         </div>
         <div class="flex align-items-center justify-content-center">
           <p-tag [value]="(websocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
-                 [severity]="(websocketService.connectionStatus  | async) ? 'success' : 'warning'"
+                 [severity]="(websocketService.connectionStatus  | async) ? 'success' : 'warn'"
                  pTooltip="Click to wake up the remote" class="widget-connection-status"
                  (click)="wakeRemote($event)" [style]="{'cursor': 'pointer'}"/>
         </div>
         <div class="flex align-items-center justify-content-center"
              *ngIf="softwareUpdate?.progress?.state && softwareUpdate!.progress!.state! !== 'DONE'">
           <p-tag [value]="softwareUpdate?.progress?.state"
-                 [severity]="'warning'"
+                 [severity]="'warn'"
                  pTooltip="Software is updating..."/>
         </div>
         <div class="flex align-items-center justify-content-center"
@@ -85,14 +85,14 @@
     </div>
     <div class="flex align-items-center justify-content-center">
       <p-tag [value]="(websocketService.connectionStatus | async) ? 'Connected' : 'Disconnected'"
-             [severity]="(websocketService.connectionStatus  | async) ? 'success' : 'warning'"
+             [severity]="(websocketService.connectionStatus  | async) ? 'success' : 'warn'"
              pTooltip="Click to wake up the remote" class="widget-connection-status"
              (click)="wakeRemote($event)" [style]="{'cursor': 'pointer'}"/>
     </div>
     <div class="flex align-items-center justify-content-center"
          *ngIf="softwareUpdate?.progress?.state && softwareUpdate!.progress!.state! !== 'DONE'">
       <p-tag [value]="softwareUpdate?.progress?.state"
-             [severity]="'warning'"
+             [severity]="'warn'"
              pTooltip="Software is updating..."/>
     </div>
     <div class="flex align-items-center justify-content-center"

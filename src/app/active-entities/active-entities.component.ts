@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import {DropdownModule} from "primeng/dropdown";
 import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase} from "@angular/common";
-import {MenuItem, Message, MessageService, PrimeTemplate} from "primeng/api";
+import {MenuItem, ToastMessageOptions, MessageService, PrimeTemplate} from "primeng/api";
 import {ProgressBarModule} from "primeng/progressbar";
 import {TagModule} from "primeng/tag";
 import {ServerService} from "../server.service";
@@ -112,7 +112,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
   newRemote: Entity | undefined;
   suggestedRemotes: Entity[] = [];
   scale = 0.8;
-  messages: Message[] = [];
+  messages: ToastMessageOptions[] = [];
   showDashboardDialog = false;
   dashboardName: string | undefined;
   selectedDashboard: Dashboard | undefined;
@@ -418,7 +418,7 @@ export class ActiveEntitiesComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  handleMessage($event: Message) {
+  handleMessage($event: ToastMessageOptions) {
     this.messages = [$event];
     this.cdr.detectChanges();
   }

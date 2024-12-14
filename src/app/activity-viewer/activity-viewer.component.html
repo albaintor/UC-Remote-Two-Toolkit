@@ -15,13 +15,13 @@
     <h3>Activity</h3>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-button label="Edit" [routerLink]="['/activity/edit', activity?.entity_id]" severity="warning" icon="pi pi-pen-to-square" size="small"></p-button>&nbsp;&nbsp;
+    <p-button label="Edit" [routerLink]="['/activity/edit', activity?.entity_id]" severity="warn" icon="pi pi-pen-to-square" size="small"></p-button>&nbsp;&nbsp;
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-button label="Copy to clipboard" (onClick)="copyToClipboard(activity, 'Activity '+Helper.getEntityName(activity)+' copied to clipboard')" icon="pi pi-copy" size="small"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-button label="Clone" [routerLink]="['/activity/clone', activity?.entity_id]" severity="warning" icon="pi pi-clone" size="small"></p-button>
+    <p-button label="Clone" [routerLink]="['/activity/clone', activity?.entity_id]" severity="warn" icon="pi pi-clone" size="small"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-button label="Save to file" (onClick)="saveActivity()" icon="pi pi-save" size="small" severity="success"></p-button>
@@ -68,10 +68,10 @@
     <p-button label="Copy page to clipboard" (onClick)="copyToClipboard(currentPage, 'Page '+currentPage.name+' copied to clipboard')" icon="pi pi-copy" size="small"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center" *ngIf="editMode">
-    <p-button label="Paste from clipboard" (onClick)="pastePage()" severity="warning" icon="pi pi-clipboard" size="small"></p-button>
+    <p-button label="Paste from clipboard" (onClick)="pastePage()" severity="warn" icon="pi pi-clipboard" size="small"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center" *ngIf="editMode">
-    <p-button label="Import from file" (onClick)="importPage()" severity="warning" icon="pi pi-file-import" size="small">
+    <p-button label="Import from file" (onClick)="importPage()" severity="warn" icon="pi pi-file-import" size="small">
       <input #input_file_page type="file" style="display:none" (change)="loadInputFilePage($event)">
     </p-button>
   </div>

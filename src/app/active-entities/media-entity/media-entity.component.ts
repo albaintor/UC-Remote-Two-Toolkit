@@ -22,14 +22,13 @@ import {MediaEntityState} from "../../websocket/remote-websocket-instance";
 import {WebsocketService} from "../../websocket/websocket.service";
 import {CdkDragHandle} from "@angular/cdk/drag-drop";
 import {ButtonComponent} from "../../controls/button/button.component";
-import {Message} from "primeng/api";
+import {ToastMessageOptions} from "primeng/api";
 import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   selector: 'app-media-entity',
   standalone: true,
   imports: [
-    Button,
     DropdownOverComponent,
     NgIf,
     ScrollingTextComponent,
@@ -38,7 +37,8 @@ import {HttpErrorResponse} from "@angular/common/http";
     TooltipModule,
     NgTemplateOutlet,
     CdkDragHandle,
-    ButtonComponent
+    ButtonComponent,
+    Button
   ],
   templateUrl: './media-entity.component.html',
   styleUrl: './media-entity.component.css',
@@ -53,7 +53,7 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
   @Input() scale = 1;
   @Input() closable: boolean = false;
   @Output() onClose: EventEmitter<MediaEntityState> = new EventEmitter();
-  @Output() onMessage: EventEmitter<Message> = new EventEmitter();
+  @Output() onMessage: EventEmitter<ToastMessageOptions> = new EventEmitter();
   protected readonly Helper = Helper;
 
   textStyle = "font-size: 1.2rem";
@@ -88,7 +88,7 @@ export class MediaEntityComponent implements OnInit, AfterViewInit {
       case "ON": return "info";
       case "OFF": return "secondary";
       case "PLAYING": return "success";
-      case "PAUSED": return "warning";
+      case "PAUSED": return "warn";
       case "STANDBY": return "secondary";
       case "BUFFERING":return "success";
       default: return "secondary";

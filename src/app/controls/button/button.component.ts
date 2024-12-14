@@ -20,7 +20,7 @@ export class ButtonComponent {
   @Input() icon: string | undefined;
   @Input() size: "small" | "large" | undefined;
   @Input() tooltip: string | undefined;
-  @Input() severity: "success" | "info" | "warning" | "danger" | "help" | "primary" | "secondary" | "contrast" | null | undefined;
+  @Input() severity: "success" | "info" | "warn" | "danger" | "help" | "primary" | "secondary" | "contrast" | null | undefined;
   @Output() click: EventEmitter<any> = new EventEmitter();
   @Input() rounded = false;
   @Input() outlined = false;

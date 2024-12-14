@@ -23,7 +23,7 @@ import {
 } from "../interfaces";
 import {MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, RouterLink} from "@angular/router";
 import {DropdownModule} from "primeng/dropdown";
 import {MenubarModule} from "primeng/menubar";
 import {DatePipe, NgForOf, NgIf} from "@angular/common";
@@ -43,6 +43,7 @@ import {Helper} from "../helper";
 import {AutoCompleteModule} from "primeng/autocomplete";
 import {CheckboxModule} from "primeng/checkbox";
 import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
+import {Tooltip} from "primeng/tooltip";
 
 class Message {
   title: string = "";
@@ -73,6 +74,8 @@ class Message {
     AutoCompleteModule,
     CheckboxModule,
     RemoteDataLoaderComponent,
+    RouterLink,
+    Tooltip,
   ],
   templateUrl: './replace-entity.component.html',
   styleUrl: './replace-entity.component.css',

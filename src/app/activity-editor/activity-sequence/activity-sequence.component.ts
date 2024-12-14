@@ -21,6 +21,7 @@ import {DockModule} from "primeng/dock";
 import {Helper} from "../../helper";
 import {InputNumberModule} from "primeng/inputnumber";
 import {FormsModule} from "@angular/forms";
+import {Tooltip} from "primeng/tooltip";
 
 @Component({
   selector: 'app-activity-sequence',
@@ -35,7 +36,8 @@ import {FormsModule} from "@angular/forms";
     DialogModule,
     DockModule,
     InputNumberModule,
-    FormsModule
+    FormsModule,
+    Tooltip
   ],
   templateUrl: './activity-sequence.component.html',
   styleUrl: './activity-sequence.component.css',

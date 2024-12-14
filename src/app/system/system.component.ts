@@ -44,6 +44,10 @@ import {InputSwitchModule} from "primeng/inputswitch";
 import {HttpErrorResponse} from "@angular/common/http";
 import {TagModule} from "primeng/tag";
 import {DialogModule} from "primeng/dialog";
+import {Tooltip} from "primeng/tooltip";
+import {ProgressBar} from "primeng/progressbar";
+import {Button} from "primeng/button";
+import {RouterLink} from "@angular/router";
 
 type DriverIntegration = Driver | Integration;
 
@@ -74,7 +78,11 @@ interface IntegrationsDrivers {
     NgForOf,
     InputSwitchModule,
     TagModule,
-    DialogModule
+    DialogModule,
+    Tooltip,
+    ProgressBar,
+    Button,
+    RouterLink
   ],
   templateUrl: './system.component.html',
   styleUrl: './system.component.css',

@@ -6,16 +6,16 @@
   <ng-template #end>
     <div class="flex align-items-center gap-2">
       <i>Work in progress</i>&nbsp;
-      <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)"
-                  class="smaller-dropdown">
-        <ng-template pTemplate="selectedItem">
+      <p-select [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)"
+                  class="smaller-dropdown" optionLabel="remote_name">
+        <ng-template #selectedItem>
           <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
           <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
         </ng-template>
-        <ng-template let-item pTemplate="item">
-          {{item.remote_name}} ({{item.address}})
-        </ng-template>
-      </p-dropdown>
+<!--        <ng-template let-item #item>-->
+<!--          {{item.remote_name}} ({{item.address}})-->
+<!--        </ng-template>-->
+      </p-select>
     </div>
   </ng-template>
 </p-menubar>

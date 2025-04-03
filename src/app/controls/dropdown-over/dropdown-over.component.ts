@@ -11,18 +11,18 @@ import {NgIf, NgTemplateOutlet} from "@angular/common";
 import {PrimeTemplate} from "primeng/api";
 import {ProgressBarModule} from "primeng/progressbar";
 import {SliderModule} from "primeng/slider";
-import {DropdownModule} from "primeng/dropdown";
+import {SelectModule} from "primeng/select";
 import {FormsModule} from "@angular/forms";
 
 @Component({
-  selector: 'app-dropdown-over',
+  selector: 'app-select-over',
   standalone: true,
   imports: [
     NgIf,
     PrimeTemplate,
     ProgressBarModule,
     SliderModule,
-    DropdownModule,
+    SelectModule,
     FormsModule,
     NgTemplateOutlet
   ],

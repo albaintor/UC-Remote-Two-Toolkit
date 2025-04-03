@@ -4,41 +4,41 @@
   <p-button class="list-item-add" [rounded]="true" (onClick)="addCommand($event)" severity="info" icon="pi pi-plus" size="small"
             [pTooltip]="'Add a command to the '+sequenceName+' sequence'" *ngIf="editable"></p-button>
   <ng-container *ngIf="activity?.options?.sequences && sequenceName">
-    <p-orderList
+    <p-orderlist
       [value]="activity!.options!.sequences![sequenceName]"
-      [listStyle]="{ 'max-height': '30rem' }"
+      [listStyle]="{ 'max-height': '30rem', 'min-width': '350px' }"
       [header]="'Sequences '+sequenceName"
       [dragdrop]="editable" [stripedRows]="true" (onReorder)="updateSequence($event)">
-      <ng-template let-command pTemplate="item">
+      <ng-template let-option #item>
         <div class="flex flex-wrap p-2 align-items-center gap-3">
           <i *ngIf="editable" class="pi pi-bars"></i>
-          <app-icon *ngIf="findCommandEntity(command)" [remote]="remote" [icon]="findCommandEntity(command)?.icon"  (click)="editCommand(command)"
+          <app-icon *ngIf="findCommandEntity(option)" [remote]="remote" [icon]="findCommandEntity(option)?.icon"  (click)="editCommand(option)"
                     [size]="50" [fontSize]="55" />
-          <div class="flex-1 flex flex-column gap-2" *ngIf="command?.type == 'command'" (click)="editCommand(command)">
-            <span class="font-bold">{{ Helper.getEntityName(findCommandEntity(command)) }}</span>
+          <div class="flex-1 flex flex-column gap-2" *ngIf="option?.type == 'command'" (click)="editCommand(option)">
+            <span class="font-bold">{{ Helper.getEntityName(findCommandEntity(option)) }}</span>
             <div class="flex align-items-center gap-2">
               <span>
-                  {{ command?.command?.["cmd_id"] }}
+                  {{ option?.command?.["cmd_id"] }}
               </span>
             </div>
             <span class="text-200">
-              {{ getCommandParams(command) }}
+              {{ getCommandParams(option) }}
           </span>
           </div>
-          <div class="flex-1 flex flex-column gap-2" *ngIf="command?.type == 'delay'">
+          <div class="flex-1 flex flex-column gap-2" *ngIf="option?.type == 'delay'">
             <span class="font-bold">Delay</span>
-            <p-inputNumber [(ngModel)]="command.delay" [min]="0" suffix=" ms"/>
+            <p-inputNumber [(ngModel)]="option.delay" [min]="0" suffix=" ms"/>
           </div>
           <div *ngIf="editable" class="list-item-delete">
-            <p-button [rounded]="true" (click)="deleteCommand(command)" severity="danger" icon="pi pi-times" size="small"
+            <p-button [rounded]="true" (click)="deleteCommand(option)" severity="danger" icon="pi pi-times" size="small"
                       pTooltip="Remove this command"></p-button>
           </div>
-          <div *ngIf="command?.command?.type == 'command' && !getCommandEntity(command)" class="list-item-orphan" [pTooltip]="'Sequence entity \''+command?.command?.entity_id+'\' is orphaned'">
+          <div *ngIf="option?.command?.type == 'command' && !getCommandEntity(option)" class="list-item-orphan" [pTooltip]="'Sequence entity \''+option?.command?.entity_id+'\' is orphaned'">
             <i class="pi pi-exclamation-triangle" style="font-size: 30px; font-weight: bold; color: red"></i>
           </div>
         </div>
       </ng-template>
-    </p-orderList>
+    </p-orderlist>
   </ng-container>
 </div>
 <p-toast key="sequence"></p-toast>

@@ -1,5 +1,5 @@
 <p-toast key="remote"></p-toast>
-<p-dialog header="Remotes configured" [(visible)]="visible" [style]="{width: '50vw'}"
+<p-dialog header="Remotes configured" [(visible)]="visible" [style]="{width: '70vw'}"
           styleClass="remote-registration-header" contentStyleClass="remote-registration">
   <div class="row">
     <div class="col-50">
@@ -23,7 +23,7 @@
     <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
   </div>
   <p-table #remotesTable [value]="remotes" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true">
-    <ng-template pTemplate="header">
+    <ng-template #header>
       <tr>
         <th>Actions</th><th>Name</th><th>Address</th><th>Port</th><th>Username</th><th>Token</th><th>API key</th><th>Validity</th>
       </tr>
@@ -53,17 +53,19 @@
   </p-table>
   <br>
   <p-table *ngIf="registrations" [value]="registrations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true">
-    <ng-template pTemplate="header">
+    <ng-template #header>
       <tr>
-        <th>Key id</th><th>Name</th><th>Prefix</th><th>Active</th>
+        <th>Key id</th><th>Name</th><th>Creation</th><th>Prefix</th><th>Active</th><th>Action</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-remote>
       <tr>
         <td>{{remote.key_id}}</td>
         <td>{{remote.name}}</td>
+        <td>{{remote.creation_date}}</td>
         <td>{{remote.prefix}}</td>
         <td>{{remote.active}}</td>
+        <td><p-button icon="pi pi-trash" pTooltip="Delete this key" [rounded]="true" (click)="deleteRegistration(remote)" severity="danger"></p-button>&nbsp;</td>
       </tr>
     </ng-template>
   </p-table>

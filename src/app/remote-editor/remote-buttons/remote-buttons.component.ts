@@ -25,7 +25,7 @@ import {MessageService} from "primeng/api";
 import {ToastModule} from "primeng/toast";
 import {ButtonEditionEvent, ButtonEditorComponent} from "../../activity-editor/button-editor/button-editor.component";
 import {IconComponent} from "../../controls/icon/icon.component";
-import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
+import {Popover, PopoverModule} from "primeng/popover";
 
 export enum ButtonMode {
   ShortPress,
@@ -45,8 +45,7 @@ export enum ButtonMode {
     ImageMapComponent,
     ToastModule,
     ButtonEditorComponent,
-    IconComponent,
-    OverlayPanelModule,
+    PopoverModule,
     NgTemplateOutlet
   ],
   templateUrl: './remote-buttons.component.html',
@@ -95,7 +94,7 @@ export class RemoteButtonsComponent implements AfterViewInit {
   @Output() onSelectUnassignedButton: EventEmitter<{button: ButtonMapping, mode: ButtonMode}> = new EventEmitter();
   @Input() hideButtonsInfo = false;
   executeButton: ButtonMapping | undefined;
-  @ViewChild("executeButtonPanel") executeButtonPanel: OverlayPanel | undefined;
+  @ViewChild("executeButtonPanel") executeButtonPanel: Popover | undefined;
   @ViewChild("buttonsInfo", {static: false}) buttonsInfo: ElementRef<HTMLDivElement> | undefined;
   @Output() onChange = new EventEmitter<ButtonEditionEvent>();
 

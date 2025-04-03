@@ -19,7 +19,7 @@ import {
   RemoteOperationResultField
 } from "../interfaces";
 import {Button} from "primeng/button";
-import {DropdownModule} from "primeng/dropdown";
+import {SelectModule} from "primeng/select";
 import {InputNumberModule} from "primeng/inputnumber";
 import {MenubarModule} from "primeng/menubar";
 import {NgForOf, NgIf} from "@angular/common";
@@ -59,7 +59,7 @@ interface ModifiedPages {
   standalone: true,
   imports: [
     Button,
-    DropdownModule,
+    SelectModule,
     InputNumberModule,
     MenubarModule,
     NgForOf,

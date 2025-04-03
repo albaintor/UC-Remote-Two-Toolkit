@@ -18,11 +18,11 @@
     <div class="flex flex-column justify-content-around" style="height: 100%">
       <div *ngIf="havcModes.length > 0"
            class="flex align-items-center justify-content-center" style="width: 100%">
-        <app-dropdown-over [value]="hvacMode" [options]="havcModes" [textTemplate]="currentMode" (valueChange)="setHavcMode(hvacMode!)">
+        <app-select-over [value]="hvacMode" [options]="havcModes" [textTemplate]="currentMode" (valueChange)="setHavcMode(hvacMode!)">
           <ng-template #currentMode>
             <p-tag [value]="getLabel(hvacMode)" [severity]="getStatusSeverity()"></p-tag>
           </ng-template>
-        </app-dropdown-over>
+        </app-select-over>
       </div>
       <div *ngIf="checkFeature(climateEntity, 'target_temperature') && climateEntity?.new_state?.attributes"
            class="flex align-items-center justify-content-center gap-2" style="width:100%;margin-bottom:10px">

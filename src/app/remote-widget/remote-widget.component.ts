@@ -14,7 +14,7 @@ import {AsyncPipe, DatePipe, NgIf} from "@angular/common";
 import {DockModule} from "primeng/dock";
 import {ProgressBarModule} from "primeng/progressbar";
 import {ScrollingTextComponent} from "../controls/scrolling-text/scrolling-text.component";
-import {DropdownModule} from "primeng/dropdown";
+import {SelectModule} from "primeng/select";
 import {FormsModule} from "@angular/forms";
 import {Activity, Remote} from "../interfaces";
 import {MediaEntityComponent} from "../active-entities/media-entity/media-entity.component";
@@ -44,7 +44,7 @@ interface WidgetConfiguration {
     DockModule,
     ProgressBarModule,
     ScrollingTextComponent,
-    DropdownModule,
+    SelectModule,
     FormsModule,
     MediaEntityComponent,
     DropdownOverComponent,

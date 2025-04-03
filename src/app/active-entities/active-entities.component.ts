@@ -6,7 +6,7 @@ import {
   OnInit, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
-import {DropdownModule} from "primeng/dropdown";
+import {SelectModule} from "primeng/select";
 import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase} from "@angular/common";
 import {MenuItem, ToastMessageOptions, MessageService, PrimeTemplate} from "primeng/api";
 import {ProgressBarModule} from "primeng/progressbar";
@@ -21,7 +21,6 @@ import {MediaEntityComponent} from "./media-entity/media-entity.component";
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
 import {ActivityPlayerComponent} from "../activity-player/activity-player.component";
 import {InputNumberModule} from "primeng/inputnumber";
-import {MessagesModule} from "primeng/messages";
 import {ToastModule} from "primeng/toast";
 import {WebsocketService} from "../websocket/websocket.service";
 import {CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray} from "@angular/cdk/drag-drop";
@@ -43,6 +42,8 @@ import {LightEntityComponent} from "./light-entity/light-entity.component";
 import {CoverEntityComponent} from "./cover-entity/cover-entity.component";
 import {ClimateEntityComponent} from "./climate-entity/climate-entity.component";
 import {ToggleButtonModule} from "primeng/togglebutton";
+import {Message} from "primeng/message";
+import {Tooltip} from "primeng/tooltip";
 
 interface SelectedActivity extends RemoteActivity {
   collapsed?: boolean;
@@ -53,7 +54,7 @@ interface SelectedActivity extends RemoteActivity {
   selector: 'app-active-entities',
   standalone: true,
   imports: [
-    DropdownModule,
+    SelectModule,
     NgIf,
     PrimeTemplate,
     ProgressBarModule,
@@ -67,7 +68,6 @@ interface SelectedActivity extends RemoteActivity {
     AutoCompleteModule,
     ActivityPlayerComponent,
     InputNumberModule,
-    MessagesModule,
     ToastModule,
     CdkDropList,
     CdkDrag,
@@ -81,7 +81,9 @@ interface SelectedActivity extends RemoteActivity {
     NgSwitchCase,
     CoverEntityComponent,
     ClimateEntityComponent,
-    ToggleButtonModule
+    ToggleButtonModule,
+    Message,
+    Tooltip
   ],
   templateUrl: './active-entities.component.html',
   styleUrl: './active-entities.component.css',

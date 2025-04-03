@@ -8,14 +8,14 @@
           <label for="media_player">Media player</label>
         </div>
         <div class="flex align-items-center">
-          <p-dropdown id="media_player" [(ngModel)]="selectedEntity" [options]="mediaPlayers" (ngModelChange)="mediaPlayerSelected($event)">
-            <ng-template pTemplate="selectedItem">
+          <p-select id="media_player" [(ngModel)]="selectedEntity" [options]="mediaPlayers" (ngModelChange)="mediaPlayerSelected($event)">
+            <ng-template #selectedItem>
               {{Helper.getEntityName(selectedEntity)}}
             </ng-template>
-            <ng-template let-item pTemplate="item">
+            <ng-template let-item #item>
               {{Helper.getEntityName(item)}} ({{item.entity_id}})
             </ng-template>
-          </p-dropdown>
+          </p-select>
         </div>
       </div>
       <div class="flex align-items-center sub-item">
@@ -30,14 +30,14 @@
           <label for="entity">Entity</label>
         </div>
         <div class="flex align-items-center">
-          <p-dropdown id="entity" [(ngModel)]="selectedEntity" [options]="activityEntities" (ngModelChange)="entitySelected($event)">
-            <ng-template pTemplate="selectedItem">
+          <p-select id="entity" [(ngModel)]="selectedEntity" [options]="activityEntities" (ngModelChange)="entitySelected($event)">
+            <ng-template #selectedItem>
               {{Helper.getEntityName(selectedEntity)}}
             </ng-template>
-            <ng-template let-item pTemplate="item">
+            <ng-template let-item #item>
               {{Helper.getEntityName(item)}} ({{item.entity_id}})
             </ng-template>
-          </p-dropdown>
+          </p-select>
         </div>
       </div>
       <div class="flex align-items-center sub-item">
@@ -50,14 +50,14 @@
           <label for="command">Command</label>
         </div>
         <div class="flex align-items-center">
-          <p-dropdown id="command" [(ngModel)]="selectedCommand" [options]="entityCommands" (ngModelChange)="commandSelected($event)">
-            <ng-template pTemplate="selectedItem">
+          <p-select id="command" [(ngModel)]="selectedCommand" [options]="entityCommands" (ngModelChange)="commandSelected($event)">
+            <ng-template #selectedItem>
               {{Helper.getEntityName(selectedCommand)}}
             </ng-template>
-            <ng-template let-item pTemplate="item">
+            <ng-template let-item #item>
               {{Helper.getEntityName(item)}}
             </ng-template>
-          </p-dropdown>
+          </p-select>
         </div>
       </div>
       <div class="flex align-items-center sub-item">
@@ -78,15 +78,15 @@
       <ng-container [ngSwitch]="param.type">
         <ng-container *ngSwitchCase="'selection'">
           <div class="flex align-items-center" *ngIf="param.param && command?.params">
-            <p-dropdown *ngIf="getSelectionItems(param).length > 0" [(ngModel)]="command!.params[param.param]" optionLabel="label" optionValue="value"
+            <p-select *ngIf="getSelectionItems(param).length > 0" [(ngModel)]="command!.params[param.param]" optionLabel="label" optionValue="value"
                         [options]="getSelectionItems(param)" (ngModelChange)="commandSelected($event)" styleClass="dropdown-command">
-              <ng-template pTemplate="selectedItem">
+              <ng-template #selectedItem>
                 {{command?.params?.[param.param]}}
               </ng-template>
-              <ng-template let-item pTemplate="item">
+              <ng-template let-item #item>
                 {{item.value}}
               </ng-template>
-            </p-dropdown>
+            </p-select>
             <input *ngIf="getSelectionItems(param).length == 0" pInputText id="text" type="text" [placeholder]="Helper.getEntityName(param)"
                    [(ngModel)]="command!.params[param.param]" class="input-command" />
           </div>

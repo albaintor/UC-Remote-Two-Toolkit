@@ -8,15 +8,15 @@
 <p-menubar [model]="items">
   <ng-template #end>
     Target remote :
-    <p-dropdown [(ngModel)]="targetRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(targetRemote!)">
-      <ng-template pTemplate="selectedItem">
+    <p-select [(ngModel)]="targetRemote" [options]="remotes" optionLabel="remote_name" placeholder="Select remote" (ngModelChange)="setRemote(targetRemote!)">
+      <ng-template #selectedItem>
         <ng-container *ngIf="targetRemote">{{targetRemote.remote_name}} ({{targetRemote.address}})</ng-container>
         <ng-container *ngIf="!targetRemote">No remote selected</ng-container>
       </ng-template>
-      <ng-template let-item pTemplate="item">
-        {{item.remote_name}} ({{item.address}})
-      </ng-template>
-    </p-dropdown>
+<!--      <ng-template let-item #item>-->
+<!--        {{item.remote_name}} ({{item.address}})-->
+<!--      </ng-template>-->
+    </p-select>
   </ng-template>
 </p-menubar>
 <app-remote-data-loader #loader [remote]="targetRemote" (loaded)="remoteLoaded($event)"></app-remote-data-loader>
@@ -66,7 +66,7 @@
       Activity name :
     </div>
     <div class="flex align-items-center justify-content-center">
-      <p-dropdown class="smaller-dropdown" [(ngModel)]="currentLanguage" [options]="Helper.getLanguages()" placeholder="Select language"
+      <p-select class="smaller-dropdown" [(ngModel)]="currentLanguage" [options]="Helper.getLanguages()" placeholder="Select language"
           optionLabel="label" optionValue="value" pTooltip="Switch language for entity names"/>
     </div>
     <div class="flex align-items-center justify-content-center">
@@ -90,8 +90,7 @@
   </div>
 </div>
 </p-toolbar>
-<p-messages severity="info">
-  <ng-template pTemplate>
+<p-message severity="info">
     <div class="ml-2">
       <ul>
         <li>Clone, copy, paste an activity or import from a file</li>
@@ -102,8 +101,7 @@
       </ul>
       Once done, click on <b>Save activity to remote</b> to update the remote with the pending operations
     </div>
-  </ng-template>
-</p-messages>
+</p-message>
 <ng-container *ngIf="orphanEntities.length > 0">
   <h3>Some entities are orphans : replace them and click on apply</h3>
   <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px" *ngFor="let item of orphanEntities">
@@ -116,7 +114,7 @@
     <div class="flex align-items-center justify-content-center">
       <p-autoComplete [(ngModel)]="item.newEntity" [dropdown]="true" [suggestions]="suggestions3" (completeMethod)="searchOrphanEntity(item, $event)" appendTo="body"
                       [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" optionLabel="entity_id">
-        <ng-template let-item pTemplate="item">
+        <ng-template let-item #item>
           <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
         </ng-template>
       </p-autoComplete>
@@ -141,12 +139,12 @@
   <ng-container *ngFor="let template of templates">
     <div class="field" *ngIf="!selectedEntity">
       <label [for]="template.entity_type" class="p-sr-only">Apply mapping to a {{template.entity_type}} :</label>
-      <p-dropdown [id]="template.entity_type"  [options]="getEntities(template.entity_type)" [(ngModel)]="selectedEntity"
+      <p-select [id]="template.entity_type"  [options]="getEntities(template.entity_type)" [(ngModel)]="selectedEntity"
                   [placeholder]="'Select a '+template.entity_type" (ngModelChange)="loadTemplate()">
-<!--        <ng-template pTemplate="selectedItem">-->
+<!--        <ng-template #selectedItem>-->
 <!--          {{selectedEntity?.name}} ({{selectedEntity?.entity_id}})-->
 <!--        </ng-template>-->
-        <ng-template let-item pTemplate="selectedItem">
+        <ng-template let-item #selectedItem>
           <div class="flex align-content-center" >
             <div class="inline-block p-1">
               <app-icon [remote]="targetRemote" [icon]="item?.icon" [size]="30"/>
@@ -156,7 +154,7 @@
             </div>
           </div>
         </ng-template>
-        <ng-template let-item pTemplate="item">
+        <ng-template let-item #item>
           <div class="flex align-content-center" >
             <div class="inline-block p-1">
               <ng-container *ngIf="item!.icon && Helper.isStandardIcon(item!.icon!)">
@@ -172,7 +170,7 @@
             </div>
           </div>
         </ng-template>
-      </p-dropdown>
+      </p-select>
     </div>
   </ng-container>
   <ng-container *ngIf="selectedEntity && availableFeatures && availableFeatures!.length > 0">
@@ -184,10 +182,12 @@
 </div>
 <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px" *ngIf="selectedEntity && availableFeatures && availableFeatures!.length > 0">
   <div class="flex align-items-center justify-content-center">
-    <p-checkbox [(ngModel)]="overwriteAssignedButtons" [binary]="true" label="Overwrite assigned physical buttons"></p-checkbox>
+    <p-checkbox id="overwriteAssignedButtons" [(ngModel)]="overwriteAssignedButtons" [binary]="true"></p-checkbox>
+    <label for="overwriteAssignedButtons">Overwrite assigned physical buttons</label>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-checkbox [(ngModel)]="keepDefinedPositions" [binary]="true" label="Preserve defined interface buttons"></p-checkbox>
+    <p-checkbox id="keepDefinedPositions" [(ngModel)]="keepDefinedPositions" [binary]="true"></p-checkbox>
+    <label for="keepDefinedPositions">Preserve defined interface buttons</label>
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-button label="Apply mapping" (onClick)="applyTemplate()"></p-button><br>
@@ -202,7 +202,7 @@
     <div style="width: 50%;">
       <p-autoComplete [(ngModel)]="entity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchActivityEntity($event)" appendTo="body"
                       field="entity_id" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
-        <ng-template let-item pTemplate="item">
+        <ng-template let-item #item>
           <div class="flex align-content-center" >
             <div class="inline-block p-1">
               <app-icon [remote]="targetRemote" [entity]="item" [size]="30"/>
@@ -216,7 +216,7 @@
     <div style="width: 50%;">
       <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions2" (completeMethod)="searchEntity($event)" appendTo="body"
                       field="entity_id" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
-        <ng-template let-item pTemplate="item">
+        <ng-template let-item #item>
           <div class="flex align-content-center" >
             <div class="inline-block p-1">
               <app-icon [remote]="targetRemote" [icon]="item?.icon" [size]="30"/>

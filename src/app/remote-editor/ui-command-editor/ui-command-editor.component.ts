@@ -12,10 +12,8 @@ import {
   Activity,
   ActivityPageCommand,
   Command,
-  Entity,
   EntityCommand,
-  EntityFeature,
-  Remote, RemoteData,
+  Remote,
   RemoteMap
 } from "../../interfaces";
 import {FormsModule} from "@angular/forms";
@@ -27,7 +25,7 @@ import {NgIf} from "@angular/common";
 import {ToastModule} from "primeng/toast";
 import {DialogModule} from "primeng/dialog";
 import {IconSelectorComponent} from "../../controls/icon-selector/icon-selector.component";
-import {DropdownModule} from "primeng/dropdown";
+import {SelectModule} from "primeng/select";
 import {ButtonModule} from "primeng/button";
 import {RemoteGridItemComponent, GridItem} from "../remote-grid-item/remote-grid-item.component";
 import {CommandEditorComponent} from "../command-editor/command-editor.component";
@@ -44,7 +42,7 @@ import {CommandEditorComponent} from "../command-editor/command-editor.component
     ToastModule,
     DialogModule,
     IconSelectorComponent,
-    DropdownModule,
+    SelectModule,
     ButtonModule,
     CommandEditorComponent
   ],

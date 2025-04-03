@@ -32,26 +32,24 @@
                        [pTooltip]="'CPU : '+(Math.round(remoteStatus!.load_avg!.one!*100)/100).toLocaleString()+' %'">
         </p-progressBar>
       </ng-container>
-      <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
-        <ng-template pTemplate="selectedItem">
+      <p-select [(ngModel)]="selectedRemote" [options]="remotes" optionLabel="remote_name" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
+        <ng-template #selectedItem>
           <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
           <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
         </ng-template>
-        <ng-template let-item pTemplate="item">
-          {{item.remote_name}} ({{item.address}})
-        </ng-template>
-      </p-dropdown>
+<!--        <ng-template let-item #item>-->
+<!--          {{item.remote_name}} ({{item.address}})-->
+<!--        </ng-template>-->
+      </p-select>
     </div>
   </ng-template>
 </p-menubar>
 <div class="progress-spinner" *ngIf="progress">
   <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
 </div>
-<p-messages severity="info">
-  <ng-template pTemplate>
+<p-message severity="info">
     <div class="ml-2">Here you can review and upload custom integrations</div>
-  </ng-template>
-</p-messages>
+</p-message>
 <p-fileUpload
   #integrationUpload
   mode="basic"
@@ -63,14 +61,14 @@
   (onBeforeUpload)="onUploadingIntegration($event)"
   (onError)="onUploadIntegrationError($event)"
   [auto]="true"
-  chooseLabel="Select integration driver to upload..." />
+  chooseLabel="Select integration driver to upload..."></p-fileUpload>
 <ng-container *ngIf="entities">
   <br>
   <p-table  [value]="entities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
            dataKey="entity_id" columnResizeMode="expand"
            [globalFilterFields]="['entity_id','name','entity_type','integration_id']"
            [scrollable]="true" [scrollHeight]="'calc(100vh - 50px)'">
-    <ng-template pTemplate="header">
+    <ng-template #header>
       <tr>
         <th pSortableColumn="name" pResizableColumn>Entity name<p-sortIcon field="name"></p-sortIcon></th>
         <th pSortableColumn="entity_id" pResizableColumn>Entity ID<p-sortIcon field="entity_id"></p-sortIcon></th>
@@ -145,7 +143,7 @@
 <br>
 <p-table [value]="driverIntegrations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
          dataKey="message" columnResizeMode="expand">
-  <ng-template pTemplate="header">
+  <ng-template #header>
     <tr>
       <th pSortableColumn="name" pResizableColumn>Name<p-sortIcon field="name"></p-sortIcon></th>
       <th pSortableColumn="driver_id" pResizableColumn>Identifier<p-sortIcon field="driver_id"></p-sortIcon></th>

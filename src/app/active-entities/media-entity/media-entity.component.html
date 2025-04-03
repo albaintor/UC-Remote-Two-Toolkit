@@ -26,18 +26,18 @@
         <div class="flex flex-wrap align-content-center justify-content-around column-gap-1" style="width: 100%">
           <p-tag *ngIf="mediaEntity.new_state?.attributes?.state" [value]="mediaEntity.new_state!.attributes!.state!" [severity]="getStatusStyle(mediaEntity.new_state!.attributes!.state!)"
                  (click)="clickState(mediaEntity)" styleClass="active-tag" pTooltip="Play / Pause" [style]="{'scale': scale}"/>
-          <app-dropdown-over *ngIf="mediaEntity.new_state!.attributes!.source" [style]="'scale:'+scale" [value]="mediaEntity.new_state!.attributes!.source!" [options]="mediaEntity.new_state?.attributes?.source_list"
+          <app-select-over *ngIf="mediaEntity.new_state!.attributes!.source" [style]="'scale:'+scale" [value]="mediaEntity.new_state!.attributes!.source!" [options]="mediaEntity.new_state?.attributes?.source_list"
                              [textTemplate]="sourceValue" (valueChange)="sourceSelected(mediaEntity, $event)">
             <ng-template #sourceValue>
               <p-tag [value]="mediaEntity.new_state!.attributes!.source!" severity="secondary"></p-tag>
             </ng-template>
-          </app-dropdown-over>
-          <app-dropdown-over *ngIf="mediaEntity.new_state!.attributes!.sound_mode" [style]="'scale:'+scale" [value]="mediaEntity.new_state!.attributes!.sound_mode!" [options]="mediaEntity.new_state?.attributes?.sound_mode_list"
+          </app-select-over>
+          <app-select-over *ngIf="mediaEntity.new_state!.attributes!.sound_mode" [style]="'scale:'+scale" [value]="mediaEntity.new_state!.attributes!.sound_mode!" [options]="mediaEntity.new_state?.attributes?.sound_mode_list"
                              [textTemplate]="soundModeValue" (valueChange)="soundModeSelected(mediaEntity, $event)">
             <ng-template #soundModeValue>
               <p-tag [value]="mediaEntity.new_state!.attributes!.sound_mode!" severity="contrast"></p-tag>
             </ng-template>
-          </app-dropdown-over>
+          </app-select-over>
         </div>
         <div class="flex align-items-center justify-content-center" *ngIf="mediaEntity?.new_state?.attributes?.media_title">
           <app-scrolling-text [text]="mediaEntity.new_state!.attributes!.media_title!" class="card-info"

@@ -58,7 +58,7 @@ import {TagModule} from "primeng/tag";
 import {InputTextModule} from "primeng/inputtext";
 import {RemoteButtonsComponent} from "../remote-editor/remote-buttons/remote-buttons.component";
 import {PageChanged, RemoteGridComponent} from "../remote-editor/remote-grid/remote-grid.component";
-import {DropdownModule} from "primeng/dropdown";
+import {SelectModule} from "primeng/select";
 import {FormsModule} from "@angular/forms";
 import {Tooltip} from "primeng/tooltip";
 import {InputNumber} from "primeng/inputnumber";
@@ -130,7 +130,7 @@ export class AsPipe implements PipeTransform {
     InputTextModule,
     RemoteButtonsComponent,
     RemoteGridComponent,
-    DropdownModule,
+    SelectModule,
     FormsModule,
     Tooltip,
     InputNumber

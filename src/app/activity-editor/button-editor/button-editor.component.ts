@@ -14,7 +14,7 @@ import {
 } from "../../interfaces";
 import {ButtonModule} from "primeng/button";
 import {DialogModule} from "primeng/dialog";
-import {DropdownModule} from "primeng/dropdown";
+import {SelectModule} from "primeng/select";
 import {IconSelectorComponent} from "../../controls/icon-selector/icon-selector.component";
 import {InputNumberModule} from "primeng/inputnumber";
 import {InputTextModule} from "primeng/inputtext";
@@ -44,7 +44,7 @@ export interface ButtonEditionEvent {
   imports: [
     ButtonModule,
     DialogModule,
-    DropdownModule,
+    SelectModule,
     IconSelectorComponent,
     InputNumberModule,
     InputTextModule,

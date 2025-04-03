@@ -13,7 +13,7 @@ import {ButtonModule} from "primeng/button";
 import {ChipModule} from "primeng/chip";
 import {CommonModule, DatePipe} from "@angular/common";
 import {NgxJsonViewerModule} from "ngx-json-viewer";
-import {OverlayPanelModule} from "primeng/overlaypanel";
+import {PopoverModule} from "primeng/popover";
 import {ProgressBarModule} from "primeng/progressbar";
 import {RemoteRegistrationComponent} from "../remote-registration/remote-registration.component";
 import {ConfirmationService, MenuItem, MessageService} from "primeng/api";
@@ -37,11 +37,10 @@ import {InputTextModule} from "primeng/inputtext";
 import {TooltipModule} from "primeng/tooltip";
 import {MenubarModule} from "primeng/menubar";
 import {ToastModule} from "primeng/toast";
-import {DropdownModule} from "primeng/dropdown";
+import {SelectModule} from "primeng/select";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {Helper} from "../helper";
 import {EntityViewerComponent} from "./entity-viewer/entity-viewer.component";
-import {MessagesModule} from "primeng/messages";
 import {DialogModule} from "primeng/dialog";
 import {MultiSelectModule} from "primeng/multiselect";
 import {AccordionModule} from "primeng/accordion";
@@ -54,6 +53,7 @@ import {RemoteWidgetComponent} from "../remote-widget/remote-widget.component";
 import { environment } from '../../environment';
 import {HttpErrorResponse} from "@angular/common/http";
 import {RouterLink} from "@angular/router";
+import {MessageModule} from "primeng/message";
 
 interface FileProgress
 {
@@ -69,7 +69,7 @@ interface FileProgress
     TableModule,
     CommonModule,
     ChipModule,
-    OverlayPanelModule,
+    PopoverModule,
     AutoCompleteModule,
     FormsModule,
     NgxJsonViewerModule,
@@ -81,11 +81,10 @@ interface FileProgress
     ProgressBarModule,
     UploadedFilesComponent,
     RemoteRegistrationComponent,
-    DropdownModule,
+    SelectModule,
     ProgressSpinnerModule,
     ActivityViewerComponent,
     EntityViewerComponent,
-    MessagesModule,
     DialogModule,
     MultiSelectModule,
     AccordionModule,
@@ -94,7 +93,8 @@ interface FileProgress
     ConfirmDialogModule,
     IconComponent,
     RemoteWidgetComponent,
-    RouterLink
+    RouterLink,
+    MessageModule
   ],
   templateUrl: './remote-browser.component.html',
   styleUrl: './remote-browser.component.css',
@@ -156,7 +156,7 @@ export class RemoteBrowserComponent implements AfterViewInit {
   selectedUnusedEntities: Entity[] = [];
   remoteProgress = 0;
   progressDetail = "";
-  accordionActiveIndexes = [2, 3];
+  accordionActiveIndexes = ['2', '3'];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private datePipe: DatePipe) {
@@ -189,10 +189,6 @@ export class RemoteBrowserComponent implements AfterViewInit {
       // this.server.setContext(this.context);
       this.messageService.add({severity: "info", summary: `Remote data loaded from cache`});
       this.localMode = true;
-      let offset = 0;
-      if (this.unusedEntities.length > 0) offset ++;
-      if (this.orphanEntities.length > 0) offset ++;
-      this.accordionActiveIndexes = [offset, offset+1];
       this.cdr.detectChanges();
     }
     else

@@ -8,7 +8,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {Helper} from "../../helper";
-import {DropdownModule} from "primeng/dropdown";
+import {SelectModule} from "primeng/select";
 import {MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../../server.service";
 import {
@@ -31,7 +31,7 @@ import {InputTextModule} from "primeng/inputtext";
   selector: 'app-command-editor',
   standalone: true,
   imports: [
-    DropdownModule,
+    SelectModule,
     SharedModule,
     NgIf,
     FormsModule,

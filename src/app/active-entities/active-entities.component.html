@@ -3,9 +3,9 @@
   <ng-template #end>
     <div class="flex flex-wrap align-items-center gap-2">
       <ng-container *ngIf="!(smallSizeMode | async)?.matches">
-        <p-dropdown *ngIf="config?.dashboards" [(ngModel)]="selectedDashboard" [options]="config!.dashboards!" placeholder="Select dashboard"
+        <p-select *ngIf="config?.dashboards" [(ngModel)]="selectedDashboard" [options]="config!.dashboards!" placeholder="Select dashboard"
                     (ngModelChange)="selectDashboard($event)" optionLabel="name" class="smaller-dropdown">
-        </p-dropdown>
+        </p-select>
         <p-button icon="pi pi-save" pTooltip="Save dashboard to browser cache"
                   (click)="showDashboardDialog = true"/>
         <p-toggleButton [(ngModel)]="lockDashboard" onLabel="Freeze dashboard" offLabel="Add new entities" onIcon="pi pi-lock"
@@ -21,7 +21,7 @@
           <p-autoComplete [(ngModel)]="newActivity" [dropdown]="true" [suggestions]="suggestedActivities" (completeMethod)="searchActivities($event)" appendTo="body"
                           [style]="{'width':'50px', 'height': '10px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addActivity($event)"
                           pTooltip="View activity">
-            <ng-template let-item pTemplate="item">
+            <ng-template let-item #item>
               <div><b>{{Helper.getEntityName(item)}}</b></div>
             </ng-template>
           </p-autoComplete>
@@ -32,7 +32,7 @@
                           [style]="{'width':'50px', 'height': '10px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}"
                           optionLabel="entity_id" (ngModelChange)="addEntity($event)"
                           pTooltip="Add entity">
-            <ng-template let-item pTemplate="item">
+            <ng-template let-item #item>
               <div><b>{{Helper.getEntityName(item)}}</b>&nbsp;<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span></div>
             </ng-template>
           </p-autoComplete>
@@ -43,59 +43,59 @@
                           [style]="{'width':'50px', 'height': '10px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id"
                           (ngModelChange)="addRemote($event)"
                           pTooltip="View remote">
-            <ng-template let-item pTemplate="item">
+            <ng-template let-item #item>
               <div><b>{{Helper.getEntityName(item)}}</b>&nbsp;<span *ngIf="item?.options?.kind" [style]="{'color': Helper.getBackgroundColor(item.options.kind)}">{{item.options.kind}}</span></div>
             </ng-template>
           </p-autoComplete>
         </div>
-        <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="loader.loadRemote(selectedRemote)"
+        <p-select [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="loader.loadRemote(selectedRemote)"
                     class="smaller-dropdown">
-          <ng-template pTemplate="selectedItem">
+          <ng-template #selectedItem>
             <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
             <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
           </ng-template>
-          <ng-template let-item pTemplate="item">
+          <ng-template let-item #item>
             {{item.remote_name}} ({{item.address}})
           </ng-template>
-        </p-dropdown>
+        </p-select>
       </ng-container>
       <ng-container *ngIf="(smallSizeMode | async)?.matches">
-        <p-dropdown *ngIf="config?.dashboards" [(ngModel)]="selectedDashboard" [options]="config!.dashboards!" placeholder="Dashboard"
+        <p-select *ngIf="config?.dashboards" [(ngModel)]="selectedDashboard" [options]="config!.dashboards!" placeholder="Dashboard"
                     (ngModelChange)="selectDashboard($event)" optionLabel="name" class="smaller-dropdown">
-        </p-dropdown>
+        </p-select>
         <p-button icon="pi pi-save" (click)="showDashboardDialog = true"/>
         <p-toggleButton [(ngModel)]="lockDashboard" onIcon="pi pi-lock" offIcon="pi pi-lock-open" [style]="{'scale': scale}"/>
         <p-autoComplete [(ngModel)]="newActivity" [dropdown]="true" [suggestions]="suggestedActivities" (completeMethod)="searchActivities($event)" appendTo="body"
                         [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addActivity($event)"
                         placeholder="Activity">
-          <ng-template let-item pTemplate="item">
+          <ng-template let-item #item>
             <div><b>{{Helper.getEntityName(item)}}</b></div>
           </ng-template>
         </p-autoComplete>
         <p-autoComplete [(ngModel)]="newEntity" [dropdown]="true" [suggestions]="suggestions" (completeMethod)="searchEntities($event)" appendTo="body"
                         [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id" (ngModelChange)="addEntity($event)"
                         placeholder="Entity">
-          <ng-template let-item pTemplate="item">
+          <ng-template let-item #item>
             <div><b>{{Helper.getEntityName(item)}}</b></div>
           </ng-template>
         </p-autoComplete>
         <p-autoComplete [(ngModel)]="newRemote" [dropdown]="true" [suggestions]="suggestedRemotes" (completeMethod)="searchRemotes($event)" appendTo="body"
                         [style]="{'width':'50px'}" panelStyleClass="autocomplete-panel-custom" [inputStyle]="{'width':'100%'}" optionLabel="entity_id"
                         (ngModelChange)="addRemote($event)" placeholder="Remotes">
-          <ng-template let-item pTemplate="item">
+          <ng-template let-item #item>
             <div><b>{{Helper.getEntityName(item)}}</b>&nbsp;<span *ngIf="item?.options?.kind" [style]="{'color': Helper.getBackgroundColor(item.options.kind)}">{{item.options.kind}}</span></div>
           </ng-template>
         </p-autoComplete>
-        <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Remote" (ngModelChange)="loader.loadRemote(selectedRemote)"
+        <p-select [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Remote" (ngModelChange)="loader.loadRemote(selectedRemote)"
                     class="smaller-dropdown">
-          <ng-template pTemplate="selectedItem">
+          <ng-template #selectedItem>
             <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}}</ng-container>
             <ng-container *ngIf="!selectedRemote">No remote</ng-container>
           </ng-template>
-          <ng-template let-item pTemplate="item">
+          <ng-template let-item #item>
             {{item.remote_name}} ({{item.address}})
           </ng-template>
-        </p-dropdown>
+        </p-select>
       </ng-container>
       <ng-container *ngFor="let activity of activities">
         <ng-container *ngIf="activity.attributes?.state === 'ON'">
@@ -128,7 +128,7 @@
             pTooltip="Click to wake up the remote"
             (click)="wakeRemote($event)"/>
   </div>
-  <p-messages *ngIf="messages.length > 0" class="message-panel" styleClass="message-panel" [(value)]="messages" [enableService]="false" showTransitionOptions="0ms" hideTransitionOptions="0ms"/>
+  <p-message *ngIf="messages.length > 0" class="message-panel" styleClass="message-panel">messages</p-message>
 </div>
 <app-activity-player *ngFor="let activity of selectedActivities" [activity]="activity" [visible]="true" [(minimized)]="activity.collapsed"
                      (onClose)="removeActivity($event)" [scale]="scale" (onMessage)="handleMessage($event)" style="width:100%"/>
@@ -192,7 +192,7 @@
 
 </div>
 <p-dialog [modal]="true" position="center" [draggable]="true" appendTo="body" [(visible)]="showDashboardDialog">
-  <ng-template pTemplate="header">
+  <ng-template #header>
     <div class="flex align-items-start justify-content-center">
       <h3>Save dashboard</h3>
     </div>

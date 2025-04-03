@@ -3,9 +3,9 @@
     <ng-container *ngIf="textTemplate" [ngTemplateOutlet]="textTemplate"/>
   </div>
   <div class="flex flex-column align-items-center justify-content-center control-edit" *ngIf="editable" style="width: 100%">
-    <p-dropdown [ngModel]="selectedValue" [options]="formattedOptions" (ngModelChange)="valueUpdate($event)"
+    <p-select [ngModel]="selectedValue" [options]="formattedOptions" (ngModelChange)="valueUpdate($event)"
                 appendTo="body" optionLabel="label" class="smaller-dropdown">
-    </p-dropdown>
+    </p-select>
   </div>
 </div>
 

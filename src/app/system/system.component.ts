@@ -20,13 +20,12 @@ import {
   takeWhile, timer
 } from "rxjs";
 import {Helper} from "../helper";
-import {DropdownModule} from "primeng/dropdown";
+import {SelectModule} from "primeng/select";
 import {MenubarModule} from "primeng/menubar";
-import {DecimalPipe, NgForOf, NgIf} from "@angular/common";
+import {NgForOf, NgIf} from "@angular/common";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
-import {MessagesModule} from "primeng/messages";
 import {TableModule} from "primeng/table";
 import {ChipModule} from "primeng/chip";
 import {
@@ -48,6 +47,7 @@ import {Tooltip} from "primeng/tooltip";
 import {ProgressBar} from "primeng/progressbar";
 import {Button} from "primeng/button";
 import {RouterLink} from "@angular/router";
+import {MessageModule} from "primeng/message";
 
 type DriverIntegration = Driver | Integration;
 
@@ -60,14 +60,13 @@ interface IntegrationsDrivers {
   selector: 'app-system',
   standalone: true,
   imports: [
-    DropdownModule,
+    SelectModule,
     MenubarModule,
     NgIf,
     ProgressSpinnerModule,
     SharedModule,
     ToastModule,
     FormsModule,
-    MessagesModule,
     TableModule,
     ChipModule,
     FileUploadModule,
@@ -82,7 +81,8 @@ interface IntegrationsDrivers {
     Tooltip,
     ProgressBar,
     Button,
-    RouterLink
+    RouterLink,
+    MessageModule
   ],
   templateUrl: './system.component.html',
   styleUrl: './system.component.css',

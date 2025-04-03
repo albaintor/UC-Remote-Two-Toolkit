@@ -6,25 +6,25 @@
 <p-blockUI [blocked]="blockedMenu"/>
 <p-menubar [model]="items">
   <ng-template #end>Source remote :
-    <p-dropdown [(ngModel)]="selectedRemote1" [options]="remotes" placeholder="Select source remote">
-      <ng-template pTemplate="selectedItem">
+    <p-select [(ngModel)]="selectedRemote1" optionLabel="remote_name" [options]="remotes" placeholder="Select source remote">
+      <ng-template #selectedItem>
         <ng-container *ngIf="selectedRemote1">{{selectedRemote1.remote_name}} ({{selectedRemote1.address}})</ng-container>
         <ng-container *ngIf="!selectedRemote1">No remote selected</ng-container>
       </ng-template>
-      <ng-template let-item pTemplate="item">
-        {{item.remote_name}} ({{item.address}}<ng-container *ngIf="item.port !== '80'">:{{item.port}}</ng-container>)
-      </ng-template>
-    </p-dropdown>&nbsp;&nbsp;<p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" [disabled]="true"/>&nbsp;&nbsp;
+<!--      <ng-template let-item #item>-->
+<!--        {{item.remote_name}} ({{item.address}}<ng-container *ngIf="item.port !== '80'">:{{item.port}}</ng-container>)-->
+<!--      </ng-template>-->
+    </p-select>&nbsp;&nbsp;<p-button icon="pi pi-arrow-right" [rounded]="true" size="small" severity="secondary" [disabled]="true"/>&nbsp;&nbsp;
     Target remote :
-    <p-dropdown [(ngModel)]="selectedRemote2" [options]="remotes" placeholder="Select target remote">
-      <ng-template pTemplate="selectedItem">
+    <p-select [(ngModel)]="selectedRemote2"optionLabel="remote_name" [options]="remotes" placeholder="Select target remote">
+      <ng-template #selectedItem>
         <ng-container *ngIf="selectedRemote2">{{selectedRemote2.remote_name}} ({{selectedRemote2.address}})</ng-container>
         <ng-container *ngIf="!selectedRemote2">No remote selected</ng-container>
       </ng-template>
-      <ng-template let-item pTemplate="item">
-        {{item.remote_name}} ({{item.address}}<ng-container *ngIf="item.port !== '80'">:{{item.port}}</ng-container>)
-      </ng-template>
-    </p-dropdown>
+<!--      <ng-template let-item #item>-->
+<!--        {{item.remote_name}} ({{item.address}}<ng-container *ngIf="item.port !== '80'">:{{item.port}}</ng-container>)-->
+<!--      </ng-template>-->
+    </p-select>
   </ng-template>
 </p-menubar>
 <app-remote-data-loader #loader1 [remote]="selectedRemote1"></app-remote-data-loader>
@@ -51,7 +51,7 @@
       <div class="flex align-items-center justify-content-center">
         <p-autoComplete [(ngModel)]="item.newEntity" [dropdown]="true" [suggestions]="entitiesSuggestions" (completeMethod)="searchOrphanEntity(item, $event)" appendTo="body"
                         [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" optionLabel="entity_id">
-          <ng-template let-item pTemplate="item">
+          <ng-template let-item #item>
             <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
           </ng-template>
         </p-autoComplete>
@@ -77,7 +77,7 @@
 </ng-container>
 <p-table [value]="activitiesDiff" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
          [scrollable]="true" [scrollHeight]="'calc(100vh - 50px)'" [(selection)]="selectedActivities">
-  <ng-template pTemplate="header">
+  <ng-template #header>
     <tr>
       <th style="width: 4rem"><p-tableHeaderCheckbox pTooltip="Synchronize all the activities from remote {{selectedRemote1?.remote_name}} to {{selectedRemote2?.remote_name}}" /></th>
       <th pResizableColumn><p-columnFilter field="activity1.name" matchMode="in" [showMenu]="false">
@@ -172,7 +172,7 @@
 
 <p-table *ngIf="driversDiff.length>0" [value]="driversDiff" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
          [scrollable]="true" [scrollHeight]="'calc(100vh - 50px)'" [(selection)]="selectedActivities">
-  <ng-template pTemplate="header">
+  <ng-template #header>
     <tr>
       <th pResizableColumn><p-columnFilter field="driver1.name" matchMode="in" [showMenu]="false">
         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
@@ -226,7 +226,7 @@
     </tr>
   </ng-template>
 </p-table>
-<p-overlayPanel #diffPanelSequences [style]="{ width: '450px' }" [showCloseIcon]="true" appendTo="body">
+<p-popover #diffPanelSequences [style]="{ width: '450px' }" [showCloseIcon]="true" appendTo="body">
   <ng-template pTemplate="content">
     <ng-container *ngIf="selectedSequences">
       <div class="flex align-content-center flex-wrap gap-3" style="min-height: 50px">
@@ -240,8 +240,8 @@
       </div>
     </ng-container>
   </ng-template>
-</p-overlayPanel>
-<p-overlayPanel #diffPanelButton [style]="{ width: '850px' }" [showCloseIcon]="true" appendTo="body" styleClass="buttons_panel">
+</p-popover>
+<p-popover #diffPanelButton [style]="{ width: '850px' }" [showCloseIcon]="true" appendTo="body" styleClass="buttons_panel">
   <ng-template pTemplate="content">
     <ng-container *ngIf="selectedButton">
       <div class="flex flex-column">
@@ -328,8 +328,8 @@
 
     </ng-container>
   </ng-template>
-</p-overlayPanel>
-<p-overlayPanel #actvitiesViewer [showCloseIcon]="true" appendTo="body">
+</p-popover>
+<p-popover #actvitiesViewer [showCloseIcon]="true" appendTo="body">
   <ng-template pTemplate="content">
     <div class="grid" *ngIf="selectedActivity1 && selectedActivity2">
       <div class="col-6">
@@ -350,10 +350,10 @@
       <app-activity-viewer [remote]="selectedRemote2" [editMode]="false" [activity]="selectedActivity2"></app-activity-viewer>
     </ng-container>
   </ng-template>
-</p-overlayPanel>
+</p-popover>
 <app-remote-operations #operations [operations]="remoteOperations" [remote]="selectedRemote2" [groupByActivities]="true"
                        [(visible)]="showOperations" (operationsDone)="operationsDone($event)"></app-remote-operations>
-<p-overlayPanel #entityPanel [style]="{ width: '450px' }" [showCloseIcon]="true" appendTo="body" styleClass="buttons_panel">
+<p-popover #entityPanel [style]="{ width: '450px' }" [showCloseIcon]="true" appendTo="body" styleClass="buttons_panel">
   <ng-template pTemplate="content">
     <ng-container *ngIf="selectedEntity">
       <div class="flex flex-column">
@@ -369,5 +369,5 @@
       </div>
     </ng-container>
   </ng-template>
-</p-overlayPanel>
+</p-popover>
 <p-confirmDialog key="confirmSync"/>

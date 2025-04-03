@@ -8,23 +8,23 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {
-    Activity,
-    Command,
-    CommandSequence,
-    Config,
-    Context,
-    Entity,
-    Macro,
-    OperationStatus,
-    OrphanEntity,
-    Profile,
-    Remote, RemoteData,
-    RemoteOperation
+  Activity,
+  Command,
+  CommandSequence,
+  Config,
+  Context,
+  Entity, EntityFeature,
+  Macro,
+  OperationStatus,
+  OrphanEntity,
+  Profile,
+  Remote, RemoteData,
+  RemoteOperation
 } from "../interfaces";
 import {MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
 import {ActivatedRoute, RouterLink} from "@angular/router";
-import {DropdownModule} from "primeng/dropdown";
+import {SelectModule} from "primeng/select";
 import {MenubarModule} from "primeng/menubar";
 import {DatePipe, NgForOf, NgIf} from "@angular/common";
 import {ProgressBarModule} from "primeng/progressbar";
@@ -36,14 +36,13 @@ import {TableModule} from "primeng/table";
 import {EntityViewerComponent} from "../remote-browser/entity-viewer/entity-viewer.component";
 import {ButtonModule} from "primeng/button";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
-import {forkJoin, from, map, mergeMap, Observable} from "rxjs";
-import {MessagesModule} from "primeng/messages";
 import {MultiSelectModule} from "primeng/multiselect";
 import {Helper} from "../helper";
 import {AutoCompleteModule} from "primeng/autocomplete";
 import {CheckboxModule} from "primeng/checkbox";
 import {RemoteDataLoaderComponent} from "../remote-data-loader/remote-data-loader.component";
 import {Tooltip} from "primeng/tooltip";
+import {MessageModule} from "primeng/message";
 
 class Message {
   title: string = "";
@@ -54,7 +53,7 @@ class Message {
   selector: 'app-replace-entity',
   standalone: true,
   imports: [
-    DropdownModule,
+    SelectModule,
     MenubarModule,
     NgIf,
     ProgressBarModule,
@@ -68,7 +67,6 @@ class Message {
     EntityViewerComponent,
     ButtonModule,
     RemoteOperationsComponent,
-    MessagesModule,
     DatePipe,
     MultiSelectModule,
     AutoCompleteModule,
@@ -76,6 +74,7 @@ class Message {
     RemoteDataLoaderComponent,
     RouterLink,
     Tooltip,
+    MessageModule
   ],
   templateUrl: './replace-entity.component.html',
   styleUrl: './replace-entity.component.css',
@@ -88,6 +87,7 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
   config: Config | undefined;
   remotes: Remote[] | undefined;
   selectedRemote: Remote | undefined;
+  featuresMap: EntityFeature[] = [];
   activities: Activity[] = [];
   entities: Entity[] = [];
   progress = false
@@ -140,6 +140,9 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
       this.availableEntities = [...this.entities];
       this.cdr.detectChanges();
     }
+    this.server.getFeaturesMap().subscribe(features => {
+      this.featuresMap = features;
+    })
   }
 
   ngAfterViewInit() {
@@ -273,6 +276,13 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
             let finalsequences: CommandSequence[] = [];
             sequences.forEach(sequence => {
               const item = replaceEntities.find(entity => entity.oldEntity!.entity_id === sequence.command?.entity_id);
+              if (item?.newEntity && sequence.command?.cmd_id && !Helper.checkCommandCompatibility(this.featuresMap, item.newEntity, sequence.command.cmd_id)) {
+                console.warn("The new entity has an incompatible command", sequence.command);
+                this.messages.push({title: `The new entity has an incompatible command ${sequence.command.cmd_id}`,
+                  message: `${sequence.command!.entity_id!}  will be removed from sequence in activity ${Helper.getEntityName(activity)} (${activity.entity_id})`});
+                this.cdr.detectChanges();
+                return;
+              }
               if (item) {
                 sequence.command!.entity_id = item.newEntity!.entity_id!;
                 finalsequences.push(sequence);
@@ -285,8 +295,9 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
                   message: `${sequence.command!.entity_id!}  will be removed from sequence in activity ${Helper.getEntityName(activity)} (${activity.entity_id})`});
                 this.cdr.detectChanges();
               }
-              else
+              else {
                 finalsequences.push(sequence);
+              }
             });
             sequences_list[type] =  finalsequences;
           }
@@ -439,6 +450,7 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
         const body: any = {
         };
         if (macro.options?.included_entities) {
+          if (!body.options) body.options = {};
           body.options.included_entities = macro.options.included_entities.map(entity_id => {
             const entry = this.replaceEntities.find(entity =>
               entity.oldEntity?.entity_id! === entity_id?.entity_id);
@@ -447,6 +459,7 @@ export class ReplaceEntityComponent implements OnInit, AfterViewInit {
           });
         }
         if (macro.options?.sequence) {
+          if (!body.options) body.options = {};
           body.options.sequence = [...macro.options.sequence];
           (body.options.sequence as CommandSequence[]).forEach(sequence => {
             const entry = this.replaceEntities.find(entity =>

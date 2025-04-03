@@ -7,7 +7,7 @@ import {
   Driver,
   Entity,
   EntityCommand,
-  EntityCommandParameter,
+  EntityCommandParameter, EntityFeature,
   EntityIntegration,
   EntityUsage,
   Integration,
@@ -836,5 +836,14 @@ export class Helper
         results.push({entityId: entity2.entity_id!, missing1: true})
     })
     return results;
+  }
+
+  static checkCommandCompatibility(featuresMap: EntityFeature[], entity: Entity, command: string): boolean {
+    if (!entity.features) return true;
+    const features = featuresMap.find(item => item.entity_type === entity.entity_type);
+    if (!features) return true;
+    const feature = features.features_map.find(item => item.commands.includes(command))
+    if (!feature || !feature.feature) return true;
+    return entity.features.includes(feature.feature);
   }
 }

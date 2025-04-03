@@ -1,7 +1,7 @@
 <p-toast></p-toast>
 <p-dialog header="Uploaded files" [(visible)]="visible" [style]="{width: '50vw'}">
   <p-table [value]="uploadedFiles" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true">
-    <ng-template pTemplate="header">
+    <ng-template #header>
       <tr>
         <th>Filename</th><th>Actions</th>
       </tr>

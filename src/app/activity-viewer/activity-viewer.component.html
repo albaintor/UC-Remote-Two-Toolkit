@@ -32,14 +32,14 @@
 </div>
 </p-toolbar>
 <p-toolbar styleClass="toolbar-included-entities"><h3>Included entities</h3>
-  <p-dropdown *ngIf="editMode" [options]="entities" [(ngModel)]="includedEntity" (ngModelChange)="addIncludedEntity($event)" placeholder="Add entity">
-    <ng-template let-item pTemplate="item">
+  <p-select *ngIf="editMode" [options]="entities" [(ngModel)]="includedEntity" (ngModelChange)="addIncludedEntity($event)" placeholder="Add entity">
+    <ng-template let-item #item>
       <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
     </ng-template>
-    <ng-template let-item pTemplate="selectedItem">
+    <ng-template let-item #selectedItem>
       <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
     </ng-template>
-  </p-dropdown>
+  </p-select>
   <p-chip *ngFor="let entity of activity?.options?.included_entities" label="{{Helper.getEntityName(entity)}} ({{Helper.getEntityType(entity)}})"
           [style]="getStyle(Helper.getEntityType(entity))" [pTooltip]="entity.entity_id" [removable]="editMode"
           (onRemove)="deleteIncludedEntity(entity, $event)"></p-chip>&nbsp;

@@ -2,7 +2,7 @@
 <ng-container *ngIf="!(smallSizeMode | async)?.matches">
   <p-dialog [modal]="false" position="topright" [showHeader]="true" [closable]="false" [visible]="visible" [draggable]="true"
                        contentStyleClass="widget-dialog" class="widget" styleClass="widget-header" appendTo="body">
-    <ng-template pTemplate="header">
+    <ng-template #header>
       <div class="flex justify-content-between flex-wrap gap-3 column-gap-4" style="width: 100%">
         <div class="flex align-items-center justify-content-center">
           <p-button icon="pi pi-window-minimize" [severity]="minimized ? 'secondary' : 'info'" class="smaller-button"
@@ -47,16 +47,16 @@
                             [headerTemplate]="entitySelector" [scale]="scale" style="width: 100%">
             <ng-template #entitySelector>
               <div style="position: relative; width: 100%; height: 60px;margin-left:30px"></div>
-              <p-dropdown [(ngModel)]="mediaEntity" [options]="mediaEntities" placeholder="Media entity" appendTo="body"
+              <p-select [(ngModel)]="mediaEntity" [options]="mediaEntities" placeholder="Media entity" appendTo="body"
                           (ngModelChange)="changedMediaEntity($event)" optionLabel="entity_id"
                           [style]="{'scale':scale, position: 'absolute', right: 0, top:0, transform: 'translate(25%, 0%)'}">
-                <ng-template pTemplate="selectedItem">
+                <ng-template #selectedItem>
                   {{websocketService.getEntityName(mediaEntity)}}
                 </ng-template>
-                <ng-template let-item pTemplate="item">
+                <ng-template let-item #item>
                   {{websocketService.getEntityName(item)}}
                 </ng-template>
-              </p-dropdown>
+              </p-select>
             </ng-template>
           </app-media-entity>
         </div>
@@ -108,16 +108,16 @@
                           [headerTemplate]="entitySelector" [scale]="scale" style="width: 100%">
           <ng-template #entitySelector>
             <div style="position: relative; width: 100%; height: 60px;margin-left:30px"></div>
-            <p-dropdown [(ngModel)]="mediaEntity" [options]="mediaEntities" placeholder="Media entity" appendTo="body"
+            <p-select [(ngModel)]="mediaEntity" [options]="mediaEntities" placeholder="Media entity" appendTo="body"
                         (ngModelChange)="changedMediaEntity($event)" optionLabel="entity_id"
                         [style]="{'scale':scale, position: 'absolute', right: 0, top:0, transform: 'translate(25%, 0%)'}">
-              <ng-template pTemplate="selectedItem">
+              <ng-template #selectedItem>
                 {{websocketService.getEntityName(mediaEntity)}}
               </ng-template>
-              <ng-template let-item pTemplate="item">
+              <ng-template let-item #item>
                 {{websocketService.getEntityName(item)}}
               </ng-template>
-            </p-dropdown>
+            </p-select>
           </ng-template>
         </app-media-entity>
       </div>

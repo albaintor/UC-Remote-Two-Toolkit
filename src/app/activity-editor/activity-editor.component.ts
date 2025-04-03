@@ -11,7 +11,7 @@ import {
 import {ConfirmationService, MenuItem, MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../server.service";
 import {ActivatedRoute} from "@angular/router";
-import {DropdownModule} from "primeng/dropdown";
+import {SelectModule} from "primeng/select";
 import {MenubarModule} from "primeng/menubar";
 import {NgForOf, NgIf} from "@angular/common";
 import {ProgressBarModule} from "primeng/progressbar";
@@ -49,7 +49,6 @@ import {ButtonModule} from "primeng/button";
 import {Helper} from "../helper";
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
 import {RemoteOperationsComponent} from "../remote-operations/remote-operations.component";
-import {MessagesModule} from "primeng/messages";
 import {DialogModule} from "primeng/dialog";
 import {saveAs} from "file-saver-es";
 import {map, Observable} from "rxjs";
@@ -65,6 +64,7 @@ import {IconSelectorComponent} from "../controls/icon-selector/icon-selector.com
 import {IconComponent} from "../controls/icon/icon.component";
 import {ToolbarModule} from "primeng/toolbar";
 import {RemoteWidgetComponent} from "../remote-widget/remote-widget.component";
+import {MessageModule} from "primeng/message";
 
 export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
 
@@ -77,38 +77,38 @@ enum OperationMode {
 @Component({
   selector: 'app-activity-editor',
   standalone: true,
-    imports: [
-        DropdownModule,
-        MenubarModule,
-        NgIf,
-        ProgressBarModule,
-        ProgressSpinnerModule,
-        SharedModule,
-        ToastModule,
-        FormsModule,
-        ActivityViewerComponent,
-        NgForOf,
-        NgxJsonViewerModule,
-        MultiSelectModule,
-        CheckboxModule,
-        ButtonModule,
-        AutoCompleteModule,
-        RemoteOperationsComponent,
-        MessagesModule,
-        DialogModule,
-        RemoteDataLoaderComponent,
-        ChipModule,
-        InputTextModule,
-        ConfirmDialogModule,
-        BlockUIModule,
-        DividerModule,
-        TagModule,
-        ToggleButtonModule,
-        IconSelectorComponent,
-        IconComponent,
-        ToolbarModule,
-        RemoteWidgetComponent
-    ],
+  imports: [
+    SelectModule,
+    MenubarModule,
+    NgIf,
+    ProgressBarModule,
+    ProgressSpinnerModule,
+    SharedModule,
+    ToastModule,
+    FormsModule,
+    ActivityViewerComponent,
+    NgForOf,
+    NgxJsonViewerModule,
+    MultiSelectModule,
+    CheckboxModule,
+    ButtonModule,
+    AutoCompleteModule,
+    RemoteOperationsComponent,
+    DialogModule,
+    RemoteDataLoaderComponent,
+    ChipModule,
+    InputTextModule,
+    ConfirmDialogModule,
+    BlockUIModule,
+    DividerModule,
+    TagModule,
+    ToggleButtonModule,
+    IconSelectorComponent,
+    IconComponent,
+    ToolbarModule,
+    RemoteWidgetComponent,
+    MessageModule
+  ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',
   providers: [MessageService, ConfirmationService],

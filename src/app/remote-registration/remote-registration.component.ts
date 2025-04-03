@@ -52,6 +52,7 @@ export class RemoteRegistrationComponent {
   @Output() remoteSelected = new EventEmitter<Remote>();
   @Output() remotesChanged = new EventEmitter<Remote[]>();
   selectedRemote: Remote | undefined;
+  extractedRemote: Remote | undefined;
   registrations: RemoteRegistration[] | undefined;
   blockedPanel = false;
   progress = false;
@@ -155,22 +156,44 @@ export class RemoteRegistrationComponent {
     }})
   }
 
-  getRemote(remote: Remote) {
+  deleteRegistration(remote: RemoteRegistration) {
+    console.info("Unregistering remote", remote);
+    if (!this.extractedRemote) return;
+    this.server.deleteRemoteKey(this.extractedRemote, remote.key_id).subscribe({
+      next: ((results) => {
+        this.messageService.add({severity: "success", summary: "Remote unregistered",
+          key: "remote"});
+        this.getRemote(this.extractedRemote!, false);
+        this.cdr.detectChanges();
+      }),
+      error: ((error: any) => {
+        console.error("Error unregistering remote", error);
+        this.messageService.add({severity: "error", summary: "Error while unregistering remote", key: "remote"});
+        this.cdr.detectChanges();
+      }),
+      complete: () => {
+        this.cdr.detectChanges();
+      }})
+  }
+
+  getRemote(remote: Remote, notify=true) {
     this.blockedPanel = true;
     this.progress = true;
     this.cdr.detectChanges();
     this.server.getRemoteRegistrations(remote).subscribe({
       next: ((results) => {
-        this.messageService.add({severity: "success", summary: "Registrations retrieved",
-          key: "remote"});
+        if (notify)
+          this.messageService.add({severity: "success", summary: "Registrations retrieved",
+            key: "remote"});
         this.registrations = results;
+        this.extractedRemote = remote;
         this.cdr.detectChanges();
       }),
       error: ((error: any) => {
         console.error("Error extracting remote info", error);
         this.blockedPanel = false;
         this.progress = false;
-        this.messageService.add({severity: "error", summary: "Error while extracting remote registrations", key: "remote"});
+        if (notify) this.messageService.add({severity: "error", summary: "Error while extracting remote registrations", key: "remote"});
         this.cdr.detectChanges();
       }),
       complete: () => {

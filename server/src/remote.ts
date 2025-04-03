@@ -207,7 +207,7 @@ export class Remote
   async getRegisteredKeys()
   {
     const options = this.getOptions();
-    const url = this.getURL() + '/api/auth/api_keys';
+    const url = this.getURL() + '/api/auth/api_keys?page=1&limit=100';
     console.log('Get remote registering information', url, options);
     const res = await got.get(url, options);
     let resBody;
@@ -230,6 +230,14 @@ export class Remote
         scopes: ["admin"]
       }
     }
+    const registrations = await this.getRegisteredKeys() as [any];
+    for (let registration of registrations) {
+      if (registration.name == api_key_name) {
+        const url = this.getURL() + '/api/auth/api_keys/' + registration.key_id;
+        await got.delete(url, options);
+      }
+    }
+
     const url = this.getURL() + '/api/auth/api_keys';
     console.log('Register remote', url, options);
     const res = await got.post(url, options);
@@ -247,13 +255,29 @@ export class Remote
     }
   }
 
+  async unregisterKeyId(keyId: string)
+  {
+    const options = this.getOptions();
+    const url = this.getURL() + '/api/auth/api_keys/' + keyId;
+    console.log('Unregister remote key', url, options);
+    const res = await got.delete(url, options);
+    let resBody;
+    try {
+      if (res?.body) resBody = JSON.parse(res.body);
+      return resBody;
+    } catch (err) {
+      console.error('Error unregistering remote', err, res?.body);
+      throw (err);
+    }
+  }
+
   async unregister(api_key_name: string)
   {
     const options = this.getOptions();
-    let url = this.getURL() + '/api/auth/api_keys';
+    let url = this.getURL() + '/api/auth/api_keys?page=1&limit=100';
     const res = await got.get(url, options);
     const keys = JSON.parse(res.body);
-    console.log("List of registered keys", keys);
+    console.log(`List of registered keys for ${this.address}`, keys);
     for (let key of keys) {
       if (key.name === api_key_name) {
         url = this.getURL() + '/api/auth/api_keys/' + key.key_id;

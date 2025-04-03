@@ -7,7 +7,7 @@
       [listStyle]="{ 'max-height': '30rem' }"
       header="Activity pages"
       [dragdrop]="editable" [stripedRows]="true" (onReorder)="updatePages($event)">
-      <ng-template let-page pTemplate="item">
+      <ng-template let-page #item>
         <div class="flex flex-wrap p-2 align-items-center gap-3">
           <i *ngIf="editable" class="pi pi-bars"></i>
           <div class="flex-1 flex flex-column gap-2" (click)="selectPage(page)">

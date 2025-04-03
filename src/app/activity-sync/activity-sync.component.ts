@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import {ConfirmationService, MenuItem, MessageService, PrimeTemplate} from "primeng/api";
 import {BlockUIModule} from "primeng/blockui";
-import {DropdownModule} from "primeng/dropdown";
+import {SelectModule} from "primeng/select";
 import {MenubarModule} from "primeng/menubar";
 import {KeyValuePipe, NgForOf, NgIf} from "@angular/common";
 import {ProgressSpinnerModule} from "primeng/progressspinner";
@@ -33,7 +33,7 @@ import {ChipModule} from "primeng/chip";
 import {IconComponent} from "../controls/icon/icon.component";
 import {InputTextModule} from "primeng/inputtext";
 import {TableModule} from "primeng/table";
-import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
+import {Popover, PopoverModule} from "primeng/popover";
 import {ActivityViewerComponent} from "../activity-viewer/activity-viewer.component";
 import {Button} from "primeng/button";
 import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplete";
@@ -99,7 +99,7 @@ interface DriverDiff {
   standalone: true,
   imports: [
     BlockUIModule,
-    DropdownModule,
+    SelectModule,
     MenubarModule,
     NgIf,
     PrimeTemplate,
@@ -113,7 +113,7 @@ interface DriverDiff {
     NgForOf,
     TableModule,
     KeyValuePipe,
-    OverlayPanelModule,
+    PopoverModule,
     ActivityViewerComponent,
     Button,
     AutoCompleteModule,
@@ -756,7 +756,7 @@ export class ActivitySyncComponent implements AfterViewInit {
     });
   }
 
-  showButton(button : ButtonsMappingDiff, diffPanelButton: OverlayPanel, $event: MouseEvent) {
+  showButton(button : ButtonsMappingDiff, diffPanelButton: Popover, $event: MouseEvent) {
     this.selectedButton = button;
     diffPanelButton.hide();
     this.cdr.detectChanges();
@@ -764,19 +764,19 @@ export class ActivitySyncComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  showSequence(sequences : CommandSequence[], diffPanelSequences: OverlayPanel, $event: MouseEvent) {
+  showSequence(sequences : CommandSequence[], diffPanelSequences: Popover, $event: MouseEvent) {
     this.selectedSequences = sequences;
     diffPanelSequences.show($event, $event.target);
     this.cdr.detectChanges();
   }
 
-  showEntity(entity: Entity, entityPanel: OverlayPanel, $event: MouseEvent) {
+  showEntity(entity: Entity, entityPanel: Popover, $event: MouseEvent) {
     this.selectedEntity = entity;
     entityPanel.show($event, $event.target);
     this.cdr.detectChanges();
   }
 
-  viewActivities(diff: ActivityDiff, actvitiesViewer: OverlayPanel, $event: MouseEvent) {
+  viewActivities(diff: ActivityDiff, actvitiesViewer: Popover, $event: MouseEvent) {
     this.selectedActivity1 = diff.activity1;
     this.selectedActivity2 = diff.activity2;
     actvitiesViewer.show($event, $event.target);

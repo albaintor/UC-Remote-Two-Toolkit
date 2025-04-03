@@ -278,7 +278,7 @@ app.post('/api/config/remote', async (req, res, next) => {
 
   const remote = new Remote(req.body?.address, req.body?.port, user,req.body?.token);
   try {
-    const api_key_name = req.body?.api_key_name ? req.body?.api_key_name : "RC2Tool";
+    const api_key_name = req.body?.api_key_name ? req.body?.api_key_name : "UCWebTool";
     await remote.unregister(api_key_name);
     await remote.register(api_key_name);
     await remote.getRemoteName();
@@ -359,6 +359,30 @@ app.delete('/api/config/remote/:address', async (req, res, next) => {
   finally {
     configFile.remotes = configFile.remotes?.filter(local_remote => remote.address !== local_remote.address);
     writeConfigFile(configFile);
+  }
+})
+
+
+app.delete('/api/config/remote/:address/registration/:key', async (req, res, next) => {
+  const address = req.params.address;
+  const key = req.params.key;
+  let user = REMOTE_USER
+  if (req.body?.user)
+    user = req.body?.user;
+  const configFile: Config = getConfigFile();
+  const remoteEntry = configFile?.remotes?.find(remote => remote.address === address);
+  if (!remoteEntry)
+  {
+    res.status(404).json(address);
+    return;
+  }
+  const remote = new Remote(remoteEntry.address, remoteEntry.port, remoteEntry.user, remoteEntry.token, remoteEntry.api_key);
+  try {
+    await remote.unregisterKeyId(key);
+    res.status(200).json(address);
+  } catch (error)
+  {
+    errorHandler(error, req, res, next);
   }
 })
 

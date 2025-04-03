@@ -28,7 +28,7 @@ export interface EventMessage extends Message {
   msg: string;
 }
 
-const RECONNECT_INTERVAL = 5000;
+const RECONNECT_INTERVAL = 10000;
 
 export class RemoteWebsocket  {
   private remote: Remote | undefined;

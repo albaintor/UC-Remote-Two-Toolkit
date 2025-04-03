@@ -21,7 +21,7 @@ import {catchError, forkJoin, from, map, mergeMap, of} from "rxjs";
 import {ChipModule} from "primeng/chip";
 import {Helper} from "../helper";
 import {Ripple} from "primeng/ripple";
-import {OverlayPanel, OverlayPanelModule} from "primeng/overlaypanel";
+import {Popover, PopoverModule} from "primeng/popover";
 import {ProgressBarModule} from "primeng/progressbar";
 
 @Component({
@@ -37,7 +37,7 @@ import {ProgressBarModule} from "primeng/progressbar";
     NgxJsonViewerModule,
     ChipModule,
     Ripple,
-    OverlayPanelModule,
+    PopoverModule,
     ProgressBarModule
   ],
   templateUrl: './remote-operations.component.html',
@@ -88,7 +88,7 @@ export class RemoteOperationsComponent {
   @Output() visibleChange: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() operationsDone: EventEmitter<RemoteOperation[]> = new EventEmitter<RemoteOperation[]>();
   @Output() operationsStart: EventEmitter<RemoteOperation[]> = new EventEmitter<RemoteOperation[]>();
-  @ViewChild("resultsPannel", {static: false}) resultsPannel: OverlayPanel | undefined;
+  @ViewChild("resultsPannel", {static: false}) resultsPannel: Popover | undefined;
   selectedOperation: RemoteOperation | undefined = undefined;
   protected readonly Helper = Helper;
   progress = false;

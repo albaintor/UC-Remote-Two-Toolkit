@@ -8,7 +8,7 @@ import {
   Config,
   Driver,
   Entity,
-  EntityCommand, FAFontConfiguration,
+  EntityCommand, EntityFeature, FAFontConfiguration,
   Integration,
   LanguageCode,
   Macro,
@@ -98,6 +98,13 @@ export class ServerService {
   getPictureRemoteMap(): Observable<{ [id: string]: string }>
   {
     return this.http.get<{ [id: string]: string }>('/assets/remote/picture-button-map.json').pipe(map(results => {
+      return results;
+    }))
+  }
+
+  getFeaturesMap(): Observable<EntityFeature[]>
+  {
+    return this.http.get<EntityFeature[]>('/assets/remote/features-map.json').pipe(map(results => {
       return results;
     }))
   }
@@ -389,6 +396,13 @@ export class ServerService {
   getRemoteRegistrations(remote: Remote): Observable<RemoteRegistration[]>
   {
     return this.http.get<RemoteRegistration[]>('/api/config/remote/'+remote.address).pipe(map(results => {
+      return results;
+    }))
+  }
+
+  deleteRemoteKey(remote: Remote, key: string): Observable<any>
+  {
+    return this.http.delete<any>(`/api/config/remote/${remote.address}/registration/${key}`).pipe(map(results => {
       return results;
     }))
   }

@@ -19,7 +19,7 @@
   <ng-container *ngIf="!groupByActivities">
     <p-table [value]="_operations" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
              [scrollable]="true" [scrollHeight]="'calc(70vh - 50px)'" [(selection)]="selectedOperations" >
-      <ng-template pTemplate="header">
+      <ng-template #header>
         <tr>
           <th style="width: 4rem"><p-tableHeaderCheckbox pTooltip="Execute or ignore all operations" /></th>
           <th pResizableColumn>Name</th>
@@ -54,7 +54,7 @@
   <ng-container *ngIf="groupByActivities && activities">
     <p-table dataKey="id" [value]="activities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
              [scrollable]="true" [scrollHeight]="'calc(70vh - 50px)'" >
-      <ng-template pTemplate="header">
+      <ng-template #header>
         <tr>
           <th style="width: 5rem"></th>
           <th pResizableColumn>Activity</th>
@@ -75,7 +75,7 @@
           <td colspan="3">
             <div class="p-3">
               <p-table [value]="getFromActivity(activity)">
-                <ng-template pTemplate="header">
+                <ng-template #header>
                   <tr>
                     <th pResizableColumn>Name</th>
                     <th pResizableColumn>Method</th>
@@ -113,11 +113,11 @@
     </p-table>
   </ng-container>
 </p-dialog>
-<p-overlayPanel id="resultsPannel" #resultsPannel [style]="{ width: '80%' }" [showCloseIcon]="true">
+<p-popover id="resultsPannel" #resultsPannel [style]="{ width: '80%' }" [showCloseIcon]="true">
   <ng-template pTemplate="content">
     <ng-container *ngIf="selectedOperation?.results">
       <h3>Results of the operation {{selectedOperation!.method!}} {{selectedOperation!.api!}}</h3>
       <ngx-json-viewer [json]="selectedOperation!.results!" [depth]="3"></ngx-json-viewer>
     </ng-container>
   </ng-template>
-</p-overlayPanel>
+</p-popover>

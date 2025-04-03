@@ -5,15 +5,15 @@
 <h2><img src="assets/logo.png" alt="" style="width:200px"/>&nbsp;&nbsp;Unfolded Circle remote configuration toolkit</h2>
 <p-menubar [model]="items">
   <ng-template #end>
-    <p-dropdown [(ngModel)]="selectedRemote" [options]="remotes" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
-      <ng-template pTemplate="selectedItem">
+    <p-select [(ngModel)]="selectedRemote" [options]="remotes" optionLabel="remote_name" placeholder="Select remote" (ngModelChange)="setRemote(selectedRemote!)">
+      <ng-template #selectedItem>
         <ng-container *ngIf="selectedRemote">{{selectedRemote.remote_name}} ({{selectedRemote.address}})</ng-container>
         <ng-container *ngIf="!selectedRemote">No remote selected</ng-container>
       </ng-template>
-      <ng-template let-item pTemplate="item">
-        {{item.remote_name}} ({{item.address}})
-      </ng-template>
-    </p-dropdown>
+<!--      <ng-template let-item #item>-->
+<!--        {{item.remote_name}} ({{item.address}})-->
+<!--      </ng-template>-->
+    </p-select>
   </ng-template>
 </p-menubar>
 <ng-container *ngIf="progress">
@@ -22,15 +22,13 @@
 </ng-container>
 <app-remote-data-loader #loader [remote]="selectedRemote" (loaded)="remoteLoaded($event)"></app-remote-data-loader>
 <app-entity-viewer #entityviewer></app-entity-viewer>
-<p-messages severity="info">
-  <ng-template pTemplate>
+<p-message severity="info">
     <div class="ml-2">Replace one or multiple entities by others in all activities, UI pages, macros : select the entity in the table below twice (first original entity, second selection new entity).<br>
       You can click on <b>Add</b> to select another couple of old/new entity to be replaced.<br>
       Note that you should select all the necessary couples to be replaced in one time, because if an entity is orphaned (not related to any integration) all related mappings will be cleared and you won't be able to replace it on a second pass.
       If you want to replace entities only within a given activity, rather go to the activity page and edit it.
     </div>
-  </ng-template>
-</p-messages>
+</p-message>
 <ng-container *ngIf="context && context.type">
   <h4>Current source (cached) : {{context.source}} ({{context.date | date:'dd MMM yyyy \'at\' HH:mm'}})</h4>
 </ng-container>
@@ -58,13 +56,16 @@
     <p-button label="Remove" (onClick)="remove()" severity="danger" icon="pi pi-minus" size="small" [rounded]="true"></p-button>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-checkbox [(ngModel)]="replaceActivities" [binary]="true" label="Replace in activities" />
+    <p-checkbox id="replaceActivities" [(ngModel)]="replaceActivities" [binary]="true"/>
+    <label for="replaceActivities">Replace in activities</label>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-checkbox [(ngModel)]="replaceProfiles" [binary]="true" label="Replace in profile pages" />
+    <p-checkbox id="replaceProfiles" [(ngModel)]="replaceProfiles" [binary]="true" />
+    <label for="replaceProfiles">Replace in profile pages</label>
   </div>
   <div class="flex align-items-center justify-content-center">
-    <p-checkbox [(ngModel)]="replaceMacros" [binary]="true" label="Replace in macros" />
+    <p-checkbox id="replaceMacros" [(ngModel)]="replaceMacros" [binary]="true" />
+    <label for="replaceMacros">Replace in macros</label>
   </div>
   <div class="flex align-items-center justify-content-center">
     <p-button [disabled]="checkSelection()" label="Submit" icon="pi pi-check"
@@ -75,7 +76,7 @@
   <h3>Warnings during the analysis</h3>
   <p-table [value]="messages" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
            dataKey="message" columnResizeMode="expand">
-    <ng-template pTemplate="header">
+    <ng-template #header>
       <tr>
         <th pSortableColumn="title" pResizableColumn>Title<p-sortIcon field="title"></p-sortIcon></th>
         <th pSortableColumn="message" pResizableColumn>Detail<p-sortIcon field="message"></p-sortIcon></th>
@@ -97,7 +98,7 @@
   <h3>Orphan entities</h3>
   <p-table [value]="orphanEntities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
            dataKey="entity_id" columnResizeMode="expand">
-    <ng-template pTemplate="header">
+    <ng-template #header>
       <tr>
         <th pSortableColumn="title" pResizableColumn>Name<p-sortIcon field="name"></p-sortIcon></th>
         <th pSortableColumn="entity_id" pResizableColumn>Entity id<p-sortIcon field="entity_id"></p-sortIcon></th>
@@ -120,7 +121,7 @@
 <h2>Select entity to replace</h2>
 <p-table [value]="availableEntities" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
          dataKey="entity_id" columnResizeMode="expand" [scrollable]="true" [scrollHeight]="'calc(100vh - 50px)'">
-  <ng-template pTemplate="header">
+  <ng-template #header>
     <tr>
       <th pSortableColumn="name" pResizableColumn>Name<p-sortIcon field="name"></p-sortIcon></th>
       <th pSortableColumn="entity_id" pResizableColumn>Entity ID<p-sortIcon field="entity_id"></p-sortIcon></th>

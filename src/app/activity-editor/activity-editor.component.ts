@@ -22,9 +22,9 @@ import {
   Activity,
   ActivityPageCommand,
   ButtonMapping,
-  Command,
+  Command, CommandMapping,
   Config,
-  Entity,
+  Entity, EntityFeature,
   LanguageCode,
   OperationStatus,
   Remote,
@@ -150,7 +150,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   mode: OperationMode = OperationMode.Undefined;
   showOperations = false;
   orphanEntities : {oldEntity:Entity, newEntity:Entity | undefined}[] = [];
-  uncompatibleCommands: ButtonMapping[] = [];
+  uncompatibleCommands: CommandMapping[] = [];
 
   @ViewChild("editor") activityViewer: ActivityViewerComponent | undefined;
   @ViewChild(RemoteOperationsComponent) operations: RemoteOperationsComponent | undefined;
@@ -169,6 +169,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
   remoteModels: RemoteModels | undefined;
   activityOperations: ActivityChange[] = [];
   currentLanguage: LanguageCode = Helper.getLanguageName();
+  featuresMap: EntityFeature[] = [];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private activatedRoute: ActivatedRoute, private confirmationService: ConfirmationService) {
@@ -201,7 +202,9 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
       this.buildData();
       this.cdr.detectChanges();
     })
-
+    this.server.getFeaturesMap().subscribe(features => {
+      this.featuresMap = features;
+    })
   }
 
   ngAfterViewInit(): void {
@@ -455,7 +458,15 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     {
       const sequences = this.updatedActivity.options!.sequences[sequenceName];
       sequences.forEach(sequence => {
-        if (sequence.command?.entity_id) this.checkIncludedEntity(sequence.command!.entity_id, this.updatedActivity!);
+        if (sequence.command?.entity_id) {
+          this.checkIncludedEntity(sequence.command!.entity_id, this.updatedActivity!);
+          let entity = this.entities.find(entity => entity.entity_id === sequence.command!.entity_id);
+          if (entity && sequence.command?.cmd_id && !Helper.checkCommandCompatibility(this.featuresMap, entity, sequence.command.cmd_id)) {
+            console.warn("The new entity has an incompatible command", sequence.command);
+            this.uncompatibleCommands.push({sequence: sequenceName, button: "",
+              short_press: {entity_id: entity.entity_id!,cmd_id: sequence.command!.cmd_id}})
+          }
+        }
       })
     }
     if (!remoteModel) console.debug("Sync : remote model is not available available yet")
@@ -473,6 +484,15 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     });
     // Remove buttons not compatible with this remote model
     this.uncompatibleCommands.forEach(button => {
+      if (button.sequence) {
+        const index = this.updatedActivity!.options?.sequences?.[button.sequence]
+          .findIndex(item => item.command?.entity_id === button.short_press?.entity_id &&
+            item.command?.cmd_id === button.short_press?.cmd_id);
+        if (index) {
+          this.updatedActivity!.options!.sequences?.[button.sequence]!.splice(index, 1);
+        }
+        return
+      }
       const index = this.updatedActivity!.options?.button_mapping?.indexOf(button);
       if (index != undefined && index !== -1) this.updatedActivity!.options!.button_mapping!.splice(index, 1);
     })

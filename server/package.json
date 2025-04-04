@@ -1,7 +1,7 @@
 {
   "name": "server",
   "type": "module",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "main": "app.js",
   "scripts": {
     "start": "node dist/app.js",
@@ -37,7 +37,7 @@
     "@types/multer": "^1.4.12",
     "@types/node": "^22.10.0",
     "@typescript-eslint/parser": "^8.16.0",
-    "esbuild": "^0.24.0",
+    "esbuild": "^0.25.2",
     "postject": "^1.0.0-alpha.6",
     "tsc-watch": "^6.2.1",
     "typescript": "^5.7.2"

@@ -5242,6 +5242,7 @@ export const appConfig: ApplicationConfig = {
         preset: MyPreset,
         options: {
           cssLayer: false,
+          darkModeSelector: '.app-dark'
         }
       }
     })],

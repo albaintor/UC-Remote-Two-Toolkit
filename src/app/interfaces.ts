@@ -349,6 +349,10 @@ export interface ButtonMapping
   double_press?: Command;
 }
 
+export interface CommandMapping extends ButtonMapping {
+  sequence?: string;
+}
+
 export interface ActivityPageCommand
 {
   type: "text"|"icon"|"media_player";

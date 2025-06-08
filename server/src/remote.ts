@@ -131,11 +131,11 @@ export class Remote
       headers: this.getHeaders(),
       timeout: {
         lookup: 100,
-        connect: 1000,
-        secureConnect: 1000,
-        socket: 1000,
+        connect: 5000,
+        secureConnect: 5000,
+        socket: 5000,
         send: 10000,
-        response: 3000
+        response: 5000
       }
     }
   }

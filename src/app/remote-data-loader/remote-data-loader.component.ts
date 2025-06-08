@@ -127,8 +127,9 @@ export class RemoteDataLoaderComponent {
         return from(this.activities).pipe(mergeMap(activity => {
           return this.server.getRemoteActivity(remote, activity.entity_id!).pipe(
             catchError(error => {
-              console.error("Error activity", error);
-              throw error;
+              console.error("Error activity extraction", activity, error);
+              return of(activity);
+              //throw error;
             }),
             map(activityDetails => {
               // console.debug("Get remote activity details", remote, activityDetails);
@@ -141,7 +142,7 @@ export class RemoteDataLoaderComponent {
               return activity;
             }))
         }, 2))
-      })));
+      },4)));
     tasks.push(this.server.getRemoteMacros(remote).pipe(
       catchError(error => {
         console.error("Error macros", error);
@@ -182,7 +183,7 @@ export class RemoteDataLoaderComponent {
         throw error;
       }),
       map(results => {
-        console.log("Get remote data over", remote, results);
+        console.log("Get remote data over", remote, results, this.entities);
         this.unusedEntities = Helper.getUnusedEntities(this.activities, this.profiles, this.entities);
         this.orphanEntities = Helper.getOrphans(this.activities, this.entities);
         this.messageService.add({

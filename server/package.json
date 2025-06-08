@@ -1,7 +1,7 @@
 {
   "name": "server",
   "type": "module",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "main": "app.js",
   "scripts": {
     "start": "node dist/app.js",

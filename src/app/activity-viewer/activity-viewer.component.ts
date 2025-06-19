@@ -62,6 +62,7 @@ import {SelectModule} from "primeng/select";
 import {FormsModule} from "@angular/forms";
 import {Tooltip} from "primeng/tooltip";
 import {InputNumber} from "primeng/inputnumber";
+import {ActivityEntitiesComponent} from "../activity-editor/activity-entities/activity-entities.component";
 
 enum DataFormat {
   None,
@@ -133,7 +134,8 @@ export class AsPipe implements PipeTransform {
     SelectModule,
     FormsModule,
     Tooltip,
-    InputNumber
+    InputNumber,
+    ActivityEntitiesComponent
   ],
   templateUrl: './activity-viewer.component.html',
   styleUrl: './activity-viewer.component.css',

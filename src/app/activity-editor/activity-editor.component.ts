@@ -65,6 +65,7 @@ import {IconComponent} from "../controls/icon/icon.component";
 import {ToolbarModule} from "primeng/toolbar";
 import {RemoteWidgetComponent} from "../remote-widget/remote-widget.component";
 import {MessageModule} from "primeng/message";
+import {ActivityEntitiesComponent} from "./activity-entities/activity-entities.component";
 
 export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
 
@@ -107,7 +108,8 @@ enum OperationMode {
     IconComponent,
     ToolbarModule,
     RemoteWidgetComponent,
-    MessageModule
+    MessageModule,
+    ActivityEntitiesComponent
   ],
   templateUrl: './activity-editor.component.html',
   styleUrl: './activity-editor.component.css',

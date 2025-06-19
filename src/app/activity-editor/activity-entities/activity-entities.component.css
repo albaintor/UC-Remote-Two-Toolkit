@@ -6,14 +6,6 @@ div[class="p-orderlist-controls"] {
   min-width: 350px;
 }
 
-
-.list-item-delay {
-  position: absolute;
-  right: 60px;
-  top: 5px;
-  z-index: 1000;
-}
-
 .list-item-add {
   position: absolute;
   right: 5px;

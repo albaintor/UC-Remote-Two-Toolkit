@@ -163,9 +163,9 @@ export class ServerService {
   loadResources(remote: Remote, type: string): Observable<any>
   {
     const tasks = [
-      /*this.http.get<any>(`/api/remote/${remote.address}/resources/${type}`).pipe(map(results => {
+      this.http.get<any>(`/api/remote/${remote.address}/resources/${type}`).pipe(map(results => {
         return results;
-      })),*/
+      })),
       this.getRemoteModels().pipe(mergeMap(models => {
         console.debug("Loading remote resources", models.resources);
         return from(models.resources).pipe(mergeMap(resource => {

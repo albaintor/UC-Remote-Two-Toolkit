@@ -8,8 +8,8 @@
       [value]="activity!.options!.sequences![sequenceName]"
       [listStyle]="{ 'max-height': '30rem', 'min-width': '350px' }"
       [header]="'Sequences '+sequenceName"
-      [dragdrop]="editable" [stripedRows]="true" (onReorder)="updateSequence($event)">
-      <ng-template let-option #item>
+      [dragdrop]="true" [stripedRows]="true" (onReorder)="updateSequence($event)">
+      <ng-template let-option #item >
         <div class="flex flex-wrap p-2 align-items-center gap-3">
           <i *ngIf="editable" class="pi pi-bars"></i>
           <app-icon *ngIf="findCommandEntity(option)" [remote]="remote" [icon]="findCommandEntity(option)?.icon"  (click)="editCommand(option)"

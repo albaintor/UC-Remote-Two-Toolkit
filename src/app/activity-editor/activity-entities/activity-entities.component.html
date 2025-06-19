@@ -1,0 +1,39 @@
+<div style="position: relative">
+  <p-button class="list-item-add" [rounded]="true" (onClick)="add($event)" severity="info" icon="pi pi-plus" size="small"
+            [pTooltip]="'Add an entity to the activity '+(activity?.name ?? '')" *ngIf="editable"></p-button>
+    <p-orderlist
+      [value]="includedEntities"
+      [listStyle]="{ 'max-height': '30rem', 'min-width': '350px' }"
+      header="Included entities" [dragdrop]="true"
+      [stripedRows]="true" (onReorder)="updateIncludedEntities($event)">
+      <ng-template let-option #item>
+        <div class="flex flex-wrap p-2 align-items-center gap-3">
+          <i *ngIf="editable" class="pi pi-bars"></i>
+          <app-icon *ngIf="findEntity(option)" [remote]="remote" [icon]="findEntity(option)?.icon"
+                    [size]="50" [fontSize]="55" />
+          <div class="flex-1 flex flex-column gap-2">
+            <span class="font-bold">{{ Helper.getEntityName(findEntity(option))}}</span>
+          </div>
+          <div *ngIf="editable" class="list-item-delete">
+            <p-button [rounded]="true" (click)="delete(option)" severity="danger" icon="pi pi-times" size="small"
+                      pTooltip="Remove this entity"></p-button>
+          </div>
+          <div *ngIf="!findEntity(option)" class="list-item-orphan" [pTooltip]="'Entity \''+option+'\' is orphaned'">
+            <i class="pi pi-exclamation-triangle" style="font-size: 30px; font-weight: bold; color: red"></i>
+          </div>
+        </div>
+      </ng-template>
+    </p-orderlist>
+</div>
+<p-toast key="included_entities"></p-toast>
+<p-dialog header="Add entity" [(visible)]="entityDialogVisible" [style]="{width: '50vw', height: '40vw'}" appendTo="body"
+          [dismissableMask]="true" [modal]="true" [closeOnEscape]="true" [closable]="true">
+  <p-select id="entity" [(ngModel)]="selectedEntity" [options]="entities" (ngModelChange)="entitySelected($event)">
+    <ng-template #selectedItem>
+      {{Helper.getEntityName(selectedEntity)}}
+    </ng-template>
+    <ng-template let-item #item>
+      {{Helper.getEntityName(item)}} ({{item.entity_id}})
+    </ng-template>
+  </p-select>
+</p-dialog>

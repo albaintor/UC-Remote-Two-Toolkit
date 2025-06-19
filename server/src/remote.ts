@@ -72,6 +72,7 @@ export class Remote
     let icons: any = JSON.parse(res.body);
     for (let icon of icons) {
       global_list.push(icon['id']);
+      console.log('Load resource', `${url}/${icon['id']}`);
       await streamPipeline(got.stream(`${url}/${icon['id']}`, options),
         fs.createWriteStream(path.join(target_path, icon['id'])));
     }

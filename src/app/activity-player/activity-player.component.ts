@@ -8,7 +8,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {DialogModule} from "primeng/dialog";
-import {MessageService, PrimeTemplate, ToastMessageOptions} from "primeng/api";
+import {MessageService, ToastMessageOptions} from "primeng/api";
 import {ServerService} from "../server.service";
 import {Activity, ButtonMapping, Command, EntityCommand, Remote, RemoteActivity, UIPage} from "../interfaces";
 import {Helper} from "../helper";
@@ -30,29 +30,27 @@ import {MediaEntityState} from "../websocket/remote-websocket-instance";
 import {WebsocketService} from "../websocket/websocket.service";
 
 @Component({
-  selector: 'app-activity-player',
-  standalone: true,
-  imports: [
-    DialogModule,
-    PrimeTemplate,
-    Button,
-    TooltipModule,
-    RemoteButtonsComponent,
-    NgIf,
-    RemoteGridComponent,
-    ToastModule,
-    ProgressBarModule,
-    PaginationComponent,
-    RouterLink,
-    IconComponent,
-    SliderComponent,
-    AsyncPipe
-  ],
-  templateUrl: './activity-player.component.html',
-  styleUrl: './activity-player.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  providers: [MessageService]
+    selector: 'app-activity-player',
+    imports: [
+        DialogModule,
+        Button,
+        TooltipModule,
+        RemoteButtonsComponent,
+        NgIf,
+        RemoteGridComponent,
+        ToastModule,
+        ProgressBarModule,
+        PaginationComponent,
+        RouterLink,
+        IconComponent,
+        SliderComponent,
+        AsyncPipe
+    ],
+    templateUrl: './activity-player.component.html',
+    styleUrl: './activity-player.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    providers: [MessageService]
 })
 export class ActivityPlayerComponent implements OnInit {
   remote: Remote | undefined;

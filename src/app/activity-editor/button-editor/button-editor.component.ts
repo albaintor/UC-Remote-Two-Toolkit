@@ -39,26 +39,24 @@ export interface ButtonEditionEvent {
 }
 
 @Component({
-  selector: 'app-button-editor',
-  standalone: true,
-  imports: [
-    ButtonModule,
-    DialogModule,
-    SelectModule,
-    IconSelectorComponent,
-    InputNumberModule,
-    InputTextModule,
-    NgIf,
-    PaginatorModule,
-    SelectButtonModule,
-    SharedModule,
-    ToastModule,
-    CommandEditorComponent
-  ],
-  templateUrl: './button-editor.component.html',
-  styleUrl: './button-editor.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-button-editor',
+    imports: [
+        ButtonModule,
+        DialogModule,
+        SelectModule,
+        InputNumberModule,
+        InputTextModule,
+        NgIf,
+        PaginatorModule,
+        SelectButtonModule,
+        SharedModule,
+        ToastModule,
+        CommandEditorComponent
+    ],
+    templateUrl: './button-editor.component.html',
+    styleUrl: './button-editor.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class ButtonEditorComponent {
   // @Input() items: HTMLElement[];

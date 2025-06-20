@@ -9,8 +9,7 @@ import {
 } from '@angular/core';
 import {MessageService} from "primeng/api";
 import {ServerService} from "../../server.service";
-import {Activity, CommandSequence, Entity, Remote, RemoteMap} from "../../interfaces";
-import {CommandEditorComponent} from "../../remote-editor/command-editor/command-editor.component";
+import {Activity,Entity, Remote, RemoteMap} from "../../interfaces";
 import {NgIf} from "@angular/common";
 import {OrderListModule} from "primeng/orderlist";
 import {IconComponent} from "../../controls/icon/icon.component";
@@ -30,26 +29,25 @@ export interface IncludedEntity {
 }
 
 @Component({
-  selector: 'app-activity-entities',
-  standalone: true,
-  imports: [
-    OrderListModule,
-    IconComponent,
-    ToastModule,
-    NgIf,
-    Button,
-    DialogModule,
-    DockModule,
-    InputNumberModule,
-    FormsModule,
-    Tooltip,
-    Select
-  ],
-  templateUrl: './activity-entities.component.html',
-  styleUrl: './activity-entities.component.css',
-  providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-activity-entities',
+    imports: [
+        OrderListModule,
+        IconComponent,
+        ToastModule,
+        NgIf,
+        Button,
+        DialogModule,
+        DockModule,
+        InputNumberModule,
+        FormsModule,
+        Tooltip,
+        Select
+    ],
+    templateUrl: './activity-entities.component.html',
+    styleUrl: './activity-entities.component.css',
+    providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class ActivityEntitiesComponent {
   @Input() remote: Remote | undefined;

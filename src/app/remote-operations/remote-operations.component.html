@@ -113,7 +113,7 @@
     </p-table>
   </ng-container>
 </p-dialog>
-<p-popover id="resultsPannel" #resultsPannel [style]="{ width: '80%' }" [showCloseIcon]="true">
+<p-popover id="resultsPannel" #resultsPannel [style]="{ width: '80%' }">
   <ng-template pTemplate="content">
     <ng-container *ngIf="selectedOperation?.results">
       <h3>Results of the operation {{selectedOperation!.method!}} {{selectedOperation!.api!}}</h3>

@@ -55,36 +55,34 @@ interface ModifiedPages {
 }
 
 @Component({
-  selector: 'app-pages',
-  standalone: true,
-  imports: [
-    Button,
-    SelectModule,
-    InputNumberModule,
-    MenubarModule,
-    NgForOf,
-    NgIf,
-    PrimeTemplate,
-    ToastModule,
-    TooltipModule,
-    FormsModule,
-    RemoteDataLoaderComponent,
-    PageComponent,
-    CdkDropList,
-    CdkDrag,
-    BlockUIModule,
-    ProgressSpinnerModule,
-    DialogModule,
-    InputTextModule,
-    TagModule,
-    RemoteOperationsComponent,
-    RemoteWidgetComponent
-  ],
-  templateUrl: './pages.component.html',
-  styleUrl: './pages.component.css',
-  providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-pages',
+    imports: [
+        Button,
+        SelectModule,
+        InputNumberModule,
+        MenubarModule,
+        NgForOf,
+        NgIf,
+        ToastModule,
+        TooltipModule,
+        FormsModule,
+        RemoteDataLoaderComponent,
+        PageComponent,
+        CdkDropList,
+        CdkDrag,
+        BlockUIModule,
+        ProgressSpinnerModule,
+        DialogModule,
+        InputTextModule,
+        TagModule,
+        RemoteOperationsComponent,
+        RemoteWidgetComponent
+    ],
+    templateUrl: './pages.component.html',
+    styleUrl: './pages.component.css',
+    providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class PagesComponent implements OnInit {
   menuItems: MenuItem[] = [

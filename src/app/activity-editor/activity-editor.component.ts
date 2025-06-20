@@ -21,7 +21,6 @@ import {FormsModule} from "@angular/forms";
 import {
   Activity,
   ActivityPageCommand,
-  ButtonMapping,
   Command, CommandMapping,
   Config,
   Entity, EntityFeature,
@@ -65,7 +64,7 @@ import {IconComponent} from "../controls/icon/icon.component";
 import {ToolbarModule} from "primeng/toolbar";
 import {RemoteWidgetComponent} from "../remote-widget/remote-widget.component";
 import {MessageModule} from "primeng/message";
-import {ActivityEntitiesComponent} from "./activity-entities/activity-entities.component";
+import {TooltipModule} from "primeng/tooltip";
 
 export const NEW_ACTIVITY_ID_KEY = "<ACTIVITY_ID>";
 
@@ -76,46 +75,45 @@ enum OperationMode {
 }
 
 @Component({
-  selector: 'app-activity-editor',
-  standalone: true,
-  imports: [
-    SelectModule,
-    MenubarModule,
-    NgIf,
-    ProgressBarModule,
-    ProgressSpinnerModule,
-    SharedModule,
-    ToastModule,
-    FormsModule,
-    ActivityViewerComponent,
-    NgForOf,
-    NgxJsonViewerModule,
-    MultiSelectModule,
-    CheckboxModule,
-    ButtonModule,
-    AutoCompleteModule,
-    RemoteOperationsComponent,
-    DialogModule,
-    RemoteDataLoaderComponent,
-    ChipModule,
-    InputTextModule,
-    ConfirmDialogModule,
-    BlockUIModule,
-    DividerModule,
-    TagModule,
-    ToggleButtonModule,
-    IconSelectorComponent,
-    IconComponent,
-    ToolbarModule,
-    RemoteWidgetComponent,
-    MessageModule,
-    ActivityEntitiesComponent
-  ],
-  templateUrl: './activity-editor.component.html',
-  styleUrl: './activity-editor.component.css',
-  providers: [MessageService, ConfirmationService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-activity-editor',
+    imports: [
+        SelectModule,
+        MenubarModule,
+        NgIf,
+        ProgressBarModule,
+        ProgressSpinnerModule,
+        SharedModule,
+        ToastModule,
+        FormsModule,
+        ActivityViewerComponent,
+        NgForOf,
+        NgxJsonViewerModule,
+        MultiSelectModule,
+        CheckboxModule,
+        ButtonModule,
+        AutoCompleteModule,
+        RemoteOperationsComponent,
+        DialogModule,
+        RemoteDataLoaderComponent,
+        ChipModule,
+        InputTextModule,
+        ConfirmDialogModule,
+        BlockUIModule,
+        DividerModule,
+        TagModule,
+        ToggleButtonModule,
+        IconSelectorComponent,
+        IconComponent,
+        ToolbarModule,
+        RemoteWidgetComponent,
+        MessageModule,
+        TooltipModule
+    ],
+    templateUrl: './activity-editor.component.html',
+    styleUrl: './activity-editor.component.css',
+    providers: [MessageService, ConfirmationService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class ActivityEditorComponent implements OnInit, AfterViewInit {
   buttonsMap:{ [id: string]: string } = {};
@@ -451,6 +449,7 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
 
     if (this.uncompatibleCommands.length > 0)
     {
+      console.debug("Uncompatible commands init", this.uncompatibleCommands)
       this.updatedActivity.options?.button_mapping?.push(...this.uncompatibleCommands);
       this.uncompatibleCommands = [];
     }
@@ -475,12 +474,14 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     else {
       console.debug("Checking remote compatibility", remoteModel);
     }
+
     this.updatedActivity!.options?.button_mapping?.forEach(button => {
       if (!button.long_press && !button.short_press && !button.double_press) return;
       if (button.long_press) this.checkIncludedEntity(button.long_press.entity_id, this.updatedActivity!);
       if (button.short_press) this.checkIncludedEntity(button.short_press.entity_id, this.updatedActivity!);
       if (button.double_press) this.checkIncludedEntity(button.double_press.entity_id, this.updatedActivity!);
       if (remoteModel && !remoteModel?.buttons?.includes(button.button)) {
+        console.warn(`The remote model ${remoteModel.model} is missing this configured button ${button.button}`, remoteModel, button);
         this.uncompatibleCommands.push(button);
       }
     });

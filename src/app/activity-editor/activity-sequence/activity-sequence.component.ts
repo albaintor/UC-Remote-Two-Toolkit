@@ -24,26 +24,25 @@ import {FormsModule} from "@angular/forms";
 import {Tooltip} from "primeng/tooltip";
 
 @Component({
-  selector: 'app-activity-sequence',
-  standalone: true,
-  imports: [
-    CommandEditorComponent,
-    OrderListModule,
-    IconComponent,
-    ToastModule,
-    NgIf,
-    Button,
-    DialogModule,
-    DockModule,
-    InputNumberModule,
-    FormsModule,
-    Tooltip
-  ],
-  templateUrl: './activity-sequence.component.html',
-  styleUrl: './activity-sequence.component.css',
-  providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-activity-sequence',
+    imports: [
+        CommandEditorComponent,
+        OrderListModule,
+        IconComponent,
+        ToastModule,
+        NgIf,
+        Button,
+        DialogModule,
+        DockModule,
+        InputNumberModule,
+        FormsModule,
+        Tooltip
+    ],
+    templateUrl: './activity-sequence.component.html',
+    styleUrl: './activity-sequence.component.css',
+    providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class ActivitySequenceComponent {
   @Input() remote: Remote | undefined;

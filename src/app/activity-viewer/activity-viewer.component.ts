@@ -44,12 +44,10 @@ import {saveAs} from 'file-saver-es';
 import {ConfirmDialogModule} from "primeng/confirmdialog";
 import {
   ButtonEditionEvent,
-  ButtonEditionType,
-  ButtonEditorComponent
+  ButtonEditionType
 } from "../activity-editor/button-editor/button-editor.component";
 import {from, map, Observable} from "rxjs";
 import {ActivitySequenceComponent} from "../activity-editor/activity-sequence/activity-sequence.component";
-import {ImageMapComponent} from "../controls/image-map/image-map.component";
 import {DividerModule} from "primeng/divider";
 import {ToolbarModule} from "primeng/toolbar";
 import {DockModule} from "primeng/dock";
@@ -62,7 +60,9 @@ import {SelectModule} from "primeng/select";
 import {FormsModule} from "@angular/forms";
 import {Tooltip} from "primeng/tooltip";
 import {InputNumber} from "primeng/inputnumber";
-import {ActivityEntitiesComponent} from "../activity-editor/activity-entities/activity-entities.component";
+import {
+  IncludedEntity
+} from "../activity-editor/activity-entities/activity-entities.component";
 
 enum DataFormat {
   None,
@@ -103,26 +103,19 @@ export class AsPipe implements PipeTransform {
   }
 }
 @Component({
-  selector: 'app-activity-viewer',
-  standalone: true,
+    selector: 'app-activity-viewer',
   imports: [
     DialogModule,
     ToastModule,
     NgIf,
     PaginatorModule,
-    NgForOf,
-    AsPipe,
     ChipModule,
     OverlayPanelModule,
     RouterLink,
-    RemoteGridItemComponent,
     ButtonModule,
     NgxJsonViewerModule,
-    UiCommandEditorComponent,
     ConfirmDialogModule,
-    ButtonEditorComponent,
     ActivitySequenceComponent,
-    ImageMapComponent,
     DividerModule,
     ToolbarModule,
     DockModule,
@@ -135,13 +128,13 @@ export class AsPipe implements PipeTransform {
     FormsModule,
     Tooltip,
     InputNumber,
-    ActivityEntitiesComponent
+    NgForOf
   ],
-  templateUrl: './activity-viewer.component.html',
-  styleUrl: './activity-viewer.component.css',
-  providers: [MessageService, ConfirmationService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    templateUrl: './activity-viewer.component.html',
+    styleUrl: './activity-viewer.component.css',
+    providers: [MessageService, ConfirmationService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class ActivityViewerComponent implements AfterViewInit {
   currentPage: UIPage | undefined;
@@ -614,5 +607,18 @@ export class ActivityViewerComponent implements AfterViewInit {
     this.onChange.emit({button: $event.button,
       type: $event.type === ButtonEditionType.Delete ? ActivityChangeType.DeletedButton:
         ActivityChangeType.ModifiedButton});
+  }
+
+  updateIncludedEntities($event: { activity: Activity; includedEntities: IncludedEntity[] }) {
+    if (!this.activity) return;
+    if (!this.activity.options) this.activity.options = {};
+    if (!this.activity.options.included_entities) this.activity.options.included_entities = [];
+    this.activity.options.included_entities = $event.includedEntities.map(includedEntity => {
+      let entity = this.entities.find(entity => entity.entity_id === includedEntity.entityId);
+      if (!entity) {
+        entity = {entity_id: includedEntity.entityId, name: {"en": includedEntity.name}, entity_type: ""};
+      }
+      return entity;
+    })
   }
 }

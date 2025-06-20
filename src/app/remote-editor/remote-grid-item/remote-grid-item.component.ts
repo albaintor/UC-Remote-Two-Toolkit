@@ -19,13 +19,12 @@ export interface GridItem
 }
 
 @Component({
-  selector: 'grid-button',
-  standalone: true,
-  imports: [],
-  templateUrl: './remote-grid-item.component.html',
-  styleUrl: './remote-grid-item.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'grid-button',
+    imports: [],
+    templateUrl: './remote-grid-item.component.html',
+    styleUrl: './remote-grid-item.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class RemoteGridItemComponent implements AfterViewInit{
   editable: boolean = true;

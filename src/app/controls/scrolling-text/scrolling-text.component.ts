@@ -7,18 +7,16 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {NgIf} from "@angular/common";
-import {Remote} from "../../interfaces";
 
 @Component({
-  selector: 'app-scrolling-text',
-  standalone: true,
-  imports: [
-    NgIf
-  ],
-  templateUrl: './scrolling-text.component.html',
-  styleUrl: './scrolling-text.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-scrolling-text',
+    imports: [
+        NgIf
+    ],
+    templateUrl: './scrolling-text.component.html',
+    styleUrl: './scrolling-text.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class ScrollingTextComponent implements AfterViewInit {
   text: string | undefined;

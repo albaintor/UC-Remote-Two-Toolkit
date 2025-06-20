@@ -18,17 +18,15 @@ export interface MapElement
 }
 
 @Component({
-  selector: 'app-image-map',
-  standalone: true,
-  imports: [
-    NgTemplateOutlet,
-    NgIf,
-    NgOptimizedImage
-  ],
-  templateUrl: './image-map.component.html',
-  styleUrl: './image-map.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.ShadowDom
+    selector: 'app-image-map',
+    imports: [
+        NgTemplateOutlet,
+        NgIf
+    ],
+    templateUrl: './image-map.component.html',
+    styleUrl: './image-map.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.ShadowDom
 })
 export class ImageMapComponent implements AfterViewInit, OnDestroy {
   @Input() image: string  = "";

@@ -18,17 +18,16 @@ import {MediaEntityState} from "../../../websocket/remote-websocket-instance";
 import {WebsocketService} from "../../../websocket/websocket.service";
 
 @Component({
-  selector: 'app-activity-media-entity',
-  standalone: true,
-  imports: [
-    NgIf,
-    ScrollingTextComponent,
-    SliderComponent
-  ],
-  templateUrl: './remote-media-entity.component.html',
-  styleUrl: './remote-media-entity.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-activity-media-entity',
+    imports: [
+        NgIf,
+        ScrollingTextComponent,
+        SliderComponent
+    ],
+    templateUrl: './remote-media-entity.component.html',
+    styleUrl: './remote-media-entity.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class RemoteMediaEntityComponent implements AfterViewInit {
   mediaEntityState: MediaEntityState | undefined;

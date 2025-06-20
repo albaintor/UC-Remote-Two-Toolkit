@@ -9,18 +9,17 @@ import {InputTextModule} from "primeng/inputtext";
 import {FormsModule} from "@angular/forms";
 
 @Component({
-  selector: 'app-icon-selector',
-  standalone: true,
-  imports: [
-    DialogModule,
-    NgForOf,
-    TooltipModule,
-    InputTextModule,
-    FormsModule
-  ],
-  templateUrl: './icon-selector.component.html',
-  styleUrl: './icon-selector.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-icon-selector',
+    imports: [
+        DialogModule,
+        NgForOf,
+        TooltipModule,
+        InputTextModule,
+        FormsModule
+    ],
+    templateUrl: './icon-selector.component.html',
+    styleUrl: './icon-selector.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class IconSelectorComponent {
   visible = false;

@@ -3,16 +3,15 @@ import {Button} from "primeng/button";
 import {TooltipModule} from "primeng/tooltip";
 
 @Component({
-  selector: 'app-button',
-  standalone: true,
+    selector: 'app-button',
     imports: [
         Button,
         TooltipModule
     ],
-  templateUrl: './button.component.html',
-  styleUrl: './button.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    templateUrl: './button.component.html',
+    styleUrl: './button.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class ButtonComponent {
   @Input() scale = 1;

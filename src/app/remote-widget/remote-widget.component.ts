@@ -32,30 +32,27 @@ interface WidgetConfiguration {
 }
 
 @Component({
-  selector: 'app-remote-widget',
-  standalone: true,
-  imports: [
-    DialogModule,
-    Button,
-    TagModule,
-    NgIf,
-    AsyncPipe,
-    DatePipe,
-    DockModule,
-    ProgressBarModule,
-    ScrollingTextComponent,
-    SelectModule,
-    FormsModule,
-    MediaEntityComponent,
-    DropdownOverComponent,
-    ToastModule,
-    Tooltip
-  ],
-  templateUrl: './remote-widget.component.html',
-  styleUrl: './remote-widget.component.css',
-  providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-remote-widget',
+    imports: [
+        DialogModule,
+        Button,
+        TagModule,
+        NgIf,
+        AsyncPipe,
+        DockModule,
+        ProgressBarModule,
+        ScrollingTextComponent,
+        SelectModule,
+        FormsModule,
+        MediaEntityComponent,
+        ToastModule,
+        Tooltip
+    ],
+    templateUrl: './remote-widget.component.html',
+    styleUrl: './remote-widget.component.css',
+    providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class RemoteWidgetComponent implements OnInit {
   @Input() visible = true;

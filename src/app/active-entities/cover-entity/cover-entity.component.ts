@@ -12,7 +12,6 @@ import {CoverEntityState} from "../../websocket/remote-websocket-instance";
 import {ServerService} from "../../server.service";
 import {WebsocketService} from "../../websocket/websocket.service";
 import {Helper} from "../../helper";
-import {Button} from "primeng/button";
 import {CdkDragHandle} from "@angular/cdk/drag-drop";
 import {NgIf, NgTemplateOutlet} from "@angular/common";
 import {SliderComponent} from "../../controls/slider/slider.component";
@@ -24,23 +23,21 @@ import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-te
 import {TagModule} from "primeng/tag";
 
 @Component({
-  selector: 'app-cover-entity',
-  standalone: true,
-  imports: [
-    Button,
-    CdkDragHandle,
-    NgIf,
-    SliderComponent,
-    TooltipModule,
-    NgTemplateOutlet,
-    ButtonComponent,
-    ScrollingTextComponent,
-    TagModule
-  ],
-  templateUrl: './cover-entity.component.html',
-  styleUrl: './cover-entity.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-cover-entity',
+    imports: [
+        CdkDragHandle,
+        NgIf,
+        SliderComponent,
+        TooltipModule,
+        NgTemplateOutlet,
+        ButtonComponent,
+        ScrollingTextComponent,
+        TagModule
+    ],
+    templateUrl: './cover-entity.component.html',
+    styleUrl: './cover-entity.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class CoverEntityComponent implements OnInit {
   @Input() coverEntity: CoverEntityState | undefined;

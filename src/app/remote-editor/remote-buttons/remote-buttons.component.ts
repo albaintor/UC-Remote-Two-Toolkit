@@ -34,25 +34,24 @@ export enum ButtonMode {
 }
 
 @Component({
-  selector: 'app-remote-buttons',
-  standalone: true,
-  imports: [
-    TagModule,
-    ChipModule,
-    TooltipModule,
-    NgIf,
-    NgForOf,
-    ImageMapComponent,
-    ToastModule,
-    ButtonEditorComponent,
-    PopoverModule,
-    NgTemplateOutlet
-  ],
-  templateUrl: './remote-buttons.component.html',
-  styleUrl: './remote-buttons.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  providers: [MessageService]
+    selector: 'app-remote-buttons',
+    imports: [
+        TagModule,
+        ChipModule,
+        TooltipModule,
+        NgIf,
+        NgForOf,
+        ImageMapComponent,
+        ToastModule,
+        ButtonEditorComponent,
+        PopoverModule,
+        NgTemplateOutlet
+    ],
+    templateUrl: './remote-buttons.component.html',
+    styleUrl: './remote-buttons.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    providers: [MessageService]
 })
 export class RemoteButtonsComponent implements AfterViewInit {
   remote: Remote | undefined;

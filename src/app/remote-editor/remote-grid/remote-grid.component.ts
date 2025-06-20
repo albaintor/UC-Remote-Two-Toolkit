@@ -56,24 +56,23 @@ export class AsPipe implements PipeTransform {
   }
 }
 @Component({
-  selector: 'app-remote-grid',
-  standalone: true,
-  imports: [
-    RemoteGridItemComponent,
-    AsPipe,
-    ChipModule,
-    NgForOf,
-    NgIf,
-    TagModule,
-    UiCommandEditorComponent,
-    ToastModule,
-    RemoteMediaEntityComponent,
-  ],
-  templateUrl: './remote-grid.component.html',
-  styleUrl: './remote-grid.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  providers: [MessageService]
+    selector: 'app-remote-grid',
+    imports: [
+        RemoteGridItemComponent,
+        AsPipe,
+        ChipModule,
+        NgForOf,
+        NgIf,
+        TagModule,
+        UiCommandEditorComponent,
+        ToastModule,
+        RemoteMediaEntityComponent,
+    ],
+    templateUrl: './remote-grid.component.html',
+    styleUrl: './remote-grid.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    providers: [MessageService]
 })
 export class RemoteGridComponent implements AfterViewInit {
   currentPage: UIPage | undefined;

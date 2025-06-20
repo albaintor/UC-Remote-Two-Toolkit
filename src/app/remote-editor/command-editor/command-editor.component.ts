@@ -28,27 +28,26 @@ import {CheckboxModule} from "primeng/checkbox";
 import {InputTextModule} from "primeng/inputtext";
 
 @Component({
-  selector: 'app-command-editor',
-  standalone: true,
-  imports: [
-    SelectModule,
-    SharedModule,
-    NgIf,
-    FormsModule,
-    ToastModule,
-    NgSwitch,
-    NgSwitchCase,
-    NgForOf,
-    InputNumberModule,
-    CheckboxModule,
-    NgSwitchDefault,
-    InputTextModule
-  ],
-  templateUrl: './command-editor.component.html',
-  styleUrl: './command-editor.component.css',
-  providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-command-editor',
+    imports: [
+        SelectModule,
+        SharedModule,
+        NgIf,
+        FormsModule,
+        ToastModule,
+        NgSwitch,
+        NgSwitchCase,
+        NgForOf,
+        InputNumberModule,
+        CheckboxModule,
+        NgSwitchDefault,
+        InputTextModule
+    ],
+    templateUrl: './command-editor.component.html',
+    styleUrl: './command-editor.component.css',
+    providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class CommandEditorComponent implements OnInit {
   command: Command | undefined;

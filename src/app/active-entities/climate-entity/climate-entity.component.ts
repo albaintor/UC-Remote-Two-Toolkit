@@ -49,25 +49,24 @@ const HAVC_FEATURES_MAP: {[type:string]: string} = {
 
 
 @Component({
-  selector: 'app-climate-entity',
-  standalone: true,
-  imports: [
-    CdkDragHandle,
-    ColorPickerModule,
-    NgIf,
-    TooltipModule,
-    NgTemplateOutlet,
-    KnobModule,
-    FormsModule,
-    DropdownOverComponent,
-    TagModule,
-    ButtonComponent,
-    ScrollingTextComponent
-  ],
-  templateUrl: './climate-entity.component.html',
-  styleUrl: './climate-entity.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-climate-entity',
+    imports: [
+        CdkDragHandle,
+        ColorPickerModule,
+        NgIf,
+        TooltipModule,
+        NgTemplateOutlet,
+        KnobModule,
+        FormsModule,
+        DropdownOverComponent,
+        TagModule,
+        ButtonComponent,
+        ScrollingTextComponent
+    ],
+    templateUrl: './climate-entity.component.html',
+    styleUrl: './climate-entity.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class ClimateEntityComponent implements OnInit, OnDestroy {
   climateEntity: ClimateEntityState | undefined;

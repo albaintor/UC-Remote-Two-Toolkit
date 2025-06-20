@@ -31,26 +31,25 @@ import {RemoteGridItemComponent, GridItem} from "../remote-grid-item/remote-grid
 import {CommandEditorComponent} from "../command-editor/command-editor.component";
 
 @Component({
-  selector: 'app-ui-command-editor',
-  standalone: true,
-  imports: [
-    FormsModule,
-    InputTextModule,
-    InputNumberModule,
-    SelectButtonModule,
-    NgIf,
-    ToastModule,
-    DialogModule,
-    IconSelectorComponent,
-    SelectModule,
-    ButtonModule,
-    CommandEditorComponent
-  ],
-  templateUrl: './ui-command-editor.component.html',
-  styleUrl: './ui-command-editor.component.css',
-  providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-ui-command-editor',
+    imports: [
+        FormsModule,
+        InputTextModule,
+        InputNumberModule,
+        SelectButtonModule,
+        NgIf,
+        ToastModule,
+        DialogModule,
+        IconSelectorComponent,
+        SelectModule,
+        ButtonModule,
+        CommandEditorComponent
+    ],
+    templateUrl: './ui-command-editor.component.html',
+    styleUrl: './ui-command-editor.component.css',
+    providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class UiCommandEditorComponent {
   @Input() remote: Remote | undefined;

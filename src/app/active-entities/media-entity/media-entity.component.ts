@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import {Remote} from "../../interfaces";
 import {ServerService} from "../../server.service";
-import {Button} from "primeng/button";
 import {DropdownOverComponent} from "../../controls/dropdown-over/dropdown-over.component";
 import {NgIf, NgTemplateOutlet} from "@angular/common";
 import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-text.component";
@@ -26,24 +25,22 @@ import {ToastMessageOptions} from "primeng/api";
 import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
-  selector: 'app-media-entity',
-  standalone: true,
-  imports: [
-    DropdownOverComponent,
-    NgIf,
-    ScrollingTextComponent,
-    SliderComponent,
-    TagModule,
-    TooltipModule,
-    NgTemplateOutlet,
-    CdkDragHandle,
-    ButtonComponent,
-    Button
-  ],
-  templateUrl: './media-entity.component.html',
-  styleUrl: './media-entity.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-media-entity',
+    imports: [
+        DropdownOverComponent,
+        NgIf,
+        ScrollingTextComponent,
+        SliderComponent,
+        TagModule,
+        TooltipModule,
+        NgTemplateOutlet,
+        CdkDragHandle,
+        ButtonComponent,
+    ],
+    templateUrl: './media-entity.component.html',
+    styleUrl: './media-entity.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class MediaEntityComponent implements OnInit, AfterViewInit {
   protected readonly Math = Math;

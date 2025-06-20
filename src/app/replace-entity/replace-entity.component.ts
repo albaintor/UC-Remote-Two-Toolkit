@@ -50,37 +50,36 @@ class Message {
 }
 
 @Component({
-  selector: 'app-replace-entity',
-  standalone: true,
-  imports: [
-    SelectModule,
-    MenubarModule,
-    NgIf,
-    ProgressBarModule,
-    ProgressSpinnerModule,
-    SharedModule,
-    ToastModule,
-    FormsModule,
-    ChipModule,
-    NgForOf,
-    TableModule,
-    EntityViewerComponent,
-    ButtonModule,
-    RemoteOperationsComponent,
-    DatePipe,
-    MultiSelectModule,
-    AutoCompleteModule,
-    CheckboxModule,
-    RemoteDataLoaderComponent,
-    RouterLink,
-    Tooltip,
-    MessageModule
-  ],
-  templateUrl: './replace-entity.component.html',
-  styleUrl: './replace-entity.component.css',
-  providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-replace-entity',
+    imports: [
+        SelectModule,
+        MenubarModule,
+        NgIf,
+        ProgressBarModule,
+        ProgressSpinnerModule,
+        SharedModule,
+        ToastModule,
+        FormsModule,
+        ChipModule,
+        NgForOf,
+        TableModule,
+        EntityViewerComponent,
+        ButtonModule,
+        RemoteOperationsComponent,
+        DatePipe,
+        MultiSelectModule,
+        AutoCompleteModule,
+        CheckboxModule,
+        RemoteDataLoaderComponent,
+        RouterLink,
+        Tooltip,
+        MessageModule
+    ],
+    templateUrl: './replace-entity.component.html',
+    styleUrl: './replace-entity.component.css',
+    providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class ReplaceEntityComponent implements OnInit, AfterViewInit {
   remoteOperations: RemoteOperation[] = [];

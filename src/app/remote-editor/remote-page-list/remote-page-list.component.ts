@@ -26,22 +26,19 @@ export enum Operation {
 }
 
 @Component({
-  selector: 'app-remote-page-list',
-  standalone: true,
-  imports: [
-    Button,
-    IconComponent,
-    InputNumberModule,
-    NgIf,
-    OrderListModule,
-    PrimeTemplate,
-    TooltipModule
-  ],
-  templateUrl: './remote-page-list.component.html',
-  styleUrl: './remote-page-list.component.css',
-  providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-remote-page-list',
+    imports: [
+        Button,
+        InputNumberModule,
+        NgIf,
+        OrderListModule,
+        TooltipModule
+    ],
+    templateUrl: './remote-page-list.component.html',
+    styleUrl: './remote-page-list.component.css',
+    providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class RemotePageListComponent implements OnInit {
   remote: Remote | undefined;

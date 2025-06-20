@@ -17,16 +17,15 @@ interface Indexes
 }
 
 @Component({
-  selector: 'app-pagination',
-  standalone: true,
-  imports: [
-    NgIf,
-    NgForOf
-  ],
-  templateUrl: './pagination.component.html',
-  styleUrl: './pagination.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-pagination',
+    imports: [
+        NgIf,
+        NgForOf
+    ],
+    templateUrl: './pagination.component.html',
+    styleUrl: './pagination.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class PaginationComponent implements AfterViewInit {
   numberOfPages = 0;

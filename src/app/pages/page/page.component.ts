@@ -9,10 +9,8 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {ServerService} from "../../server.service";
-import {MessageService, PrimeTemplate} from "primeng/api";
 import {Entity, Page, PageItem, Profile, ProfileGroup, Remote} from "../../interfaces";
 import {Button} from "primeng/button";
-import {CommandEditorComponent} from "../../remote-editor/command-editor/command-editor.component";
 import {DialogModule} from "primeng/dialog";
 import {IconComponent} from "../../controls/icon/icon.component";
 import {InputNumberModule} from "primeng/inputnumber";
@@ -26,28 +24,25 @@ import {AutoCompleteCompleteEvent, AutoCompleteModule} from "primeng/autocomplet
 import {FormsModule} from "@angular/forms";
 
 @Component({
-  selector: 'app-page',
-  standalone: true,
-  imports: [
-    Button,
-    CommandEditorComponent,
-    DialogModule,
-    IconComponent,
-    InputNumberModule,
-    NgIf,
-    OrderListModule,
-    PrimeTemplate,
-    ToastModule,
-    TooltipModule,
-    NgForOf,
-    ExpandableContentComponent,
-    AutoCompleteModule,
-    FormsModule
-  ],
-  templateUrl: './page.component.html',
-  styleUrl: './page.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-page',
+    imports: [
+        Button,
+        DialogModule,
+        IconComponent,
+        InputNumberModule,
+        NgIf,
+        OrderListModule,
+        ToastModule,
+        TooltipModule,
+        NgForOf,
+        ExpandableContentComponent,
+        AutoCompleteModule,
+        FormsModule
+    ],
+    templateUrl: './page.component.html',
+    styleUrl: './page.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class PageComponent implements OnInit {
   @Input() remote: Remote | undefined;

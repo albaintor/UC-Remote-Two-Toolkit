@@ -71,7 +71,7 @@
   </ng-container>
 </div>
 <app-button-editor [activity]="activity" [remote]="remote" [button]="selectedButton" (buttonChanged)="buttonChanged($event)"></app-button-editor>
-<p-popover #executeButtonPanel [showCloseIcon]="true" appendTo="body" [style]="{width: '450px'}">
+<p-popover #executeButtonPanel appendTo="body" [style]="{width: '450px'}">
   <ng-template pTemplate="content">
     <div class="grid">
       <ng-container *ngIf="executeButton" [ngTemplateOutlet]="buttonTemplate" [ngTemplateOutletContext]="{button:executeButton}"/>

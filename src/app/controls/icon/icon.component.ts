@@ -12,15 +12,14 @@ import {NgIf} from "@angular/common";
 import {Entity, EntityIntegration, Remote} from "../../interfaces";
 
 @Component({
-  selector: 'app-icon',
-  standalone: true,
-  imports: [
-    NgIf
-  ],
-  templateUrl: './icon.component.html',
-  styleUrl: './icon.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-icon',
+    imports: [
+        NgIf
+    ],
+    templateUrl: './icon.component.html',
+    styleUrl: './icon.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class IconComponent {
   @Input() remote: Remote | undefined;

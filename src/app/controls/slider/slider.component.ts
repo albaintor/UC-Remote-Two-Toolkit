@@ -14,24 +14,23 @@ import {FormsModule, NG_VALUE_ACCESSOR} from "@angular/forms";
 import {debounceTime, Subject, Subscription} from "rxjs";
 
 @Component({
-  selector: 'app-slider',
-  standalone: true,
-  imports: [
-    NgIf,
-    PrimeTemplate,
-    ProgressBarModule,
-    SliderModule,
-    FormsModule
-  ],
-  templateUrl: './slider.component.html',
-  styleUrl: './slider.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => SliderComponent),
-    multi: true
-  }]
+    selector: 'app-slider',
+    imports: [
+        NgIf,
+        PrimeTemplate,
+        ProgressBarModule,
+        SliderModule,
+        FormsModule
+    ],
+    templateUrl: './slider.component.html',
+    styleUrl: './slider.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None,
+    providers: [{
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SliderComponent),
+            multi: true
+        }]
 })
 export class SliderComponent implements OnInit {
   value: number | undefined;

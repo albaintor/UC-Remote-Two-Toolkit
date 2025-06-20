@@ -8,28 +8,25 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {NgIf, NgTemplateOutlet} from "@angular/common";
-import {PrimeTemplate} from "primeng/api";
 import {ProgressBarModule} from "primeng/progressbar";
 import {SliderModule} from "primeng/slider";
 import {SelectModule} from "primeng/select";
 import {FormsModule} from "@angular/forms";
 
 @Component({
-  selector: 'app-select-over',
-  standalone: true,
-  imports: [
-    NgIf,
-    PrimeTemplate,
-    ProgressBarModule,
-    SliderModule,
-    SelectModule,
-    FormsModule,
-    NgTemplateOutlet
-  ],
-  templateUrl: './dropdown-over.component.html',
-  styleUrl: './dropdown-over.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-select-over',
+    imports: [
+        NgIf,
+        ProgressBarModule,
+        SliderModule,
+        SelectModule,
+        FormsModule,
+        NgTemplateOutlet
+    ],
+    templateUrl: './dropdown-over.component.html',
+    styleUrl: './dropdown-over.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class DropdownOverComponent {
   value: any | undefined;

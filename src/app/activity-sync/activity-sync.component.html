@@ -226,7 +226,7 @@
     </tr>
   </ng-template>
 </p-table>
-<p-popover #diffPanelSequences [style]="{ width: '450px' }" [showCloseIcon]="true" appendTo="body">
+<p-popover #diffPanelSequences [style]="{ width: '450px' }" appendTo="body">
   <ng-template pTemplate="content">
     <ng-container *ngIf="selectedSequences">
       <div class="flex align-content-center flex-wrap gap-3" style="min-height: 50px">
@@ -241,7 +241,7 @@
     </ng-container>
   </ng-template>
 </p-popover>
-<p-popover #diffPanelButton [style]="{ width: '850px' }" [showCloseIcon]="true" appendTo="body" styleClass="buttons_panel">
+<p-popover #diffPanelButton [style]="{ width: '850px' }" appendTo="body" styleClass="buttons_panel">
   <ng-template pTemplate="content">
     <ng-container *ngIf="selectedButton">
       <div class="flex flex-column">
@@ -329,7 +329,7 @@
     </ng-container>
   </ng-template>
 </p-popover>
-<p-popover #actvitiesViewer [showCloseIcon]="true" appendTo="body">
+<p-popover #actvitiesViewer appendTo="body">
   <ng-template pTemplate="content">
     <div class="grid" *ngIf="selectedActivity1 && selectedActivity2">
       <div class="col-6">
@@ -353,7 +353,7 @@
 </p-popover>
 <app-remote-operations #operations [operations]="remoteOperations" [remote]="selectedRemote2" [groupByActivities]="true"
                        [(visible)]="showOperations" (operationsDone)="operationsDone($event)"></app-remote-operations>
-<p-popover #entityPanel [style]="{ width: '450px' }" [showCloseIcon]="true" appendTo="body" styleClass="buttons_panel">
+<p-popover #entityPanel [style]="{ width: '450px' }" appendTo="body" styleClass="buttons_panel">
   <ng-template pTemplate="content">
     <ng-container *ngIf="selectedEntity">
       <div class="flex flex-column">

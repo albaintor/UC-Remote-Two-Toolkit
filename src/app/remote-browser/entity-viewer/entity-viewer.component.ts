@@ -4,29 +4,26 @@ import {MessageService, SharedModule} from "primeng/api";
 import {ServerService} from "../../server.service";
 import {Activity, Entity} from "../../interfaces";
 import {DialogModule} from "primeng/dialog";
-import {CommonModule, NgForOf, NgIf} from "@angular/common";
-import {AsPipe} from "../../activity-viewer/activity-viewer.component";
+import {CommonModule} from "@angular/common";
 import {ChipModule} from "primeng/chip";
 import {Helper} from "../../helper";
 import {TooltipModule} from "primeng/tooltip";
 
 @Component({
-  selector: 'app-entity-viewer',
-  standalone: true,
-  imports: [
-    OverlayPanelModule,
-    SharedModule,
-    DialogModule,
-    CommonModule,
-    AsPipe,
-    ChipModule,
-    TooltipModule
-  ],
-  templateUrl: './entity-viewer.component.html',
-  styleUrl: './entity-viewer.component.css',
-  providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-entity-viewer',
+    imports: [
+        OverlayPanelModule,
+        SharedModule,
+        DialogModule,
+        CommonModule,
+        ChipModule,
+        TooltipModule
+    ],
+    templateUrl: './entity-viewer.component.html',
+    styleUrl: './entity-viewer.component.css',
+    providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class EntityViewerComponent {
   panelStyle: any = { width: '70vw' };

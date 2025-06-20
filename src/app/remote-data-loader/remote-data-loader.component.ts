@@ -28,19 +28,18 @@ import {
 import {Helper} from "../helper";
 
 @Component({
-  selector: 'app-remote-data-loader',
-  standalone: true,
-  imports: [
-    NgIf,
-    ProgressSpinnerModule,
-    ToastModule,
-    ProgressBarModule
-  ],
-  templateUrl: './remote-data-loader.component.html',
-  styleUrl: './remote-data-loader.component.css',
-  providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-remote-data-loader',
+    imports: [
+        NgIf,
+        ProgressSpinnerModule,
+        ToastModule,
+        ProgressBarModule
+    ],
+    templateUrl: './remote-data-loader.component.html',
+    styleUrl: './remote-data-loader.component.css',
+    providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class RemoteDataLoaderComponent {
 

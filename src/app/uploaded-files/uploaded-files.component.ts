@@ -3,7 +3,7 @@ import {ServerService} from "../server.service";
 import {MessageService} from "primeng/api";
 import {DialogModule} from "primeng/dialog";
 import {ChipModule} from "primeng/chip";
-import {CommonModule, NgForOf} from "@angular/common";
+import {CommonModule} from "@angular/common";
 import {TableModule} from "primeng/table";
 import {ButtonModule} from "primeng/button";
 import {TooltipModule} from "primeng/tooltip";
@@ -11,22 +11,20 @@ import {ToastModule} from "primeng/toast";
 import { HttpErrorResponse } from "@angular/common/http";
 
 @Component({
-  selector: 'app-uploaded-files',
-  standalone: true,
-  imports: [
-    CommonModule,
-    DialogModule,
-    ChipModule,
-    NgForOf,
-    TableModule,
-    ButtonModule,
-    TooltipModule,
-    ToastModule
-  ],
-  templateUrl: './uploaded-files.component.html',
-  styleUrl: './uploaded-files.component.css',
-  providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-uploaded-files',
+    imports: [
+        CommonModule,
+        DialogModule,
+        ChipModule,
+        TableModule,
+        ButtonModule,
+        TooltipModule,
+        ToastModule
+    ],
+    templateUrl: './uploaded-files.component.html',
+    styleUrl: './uploaded-files.component.css',
+    providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UploadedFilesComponent {
 

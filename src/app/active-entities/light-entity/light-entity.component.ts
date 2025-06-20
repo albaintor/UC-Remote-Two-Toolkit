@@ -25,8 +25,7 @@ import {HttpErrorResponse} from "@angular/common/http";
 import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-text.component";
 
 @Component({
-  selector: 'app-light-entity',
-  standalone: true,
+    selector: 'app-light-entity',
     imports: [
         NgIf,
         TooltipModule,
@@ -38,10 +37,10 @@ import {ScrollingTextComponent} from "../../controls/scrolling-text/scrolling-te
         ButtonComponent,
         ScrollingTextComponent
     ],
-  templateUrl: './light-entity.component.html',
-  styleUrl: './light-entity.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    templateUrl: './light-entity.component.html',
+    styleUrl: './light-entity.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class LightEntityComponent implements OnInit {
   lightEntity: LightEntityState | undefined;

@@ -25,26 +25,25 @@ import {Popover, PopoverModule} from "primeng/popover";
 import {ProgressBarModule} from "primeng/progressbar";
 
 @Component({
-  selector: 'app-remote-operations',
-  standalone: true,
-  imports: [
-    DialogModule,
-    ToastModule,
-    ButtonModule,
-    NgIf,
-    TableModule,
-    TooltipModule,
-    NgxJsonViewerModule,
-    ChipModule,
-    Ripple,
-    PopoverModule,
-    ProgressBarModule
-  ],
-  templateUrl: './remote-operations.component.html',
-  styleUrl: './remote-operations.component.css',
-  providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-remote-operations',
+    imports: [
+        DialogModule,
+        ToastModule,
+        ButtonModule,
+        NgIf,
+        TableModule,
+        TooltipModule,
+        NgxJsonViewerModule,
+        ChipModule,
+        Ripple,
+        PopoverModule,
+        ProgressBarModule
+    ],
+    templateUrl: './remote-operations.component.html',
+    styleUrl: './remote-operations.component.css',
+    providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class RemoteOperationsComponent {
   _visible = false;

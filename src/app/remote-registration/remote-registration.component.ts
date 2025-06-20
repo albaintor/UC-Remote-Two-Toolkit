@@ -22,25 +22,24 @@ import {ProgressSpinnerModule} from "primeng/progressspinner";
 import {WebsocketService} from "../websocket/websocket.service";
 
 @Component({
-  selector: 'app-remote-registration',
-  standalone: true,
-  imports: [
-    DialogModule,
-    ToastModule,
-    FormsModule,
-    ButtonModule,
-    NgIf,
-    TableModule,
-    TooltipModule,
-    InputTextModule,
-    BlockUIModule,
-    ProgressSpinnerModule
-  ],
-  templateUrl: './remote-registration.component.html',
-  styleUrl: './remote-registration.component.css',
-  providers: [MessageService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-remote-registration',
+    imports: [
+        DialogModule,
+        ToastModule,
+        FormsModule,
+        ButtonModule,
+        NgIf,
+        TableModule,
+        TooltipModule,
+        InputTextModule,
+        BlockUIModule,
+        ProgressSpinnerModule
+    ],
+    templateUrl: './remote-registration.component.html',
+    styleUrl: './remote-registration.component.css',
+    providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class RemoteRegistrationComponent {
   visible = false;

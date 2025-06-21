@@ -61,6 +61,7 @@ import {FormsModule} from "@angular/forms";
 import {Tooltip} from "primeng/tooltip";
 import {InputNumber} from "primeng/inputnumber";
 import {
+  ActivityEntitiesComponent,
   IncludedEntity
 } from "../activity-editor/activity-entities/activity-entities.component";
 
@@ -128,7 +129,8 @@ export class AsPipe implements PipeTransform {
     FormsModule,
     Tooltip,
     InputNumber,
-    NgForOf
+    NgForOf,
+    ActivityEntitiesComponent
   ],
     templateUrl: './activity-viewer.component.html',
     styleUrl: './activity-viewer.component.css',

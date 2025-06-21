@@ -31,15 +31,15 @@
   </div>
 </div>
 </p-toolbar>
-<!--<div class="flex justify-content-center flex-wrap gap-6">
+<div class="flex justify-content-center flex-wrap gap-6">
   <div class="flex align-items-start justify-content-center">
     <h3>Included entities</h3>
   </div>
   <div class="flex align-items-start justify-content-center">
     <app-activity-entities [remote]="remote" [activity]="activity" (onUpdate)="updateIncludedEntities($event)"/>
   </div>
-</div>-->
-<p-toolbar styleClass="toolbar-included-entities"><h3>Included entities</h3>
+</div>
+<!-- <p-toolbar styleClass="toolbar-included-entities"><h3>Included entities</h3>
   <p-select *ngIf="editMode" [options]="entities" [(ngModel)]="includedEntity" (ngModelChange)="addIncludedEntity($event)" placeholder="Add entity">
     <ng-template let-item #item>
       <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
@@ -51,7 +51,7 @@
   <p-chip *ngFor="let entity of activity?.options?.included_entities" label="{{Helper.getEntityName(entity)}} ({{Helper.getEntityType(entity)}})"
           [style]="getStyle(Helper.getEntityType(entity))" [pTooltip]="entity.entity_id" [removable]="editMode"
           (onRemove)="deleteIncludedEntity(entity, $event)"></p-chip>&nbsp;
-</p-toolbar>
+</p-toolbar> -->
 <h3>Buttons mapping and startup/stop sequences</h3>
 <div class="flex justify-content-center flex-wrap gap-6">
   <div class="flex align-items-start justify-content-center">

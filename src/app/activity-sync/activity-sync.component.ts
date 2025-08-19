@@ -20,7 +20,7 @@ import {
   ButtonMapping, Command,
   CommandSequence,
   Config, Driver,
-  Entity, OperationStatus,
+  Entity, LanguageName, OperationStatus,
   Remote,
   RemoteData, RemoteModel, RemoteModels,
   RemoteOperation, RemoteOperationResultField,
@@ -193,18 +193,6 @@ export class ActivitySyncComponent implements AfterViewInit {
         return "Missing";
       default: return "Unknown";
     }
-  }
-
-  static getObjectName(entity: any): string
-  {
-    if (!entity) return "";
-    // console.debug(entity);
-    if (entity?.[Helper.getLanguageName()]) return entity[Helper.getLanguageName()];
-    if (typeof entity === "string") return entity;
-    if (typeof entity.name === "string") return entity.name;
-    if (entity.name?.[Helper.getLanguageName()]) return entity.name[Helper.getLanguageName()];
-    if (entity.name?.['en']) return entity.name['en'];
-    return "";
   }
 
   static getStatusLabel(diff: ActivityDiff): string

@@ -198,14 +198,6 @@ export class ServerService {
     }))
   }
 
-  getObjectName(object: any): string
-  {
-    if (typeof object.name === 'string') return object.name;
-    let name  = object.name[this.config!.language];
-    if (name) return name;
-    return object.name['en'];
-  }
-
   getRemoteIntegrationEntities(remote: Remote, integrationId: string, filter : "NEW"|"CONFIGURED"|"ALL" = "NEW"): Observable<Entity[]>
   {
     const httpOptions = {params: new HttpParams({fromObject: {filter}})};
@@ -219,17 +211,6 @@ export class ServerService {
   }
 
   getRemoteEntities(remote: Remote): Observable<Entity[]>
-  {
-    return this.http.get<Entity[]>(`/api/remote/${remote.address}/entities`).pipe(map(entities => {
-      /*entities.forEach(entity => {
-        entity.name = this.getObjectName(entity);
-      })*/
-      this.entities = entities;
-      return entities;
-    }))
-  }
-
-  getRemoteRemotes(remote: Remote): Observable<Entity[]>
   {
     return this.http.get<Entity[]>(`/api/remote/${remote.address}/entities`).pipe(map(entities => {
       /*entities.forEach(entity => {

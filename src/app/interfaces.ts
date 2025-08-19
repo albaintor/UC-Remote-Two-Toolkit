@@ -442,7 +442,7 @@ export interface Macro {
   device_class?: string;
 }
 
-export type LanguageCode = 'en' |'fr'|'de';
+export type LanguageCode = 'en' |'fr'|'de'|string;
 
 export interface LanguageName {
   [key: LanguageCode | string]: string;

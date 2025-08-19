@@ -84,7 +84,7 @@
         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
           <p-multiSelect
             [ngModel]="value"
-            [options]="Helper.getItemsConverted(activitiesDiff, 'activity1.name', ActivitySyncComponent.getObjectName)"
+            [options]="Helper.getItemsConverted(activitiesDiff, 'activity1.name', Helper.getEntityName)"
             placeholder="Activity name"
             (onChange)="filter($event.value)"
             optionLabel="name" optionValue="value" appendTo="body">
@@ -178,7 +178,7 @@
         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
           <p-multiSelect
             [ngModel]="value"
-            [options]="Helper.getItemsConverted(driversDiff, 'driver1.name', ActivitySyncComponent.getObjectName)"
+            [options]="Helper.getItemsConverted(driversDiff, 'driver1.name', Helper.getEntityName)"
             placeholder="Driver name"
             (onChange)="filter($event.value)"
             optionLabel="name" optionValue="value" appendTo="body">

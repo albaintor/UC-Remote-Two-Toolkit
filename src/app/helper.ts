@@ -414,7 +414,14 @@ export class Helper
     else if (entity?.['en']) return entity['en'];
     if (typeof entity.name === "string") return entity.name;
     if (entity.name?.[Helper.getLanguageName()]) return entity.name[Helper.getLanguageName()];
-    if (entity.name?.['en']) return entity.name['en'];
+    const names: LanguageName = entity.name;
+    let firstValue: string | undefined;
+    for (const [key, value] of Object.entries(names)) {
+      if (key.startsWith(Helper.getLanguageName()))
+        return value;
+      if (!firstValue) firstValue = value;
+    }
+    if (firstValue) return firstValue;
     return "";
   }
 

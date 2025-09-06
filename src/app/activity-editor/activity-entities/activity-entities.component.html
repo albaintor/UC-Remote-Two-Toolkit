@@ -12,13 +12,13 @@
           <app-icon *ngIf="findEntity(option)" [remote]="remote" [icon]="findEntity(option)?.icon"
                     [size]="50" [fontSize]="55" />
           <div class="flex-1 flex flex-column gap-2">
-            <span class="font-bold">{{ Helper.getEntityName(findEntity(option))}}</span>
+            <span class="font-bold">{{ Helper.getEntityName(option)}}</span>
           </div>
           <div *ngIf="editable" class="list-item-delete">
             <p-button [rounded]="true" (click)="delete(option)" severity="danger" icon="pi pi-times" size="small"
                       pTooltip="Remove this entity"></p-button>
           </div>
-          <div *ngIf="!findEntity(option)" class="list-item-orphan" [pTooltip]="'Entity \''+option+'\' is orphaned'">
+          <div *ngIf="!findEntity(option)" class="list-item-orphan" [pTooltip]="'Entity \''+Helper.getEntityName(option)+'\' is orphaned'">
             <i class="pi pi-exclamation-triangle" style="font-size: 30px; font-weight: bold; color: red"></i>
           </div>
         </div>

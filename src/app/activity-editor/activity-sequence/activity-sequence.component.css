@@ -26,7 +26,6 @@ div[class="p-orderlist-controls"] {
   position: absolute;
   right: 15px;
   top: 0;
-  z-index: 1000;
 }
 
 .list-item-delete {

@@ -416,6 +416,7 @@ export class Helper
     if (entity.name?.[Helper.getLanguageName()]) return entity.name[Helper.getLanguageName()];
     const names: LanguageName = entity.name;
     let firstValue: string | undefined;
+    if (names)
     for (const [key, value] of Object.entries(names)) {
       if (key.startsWith(Helper.getLanguageName()))
         return value;
@@ -423,6 +424,13 @@ export class Helper
     }
     if (firstValue) return firstValue;
     return "";
+  }
+
+  static getEntityNameOrID(entity: any): string
+  {
+    let entityName = Helper.getEntityName(entity);
+    if (entityName ==  "") return entity?.entity_id ??  "";
+    return entityName;
   }
 
   static getEntityNames(entity: Entity | Activity | Macro | Integration | Driver | EntityIntegration): LocalizedName[]

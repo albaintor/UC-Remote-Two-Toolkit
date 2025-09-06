@@ -688,6 +688,8 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
               ...button
             }, status: OperationStatus.Todo})
       });
+
+      console.debug("Orphaned entities", this.orphanEntities);
     }
 
 

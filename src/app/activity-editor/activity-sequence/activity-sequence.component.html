@@ -6,7 +6,7 @@
   <ng-container *ngIf="activity?.options?.sequences && sequenceName">
     <p-orderlist
       [value]="activity!.options!.sequences![sequenceName]"
-      [listStyle]="{ 'max-height': '30rem', 'min-width': '350px' }"
+      [listStyle]="{ 'min-height': '40px', 'max-height': '30rem', 'min-width': '350px' }"
       [header]="'Sequences '+sequenceName"
       [dragdrop]="true" [stripedRows]="true" (onReorder)="updateSequence($event)">
       <ng-template let-option #item >

@@ -740,7 +740,7 @@ app.get('/api/remote/:address/resources/:type/:id', async (req, res, next) => {
     if (DATA_DIR.startsWith('.'))
       res.sendFile(path.join(RESOURCES_DIR, address, type, resource_id), { root: '.' });
     else
-      res.sendFile(path.join(RESOURCES_DIR, address, type, resource_id));
+      res.sendFile(path.resolve(path.join(RESOURCES_DIR, address, type, resource_id)));
   } catch (error)
   {
     errorHandler(error, req, res, next);

@@ -116,6 +116,7 @@ export class RemoteWebsocket  {
     this.connectionStatus$.pipe(
       skip(1),
       filter(status => !status),
+      delay(10000),
       tap(() => {
         console.debug("Websocket disconnect, reconnecting...");
         this.initWebsocket();

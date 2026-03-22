@@ -77,7 +77,9 @@ export class ActivityEntitiesComponent {
       this.cdr.detectChanges();
     });
     this.server.entities$.subscribe(entities => {
-      this.entities = entities;
+      this.entities = entities.sort((a, b) => {
+        return Helper.getEntityName(a).localeCompare(Helper.getEntityName(b));
+      });
     })
   }
 

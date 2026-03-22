@@ -15,14 +15,14 @@
   </div>
   <br><div class="flex flex-wrap gap-3" *ngIf="!Helper.isEmptyItem(gridItem?.item)">
     <div class="flex align-items-center">
-      <label for="mode">Toggle text / icon / Media Player</label>
+      <label for="mode">Toggle text / icon / Media Player / Select / Sensor</label>
     </div>
     <div class="flex align-items-center">
       <p-selectButton id="mode" [options]="stateOptions" [(ngModel)]="gridItem!.item!.type"
                       optionLabel="label" optionValue="value" (ngModelChange)="itemTypeSelected($event)"></p-selectButton>
     </div>
   </div>
-  <ng-container *ngIf="!Helper.isEmptyItem(gridItem?.item) && gridItem!.item!.type !== 'media_player'">
+  <ng-container *ngIf="!Helper.isEmptyItem(gridItem?.item) && !['media_player', 'select', 'sensor'].includes(gridItem!.item!.type)">
     <div class="flex flex-wrap gap-3">
       <div class="flex align-items-center" *ngIf="gridItem!.item!.type === 'text'">
         <label for="text">Display text</label>
@@ -39,6 +39,16 @@
               <img [src]="Helper.getIconURL(remote!, gridItem!.item!.icon)" [alt]="gridItem!.item!.icon" width="70" height="70">
             </ng-container>
           </span>
+      </div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="!Helper.isEmptyItem(gridItem?.item) && (gridItem!.item!.type == 'select' || gridItem!.item!.type == 'sensor')">
+    <div class="flex flex-wrap gap-3">
+      <div class="flex align-items-center">
+        <label for="text">Label</label>
+      </div>
+      <div class="flex align-items-center">
+        <input pInputText id="text" type="text" placeholder="Normal" [(ngModel)]="gridItem!.item!.text" />
       </div>
     </div>
   </ng-container>

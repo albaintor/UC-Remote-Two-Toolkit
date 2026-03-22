@@ -41,7 +41,15 @@
                                              (onSelectButton)="onSelectButton.emit($event)"/>
                 </ng-container>
               </div>
-        </span>
+            </span>
+            <span *ngIf="item?.select" style="text-align: center;width:100%;height: 100%">
+              <p-chip *ngIf="!runMode" [label]="getEntityName(item.select?.select_id)"
+                      [style]="Helper.getStyle(getEntityName(item.select?.select_id!))"></p-chip>
+            </span>
+            <span *ngIf="item?.sensor" style="text-align: center;width:100%;height: 100%">
+              <p-chip *ngIf="!runMode" [label]="getEntityName(item.sensor?.sensor_id)"
+                      [style]="Helper.getStyle(getEntityName(item.sensor?.sensor_id!))"></p-chip>
+            </span>
             <ng-container *ngIf="!runMode">
               <ng-container *ngFor="let param of Helper.getParams(item?.command)">
                 <ng-container *ngIf="Helper.getParam(item?.command, param, configEntityCommands)">

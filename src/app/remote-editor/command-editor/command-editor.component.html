@@ -23,7 +23,51 @@
       </div>
     </div>
   </ng-container>
-  <ng-container *ngIf="uiCommand?.type !== 'media_player'">
+  <ng-container *ngIf="uiCommand?.type === 'select'">
+    <div class="flex flex-column">
+      <div class="flex flex-wrap gap-3">
+        <div class="flex align-items-center">
+          <label for="select">Select</label>
+        </div>
+        <div class="flex align-items-center">
+          <p-select id="select" [(ngModel)]="selectedEntity" [options]="getSelectEntities()" (ngModelChange)="selectSelected($event)">
+            <ng-template #selectedItem>
+              {{Helper.getEntityName(selectedEntity)}}
+            </ng-template>
+            <ng-template let-item #item>
+              {{Helper.getEntityName(item)}} ({{item.entity_id}})
+            </ng-template>
+          </p-select>
+        </div>
+      </div>
+      <div class="flex align-items-center sub-item">
+        {{selectedEntity?.entity_id}}
+      </div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="uiCommand?.type === 'sensor'">
+    <div class="flex flex-column">
+      <div class="flex flex-wrap gap-3">
+        <div class="flex align-items-center">
+          <label for="sensor">Sensor</label>
+        </div>
+        <div class="flex align-items-center">
+          <p-select id="sensor" [(ngModel)]="selectedEntity" [options]="getSensorEntities()" (ngModelChange)="sensorSelected($event)">
+            <ng-template #selectedItem>
+              {{Helper.getEntityName(selectedEntity)}}
+            </ng-template>
+            <ng-template let-item #item>
+              {{Helper.getEntityName(item)}} ({{item.entity_id}})
+            </ng-template>
+          </p-select>
+        </div>
+      </div>
+      <div class="flex align-items-center sub-item">
+        {{selectedEntity?.entity_id}}
+      </div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="!['media_player','sensor','select'].includes(uiCommand?.type ?? '')">
     <div class="flex flex-column">
       <div class="flex flex-wrap gap-3">
         <div class="flex align-items-center">

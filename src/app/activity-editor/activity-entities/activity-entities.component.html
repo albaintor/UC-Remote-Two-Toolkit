@@ -1,6 +1,6 @@
 <div style="position: relative">
   <p-button class="list-item-add" [rounded]="true" (onClick)="add($event)" severity="info" icon="pi pi-plus" size="small"
-            [pTooltip]="'Add an entity to the activity '+(activity?.name ?? '')" *ngIf="editable"></p-button>
+            [pTooltip]="'Add an entity to the activity '+(Helper.getEntityName(activity?.name))" *ngIf="editable"></p-button>
     <p-orderlist
       [value]="includedEntities"
       [listStyle]="{ 'max-height': '30rem', 'min-width': '350px' }"

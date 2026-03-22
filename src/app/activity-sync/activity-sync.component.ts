@@ -274,7 +274,6 @@ export class ActivitySyncComponent implements AfterViewInit {
   // TODO : diff activity groups, missing icons
   buildData(sourceRemoteData: RemoteData, targetRemoteData: RemoteData, orphanEntities:OrphanEntity[], activity1: Activity, activity2?: Activity): ActivityOperations | undefined
   {
-    this.orphanEntities = [];
     const remoteModel = this.getRemoteModel();
 
     const updatedActivity: Activity = {
@@ -365,10 +364,10 @@ export class ActivitySyncComponent implements AfterViewInit {
     if (updatedActivity?.options?.included_entities) {
       updatedActivity.options.included_entities.forEach(included_entity => {
         if (!targetRemoteData.entities.find(entity => entity.entity_id === included_entity.entity_id) &&
-          !orphanEntities.find(item => item.oldEntity.entity_id === included_entity.entity_id))
+          !activityOperations.orphanEntities.find(item => item.oldEntity.entity_id === included_entity.entity_id))
         {
           activityOperations.orphanEntities.push({oldEntity:included_entity, newEntity: undefined, origin: "Included entity",
-            activity: activity1});
+             activity: activity1});
         }
       })
     }

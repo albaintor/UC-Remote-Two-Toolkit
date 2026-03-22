@@ -355,11 +355,20 @@ export interface CommandMapping extends ButtonMapping {
 
 export interface ActivityPageCommand
 {
-  type: "text"|"icon"|"media_player";
+  type: "text"|"icon"|"media_player"|"select"|"sensor";
   text?: string;
   icon?: string;
   media_player_id?: string;
   command?: string | Command;
+  select?: {
+    select_id: string;
+    show_name?: boolean;
+  }
+  sensor?: {
+    sensor_id: string;
+    show_label?: boolean;
+    show_unit?: boolean;
+  }
   location: {
     x: number;
     y: number;

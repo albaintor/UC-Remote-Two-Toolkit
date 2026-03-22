@@ -65,6 +65,8 @@ export class UiCommandEditorComponent {
     { label: 'Text', value: 'text' },
     { label: 'Icon', value: 'icon' },
     { label: 'Media Player', value: 'media_player' },
+    { label: 'Select', value: 'select' },
+    { label: 'Sensor', value: 'sensor' },
   ];
   protected readonly Helper = Helper;
   visible = false;
@@ -156,12 +158,14 @@ export class UiCommandEditorComponent {
     this.cdr.detectChanges();
   }
 
-  itemTypeSelected($event: any) {
+    itemTypeSelected($event: any) {
     if (!this.gridItem?.item) return;
     if (this.gridItem.item.type === "text")
     {
       delete this.gridItem.item.icon;
       delete this.gridItem.item.media_player_id;
+      delete this.gridItem.item.sensor;
+      delete this.gridItem.item.select;
       this.gridItem.item.text = "Text";
       if (!this.gridItem.item.command) {
         this.gridItem.item.command = {entity_id: "", cmd_id: ""};
@@ -171,6 +175,8 @@ export class UiCommandEditorComponent {
     {
       delete this.gridItem.item.text;
       delete this.gridItem.item.media_player_id;
+      delete this.gridItem.item.sensor;
+      delete this.gridItem.item.select;
       if (!this.gridItem.item.icon) this.gridItem.item.icon = "uc:info";
       if (!this.gridItem.item.command) {
         this.gridItem.item.command = {entity_id: "", cmd_id: ""};
@@ -180,12 +186,35 @@ export class UiCommandEditorComponent {
     {
       delete this.gridItem.item.text;
       delete this.gridItem.item.icon;
-      delete this.gridItem.item.command;
+      delete this.gridItem.item.sensor;
+      delete this.gridItem.item.select;
       if (!this.gridItem.item.media_player_id)
       {
         this.gridItem.item.media_player_id = "";
         this.commandEditor?.initSelection();
       }
+    }
+    else if (this.gridItem.item.type === "select")
+    {
+      delete this.gridItem.item.icon;
+      delete this.gridItem.item.sensor;
+      delete this.gridItem.item.media_player_id;
+      this.gridItem.item.text = "Select label";
+      if (!this.gridItem.item.select) {
+        this.gridItem.item.select = {select_id: "", show_name: false};
+      }
+      this.commandEditor?.initSelection();
+    }
+    else if (this.gridItem.item.type === "sensor")
+    {
+      delete this.gridItem.item.icon;
+      delete this.gridItem.item.select;
+      delete this.gridItem.item.media_player_id;
+      this.gridItem.item.text = "Sensor label";
+      if (!this.gridItem.item.sensor) {
+        this.gridItem.item.sensor = {sensor_id: "", show_label: false}
+      }
+      this.commandEditor?.initSelection();
     }
     this.cdr.detectChanges();
   }

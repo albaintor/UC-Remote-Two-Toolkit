@@ -30,7 +30,7 @@ export interface LocalizedName {
 
 export class Helper
 {
-  static languageName: LanguageCode = 'en';
+  static languageName: LanguageCode = 'en_US';
   static iconsMap: Map<string, string> = new Map();
 
   static getLanguageName(): LanguageCode
@@ -41,21 +41,28 @@ export class Helper
   static getLanguages()
   {
     return [
-      {label:'English', value:'en'},
-      {label:'Français', value:'fr'},
-      {label:'Deutsch', value:'de'},
+      {label:'English', value:'en_US'},
+      {label:'Français', value:'fr_FR'},
+      {label:'Deutsch', value:'de_DE'},
     ]
+  }
+
+  static getLanguageValueFromObject(object: [string, any], languageName: string|undefined = undefined)
+  {
+    try {
+      for (const [key, value] of Object.entries(object)) {
+        if (key.startsWith(languageName ? languageName : Helper.languageName)) return value;
+      }
+    } catch (exception) {}
+    return null;
   }
 
   static getLanguageNameFromCode(code: LanguageCode)
   {
-    switch(code)
-    {
-      case "en": return "English";
-      case "fr": return "Français";
-      case "de": return "Deutsch";
-      default: return "Unknown";
-    }
+    if (code.startsWith("en")) return "English";
+    if (code.startsWith("fr")) return "Français"
+    if (code.startsWith("de")) return "Deutsch";
+    return "Unknown";
   }
 
   static setLanguageName(languageCode: LanguageCode)
@@ -401,8 +408,8 @@ export class Helper
 
   static buildName(name: string): LanguageName
   {
-    if (Helper.getLanguageName() === 'en') return {'en': name};
-    let obj: any = {'en': name};
+    if (Helper.getLanguageName().startsWith('en')) return {'en_US': name};
+    let obj: any = {'en_US': name};
     obj[Helper.getLanguageName()] = name;
     return obj;
   }
@@ -410,10 +417,15 @@ export class Helper
   static getEntityName(entity: any): string
   {
     if (!entity) return "";
-    if (entity?.[Helper.getLanguageName()]) return entity[Helper.getLanguageName()];
+    if (entity && Helper.getLanguageValueFromObject(entity)) return Helper.getLanguageValueFromObject(entity);
+    else if (entity?.['en_US']) return entity['en_US'];
     else if (entity?.['en']) return entity['en'];
     if (typeof entity.name === "string") return entity.name;
-    if (entity.name?.[Helper.getLanguageName()]) return entity.name[Helper.getLanguageName()];
+    if (entity.name) {
+      if (Helper.getLanguageValueFromObject(entity.name)) return Helper.getLanguageValueFromObject(entity.name);
+      else if (Helper.getLanguageValueFromObject(entity.name, "en")) return Helper.getLanguageValueFromObject(entity.name, "en");
+    }
+    if (entity.name && Helper.getLanguageValueFromObject(entity.name)) return Helper.getLanguageValueFromObject(entity.name);
     const names: LanguageName = entity.name;
     let firstValue: string | undefined;
     if (names)
@@ -529,7 +541,7 @@ export class Helper
   {
     if (!item) return true;
     return item.media_player_id == undefined && item.icon == undefined && item.text == undefined &&
-      (item.command == undefined || (item.command as Command)?.entity_id == undefined);
+      (item.command == undefined || (item.command as Command)?.entity_id == undefined) && item.sensor == undefined && item.select == undefined;
   }
 
   static checkItemOverflow(x: number, y: number, width: number, height: number,

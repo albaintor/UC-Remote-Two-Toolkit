@@ -128,6 +128,18 @@ export class CommandEditorComponent implements OnInit {
     })
   }
 
+  getSelectEntities(): Entity[] {
+    return this.entities.filter(entity => entity.entity_type === 'select').sort((a, b) => {
+      return Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!);
+    });
+  }
+
+  getSensorEntities(): Entity[] {
+    return this.entities.filter(entity => entity.entity_type === 'sensor').sort((a, b) => {
+      return Helper.getEntityName(a)!.localeCompare(Helper.getEntityName(b)!);
+    });
+  }
+
   getCommand(): Command | undefined
   {
     if (this.uiCommand) return (this.uiCommand.command as Command);
@@ -137,10 +149,16 @@ export class CommandEditorComponent implements OnInit {
   initSelection()
   {
     let command = this.getCommand();
-
+    console.debug("Init command", this.uiCommand, this.selectedEntity);
     if (this.uiCommand?.media_player_id)
       this.selectedEntity = this.activityEntities?.find(entity => entity.entity_id ==
         this.uiCommand?.media_player_id);
+    else if (this.uiCommand?.sensor?.sensor_id)
+      this.selectedEntity = this.entities?.find(entity => entity.entity_id ==
+        this.uiCommand!.sensor!.sensor_id!);
+    else if (this.uiCommand?.select?.select_id)
+      this.selectedEntity = this.entities?.find(entity => entity.entity_id ==
+        this.uiCommand!.select!.select_id!);
     else if (command?.entity_id && this.remote)
         this.loadEntity(command.entity_id);
     this.updateSelection();
@@ -226,6 +244,18 @@ export class CommandEditorComponent implements OnInit {
   mediaPlayerSelected($event: any) {
     if (!this.uiCommand || !this.selectedEntity) return;
     this.uiCommand.media_player_id = this.selectedEntity.entity_id;
+    this.cdr.detectChanges();
+  }
+
+  selectSelected($event: any) {
+    if (!this.uiCommand || !this.selectedEntity) return;
+    this.uiCommand.select = {select_id: this.selectedEntity.entity_id ?? ""};
+    this.cdr.detectChanges();
+  }
+
+  sensorSelected($event: any) {
+    if (!this.uiCommand || !this.selectedEntity) return;
+    this.uiCommand.sensor = {sensor_id: this.selectedEntity.entity_id ?? ""};
     this.cdr.detectChanges();
   }
 

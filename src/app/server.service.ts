@@ -186,6 +186,7 @@ export class ServerService {
   getConfigEntityCommands(remote: Remote): Observable<EntityCommand[]>
   {
     return this.http.get<EntityCommand[]>(`/api/remote/${remote.address}/cfg/entity/commands`).pipe(map(results => {
+      console.debug("Retrieved config commands", results);
       this.configCommands$.next(results);
       return results;
     }))

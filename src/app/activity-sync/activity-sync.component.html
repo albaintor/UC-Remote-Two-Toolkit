@@ -75,6 +75,28 @@
   </ng-container>
   <p-divider />
 </ng-container>
+<ng-container *ngIf="orphanSelectsSensors.length > 0">
+  <h3>Some selects or sensors are orphans : replace them or remove them and click on apply</h3>
+  <div class="flex align-content-center flex-wrap gap-3" style="min-height: 100px" *ngFor="let item of orphanSelectsSensors">
+    <div class="flex flex-column">
+      <div class="flex align-items-center justify-content-center">
+        <p-chip [label]="item.entityId" />&nbsp;
+      </div>
+      <div class="flex align-items-center justify-content-center">
+        <p-checkbox id="remove" [(ngModel)]="item.remove" [binary]="true" /> <label for="remove" class="ml-2">Remove it</label>
+      </div>
+    </div>
+    <div class="flex align-items-center justify-content-center">
+      <p-autoComplete [(ngModel)]="item.newEntity" [dropdown]="true" [suggestions]="entitiesSuggestions" (completeMethod)="searchOrphanEntity2($event)" appendTo="body"
+                      [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" optionLabel="entity_id">
+        <ng-template let-item #item>
+          <div><b>{{Helper.getEntityName(item)}}</b> [<span [style]="{'color': Helper.getBackgroundColor(item.entity_type)}">{{item.entity_type}}</span>] ({{item.entity_id}})</div>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+  </div>
+  <p-button label="Apply" (onClick)="submitOrphans()" size="small"></p-button>
+</ng-container>
 <p-table [value]="activitiesDiff" styleClass="p-datatable-sm p-datatable-striped" [resizableColumns]="true"
          [scrollable]="true" [scrollHeight]="'calc(100vh - 50px)'" [(selection)]="selectedActivities">
   <ng-template #header>

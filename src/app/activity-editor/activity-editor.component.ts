@@ -395,7 +395,11 @@ export class ActivityEditorComponent implements OnInit, AfterViewInit {
     if (!entityId) return;
     if (activity.options?.included_entities?.find(entity => entity.entity_id === entityId)) return;
     let entity = this.entities.find(entity => entity.entity_id === entityId);
-    if (entity?.entity_type && ["sensor", "select"].includes(entity.entity_type)) return;
+    if (entity?.entity_type && ["sensor", "select"].includes(entity.entity_type)) {
+      if (!this.entities.find(entity => entity.entity_id === entityId)) {
+        this.orphanEntities.push({oldEntity: {entity_id:entityId, entity_type: "", name: Helper.buildName("")}, newEntity: undefined});
+      }
+    }
     if (!entity)
     {
       if (!this.orphanEntities.find(item => item.oldEntity?.entity_id === entityId))

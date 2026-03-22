@@ -73,7 +73,9 @@ export class RemoteOperationsComponent {
   groupByActivities = false;
   @Input("groupByActivities") set _groupByActivities(value: boolean)
   {
-    this.groupByActivities = value;
+    //TODO bug to fix
+    // this.groupByActivities = value;
+    this.groupByActivities = false;
     if (this.groupByActivities) {
       this.activities = Array.from(new Set(this.selectedOperations
         .map(operation => operation.activity!)).values());

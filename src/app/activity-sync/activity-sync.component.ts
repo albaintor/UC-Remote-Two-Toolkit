@@ -45,6 +45,7 @@ import {MultiSelectModule} from "primeng/multiselect";
 import {HttpErrorResponse} from "@angular/common/http";
 import {Tooltip} from "primeng/tooltip";
 import {RouterLink} from "@angular/router";
+import {Checkbox} from "primeng/checkbox";
 
 enum DiffStatus {
   Equals = 1,
@@ -73,11 +74,18 @@ interface ActivityDiff {
   orphanEntities?: Entity[];
 }
 
+interface ActivityOrphanAction {
+  entityId: string;
+  newEntity: Entity | undefined;
+  remove: boolean;
+}
+
 interface ActivityOperations {
   activity: Activity;
   uncompatibleCommands: ButtonMapping[];
   orphanEntities: OrphanEntity[];
   remoteOperations: RemoteOperation[];
+  orphanSelectSensors: ActivityOrphanAction[];
 }
 
 interface OrphanEntity
@@ -96,33 +104,34 @@ interface DriverDiff {
 
 @Component({
     selector: 'app-activity-sync',
-    imports: [
-        BlockUIModule,
-        SelectModule,
-        MenubarModule,
-        NgIf,
-        PrimeTemplate,
-        ProgressSpinnerModule,
-        RemoteDataLoaderComponent,
-        ToastModule,
-        FormsModule,
-        ChipModule,
-        IconComponent,
-        InputTextModule,
-        NgForOf,
-        TableModule,
-        KeyValuePipe,
-        PopoverModule,
-        ActivityViewerComponent,
-        Button,
-        AutoCompleteModule,
-        DividerModule,
-        ConfirmDialogModule,
-        RemoteOperationsComponent,
-        MultiSelectModule,
-        Tooltip,
-        RouterLink
-    ],
+  imports: [
+    BlockUIModule,
+    SelectModule,
+    MenubarModule,
+    NgIf,
+    PrimeTemplate,
+    ProgressSpinnerModule,
+    RemoteDataLoaderComponent,
+    ToastModule,
+    FormsModule,
+    ChipModule,
+    IconComponent,
+    InputTextModule,
+    NgForOf,
+    TableModule,
+    KeyValuePipe,
+    PopoverModule,
+    ActivityViewerComponent,
+    Button,
+    AutoCompleteModule,
+    DividerModule,
+    ConfirmDialogModule,
+    RemoteOperationsComponent,
+    MultiSelectModule,
+    Tooltip,
+    RouterLink,
+    Checkbox
+  ],
     templateUrl: './activity-sync.component.html',
     styleUrl: './activity-sync.component.css',
     providers: [MessageService, ConfirmationService],
@@ -165,6 +174,7 @@ export class ActivitySyncComponent implements AfterViewInit {
   showOperations = false;
   remoteOperations: RemoteOperation[] = [];
   selectedEntity:Entity|undefined = undefined;
+  orphanSelectsSensors: ActivityOrphanAction[] = [];
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private confirmationService: ConfirmationService) {
@@ -207,6 +217,25 @@ export class ActivitySyncComponent implements AfterViewInit {
         return "Missing";
       default: return "Unknown";
     }
+  }
+
+  addDefaultCommand(entityId: String, object: any) {
+    let entity = this.remoteData2?.entities?.find(entity => entity.entity_id === entityId);
+    if (!entity) return;
+    let command = this.remoteData2?.configCommands.find(command => command.id.startsWith(entity.entity_type))
+    object["cmd_id"] = command?.id ?? "";
+  }
+
+  checkEntityCommand(entityId: String, cmd_id: String): boolean {
+    let entity = this.remoteData2?.entities?.find(entity => entity.entity_id === entityId);
+    if (!entity) return false;
+    if (!this.remoteData2?.configCommands.find(command => command.cmd_id === cmd_id || command.id === cmd_id)) {
+      if (!entity.options?.simple_commands?.find(command => command === cmd_id)) {
+        console.warn("Command not found in remote", entityId, cmd_id);
+        return false
+      }
+    }
+    return true;
   }
 
   checkIncludedEntity(orphanEntities: OrphanEntity[], sourceRemoteData: RemoteData, targetRemoteData: RemoteData, entityId: string, activity: Activity,
@@ -301,7 +330,8 @@ export class ActivitySyncComponent implements AfterViewInit {
       activity: updatedActivity,
       uncompatibleCommands: [],
       remoteOperations : [],
-      orphanEntities: [...orphanEntities]
+      orphanEntities: [...orphanEntities],
+      orphanSelectSensors: []
     };
 
     orphanEntities.forEach(item => {
@@ -313,12 +343,18 @@ export class ActivitySyncComponent implements AfterViewInit {
     for (let sequenceName in updatedActivity!.options?.sequences)
     {
       const sequences = updatedActivity.options!.sequences[sequenceName];
+      let toRemove: CommandSequence[] = [];
       sequences.forEach(sequence => {
         if (sequence.command?.entity_id && this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
           targetRemoteData, sequence.command!.entity_id, updatedActivity!, sequence)) {
           sequence.command.entity_id = this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
             targetRemoteData, sequence.command!.entity_id, updatedActivity!, sequence)!;
         }
+        if (sequence.command?.cmd_id && !this.checkEntityCommand(sequence.command.entity_id, sequence.command.cmd_id))
+          toRemove.push(sequence);
+      })
+      toRemove.forEach(sequence => {
+        sequences.splice(sequences.indexOf(sequence), 1);
       })
     }
     if (!remoteModel) console.debug("Sync : remote model is not available available yet")
@@ -342,13 +378,21 @@ export class ActivitySyncComponent implements AfterViewInit {
       if (remoteModel && !remoteModel?.buttons?.includes(button.button)) {
         activityOperations.uncompatibleCommands.push(button);
       }
+      if (button.short_press?.cmd_id && !this.checkEntityCommand(button.short_press.entity_id, button.short_press.cmd_id))
+        delete button.short_press;
+      if (button.long_press?.cmd_id && !this.checkEntityCommand(button.long_press.entity_id, button.long_press.cmd_id))
+        delete button.long_press
+      if (button.double_press?.cmd_id && !this.checkEntityCommand(button.double_press.entity_id, button.double_press.cmd_id))
+        delete button.double_press
     });
     // Remove buttons not compatible with this remote model
     activityOperations.uncompatibleCommands.forEach(button => {
       const index = updatedActivity!.options?.button_mapping?.indexOf(button);
       if (index != undefined && index !== -1) updatedActivity!.options!.button_mapping!.splice(index, 1);
     })
+    let pageNb = 0;
     updatedActivity!.options?.user_interface?.pages?.forEach(page => {
+      pageNb ++;
       page.items.forEach(item => {
         if (item.media_player_id && this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
           targetRemoteData, item.media_player_id, updatedActivity!, page))
@@ -358,6 +402,29 @@ export class ActivitySyncComponent implements AfterViewInit {
           targetRemoteData, (item.command as Command)!.entity_id, updatedActivity!, page))
           (item.command as Command).entity_id = this.checkIncludedEntity(activityOperations.orphanEntities, sourceRemoteData,
             targetRemoteData, (item.command as Command)!.entity_id, updatedActivity!, page)!;
+        if ((item.command as Command)?.cmd_id && !this.checkEntityCommand((item.command as Command)!.entity_id, (item.command as Command)!.cmd_id))
+        {
+          this.addDefaultCommand((item.command as Command)!.entity_id, item.command);
+        }
+        if (item.select || item.sensor) {
+          let entityId = item.sensor?.sensor_id ?? item.select?.select_id;
+          console.log("TOTO", item);
+          if (entityId) {
+            const orphan = activityOperations.orphanSelectSensors.find(orphan => orphan.entityId === entityId);
+            if (!orphan && !this.remoteData2?.entities.find(entity => entity.entity_id === entityId)) {
+              console.warn(`Orphan select or sensor in page ${pageNb}`, entityId, item.location);
+              activityOperations.orphanSelectSensors.push({entityId: entityId, newEntity: undefined, remove: false})
+            } else if (orphan?.newEntity) {
+              if (item.select) item.select.select_id = orphan.newEntity.entity_id!;
+              if (item.sensor) item.sensor.sensor_id = orphan.newEntity.entity_id!;
+            }
+          }
+        }
+      })
+      activityOperations.orphanSelectSensors.forEach(orphan => {
+        if (!orphan.remove) return;
+        const index = page.items.indexOf(page.items.find(item => item.select?.select_id === orphan.entityId || item.sensor?.sensor_id === orphan.entityId)!);
+        if (index != undefined && index !== -1) page.items.splice(index, 1);
       })
     });
 
@@ -773,10 +840,18 @@ export class ActivitySyncComponent implements AfterViewInit {
     if (!this.remoteData2) return;
     if (!item.oldEntity.entity_type) {
       this.entitiesSuggestions = this.remoteData2.entities.filter(entity =>
-        Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()));
+        Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()))
+        .sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
     } else
     this.entitiesSuggestions = this.remoteData2.entities.filter(entity => entity.entity_type === item.oldEntity.entity_type &&
-      Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()));
+      Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()))
+      .sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
+  }
+
+  searchOrphanEntity2($event: AutoCompleteCompleteEvent) {
+    if (!this.remoteData2) return;
+    this.entitiesSuggestions = this.remoteData2.entities.filter(entity => Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()))
+      .sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
   }
 
   private syncActivities() {
@@ -799,6 +874,7 @@ export class ActivitySyncComponent implements AfterViewInit {
         if (data.uncompatibleCommands.length > 0)
           this.uncompatibleCommands.push({activity: data.activity, buttons: data.uncompatibleCommands});
         this.orphanEntities = [...data.orphanEntities];
+        this.orphanSelectsSensors = [...data.orphanSelectSensors];
         this.cdr.detectChanges();
       }
     });

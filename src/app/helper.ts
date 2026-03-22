@@ -279,6 +279,14 @@ export class Helper
           item.media_player_id = new_entity_id;
           found = true;
         }
+        if (item.select?.select_id === entity_id) {
+          item.select.select_id = new_entity_id;
+          found = true;
+        }
+        if (item.sensor?.sensor_id === entity_id) {
+          item.sensor.sensor_id = new_entity_id;
+          found = true;
+        }
         if (found && !activityChanges.find(item => item.type === ActivityChangeType.ModifiedPage &&
           (page?.page_id && item.page?.page_id === page.page_id ||
             (!page?.page_id && page.name === item.page?.name))))

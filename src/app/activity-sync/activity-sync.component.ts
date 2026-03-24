@@ -175,6 +175,19 @@ export class ActivitySyncComponent implements AfterViewInit {
   remoteOperations: RemoteOperation[] = [];
   selectedEntity:Entity|undefined = undefined;
   orphanSelectsSensors: ActivityOrphanAction[] = [];
+  searchEntityType: string | undefined;
+  entityTypes = [
+    {name: "Media player", value: "media_player"},
+    {name: "Remote", value: "remote"},
+    {name: "Sensor", value: "sensor"},
+    {name: "Select", value: "select"},
+    {name: "Light", value: "light"},
+    {name: "Climate", value: "climate"},
+    {name: "Cover", value: "cover"},
+    {name: "Switch", value: "switch"},
+    {name: "Button", value: "button"},
+    {name: "Activity", value: "activity"},
+  ]
 
   constructor(private server:ServerService, private cdr:ChangeDetectorRef, private messageService: MessageService,
               private confirmationService: ConfirmationService) {
@@ -839,6 +852,7 @@ export class ActivitySyncComponent implements AfterViewInit {
     if (!this.remoteData2) return;
     if (!item.oldEntity.entity_type) {
       this.entitiesSuggestions = this.remoteData2.entities.filter(entity =>
+        (this.searchEntityType == undefined || this.searchEntityType == entity.entity_type) &&
         Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()))
         .sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
     } else
@@ -849,7 +863,9 @@ export class ActivitySyncComponent implements AfterViewInit {
 
   searchOrphanEntity2($event: AutoCompleteCompleteEvent) {
     if (!this.remoteData2) return;
-    this.entitiesSuggestions = this.remoteData2.entities.filter(entity => Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()))
+    this.entitiesSuggestions = this.remoteData2.entities.filter(entity =>
+      (this.searchEntityType == undefined || this.searchEntityType == entity.entity_type) &&
+      Helper.getEntityName(entity).toLowerCase().includes($event.query.toLowerCase()))
       .sort((a, b) => Helper.getEntityName(a).localeCompare(Helper.getEntityName(b)));
   }
 

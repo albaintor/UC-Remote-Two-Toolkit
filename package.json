@@ -1,6 +1,6 @@
 {
   "name": "ucr-tool",
-  "version": "2.9.1",
+  "version": "2.9.2",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --host 0.0.0.0",
@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@angular/build": "^19.2.15",
-    "@angular/cli": "^19.2.15",
+    "@angular/cli": "^21.2.3",
     "@angular/compiler-cli": "^19.2.14",
     "@types/file-saver-es": "^2.0.3",
     "@types/jasmine": "~5.1.0",

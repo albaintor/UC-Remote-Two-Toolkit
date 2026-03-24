@@ -279,7 +279,14 @@ app.post('/api/config/remote', async (req, res, next) => {
   const remote = new Remote(req.body?.address, req.body?.port, user,req.body?.token);
   try {
     const api_key_name = req.body?.api_key_name ? req.body?.api_key_name : "UCWebTool";
-    await remote.unregister(api_key_name);
+    try {
+      await remote.unregister(api_key_name);
+    }  catch (error) {
+      remote.api_key = undefined;
+      await remote.unregister(api_key_name);
+    }
+    remote.api_key = undefined;
+
     await remote.register(api_key_name);
     await remote.getRemoteName();
     const configFile: Config = getConfigFile();

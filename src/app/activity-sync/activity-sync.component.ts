@@ -301,7 +301,7 @@ export class ActivitySyncComponent implements AfterViewInit {
 
 
   // TODO : diff activity groups, missing icons
-  buildData(sourceRemoteData: RemoteData, targetRemoteData: RemoteData, orphanEntities:OrphanEntity[], activity1: Activity, activity2?: Activity): ActivityOperations | undefined
+  buildData(sourceRemoteData: RemoteData, targetRemoteData: RemoteData, orphanEntities:OrphanEntity[], orphanSelectSensors: ActivityOrphanAction[],activity1: Activity, activity2?: Activity): ActivityOperations | undefined
   {
     const remoteModel = this.getRemoteModel();
 
@@ -331,7 +331,7 @@ export class ActivitySyncComponent implements AfterViewInit {
       uncompatibleCommands: [],
       remoteOperations : [],
       orphanEntities: [...orphanEntities],
-      orphanSelectSensors: []
+      orphanSelectSensors: [...orphanSelectSensors]
     };
 
     orphanEntities.forEach(item => {
@@ -408,7 +408,6 @@ export class ActivitySyncComponent implements AfterViewInit {
         }
         if (item.select || item.sensor) {
           let entityId = item.sensor?.sensor_id ?? item.select?.select_id;
-          console.log("TOTO", item);
           if (entityId) {
             const orphan = activityOperations.orphanSelectSensors.find(orphan => orphan.entityId === entityId);
             if (!orphan && !this.remoteData2?.entities.find(entity => entity.entity_id === entityId)) {
@@ -867,7 +866,7 @@ export class ActivitySyncComponent implements AfterViewInit {
     const remoteData = this.remoteData2;
     this.selectedActivities.forEach(activity => {
       if (!activity.activity1) return;
-      const data = this.buildData(this.remoteData1!, remoteData, this.orphanEntities, activity.activity1, activity.activity2);
+      const data = this.buildData(this.remoteData1!, remoteData, this.orphanEntities, this.orphanSelectsSensors, activity.activity1, activity.activity2);
       if (data)
       {
         this.activitiesOperations.push(data);

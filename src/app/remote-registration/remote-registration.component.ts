@@ -77,12 +77,21 @@ export class RemoteRegistrationComponent {
   }
 
   submit() {
-    this.server.registerRemote({
-      api_key_name: this.server.API_KEY_NAME,
+    const remote: Remote = {
       address: this.host,
       port: this.port,
       user: this.username,
-      token: this.token
+      token: this.token};
+    this.registerRemote(remote)
+  }
+
+  registerRemote(remote: Remote) {
+    this.server.registerRemote({
+      api_key_name: this.server.API_KEY_NAME,
+      address: remote.address,
+      port: remote.port,
+      user: remote.user,
+      token: remote.token
     }).subscribe({
       next: ((results) => {
         this.messageService.add({severity: "success", summary: "Remote registered",
@@ -90,12 +99,12 @@ export class RemoteRegistrationComponent {
           key: "remote"});
         this.remotesChanged.emit(this.remotes);
         this.cdr.detectChanges();
-    }),
+      }),
       error: ((error: any) => {
         console.error("Error registering remote", error);
         this.messageService.add({severity: "error", summary: "Error while registering remote", key: "remote"});
         this.cdr.detectChanges();
-    }),
+      }),
       complete: () => {
         this.refresh();
         this.cdr.detectChanges();
@@ -175,6 +184,11 @@ export class RemoteRegistrationComponent {
       }})
   }
 
+  rebuildRegistration(remote: Remote) {
+    console.debug("Rebuilding registration", remote);
+    this.registerRemote(remote);
+  }
+
   getRemote(remote: Remote, notify=true) {
     this.blockedPanel = true;
     this.progress = true;
@@ -193,6 +207,7 @@ export class RemoteRegistrationComponent {
         this.blockedPanel = false;
         this.progress = false;
         if (notify) this.messageService.add({severity: "error", summary: "Error while extracting remote registrations", key: "remote"});
+        this.rebuildRegistration(remote);
         this.cdr.detectChanges();
       }),
       complete: () => {

@@ -286,6 +286,7 @@ jobs:
     name: Publish Docker multi-arch latest
     runs-on: ubuntu-latest
     needs: [build-ubuntu]
+    environment: Ubuntu
 
     steps:
       - name: Set up Docker Buildx

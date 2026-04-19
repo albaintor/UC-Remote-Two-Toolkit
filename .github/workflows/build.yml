@@ -61,9 +61,7 @@ jobs:
           cd server
           npm ci
           npx esbuild --format=cjs --target=node22 --platform=node --bundle --outfile=bundle.js dist/app.js
-          node --experimental-sea-config sea-config.json
           node -e "require('fs').copyFileSync(process.execPath, 'ucrtool-server.exe')"
-          npx postject ucrtool-server.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
 
       - name: Prepare artifacts
         shell: bash
@@ -122,12 +120,16 @@ jobs:
         run: |
           cd server
           npm ci
-          npx esbuild --format=cjs --target=node22 --platform=node --bundle --outfile=bundle.js dist/app.js
-          node --experimental-sea-config sea-config.json
+      
+          npx esbuild \
+            --format=cjs \
+            --target=node22 \
+            --platform=node \
+            --bundle \
+            --outfile=bundle.js \
+            dist/app.js
+      
           cp "$(command -v node)" ucrtool-server
-          codesign --remove-signature ucrtool-server || true
-          npx postject ucrtool-server NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 --macho-segment-name NODE_SEA
-          codesign --sign - ucrtool-server
 
       - name: Prepare artifacts
         shell: bash
@@ -194,10 +196,17 @@ jobs:
         run: |
           cd server
           npm ci
-          npx esbuild --format=cjs --target=node22 --platform=node --bundle --outfile=bundle.js dist/app.js
-          node --experimental-sea-config sea-config.json
+          echo "Build JS bundle"
+          npx esbuild \
+            --format=cjs \
+            --target=node22 \
+            --platform=node \
+            --bundle \
+            --outfile=bundle.js \
+            dist/app.js
           cp "$(command -v node)" ucrtool-server
-          npx postject ucrtool-server NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+          echo "Node version:"
+          node -v
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

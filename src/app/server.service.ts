@@ -126,7 +126,7 @@ export class ServerService {
   getConfig(): Observable<Config>
   {
     return this.http.get<Config>('/api/config').pipe(map(results => {
-      if (!results.language) results.language = 'en';
+      if (!results.language) results.language = 'en_US';
       Helper.setLanguageName(results.language as LanguageCode);
       this.config = results;
       this.config$.next(this.config);
